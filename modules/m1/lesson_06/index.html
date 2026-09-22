@@ -1,0 +1,912 @@
+
+<!doctype html>
+<html lang="uk" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Курс Python українською — від основ до просунутих тем, у форматі книги">
+      
+      
+      
+        <link rel="canonical" href="https://nikoriakviktot.github.io/PY-Course-Victor-Nikoriak-22-09-2026/modules/m1/lesson_06/">
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Урок 6. Словники, for, comprehensions - PY Course — Viktor Nikoriak</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#6-for-comprehensions" class="md-skip">
+          Перейти до змісту
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Хедер">
+    <a href="../../.." title="PY Course — Viktor Nikoriak" class="md-header__button md-logo" aria-label="PY Course — Viktor Nikoriak" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            PY Course — Viktor Nikoriak
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Урок 6. Словники, for, comprehensions
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Пошук" placeholder="Пошук" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Шукати">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Очистити" aria-label="Очистити" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Пошук розпочато
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026" title="Перейти до вихідного коду" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Вкладки" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Головна
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../00_getting_started/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Як користуватися
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Модулі курсу (в розробці)
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../00_python_mental_model/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Довідник
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Навігація" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="PY Course — Viktor Nikoriak" class="md-nav__button md-logo" aria-label="PY Course — Viktor Nikoriak" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    PY Course — Viktor Nikoriak
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026" title="Перейти до вихідного коду" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Головна
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../../00_getting_started/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Як користуватися
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Модулі курсу (в розробці)
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../../00_python_mental_model/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Довідник
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Зміст">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Зміст
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#retrieve" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RETRIEVE
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#concept" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CONCEPT
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="CONCEPT">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dict" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        dict — доступ за ключем, а не за позицією
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Три способи ітерувати словник
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#setdefault" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        .setdefault() — читання з автоматичним створенням
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#counting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Патерн Counting — підрахунок частоти
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#grouping-counting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Патерн Grouping — розширення Counting
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#list-comprehension" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        List comprehension — той самий цикл, компактніший запис
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#create-minesweeper" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CREATE — Minesweeper крок за кроком
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#transfer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        TRANSFER
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#create" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CREATE — другий наскрізний приклад: аналітика ресторану
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="CREATE — другий наскрізний приклад: аналітика ресторану">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#transfer_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        TRANSFER (другий приклад)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+  
+
+
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="6-for-comprehensions">Урок 6. Словники, for, comprehensions<a class="headerlink" href="#6-for-comprehensions" title="Permanent link">&para;</a></h1>
+<p><strong>Передумови:</strong> уроки 4–5 (умови, <code>while</code>, списки/кортежі/множини). <strong>Розв'язує:</strong> перетворення — як перебирати, підраховувати й групувати дані, і як записувати цикл компактніше.</p>
+<h2 id="retrieve">RETRIEVE<a class="headerlink" href="#retrieve" title="Permanent link">&para;</a></h2>
+<p>Коротке пригадування без підглядання: чим <code>tuple</code> відрізняється від <code>list</code> за призначенням (не за синтаксисом), чому <code>set</code> прибирає дублікати, чому генерація унікальних позицій бомб на дошці — задача для <code>while</code>, а не для <code>for</code>.</p>
+<h2 id="concept">CONCEPT<a class="headerlink" href="#concept" title="Permanent link">&para;</a></h2>
+<h3 id="dict"><code>dict</code> — доступ за ключем, а не за позицією<a class="headerlink" href="#dict" title="Permanent link">&para;</a></h3>
+<p>Список шукає елемент за <strong>позицією</strong> (<code>fruits[0]</code>). Словник шукає за <strong>ключем</strong> — будь-яким незмінним значенням:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">student</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="s2">"Олена"</span><span class="p">,</span> <span class="s2">"age"</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span> <span class="s2">"group"</span><span class="p">:</span> <span class="s2">"КН-21"</span><span class="p">}</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="n">student</span><span class="p">[</span><span class="s2">"name"</span><span class="p">]</span>            <span class="c1"># доступ за ключем</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="n">student</span><span class="p">[</span><span class="s2">"email"</span><span class="p">]</span>           <span class="c1"># KeyError — ключа немає</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="n">student</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"email"</span><span class="p">)</span>       <span class="c1"># None — безпечно, без падіння</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="n">student</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"email"</span><span class="p">,</span> <span class="s2">"—"</span><span class="p">)</span>  <span class="c1"># "—" — своє запасне значення</span>
+</code></pre></div>
+<h3 id="_1">Три способи ітерувати словник<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">d</span><span class="p">:</span>          <span class="c1"># тільки ключі</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>  <span class="c1"># тільки значення</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>  <span class="c1"># пари (ключ, значення)</span>
+</code></pre></div>
+<p><strong>Типова пастка:</strong> <code>for k, v in d</code> (без <code>.items()</code>) намагається розпакувати сам <strong>ключ</strong> (рядок) у дві змінні — і падає з <code>ValueError</code>, якщо довжина ключа не дорівнює точно 2. Причина: <code>for key in d</code> віддає рядки на кшталт <code>"Alice"</code>, а розпакувати п'ятисимвольний рядок у дві змінні неможливо.</p>
+<h3 id="setdefault"><code>.setdefault()</code> — читання з автоматичним створенням<a class="headerlink" href="#setdefault" title="Permanent link">&para;</a></h3>
+<p><code>d.setdefault(key, default)</code>: ключ є — просто повертає значення; ключа нема — створює <code>d[key] = default</code> і повертає його. Найкорисніше для накопичення в списки:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">teams</span> <span class="o">=</span> <span class="p">{}</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="n">teams</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"Backend"</span><span class="p">,</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"Олег"</span><span class="p">)</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="n">teams</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"Backend"</span><span class="p">,</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"Ірина"</span><span class="p">)</span>   <span class="c1"># ключ вже є — список не перестворюється</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="c1"># {'Backend': ['Олег', 'Ірина']}</span>
+</code></pre></div>
+<h3 id="counting">Патерн Counting — підрахунок частоти<a class="headerlink" href="#counting" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">counts</span> <span class="o">=</span> <span class="p">{}</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="k">for</span> <span class="n">char</span> <span class="ow">in</span> <span class="s2">"banana"</span><span class="p">:</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    <span class="n">counts</span><span class="p">[</span><span class="n">char</span><span class="p">]</span> <span class="o">=</span> <span class="n">counts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">char</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="c1"># {'b': 1, 'a': 3, 'n': 2}</span>
+</code></pre></div>
+<p><code>d.get(key, 0) + 1</code> — стандартний прийом "прочитати поточне значення або 0, якщо ще не було".</p>
+<h3 id="grouping-counting">Патерн Grouping — розширення Counting<a class="headerlink" href="#grouping-counting" title="Permanent link">&para;</a></h3>
+<p>Замість того щоб рахувати, збираємо самі значення у списки за ключем:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">by_parity</span> <span class="o">=</span> <span class="p">{}</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">numbers</span><span class="p">:</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>    <span class="n">key</span> <span class="o">=</span> <span class="s2">"парні"</span> <span class="k">if</span> <span class="n">n</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="s2">"непарні"</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>    <span class="n">by_parity</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="list-comprehension">List comprehension — той самий цикл, компактніший запис<a class="headerlink" href="#list-comprehension" title="Permanent link">&para;</a></h3>
+<p>Спочатку звичайним циклом, потім та сама ідея одним рядком:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># Цикл</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="n">even_squares</span> <span class="o">=</span> <span class="p">[]</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">11</span><span class="p">):</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>    <span class="k">if</span> <span class="n">x</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>        <span class="n">even_squares</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="c1"># Comprehension — той самий результат</span>
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="n">even_squares</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="o">**</span> <span class="mi">2</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">11</span><span class="p">)</span> <span class="k">if</span> <span class="n">x</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>[ що_зберегти   for елемент in колекція   if умова ]
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>  ↑ Transform       ↑ Iterate               ↑ Filter
+</code></pre></div>
+<p><strong>Правило:</strong> comprehension будує <strong>новий список</strong>. Якщо мета — виконати дію (<code>print</code>, запис у файл) без побудови колекції — використовуйте звичайний <code>for</code>.</p>
+<p>Та сама логіка працює і для словників (<code>{w: len(w) for w in words}</code>) — спочатку зрозумілий цикл, потім компактний запис, ніколи навпаки.</p>
+<h2 id="create-minesweeper">CREATE — Minesweeper крок за кроком<a class="headerlink" href="#create-minesweeper" title="Permanent link">&para;</a></h2>
+<p>Наскрізний приклад уроку — гра «Сапер» на дошці 8×8 із 10 бомбами, побудована <strong>без жодної функції</strong> (функції — тема Уроку 7): фрагмент коду → пояснення → запуск → наступне розширення.</p>
+<ol>
+<li><strong>Позиції бомб</strong> — <code>set</code> кортежів <code>(row, col)</code> + <code>while len(bombs) &lt; 10</code> (множина сама відкидає дублікати; <code>while</code>, бо наперед невідомо, скільки випадкових спроб знадобиться).</li>
+<li><strong>Прихована дошка</strong> — спочатку подвійним циклом, потім nested list comprehension <code>[["." for col in range(SIZE)] for row in range(SIZE)]</code> — обидва варіанти дають однаковий результат, comprehension компактніший. (Пастка, якої тут свідомо немає: <code>[["."] * SIZE] * SIZE</code> повторює <strong>один і той самий</strong> внутрішній список 8 разів, а не створює 8 незалежних рядків.)</li>
+<li><strong>Друк дошки</strong> — заголовок з номерами колонок + рядок за рядком.</li>
+<li><strong>Зчитування ходу</strong> — <code>while True</code>, поки гравець не введе два коректних числа в межах дошки; перевіряється окремо, з підміненим <code>input()</code>, без реальної клавіатури. (На зафіксованому <code>seed=42</code> цей самий хід виявляється потім бомбою — навмисний "гачок" до наступного кроку.)</li>
+<li><strong>Підрахунок бомб навколо клітинки</strong> — подвійний цикл по зсувах <code>(-1, 0, 1) × (-1, 0, 1)</code>, спочатку на ізольованому тестовому прикладі.</li>
+<li><strong>Одна ітерація ходу</strong> — з'єднуємо кроки 1, 2, 4 і 5: три гілки (вже відкрито / бомба / підрахунок і відкриття), застосовані до реального стану дошки. Хід із кроку 4 виявляється саме тим бомбовим ходом; для продовження береться свіжа безпечна клітинка.</li>
+<li><strong><code>while ... else</code> і повний цикл</strong> — окрема міні-демонстрація <code>while...else</code> (навіщо <code>else</code>, коли він спрацьовує, а коли — ні через <code>break</code>), потім складання кроків 1–6 у повний ігровий цикл з лічильником <code>opened</code>; перевіряється "наосліп" (підмінений <code>input()</code>, фіксований <code>random.seed</code>) на заготовленому списку ходів.</li>
+<li><strong>Показ бомб наприкінці</strong> — застосовується напряму до реального стану дошки з кроку 6, потім дописується в кінець зібраного скрипту з кроку 7.</li>
+<li><strong>Звірка з Уроком 7</strong> — щойно написаний скрипт запускається поруч із реальним файлом <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_07_functions/resources/minesweeper_before_refactor.py"><code>minesweeper_before_refactor.py</code></a> під тим самим <code>seed</code> і тим самим списком ходів — <code>assert</code> на побайтово однаковий вивід доводить, що це справді та сама гра, а не просто показ готового файлу.</li>
+</ol>
+<p>Гру перевірено "наосліп" (підмінений <code>input()</code>, фіксований <code>random.seed</code>): сценарій програшу (перший же хід — бомба, крок 6) і сценарій повної перемоги (усі 54 безпечні клітинки відкриті послідовно, повний зібраний скрипт) — обидва проходять коректно.</p>
+<h2 id="transfer">TRANSFER<a class="headerlink" href="#transfer" title="Permanent link">&para;</a></h2>
+<p>Самостійне розширення: додати гравцю можливість <strong>позначити клітинку прапорцем</strong> (<code>"f 3 5"</code>) замість негайного відкриття — прапорці зберігаються в <code>dict</code>, кількість виставлених прапорців друкується через <code>len(flags)</code>. Окремий варіант скрипту, <code>minesweeper_before_refactor.py</code> не змінюється.</p>
+<h2 id="create">CREATE — другий наскрізний приклад: аналітика ресторану<a class="headerlink" href="#create" title="Permanent link">&para;</a></h2>
+<p>Другий, повністю незалежний наскрізний приклад — той самий цикл мислення (дані → накопичення в <code>dict</code> → результат), але на бізнес-даних, а не на грі: 244 реальні чеки ресторану (<code>seaborn.load_dataset("tips")</code>), уже знайомі з Уроку 5 як <code>orders: list[Order]</code>, де <code>Order</code> — <code>NamedTuple</code> з полями <code>total_bill, tip, sex, smoker, day, time, size</code>.</p>
+<p><strong>Повторення з Уроку 5 (коротко):</strong> <code>orders</code> перебудовується тим самим list comprehension'ом, що й у попередньому уроці, — щоб продовжити з тієї самої точки, без повторного пояснення <code>NamedTuple</code>.</p>
+<p><strong>Counting → Aggregation → Grouping, один патерн за раз, кожен вручну перед comprehension-версією:</strong></p>
+<ol>
+<li>Наївний <code>d[key] = d[key] + 1</code> падає з <code>KeyError</code> — демонструється навмисно (в <code>try/except</code>, щоб не зупиняти виконання ноутбука), тоді виправляється через <code>d.get(key, 0) + value</code>.</li>
+<li>Повний прохід по всіх чеках будує <code>revenue_by_day</code>, <code>orders_by_day</code>, <code>guests_by_day</code> — з <code>assert</code>, що сума по днях збігається із загальним доходом і кількістю чеків.</li>
+<li><strong>Leader algorithm</strong>: ручний пошук «поточного чемпіона» проти <code>max(d, key=d.get)</code> — <code>assert</code>, що обидва варіанти дають один і той самий день. Той самий патерн повторюється без жодної зміни логіки для <code>order.time</code> замість <code>order.day</code>.</li>
+<li><strong><code>set</code></strong>: ручний <code>set.add()</code> проти set comprehension для унікальних днів/часу/розмірів столу — з <code>assert</code> на рівність.</li>
+<li><strong>Grouping</strong>: <code>dict.setdefault(key, []).append(order)</code> — зберігаємо самі об'єкти <code>Order</code>, не лише лічильник; <code>assert</code>, що сума розмірів груп дорівнює кількості чеків.</li>
+<li><strong><code>defaultdict</code></strong>: усі три патерни (Counting/Aggregation/Grouping) переписані через <code>defaultdict(int)</code>/<code>defaultdict(float)</code>/<code>defaultdict(list)</code> — з <code>assert</code>-порівнянням проти щойно порахованих <code>.get()</code>/<code>.setdefault()</code>-варіантів, щоб довести, що це справді той самий результат, а не просто інший синтаксис.</li>
+<li><strong><code>Counter</code></strong>: третій спосіб рахувати, коли потрібна лише кількість — <code>Counter(order.day for order in orders)</code> проти <code>.get()</code>-підрахунку, з <code>assert</code> на рівність.</li>
+<li><strong>List і dict comprehensions на реальних даних</strong>: фільтр (<code>total_bill &gt; 40</code>), трансформація (tip% для кожного чека), фільтр+трансформація (чеки на вечерю), і <code>top10</code> через <code>sorted()</code> + зріз — усе спочатку зрозумілим циклом, де це доречно, потім comprehension, завжди з <code>assert</code>, що результати узгоджені (наприклад, кількість «великих» + «малих» чеків дорівнює загальній кількості).</li>
+<li><strong>Фінальний звіт для власника</strong>: один блок, що зводить усі вже пораховані агрегати (найкращі дні, обід vs вечеря, розміри столів, топ-3 чеки) — з <code>assert</code>, що обід + вечеря дають загальний дохід і що сума по днях узгоджена.</li>
+</ol>
+<p>Візуалізація (<code>matplotlib</code>) — поза межами цього уроку, лише одна згадка без реального коду.</p>
+<h3 id="transfer_1">TRANSFER (другий приклад)<a class="headerlink" href="#transfer_1" title="Permanent link">&para;</a></h3>
+<p>П'ять незалежних задач на тому самому <code>orders</code> (лише <code>for</code>/<code>dict</code>/<code>list</code>/<code>set</code>/comprehensions, без pandas): tip% по днях, чоловіки проти жінок, аналіз по розміру столу, топ-5 найщедріших клієнтів за tip%, і матриця день × час через <code>defaultdict(lambda: defaultdict(float))</code>. Кожна задача — функція з <code># BEGIN SOLUTION</code> / <code># END SOLUTION</code> і <code>assert</code> на конкретні очікувані значення.</p>
+<p>👉 Повний довідник методів <code>dict</code> — <a href="../../../reference/python_core/dicts/">Словники (dict)</a>.</p>
+<p><strong>Спробуйте самі — де практикуватись:</strong> <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_07_loops_dicts_comprehensions/note_lesson_06_dicts_loops_comprehensions.ipynb"><code>note_lesson_06_dicts_loops_comprehensions.ipynb</code></a> — повний покроковий конспект, перевірка поведінки гри, вправа на прапорці, самоперевірка й шпаргалка.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.sections", "navigation.indexes", "navigation.path", "navigation.prune", "navigation.footer", "toc.follow", "search.highlight", "search.suggest", "content.code.copy"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u0421\u043a\u043e\u043f\u0456\u0439\u043e\u0432\u0430\u043d\u043e \u0432 \u0431\u0443\u0444\u0435\u0440", "clipboard.copy": "\u0421\u043a\u043e\u043f\u0456\u044e\u0432\u0430\u0442\u0438 \u0432 \u0431\u0443\u0444\u0435\u0440", "search.result.more.one": "\u0429\u0435 1 \u0437\u0431\u0456\u0433 \u043d\u0430 \u0446\u0456\u0439 \u0441\u0442\u043e\u0440\u0456\u043d\u0446\u0456", "search.result.more.other": "\u0429\u0435 # \u0437\u0431\u0456\u0433\u0456\u0432 \u043d\u0430 \u0446\u0456\u0439 \u0441\u0442\u043e\u0440\u0456\u043d\u0446\u0456", "search.result.none": "\u0417\u0431\u0456\u0433\u0456\u0432 \u043d\u0435 \u0437\u043d\u0430\u0439\u0434\u0435\u043d\u043e", "search.result.one": "\u0417\u043d\u0430\u0439\u0434\u0435\u043d\u043e 1 \u0437\u0431\u0456\u0433", "search.result.other": "\u0417\u043d\u0430\u0439\u0434\u0435\u043d\u043e # \u0437\u0431\u0456\u0433\u0456\u0432", "search.result.placeholder": "\u0420\u043e\u0437\u043f\u043e\u0447\u043d\u0456\u0442\u044c \u043f\u0438\u0441\u0430\u0442\u0438 \u0434\u043b\u044f \u043f\u043e\u0448\u0443\u043a\u0443", "search.result.term.missing": "\u041d\u0435 \u0437\u043d\u0430\u0439\u0434\u0435\u043d\u043e \u0437\u0430\u043f\u0438\u0442\u0443", "select.version": "\u041e\u0431\u0440\u0430\u0442\u0438 \u0432\u0435\u0440\u0441\u0456\u044e"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>
