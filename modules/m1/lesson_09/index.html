@@ -1466,10 +1466,19 @@
 
 
 <h1 id="9">Урок 9. Декоратори<a class="headerlink" href="#9" title="Permanent link">&para;</a></h1>
-<p>Тип: Урок. Організація рішення — cross-cutting concerns (логування, авторизація тощо) без зміни коду функції.</p>
-<p>Джерело (аудит): докс L09 (closures, <code>nonlocal</code>, wrapper, 10 тестів) + <code>lesson_14_decorators_architecture.ipynb</code> (logger/authorization/middleware-chain, <code>functools.wraps</code>, <code>lru_cache</code>, міні-проєкт «Система обробки платежів»). Перед основним матеріалом потрібен короткий вступний блок «функції — це теж об'єкти» (<code>function → значення → можна передати/повернути → function→function → decorator</code>) — prerequisite-місток, не заміна повного розгляду first-class functions, який іде пізніше, в М2 (позиція 18).</p>
-<p>🚧 Контент ще не наповнено.</p>
-<p>👉 Поки урок не наповнено — повний довідник по функціях, замиканнях і декораторах уже готовий: <a href="../../../reference/python_core/functions/">Функції та функціональне програмування</a>.</p>
+<p>Організація рішення через cross-cutting concerns — логування, авторизація тощо — без зміни коду самої функції.</p>
+<p>Що на ньому відбувається:</p>
+<ul>
+<li>короткий вступний місток «функції — це теж об'єкти» (функцію можна передати як аргумент і повернути з іншої функції) — саме ці дві властивості й складають декоратор; повний розгляд first-class functions іде пізніше, в М2 (позиція 18);</li>
+<li>замикання (closures) і <code>nonlocal</code> — на прикладі лічильника, з навмисною демонстрацією <code>UnboundLocalError</code>, коли <code>nonlocal</code> пропущено;</li>
+<li>центральний кейс уроку — RBAC для блогу (ролі <code>guest</code>/<code>user</code>/<code>admin</code>): від наївної перевірки прав через <code>if</code> у кожній із 6 функцій → біль дублювання й ручних правок при новій ролі → wrapper-функція → синтаксис <code>@</code> → проблема з аргументами (<code>*args</code>/<code>**kwargs</code>) → декоратор-фабрика <code>require_role(*allowed_roles)</code> → повний рефакторинг усіх 6 функцій;</li>
+<li><code>functools.wraps</code> — навмисно показано зламаний варіант (<code>__name__</code>/<code>__doc__</code> втрачені) і виправлений;</li>
+<li>кілька декораторів на одній функції — порядок виконання на прикладі <code>@log_call</code> + <code>@require_role(...)</code> у двох різних порядках;</li>
+<li><code>functools.lru_cache</code> — реальне вимірювання часу на <code>fib(30)</code> до і після кешування;</li>
+<li>самостійне завдання (TRANSFER) — декоратор-фабрика <code>deny_role(*blocked_roles)</code>, структурно обернена до <code>require_role</code>, з 10 <code>assert</code>-перевірками.</li>
+</ul>
+<p><strong>Ноутбук заняття:</strong> <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_09_decorators/note_lesson_09_decorators.ipynb"><code>note_lesson_09_decorators.ipynb</code></a></p>
+<p>👉 Повний довідник — <a href="../../../reference/python_core/functions/">Функції та функціональне програмування</a> (замикання, декоратори, <code>*args</code>/<code>**kwargs</code>, <code>map</code>/<code>filter</code>/<code>reduce</code>) і <a href="../../../reference/python_core/namespaces_legb/">Простори імен / LEGB</a>. Глибша архітектурна тема — стек декораторів як middleware, клас-декоратори, <code>lru_cache</code> у продакшн-системах — у М2, позиція 18.</p>
 
 
 

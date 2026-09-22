@@ -1037,6 +1037,24 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    15. Git & GitHub: система
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         
   
@@ -1053,6 +1071,36 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Зміст">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Зміст
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Що на ньому відбувається
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -1381,6 +1429,25 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Зміст
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Що на ньому відбувається
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -1467,12 +1534,19 @@
 
 <h1 id="15-git-github-workflow">Урок 15. Git &amp; GitHub: від використання workflow до розуміння системи<a class="headerlink" href="#15-git-github-workflow" title="Permanent link">&para;</a></h1>
 <p>Тип: Урок. Організація рішення — робочий процес, контроль версій (інструментальний урок, не суто програмна задача).</p>
-<p>Це <strong>не</strong> перше знайомство з Git — воно вже відбулося на уроці 1, і студент до цього моменту вже кілька разів здавав домашні роботи через commit → push → Pull Request (горизонтальний трек, §1.4 <code>migration_plan.md</code>). Тут відбувається перехід від «Git як інструмент» («я знаю, які команди виконувати») до «Git як система» («я розумію, що насправді відбувається»):</p>
+<p>Це <strong>не</strong> перше знайомство з Git — воно вже відбулося на уроці 1, і студент до цього моменту вже кілька разів здавав домашні роботи через <code>commit → push → Pull Request</code> (горизонтальний трек, §1.4 <code>migration_plan.md</code>). Тут відбувається перехід від «Git як інструмент» («я знаю, які команди виконувати») до «Git як система» («я розумію, що насправді відбувається»):</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>working tree → staging area → local repository → commit graph → branches → remote → push / pull → merge → Pull Request
 </code></pre></div>
 <p>Плюс: конфлікти, <code>.gitignore</code>, хороші commit-повідомлення, README проєкту, структура репозиторію. «Портфоліо» тут — <strong>не</strong> урок особистого брендингу, а мінімальна професійна база: зрозумілий README, адекватна структура, <code>.gitignore</code>, залежності, нормальна історія коммітів, кілька проєктів на показ.</p>
-<p>Джерело (аудит): практичні інструкції вже написані як студентська документація в <a href="../../../00_getting_started/github/">«Як користуватися» → GitHub</a> (<code>git_setup.md</code>, <code>github/ssh_keys.md</code>, <code>github/fork_and_clone.md</code>, <code>homework_workflow.md</code>) — тут вони не переказуються. Бракує лише навчального формату заняття (вправ) і завдання «портфоліо».</p>
-<p>🚧 Контент ще не наповнено.</p>
+<h2 id="_1">Що на ньому відбувається<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>RETRIEVE</strong> — без підглядання: які команди йдуть від «код написано» до «PR відкрито», що показує <code>git status</code>, чим <code>origin</code> відрізняється від <code>upstream</code>.</li>
+<li><strong>CONCEPT</strong> — три реальних місця, де побували твої файли (working tree → staging area → local repository) і навіщо staging area взагалі потрібна окремим кроком; commit graph; branch як рухомий вказівник, а не копія файлів; <code>origin</code>/<code>upstream</code> як звичайні іменовані посилання; <code>push</code>/<code>pull</code> (= <code>fetch</code> + <code>merge</code>); merge (fast-forward проти справжнього three-way merge); і головне — <strong>merge conflict</strong>: чому він виникає, як читати маркери <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code>/<code>=======</code>/<code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;</code>, як розв'язати (4 кроки) і як безпечно скасувати (<code>git merge --abort</code>) — цієї теми раніше в курсі не було.</li>
+<li><strong>CREATE</strong> — дві практичні вправи в терміналі: (1) створення <strong>власного</strong> (не fork) репозиторію на GitHub — новий матеріал, якого раніше не було в курсі; (2) навмисне створення і розв'язання merge conflict на маленькому підготовленому прикладі, щоб уперше зустріти конфлікт у контрольованих умовах, а не в паніці посеред реальної домашньої роботи.</li>
+<li><strong>TRANSFER</strong> — приведення одного з попередніх проєктів курсу до мінімального «портфоліо-вигляду» (README, <code>.gitignore</code>, чиста історія комітів) за конкретним чеклистом, перевіреним двома невеликими Python-функціями просто в ноутбуці.</li>
+</ul>
+<p><strong>Ноутбук заняття:</strong> <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_15_git_github_system/note_lesson_15_git_github_system.ipynb"><code>note_lesson_15_git_github_system.ipynb</code></a></p>
+<p>👉 Практичні інструкції — вже написана студентська документація, тут не переказується: <a href="../../../00_getting_started/github/">«Як користуватися» → GitHub</a> (SSH-ключі, Fork і Clone, Pull Request, <a href="../../../00_getting_started/github/create_repository/">Як створити свій репозиторій</a>) і <a href="../../../git-cheatsheet/">Git шпаргалка</a> (команди, базові діаграми — цей урок іде на рівень глибше за неї).</p>
 
 
 
