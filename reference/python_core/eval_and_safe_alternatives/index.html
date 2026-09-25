@@ -387,6 +387,8 @@
       
         
       
+        
+      
     
     
     
@@ -1782,7 +1784,7 @@
 
 
 <h1 id="eval-python"><code>eval()</code> в Python: від «зручної функції» до «дірки в безпеці»<a class="headerlink" href="#eval-python" title="Permanent link">&para;</a></h1>
-<p>Довідник про вбудовану функцію <code>eval()</code> — що вона робить, чому вона небезпечна з чужим вводом, і чим її замінити залежно від задачі. Наскрізний приклад — CLI-калькулятор без <code>eval()</code> (<a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_05_modules_imports_cli/calculator_project/cli_calculator.py"><code>cli_calculator.py</code></a>); ця папка (<code>lesson_05_modules_imports_cli/</code>) — матеріал зі старого нумерування репозиторію, ще не інтегрований у жодну поточну позицію програми v5.0. Концептуально найближче до Уроку 12 (модулі, <code>import</code>) і Уроку 17 (капстоун-проєкт CLI).</p>
+<p>Довідник про вбудовану функцію <code>eval()</code> — що вона робить, чому вона небезпечна з чужим вводом, і чим її замінити залежно від задачі. Наскрізний приклад — CLI-калькулятор без <code>eval()</code> (<a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_12_modules_stdlib/calculator_project/cli_calculator.py"><code>cli_calculator.py</code></a>); <code>calculator_project/</code> — матеріал зі старого курсу, тепер лежить у папці Уроку 12 (<code>lesson_12_modules_stdlib/</code>, модулі та <code>import</code>); концептуально пов'язаний також з Уроком 17 (міні-проєкт CLI).</p>
 <h2 id="eval">Що таке <code>eval()</code>?<a class="headerlink" href="#eval" title="Permanent link">&para;</a></h2>
 <p><code>eval()</code> — вбудована функція Python, яка <strong>виконує рядок як Python-вираз</strong> і повертає результат:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nb">eval</span><span class="p">(</span><span class="n">expression</span><span class="p">,</span> <span class="nb">globals</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">locals</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
@@ -2138,7 +2140,7 @@
 <a id="__codelineno-24-7" name="__codelineno-24-7" href="#__codelineno-24-7"></a>Стек: [2, 12]     читаємо +   -&gt; pop(12,2), push(2+12=14) -&gt; [14]
 <a id="__codelineno-24-8" name="__codelineno-24-8" href="#__codelineno-24-8"></a>Результат: 14
 </code></pre></div>
-<p>Саме так побудований <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_05_modules_imports_cli/calculator_project/cli_calculator.py"><code>cli_calculator.py</code></a> — три етапи:</p>
+<p>Саме так побудований <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_12_modules_stdlib/calculator_project/cli_calculator.py"><code>cli_calculator.py</code></a> — три етапи:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a>  "2 + 3 * 4"
 <a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a>       ↓  tokenize()
 <a id="__codelineno-25-3" name="__codelineno-25-3" href="#__codelineno-25-3"></a>  ["2", "+", "3", "*", "4"]
