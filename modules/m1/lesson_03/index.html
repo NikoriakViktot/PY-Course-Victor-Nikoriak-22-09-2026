@@ -903,7 +903,7 @@
   <a href="#-" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Міні-проєкт «Таємнича коробка Нової Пошти»
+        Міні-проєкт «Таємнича посилка Нової Пошти»
       
     </span>
   </a>
@@ -1786,7 +1786,7 @@
   <a href="#-" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Міні-проєкт «Таємнича коробка Нової Пошти»
+        Міні-проєкт «Таємнича посилка Нової Пошти»
       
     </span>
   </a>
@@ -2355,8 +2355,9 @@
 <p><code>ord()</code> і <code>chr()</code> працюють з номерами символів у Unicode, а не з тим, як текст записується в пам'ять чи файл. Наприклад, <code>"ї"</code> — один символ з кодовою точкою <code>1111</code>, а в кодуванні UTF-8 він займає два байти: <code>"ї".encode("utf-8")</code> дає <code>b'\xd1\x97'</code>.</p>
 </div>
 <p>Це основа роботи з текстом на рівні символів. <strong>Повна вправа на шифр Цезаря — на практикумі П1 (урок 8)</strong>; тут достатньо зрозуміти механіку <code>ord()</code> і <code>chr()</code>.</p>
-<h2 id="-">Міні-проєкт «Таємнича коробка Нової Пошти»<a class="headerlink" href="#-" title="Permanent link">&para;</a></h2>
-<p>Група отримує посилку з даними, і кожен відділ розв'язує свою частину. Якщо хоч одна група помилиться, коробка не відкриється. Варіанти — у ноутбуках <code>nova_poshta_gr/python_lesson_variables_grup_1.ipynb</code> … <code>grup_4.ipynb</code>:</p>
+<h2 id="-">Міні-проєкт «Таємнича посилка Нової Пошти»<a class="headerlink" href="#-" title="Permanent link">&para;</a></h2>
+<p>На склад приїхала коробка без зворотної адреси. Склад відкриє її, лише коли кожен із чотирьох відділів перевірить свою частину даних і поставить <strong>пломбу</strong>. Якщо хоч один відділ помилиться, коробка лишиться закритою.</p>
+<p><strong>Ноутбук:</strong> <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_03_variables_and_data_types/nova_poshta_parcel.ipynb"><code>nova_poshta_parcel.ipynb</code></a> <a href="https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_03_variables_and_data_types/nova_poshta_parcel.ipynb"><img alt="Open In Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></a></p>
 <table>
 <thead>
 <tr>
@@ -2373,21 +2374,22 @@
 </tr>
 <tr>
 <td>2</td>
-<td>Ваги</td>
+<td>Ваговий</td>
 <td>вага прийшла рядком, а система приймає тільки <code>int</code></td>
 </tr>
 <tr>
 <td>3</td>
-<td>Логістики</td>
+<td>Логістика</td>
 <td>обчислення ціни, де важливий порядок операцій</td>
 </tr>
 <tr>
 <td>4</td>
-<td>Відправки</td>
-<td>місто треба передати числовими кодами символів</td>
+<td>Відправлення</td>
+<td>назва міста прийшла кодами символів — прочитати її через <code>chr()</code></td>
 </tr>
 </tbody>
 </table>
+<p><strong>Як це проходить на занятті.</strong> Усі групи відкривають <strong>той самий</strong> ноутбук і розв'язують свій відділ. За правильну відповідь система видає двоцифровий код пломби, за типову помилку — підказку. Лідер групи називає код викладачу, а викладач вписує чотири коди в клітинку «Склад» на проєкторі. Інтернет-сервіси не потрібні, і нічиї імена ніде не зберігаються. Удома той самий ноутбук можна пройти самостійно — усі чотири відділи по черзі.</p>
 <p>Кожна задача проходить той самий шлях даних:</p>
 <pre class="mermaid"><code>flowchart TD
     classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
@@ -2402,18 +2404,18 @@
     C -- так --&gt; X["int(), ord() …&lt;br&gt;або порядок операцій"]
     C -- ні --&gt; R
     X --&gt; R["результат потрібного типу"]
-    R --&gt; S["відправка результату групи"]
+    R --&gt; S["перевірка відділу&lt;br&gt;і код пломби"]
 
     class D,T step
     class M,C decision
     class X warning
     class R,S success</code></pre>
-<p><strong>Критерії успіху</strong> — твоя група готова відправляти результат, коли може:</p>
+<p><strong>Критерії успіху</strong> — твоя група готова до перевірки, коли може:</p>
 <ol>
 <li><strong>визначити</strong>, які дані отримала і якого вони типу зараз;</li>
 <li><strong>перетворити</strong> їх у тип, який вимагає система, — або пояснити, чому перетворення не потрібне;</li>
 <li><strong>пояснити</strong> результат одним реченням: чому Python повернув саме це значення;</li>
-<li><strong>вивести</strong> результат і перевірити його тип через <code>type()</code> перед відправкою.</li>
+<li><strong>вивести</strong> результат і перевірити його тип через <code>type()</code> перед перевіркою.</li>
 </ol>
 <h2 id="_11">Перенеси навичку<a class="headerlink" href="#_11" title="Permanent link">&para;</a></h2>
 <p>Нова ситуація — каса магазину. Кількість товару прийшла з форми як текст, ціна — число:</p>
