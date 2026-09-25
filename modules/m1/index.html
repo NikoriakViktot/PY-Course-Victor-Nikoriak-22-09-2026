@@ -53,6 +53,8 @@
       
     
     
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
     <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
@@ -78,7 +80,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#1-python-core" class="md-skip">
+        <a href="#1-python" class="md-skip">
           Перейти до змісту
         </a>
       
@@ -601,7 +603,7 @@
   <span class="md-ellipsis">
     
   
-    М1. Python Core
+    М1. Основи Python
   
 
     
@@ -623,7 +625,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    М1. Python Core
+    М1. Основи Python
   
 
           </label>
@@ -701,7 +703,7 @@
   <span class="md-ellipsis">
     
   
-    3. Змінні та типи даних
+    3. Змінні та базові типи даних
   
 
     
@@ -981,7 +983,7 @@
   <span class="md-ellipsis">
     
   
-    13. Виключення
+    13. Винятки та обробка помилок
   
 
     
@@ -1383,7 +1385,7 @@
   <a href="#_1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Концепція модуля
+        Чого ти навчишся
       
     </span>
   </a>
@@ -1394,7 +1396,18 @@
   <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Уроки модуля
+        Як проходити модуль
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Програма модуля
       
     </span>
   </a>
@@ -1465,7 +1478,7 @@
         <a href="./" class="md-path__link">
           
   <span class="md-ellipsis">
-    М1. Python Core
+    М1. Основи Python
   </span>
 
         </a>
@@ -1487,157 +1500,129 @@
   
 
 
-<h1 id="1-python-core">М1. Python Core<a class="headerlink" href="#1-python-core" title="Permanent link">&para;</a></h1>
-<p>🚧 Контент наповнюється поступово (15 з 17 позицій готові як ноутбуки занять, 1 позиція має повний конспект у книзі).</p>
-<h2 id="_1">Концепція модуля<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
-<blockquote>
-<p><strong>Python Core: від задачі та інформації до першої програмної системи</strong></p>
-</blockquote>
-<p>М1 будується не як послідовність ізольованих тем Python, а як поступове формування <strong>computational thinking</strong> через одну наскрізну модель мислення:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>задача → інформація → дані → перетворення → організація логіки → збереження та взаємодія → система
-</code></pre></div>
-<p>Це не один наскрізний проєкт на весь модуль — це одна модель, яку демонструють на різних задачах на різних етапах, аж до фінального CLI-проєкту на позиції 17.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>                       REAL-WORLD PROBLEM
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>                              │
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>                              ▼
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>01 ─────────────── MENTAL MODEL + WORKFLOW
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>02                         PROGRAM
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>03                          DATA
-<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>04                    DECISIONS / STATE
-<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>05–06              DATA STRUCTURES + FLOW
-<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>07                       FUNCTIONS
-<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>08                 ALGORITHMIC THINKING
-<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>09–10          ABSTRACTION + DATA STREAMS
-<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>11                        SEARCH
-<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>12                       MODULES
-<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>13                 FAILURE / RECOVERY
-<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>14                     PERSISTENCE
-<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>15              UNDERSTANDING GIT SYSTEM
-<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>16                  EFFICIENT LOOKUP
-<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>17                        SYSTEM
-<a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>                     (CLI PROJECT)
-<a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>
-<a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>     Git/GitHub ───────────────────────────────►
-<a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a>     HW → commit → push → PR → repeat → mastery
-</code></pre></div>
-<p>Git/GitHub — окремий <strong>паралельний горизонтальний трек</strong>, що йде поруч із Python з першого заняття (Pull Request — цільовий спосіб здачі домашніх робіт), а не тема, яку відкладають до кінця модуля. Практичні інструкції — у розділі <a href="../../00_getting_started/github/">Як користуватися → GitHub</a>, тут вони не переказуються.</p>
-<p>Кожен урок книги побудований за стандартизованим циклом <strong>RETRIEVE → CONCEPT → PREDICT → RUN → INVESTIGATE → MODIFY → CREATE → TRANSFER</strong> (докладно — <code>data/plan_md/migration_plan.md</code>, §1.2).</p>
-<h2 id="_2">Уроки модуля<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<h1 id="1-python">М1. Основи Python<a class="headerlink" href="#1-python" title="Permanent link">&para;</a></h1>
+<p class="m1-subtitle">Від першої програми до власного консольного застосунку</p>
+
+<p>Програма починається із задачі: порахувати виторг ресторану, обробити замовлення або реалізувати правила гри. У цьому модулі ти навчишся представляти такі задачі даними, описувати їхню обробку мовою Python та поступово збирати окремі рішення в завершену програму.</p>
+<p>Працюватимемо з різними прикладами — від ресторанної аналітики до Minesweeper. Наприкінці модуля ти поєднаєш вивчене у власному консольному застосунку.</p>
+<p><a class="md-button md-button--primary" href="lesson_01/">Почати навчання</a>
+<a class="md-button" href="../../00_getting_started/environment_setup/">Налаштувати середовище</a></p>
+<h2 id="_1">Чого ти навчишся<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<ul>
+<li>представляти інформацію числами, рядками та колекціями — списками, кортежами, множинами й словниками;</li>
+<li>описувати правила й повторювані дії через умови та цикли;</li>
+<li>організовувати код у функції та модулі;</li>
+<li>обирати спосіб пошуку й оцінювати, скільки роботи виконує твій код;</li>
+<li>обробляти помилки, читати й зберігати дані у файлах;</li>
+<li>зберігати історію змін і здавати роботу через GitHub.</li>
+</ul>
+<h2 id="_2">Як проходити модуль<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Прочитай пояснення й розбери приклади на сторінці уроку.</li>
+<li>Відкрий ноутбук заняття (посилання й кнопка Colab — на сторінці уроку), передбач результат і лише потім запусти код.</li>
+<li>Зміни приклад і виконай самостійні завдання.</li>
+<li>Здай домашню роботу за інструкцією <a href="../../00_getting_started/homework_workflow/">«Здача домашніх робіт»</a>.</li>
+</ol>
+<p>GitHub використовуємо з початку навчання для здачі робіт; на окремому занятті докладніше розберемо історію змін, гілки й Pull Request.</p>
+<h2 id="_3">Програма модуля<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<div class="m1-program">
 <table>
 <thead>
 <tr>
-<th>#</th>
-<th>Тема</th>
-<th>Тип</th>
-<th>Статус</th>
+<th>№</th>
+<th>Заняття</th>
+<th>Чого навчишся</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>1</td>
-<td><a href="lesson_01/">Вступний урок: формат курсу, AI-політика</a></td>
-<td>Урок</td>
-<td>✅ готовий ноутбук</td>
+<td><a href="lesson_01/">Вступ: формат курсу та правила роботи з AI</a></td>
+<td>запускати клітинки Jupyter-ноутбука й перевіряти відповіді AI за правилами курсу</td>
 </tr>
 <tr>
 <td>2</td>
-<td><a href="lesson_02/">Перші кроки та мінімальна робоча програма</a></td>
-<td>Урок</td>
-<td>✅ готовий ноутбук</td>
+<td><a href="lesson_02/">Перші кроки та перша програма</a></td>
+<td>запускати <code>.py</code>-файл і керувати виводом <code>print()</code> через <code>sep</code> та <code>end</code></td>
 </tr>
 <tr>
 <td>3</td>
-<td><a href="lesson_03/">Змінні та примітивні типи даних</a></td>
-<td>Урок</td>
-<td>📖 повний конспект у книзі</td>
+<td><a href="lesson_03/">Змінні та базові типи даних</a></td>
+<td>відрізняти <code>42</code>, <code>42.0</code> і <code>"42"</code> та свідомо перетворювати типи</td>
 </tr>
 <tr>
 <td>4</td>
-<td><a href="lesson_04/">Булевий тип, if, while (+ input, імпорти)</a></td>
-<td>Урок</td>
-<td>✅ готовий ноутбук</td>
+<td><a href="lesson_04/">Булевий тип, <code>if</code> і <code>while</code></a></td>
+<td>будувати умови з <code>and</code>, <code>or</code>, <code>not</code> і повторювати дії циклом <code>while</code></td>
 </tr>
 <tr>
 <td>5</td>
 <td><a href="lesson_05/">Списки, кортежі та множини</a></td>
-<td>Урок</td>
-<td>✅ готовий ноутбук</td>
+<td>обирати між <code>list</code>, <code>tuple</code> і <code>set</code> залежно від задачі</td>
 </tr>
 <tr>
 <td>6</td>
-<td><a href="lesson_06/">Словники, for, comprehensions</a></td>
-<td>Урок</td>
-<td>✅ готовий ноутбук</td>
+<td><a href="lesson_06/">Словники, цикл <code>for</code> і comprehensions</a></td>
+<td>підраховувати й групувати дані словником на прикладі Minesweeper і замовлень ресторану</td>
 </tr>
 <tr>
 <td>7</td>
 <td><a href="lesson_07/">Функції</a></td>
-<td>Урок</td>
-<td>✅ готовий ноутбук</td>
+<td>розбити суцільний скрипт Minesweeper на функції з параметрами й <code>return</code></td>
 </tr>
 <tr>
 <td>8</td>
-<td><a href="lesson_08/">П1. Big O + базові задачі</a></td>
-<td>Практикум</td>
-<td>✅ готовий ноутбук</td>
+<td><a href="lesson_08/">Практикум 1. Big O та базові задачі</a></td>
+<td>оцінювати, як росте кількість операцій — <code>O(n)</code> чи <code>O(n²)</code> — на FizzBuzz, паліндромах і шифрі Цезаря</td>
 </tr>
 <tr>
 <td>9</td>
 <td><a href="lesson_09/">Декоратори</a></td>
-<td>Урок</td>
-<td>✅ готовий ноутбук</td>
+<td>додавати перевірку прав доступу до функцій декоратором, не змінюючи їхнього коду</td>
 </tr>
 <tr>
 <td>10</td>
 <td><a href="lesson_10/">Ітератори й генератори</a></td>
-<td>Урок</td>
-<td>✅ готовий ноутбук</td>
+<td>обробляти 500 000 замовлень генераторами, не тримаючи всі дані в пам'яті одразу</td>
 </tr>
 <tr>
 <td>11</td>
-<td><a href="lesson_11/">П2. Пошук</a></td>
-<td>Практикум</td>
-<td>✅ готовий ноутбук</td>
+<td><a href="lesson_11/">Практикум 2. Пошук</a></td>
+<td>обирати лінійний чи бінарний пошук, два вказівники або ковзне вікно за властивостями даних</td>
 </tr>
 <tr>
 <td>12</td>
 <td><a href="lesson_12/">Модулі та стандартна бібліотека</a></td>
-<td>Урок</td>
-<td>✅ готовий ноутбук</td>
+<td>аналізувати замовлення за датами й частотою через <code>datetime</code> і <code>Counter</code></td>
 </tr>
 <tr>
 <td>13</td>
-<td><a href="lesson_13/">Виключення</a></td>
-<td>Урок</td>
-<td>✅ готовий ноутбук</td>
+<td><a href="lesson_13/">Винятки та обробка помилок</a></td>
+<td>перехоплювати помилки через <code>try</code> / <code>except</code> і повідомляти про них через <code>raise</code></td>
 </tr>
 <tr>
 <td>14</td>
-<td><a href="lesson_14/">Файли I/O, менеджери контексту, JSON</a></td>
-<td>Урок</td>
-<td>✅ готовий ноутбук</td>
+<td><a href="lesson_14/">Файли, менеджери контексту та JSON</a></td>
+<td>зберігати звіт у <code>report.json</code> і читати налаштування з <code>config.json</code> через <code>with open(...)</code></td>
 </tr>
 <tr>
 <td>15</td>
-<td><a href="lesson_15/">Git + GitHub: перший репозиторій, PR, портфоліо</a></td>
-<td>Урок</td>
-<td>✅ готовий ноутбук</td>
+<td><a href="lesson_15/">Git і GitHub: репозиторій, Pull Request, портфоліо</a></td>
+<td>створити власний репозиторій і розв'язати конфлікт злиття</td>
 </tr>
 <tr>
 <td>16</td>
-<td><a href="lesson_16/">П3. Хеш-структури</a></td>
-<td>Практикум</td>
-<td>✅ готовий ноутбук</td>
+<td><a href="lesson_16/">Практикум 3. Хеш-структури</a></td>
+<td>розв'язувати Two Sum і задачі на анаграми за один прохід через <code>dict</code> і <code>set</code></td>
 </tr>
 <tr>
 <td>17</td>
-<td><a href="lesson_17/">Узагальнення М1 + міні-проєкт CLI</a></td>
-<td>Урок</td>
-<td>🚧 не наповнено</td>
+<td>Узагальнення модуля та консольний міні-проєкт</td>
+<td><em>Незабаром</em></td>
 </tr>
 </tbody>
 </table>
-<p>14 позицій типу «Урок» + 3 позиції типу «Практикум (клас)» = 17 позицій М1. Детальний аудит джерел і рішення викладача по кожній позиції — <code>data/plan_md/module_1_audit.md</code>.</p>
+</div>
 
 
 

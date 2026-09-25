@@ -27,7 +27,7 @@
     
     
       
-        <title>13. Виключення - PY Course — Viktor Nikoriak</title>
+        <title>13. Винятки та обробка помилок - PY Course — Viktor Nikoriak</title>
       
     
     
@@ -52,6 +52,8 @@
         <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
       
     
+    
+      <link rel="stylesheet" href="../../../stylesheets/extra.css">
     
     <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
@@ -112,7 +114,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              13. Виключення
+              13. Винятки та обробка помилок
             
           </span>
         </div>
@@ -601,7 +603,7 @@
   <span class="md-ellipsis">
     
   
-    М1. Python Core
+    М1. Основи Python
   
 
     
@@ -623,7 +625,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    М1. Python Core
+    М1. Основи Python
   
 
           </label>
@@ -701,7 +703,7 @@
   <span class="md-ellipsis">
     
   
-    3. Змінні та типи даних
+    3. Змінні та базові типи даних
   
 
     
@@ -990,7 +992,7 @@
   <span class="md-ellipsis">
     
   
-    13. Виключення
+    13. Винятки та обробка помилок
   
 
     
@@ -1008,7 +1010,7 @@
   <span class="md-ellipsis">
     
   
-    13. Виключення
+    13. Винятки та обробка помилок
   
 
     
@@ -1766,7 +1768,7 @@
         <a href="../" class="md-path__link">
           
   <span class="md-ellipsis">
-    М1. Python Core
+    М1. Основи Python
   </span>
 
         </a>
@@ -1788,7 +1790,7 @@
   
 
 
-<h1 id="13">Урок 13. Виключення<a class="headerlink" href="#13" title="Permanent link">&para;</a></h1>
+<h1 id="13">Урок 13. Винятки та обробка помилок<a class="headerlink" href="#13" title="Permanent link">&para;</a></h1>
 <p><strong>Передумови:</strong> уроки 3–12 (типи даних, умови, функції, списки/словники, доступ до елементів). <strong>Розв'язує:</strong> перехід від коду, що аварійно зупиняється на будь-якій неочікуваній вхідній умові, до коду, який контрольовано розпізнає й обробляє помилки.</p>
 <h2 id="retrieve">RETRIEVE<a class="headerlink" href="#retrieve" title="Permanent link">&para;</a></h2>
 <p>На початку — коротке пригадування без підглядання: що повертає функція без <code>return</code>; чим <code>d.get("x", 0)</code> відрізняється від <code>d["x"]</code>, коли ключа немає; чому умову з двома межами краще писати одним <code>if ... or ...</code>, а не двома окремими <code>if</code>.</p>
