@@ -38,5 +38,6 @@
 | 28 | 7 | стек, черга, sift up у купі, префіксне дерево, LRU покроково; classDiagram пакета `dispatch` | — | ок |
 | 29 | 6 | клієнт — сервер, ER-схема, порядок виконання `SELECT`, `GROUP BY` покроково, `JOIN` покроково, шари «сервіс — репозиторій — БД» | — | ок |
 | 30 | 6 | Redis поруч із PostgreSQL, `GET`+`SET` проти `INCR` покроково, cache-aside (`sequenceDiagram`), черга producer/consumer, вибір «Redis чи PostgreSQL» | — | ок |
+| 31 | 8 | шлях запиту URL → DNS → TCP/TLS → HTTP покроково, TCP/TLS-рукостискання і HTTP-обмін (`sequenceDiagram`), що може піти не так (винятки), retry з backoff покроково, по черзі vs `gather`, шари клієнта до API, вибір requests/httpx/aiohttp | — | ок |
 
 Уроки 18–25 перевірено: алгоритми (рекурсія, merge sort, backtracking у 22) і архітектурні рішення мають схеми. Урок 14 — за потреби додати схему входу/виходу `with`.
