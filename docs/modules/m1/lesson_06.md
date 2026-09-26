@@ -358,6 +358,43 @@ flowchart TD
 | 4 | `"сб"` | `{'пт': 2, 'сб': 2}` |
 | 5 | `"нд"` — новий ключ | `{'пт': 2, 'сб': 2, 'нд': 1}` |
 
+Покроково — жовтим позначено створення нового ключа, зеленим — збільшення лічильника:
+
+```mermaid
+flowchart TD
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+
+    subgraph O1["чек 1 · пт"]
+        direction LR
+        Q1{"'пт' є?<br>ні"} --> N1["'пт': 0"] --> A1["{'пт': 1}"]
+    end
+    subgraph O2["чек 2 · пт"]
+        direction LR
+        Q2{"'пт' є?<br>так"} --> A2["{'пт': 2}"]
+    end
+    subgraph O3["чек 3 · сб"]
+        direction LR
+        Q3{"'сб' є?<br>ні"} --> N3["'сб': 0"] --> A3["{'пт': 2, 'сб': 1}"]
+    end
+    subgraph O4["чек 4 · сб"]
+        direction LR
+        Q4{"'сб' є?<br>так"} --> A4["{'пт': 2, 'сб': 2}"]
+    end
+    subgraph O5["чек 5 · нд"]
+        direction LR
+        Q5{"'нд' є?<br>ні"} --> N5["'нд': 0"] --> A5["{'пт': 2, 'сб': 2, 'нд': 1}"]
+    end
+    O1 --> O2 --> O3 --> O4 --> O5
+
+    class Q1,Q2,Q3,Q4,Q5 decision
+    class N1,N3,N5 warning
+    class A1,A2,A3,A4,A5 success
+```
+
 Ту саму логіку записують одним рядком через `.get()`: «візьми поточне значення або 0, додай 1, запиши назад».
 
 ```python

@@ -511,6 +511,43 @@ print("Найбільший чек:", max_bill)
 | `3` | `760.0` — не більше | `980.0` |
 | `4` | `450.0` — не більше | `980.0` |
 
+Та сама таблиця покроково — помаранчевим позначено порівняння, зеленим — оновлення максимуму:
+
+```mermaid
+flowchart TD
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+
+    S["старт<br>max_bill = 540.0 (чек 0)"]
+    subgraph I1["i = 1"]
+        direction LR
+        C1{"320.0 > 540.0?"} -- ні --> K1["max_bill = 540.0"]
+    end
+    subgraph I2["i = 2"]
+        direction LR
+        C2{"980.0 > 540.0?"} -- так --> U2["max_bill = 980.0"]
+    end
+    subgraph I3["i = 3"]
+        direction LR
+        C3{"760.0 > 980.0?"} -- ні --> K3["max_bill = 980.0"]
+    end
+    subgraph I4["i = 4"]
+        direction LR
+        C4{"450.0 > 980.0?"} -- ні --> K4["max_bill = 980.0"]
+    end
+    S --> I1 --> I2 --> I3 --> I4 --> E["i = 5: 5 < 5 — ні<br>Найбільший чек: 980.0"]
+
+    class S step
+    class C1,C2,C3,C4 warning
+    class K1,K3,K4 step
+    class U2,E success
+```
+
+Максимум змінився лише один раз — на чеку 2. Усі інші кроки лише підтверджують, що більшого не знайшлося.
+
 Цикл починається з `i = 1`, бо чек 0 уже взято як стартовий максимум. Чому стартують з першого елемента, а не з `0`? Якби всі чеки були від'ємні (наприклад, повернення коштів), нуль став би «максимумом», якого немає в даних.
 
 ## Множина: лише унікальні значення

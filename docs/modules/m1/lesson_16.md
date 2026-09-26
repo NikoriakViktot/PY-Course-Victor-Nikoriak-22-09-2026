@@ -173,6 +173,36 @@ print(pair_with_sum_hash(fares, 500))
 | 2 | 1 | 150 | 350 | ні | `{230: 0, 150: 1}` |
 | 3 | 2 | 270 | 230 | **так**, позиція 0 | — |
 
+Покроково — словник `seen` росте, доки доповнення не знайдеться:
+
+```mermaid
+flowchart TD
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+
+    subgraph K1["крок 1 · value 230"]
+        direction LR
+        Q1{"270 in seen?<br>ні"} --> S1["seen = {230: 0}"]
+    end
+    subgraph K2["крок 2 · value 150"]
+        direction LR
+        Q2{"350 in seen?<br>ні"} --> S2["seen = {230: 0, 150: 1}"]
+    end
+    subgraph K3["крок 3 · value 270"]
+        direction LR
+        Q3{"230 in seen?<br>так, позиція 0"} --> R3["(0, 2)"]
+    end
+    K1 --> K2 --> K3
+
+    class Q1,Q2 decision
+    class S1,S2 step
+    class Q3 warning
+    class R3 success
+```
+
 Відповідь — позиції `(0, 2)`: поїздки №1120 і №930 Марти. Один прохід, `O(n)`, а позиції в журналі збереглися.
 
 !!! note "Two Sum"
@@ -294,6 +324,26 @@ for number, bucket in enumerate(buckets):
 ```
 
 Щоб знайти 845, не треба переглядати таблицю: `845 % 8 = 5` — одразу в кошик 5 і порівняти один ключ. Кількість поїздок у таблиці на це не впливає.
+
+Шлях ключа до кошика, включно з колізією, яку розберемо далі:
+
+```mermaid
+flowchart LR
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+
+    K["ключ 845"] --> H["hash(845)<br>845"] --> B["845 % 8<br>кошик 5"] --> C["порівняти 1 ключ<br>знайдено"]
+    K2["ключ 1128"] --> H2["hash(1128)<br>1128"] --> B2["1128 % 8<br>кошик 0"] --> C2["кошик 0: [1120, 1128]<br>2 порівняння"]
+
+    class K,K2 step
+    class H,H2,B decision
+    class B2 warning
+    class C success
+    class C2 warning
+```
 
 А якщо два ключі потрапили в один кошик? Це **колізія**:
 

@@ -255,6 +255,34 @@ finally: рядок перевірено
 
 У другому виклику `print("try: розібрано")` не виконався: виняток перервав `try` на рядку `parse_line(line)`. `else` пропущено, бо виняток був. `finally` спрацював обидва рази.
 
+Обидва виклики поруч:
+
+```mermaid
+flowchart TD
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+
+    subgraph OK["check_line(KASA_LINES[0]) — правильний рядок"]
+        direction LR
+        T1["try<br>parse_line — ок"] --> E1["else<br>чек на 540.0"] --> F1["finally<br>рядок перевірено"]
+    end
+    subgraph BAD["check_line(KASA_LINES[2]) — «540,00»"]
+        direction LR
+        T2["try<br>parse_line — ValueError"] --> X2["except<br>could not convert…"] --> F2["finally<br>рядок перевірено"]
+    end
+    OK ~~~ BAD
+
+    class T1,E1 success
+    class T2 warning
+    class X2 error
+    class F1,F2 step
+```
+
+`try` і `finally` є в обох шляхах; між ними — або `else`, або `except`, але ніколи обидва разом.
+
 Навіщо `else`, якщо той самий код можна дописати в кінець `try`? Щоб у `try` лишався лише рядок, який ми **очікуємо** побачити впалим. Помилка в коді з `else` не буде випадково перехоплена чужим `except`. `finally` зазвичай закриває те, що відкрили: файл, з'єднання, зміну каси. У [уроці 14](lesson_14.md) цю роботу візьме на себе `with`.
 
 ## Кілька except і ієрархія винятків
