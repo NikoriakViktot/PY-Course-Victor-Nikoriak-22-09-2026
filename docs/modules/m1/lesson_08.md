@@ -153,6 +153,47 @@ print(has_duplicate_ids_fast([1, 2, 3, 4]))
 | `2` | `3` | 1 |
 | `3` | — | 0 |
 
+Кожна пара — один крок. Покроково для `[1, 2, 3, 4]` (порівнюються номери на позиціях `i` і `j`):
+
+```mermaid
+flowchart TD
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+
+    subgraph I0["i = 0 · номер 1"]
+        direction LR
+        A1["1 = 2?"] --> A2["1 = 3?"] --> A3["1 = 4?"] --> AS["кроків: 3"]
+    end
+    subgraph I1["i = 1 · номер 2"]
+        direction LR
+        B1["2 = 3?"] --> B2["2 = 4?"] --> BS["кроків: 5"]
+    end
+    subgraph I2["i = 2 · номер 3"]
+        direction LR
+        C1["3 = 4?"] --> CS["кроків: 6"]
+    end
+    subgraph I3["i = 3 · номер 4"]
+        direction LR
+        D1["пар праворуч немає"] --> DS["кроків: 6"]
+    end
+    I0 --> I1 --> I2 --> I3 --> R["(False, 6)"]
+    subgraph FAST["швидка: один прохід з множиною"]
+        direction LR
+        F1["1 in seen? ні"] --> F2["2 in seen? ні"] --> F3["3 in seen? ні"] --> F4["4 in seen? ні"] --> FR["(False, 4)"]
+    end
+    R ~~~ FAST
+
+    class A1,A2,A3,B1,B2,C1,F1,F2,F3,F4 warning
+    class AS,BS,CS,DS,D1 step
+    class R error
+    class FR success
+```
+
+У повільній функції кожен наступний номер порівнюється з усіма правішими — «трикутник» пар. У швидкій кожен номер перевіряється рівно один раз.
+
 Разом `3 + 2 + 1 = 6`. Для n номерів це `(n − 1) + (n − 2) + … + 1 = n·(n − 1) / 2` порівнянь. Швидка функція робить рівно n кроків — по одному на номер.
 
 ### Дослід подвоєння

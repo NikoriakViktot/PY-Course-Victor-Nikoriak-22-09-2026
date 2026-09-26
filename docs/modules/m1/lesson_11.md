@@ -130,6 +130,41 @@ print(binary_search(starts, 1000))
 | 3 | 6 … 7 | 6 → 1035 | 1035 < 1120 → `low = 7` |
 | 4 | 7 … 7 | 7 → 1120 | знайдено |
 
+Покроково — межі звужуються, доки `mid` не влучить:
+
+```mermaid
+flowchart TD
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+
+    subgraph K1["крок 1 · low 0, high 10"]
+        direction LR
+        M1{"mid 5 → 930<br>930 < 1120"} --> R1["low = 6<br>ліва половина відкинута"]
+    end
+    subgraph K2["крок 2 · low 6, high 10"]
+        direction LR
+        M2{"mid 8 → 1210<br>1210 > 1120"} --> R2["high = 7"]
+    end
+    subgraph K3["крок 3 · low 6, high 7"]
+        direction LR
+        M3{"mid 6 → 1035<br>1035 < 1120"} --> R3["low = 7"]
+    end
+    subgraph K4["крок 4 · low 7, high 7"]
+        direction LR
+        M4{"mid 7 → 1120"} --> R4["знайдено<br>(7, 4)"]
+    end
+    K1 --> K2 --> K3 --> K4
+
+    class M1,M2,M3,M4 decision
+    class R1,R2,R3 warning
+    class R4 success
+```
+
+Після кроку 1 лишилося 5 записів з 11, після кроку 2 — 2, після кроку 3 — 1.
+
 Чотири кроки на 11 записах. Для 1000 (це 16:40) пошук за три кроки звузив межі до порожнього проміжку: `low` став більшим за `high` — отже, такої поїздки немає.
 
 ### Дослід подвоєння: +1 крок
@@ -255,6 +290,39 @@ print(pair_with_sum(fares, 500))
 | 2 | 120 | 320 | 440 | замала → `left` праворуч |
 | 3 | 150 | 320 | 470 | замала → `left` праворуч |
 | 4 | 180 | 320 | 500 | знайшли |
+
+Покроково — кожен крок назавжди відкидає одну поїздку:
+
+```mermaid
+flowchart TD
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+
+    subgraph K1["крок 1 · 120 + 410"]
+        direction LR
+        S1{"530 > 500"} --> A1["right ліворуч<br>410 відкинуто"]
+    end
+    subgraph K2["крок 2 · 120 + 320"]
+        direction LR
+        S2{"440 < 500"} --> A2["left праворуч<br>120 відкинуто"]
+    end
+    subgraph K3["крок 3 · 150 + 320"]
+        direction LR
+        S3{"470 < 500"} --> A3["left праворуч<br>150 відкинуто"]
+    end
+    subgraph K4["крок 4 · 180 + 320"]
+        direction LR
+        S4{"500 = 500"} --> A4["знайшли<br>(180, 320)"]
+    end
+    K1 --> K2 --> K3 --> K4
+
+    class S1,S2,S3,S4 decision
+    class A1,A2,A3 error
+    class A4 success
+```
 
 Чому можна безпечно відкинути 410 на першому кроці? Бо навіть із **найдешевшою** поїздкою 120 вона дає забагато, а з дорожчими буде ще більше. Кожен крок відкидає одну поїздку назавжди, тому кроків щонайбільше n − 1 — це `O(n)`.
 

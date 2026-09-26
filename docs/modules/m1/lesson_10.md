@@ -178,6 +178,37 @@ generator
     | другий `next` | від паузи до другого `yield` | `"Розетка"` |
     | третій `next` | від паузи до кінця тіла | `StopIteration` → значення за замовчуванням |
 
+    Покроково: генератор щоразу зупиняється на `yield` і продовжує з того самого місця:
+
+    ```mermaid
+    flowchart TD
+        classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
+        classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
+        classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+        classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
+        classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+
+        G["feed = ticker()<br>тіло ще не виконувалось"]
+        subgraph N1["next №1"]
+            direction LR
+            P1["print('старт')"] --> Y1["yield 'Нафтогаз'<br>пауза"]
+        end
+        subgraph N2["next №2"]
+            direction LR
+            P2["print('продовжуємо')"] --> Y2["yield 'Розетка'<br>пауза"]
+        end
+        subgraph N3["next №3"]
+            direction LR
+            P3["print('кінець')"] --> Y3["кінець тіла<br>StopIteration"]
+        end
+        G --> N1 --> N2 --> N3
+
+        class G step
+        class P1,P2,P3 step
+        class Y1,Y2 warning
+        class Y3 error
+    ```
+
 Генератор — це ітератор: його можна передати в `for`, `list()`, `sum()`, і він так само одноразовий.
 
 ## Нескінченний потік угод

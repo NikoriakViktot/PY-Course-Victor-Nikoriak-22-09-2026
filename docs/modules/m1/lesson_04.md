@@ -279,6 +279,84 @@ else:
 
 Внутрішня умова перевіряється лише тоді, коли зовнішня (`is_delivery`) істинна. Кожен `else` належить тому `if`, під яким він стоїть з тим самим відступом.
 
+Шлях виконання для `order_total = 150`, `is_delivery = True`. Помаранчеві вузли — перевірки, які справді виконались, зелений — гілка, що спрацювала, червоні — гілки, до яких виконання не дійшло:
+
+```mermaid
+flowchart TD
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+
+    S["order_total = 150<br>is_delivery = True"] --> O{"is_delivery?<br>True"}
+    O -- так --> I{"order_total >= 200?<br>150 >= 200 → False"}
+    O -. ні .-> H["Замовлення в залі"]
+    I -. так .-> D["Оформлюємо доставку"]
+    I -- ні --> M["Для доставки не вистачає<br>50 грн"]
+
+    class S step
+    class O,I warning
+    class M success
+    class H,D error
+```
+
+Зовнішня перевірка відкриває або закриває вхід до внутрішньої: при `is_delivery = False` умова `order_total >= 200` навіть не обчислювалась би.
+
+### match / case: вибір за значенням
+
+Коли одна змінна порівнюється з кількома **конкретними значеннями**, довгий ланцюжок `elif command == ...` можна записати коротше. З Python 3.10 для цього є `match`:
+
+```python
+for mode in ["доставка", "в залі", "таксі"]:
+    match mode:
+        case "зал" | "в залі":
+            print("Замовлення в залі")
+        case "доставка":
+            print("Оформлюємо доставку")
+        case "самовивіз":
+            print("Заберіть на касі")
+        case _:
+            print("Невідомий спосіб:", mode)
+```
+
+```text
+Оформлюємо доставку
+Замовлення в залі
+Невідомий спосіб: таксі
+```
+
+Цикл `for` тут лише перебирає три приклади (його розберемо в уроці 6). Головне — блок `match`:
+
+- `match mode:` — яке значення перевіряємо;
+- `case "доставка":` — гілка спрацює, якщо `mode == "доставка"`;
+- `|` — «або»: `case "зал" | "в залі":` спрацює на будь-якому з двох рядків;
+- `case _:` — «усе інше», як `else`;
+- виконується **перша** гілка, що підійшла, решта пропускається — як у ланцюжку `elif`.
+
+```mermaid
+flowchart LR
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+
+    V["mode = #quot;таксі#quot;"] --> C1{"#quot;зал#quot; | #quot;в залі#quot;?"}
+    C1 -- ні --> C2{"#quot;доставка#quot;?"}
+    C2 -- ні --> C3{"#quot;самовивіз#quot;?"}
+    C3 -- ні --> C4["case _<br>Невідомий спосіб: таксі"]
+
+    class V step
+    class C1,C2,C3 decision
+    class C4 success
+```
+
+!!! warning "`case _`, а не `case other`"
+    Голе ім'я в `case` не порівнюється, а **захоплює** будь-яке значення: `case other:` спрацює завжди й запише значення у змінну `other`. Якщо після нього є ще гілки, Python не запустить програму: `SyntaxError: name capture 'other' makes remaining patterns unreachable`. Для «усього іншого» пиши `case _:`.
+
+`match` уміє більше: розбирати списки й словники за формою, додавати умову `if` до гілки. Усе це — в окремому ноутбуці [`match_case.ipynb`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_04_conditions_and_control/match_case.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_04_conditions_and_control/match_case.ipynb). Для порівнянь на кшталт `order_total >= 500` залишайся з `if` / `elif`: `match` — про збіг із конкретними значеннями та формою даних.
+
 ## Truthy, falsy і None
 
 ### Значення як умова
@@ -302,6 +380,32 @@ True True True
 ```
 
 Другий рядок часто дивує: `"False"`, `"0"` і навіть рядок з одного пробілу — **непорожні** рядки, тому вони істинні. Python не читає зміст рядка.
+
+Як Python вирішує, чи виконати блок `if value:`:
+
+```mermaid
+flowchart TD
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+
+    V["if value:"] --> N{"False або None?"}
+    N -- так --> F["falsy<br>блок пропускається"]
+    N -- ні --> Z{"нуль?<br>0, 0.0"}
+    Z -- так --> F
+    Z -- ні --> E{"порожнє?<br>#quot;#quot;, []"}
+    E -- так --> F
+    E -- ні --> T["truthy<br>блок виконується"]
+
+    class V step
+    class N,Z,E decision
+    class F error
+    class T success
+```
+
+Рядок `"0"` проходить усі три перевірки з відповіддю «ні»: це не `None`, не число і не порожній рядок.
 
 Так зручно перевіряти, чи ввів користувач хоч щось:
 
@@ -410,6 +514,36 @@ else:
 ```
 
 `guests > 0` хибна, тому ділення `order_total / guests` не виконується взагалі. Якщо поміняти частини місцями (`order_total / guests > 200 and guests > 0`), ділення відбудеться першим і програма впаде: `ZeroDivisionError: division by zero`.
+
+Обидва порядки поруч, при `guests = 0`:
+
+```mermaid
+flowchart TD
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+
+    subgraph OK["guests > 0 and order_total / guests > 200"]
+        direction LR
+        A1{"guests > 0<br>0 > 0 → False"} --> A2["and уже знає відповідь<br>False"]
+        A2 --> A3["ділення не виконується<br>гілка else"]
+    end
+    subgraph BAD["order_total / guests > 200 and guests > 0"]
+        direction LR
+        B1["order_total / guests<br>300 / 0"] --> B2["ZeroDivisionError<br>програма падає"]
+    end
+    OK ~~~ BAD
+
+    class A1 warning
+    class A2 step
+    class A3 success
+    class B1 warning
+    class B2 error
+```
+
+Ліва частина `and` працює як охоронець: права частина обчислюється, лише коли ліва істинна.
 
 ### and і or повертають операнд
 
@@ -587,6 +721,42 @@ flowchart TD
 
 Стрілка від дії повертається до перевірки: після кожного повтору Python знову обчислює `cooked < portions`. Вийти з циклу можна лише гілкою «ні», тому зміна стану (`cooked += 1`) — обов'язкова частина.
 
+Та сама програма покроково: кожен блок — один прохід, у вузлах — стан змінних:
+
+```mermaid
+flowchart TD
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+
+    subgraph P1["прохід 1"]
+        direction LR
+        C1{"0 < 3 → True"} --> U1["cooked = 1<br>Готова порція 1"]
+    end
+    subgraph P2["прохід 2"]
+        direction LR
+        C2{"1 < 3 → True"} --> U2["cooked = 2<br>Готова порція 2"]
+    end
+    subgraph P3["прохід 3"]
+        direction LR
+        C3{"2 < 3 → True"} --> U3["cooked = 3<br>Готова порція 3"]
+    end
+    subgraph P4["перевірка 4"]
+        direction LR
+        C4{"3 < 3 → False"} --> E["вихід з циклу<br>Усі порції готові"]
+    end
+    P1 --> P2 --> P3 --> P4
+
+    class C1,C2,C3 decision
+    class U1,U2,U3 step
+    class C4 warning
+    class E success
+```
+
+Умова перевіряється **чотири** рази, а блок виконується **три**: остання перевірка лише вирішує, що час виходити.
+
 ### Нуль повторів
 
 Якщо умова хибна з самого початку, блок не виконується **жодного разу**:
@@ -670,6 +840,49 @@ print("Замовлення прийнято")
 ```
 
 `while True` — умова, яка завжди істинна. Тому вийти з такого циклу можна лише через `break`. Без нього цикл був би нескінченним.
+
+Нехай офіціант вводить `кава`, `чай`, `готово`. Програма виведе:
+
+```text
+Позиція: кава
+Додано: кава
+Позиція: чай
+Додано: чай
+Позиція: готово
+Замовлення прийнято
+```
+
+Покроково:
+
+```mermaid
+flowchart TD
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+
+    subgraph R1["повтор 1"]
+        direction LR
+        I1["command = #quot;кава#quot;"] --> Q1{"== #quot;готово#quot;?<br>ні"} --> A1["Додано: кава"]
+    end
+    subgraph R2["повтор 2"]
+        direction LR
+        I2["command = #quot;чай#quot;"] --> Q2{"== #quot;готово#quot;?<br>ні"} --> A2["Додано: чай"]
+    end
+    subgraph R3["повтор 3"]
+        direction LR
+        I3["command = #quot;готово#quot;"] --> Q3{"== #quot;готово#quot;?<br>так"} --> B["break"]
+    end
+    R1 --> R2 --> R3 --> END["Замовлення прийнято"]
+
+    class I1,I2,I3,A1,A2 step
+    class Q1,Q2 decision
+    class Q3,B warning
+    class END success
+```
+
+Рядок `print("Додано:", command)` у третьому повторі вже не виконується: `break` виходить з циклу одразу.
 
 ### continue — до наступної перевірки
 
@@ -917,6 +1130,7 @@ else:
 | порівняти значення | `==`, `!=`, `<`, `<=`, `>`, `>=` |
 | перевірити діапазон | `200 <= order_total < 500` |
 | обрати одну дію з кількох | `if` / `elif` / `else` — виконується перша істинна гілка |
+| обрати дію за конкретним значенням | `match` + `case "значення":`, «усе інше» — `case _:` (Python 3.10+) |
 | поєднати умови | `and`, `or`, `not`; дужки для ясності |
 | перевірити, що значення немає | `value is None` |
 | перевірити, що рядок непорожній | `if text:` |
@@ -946,12 +1160,14 @@ else:
 ### Що далі
 
 - Ноутбук заняття з передбаченнями та вправами: [`note_lesson_04_conditions.ipynb`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_04_conditions_and_control/note_lesson_04_conditions.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_04_conditions_and_control/note_lesson_04_conditions.ipynb)
+- Окремий ноутбук про `match` / `case`: [`match_case.ipynb`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_04_conditions_and_control/match_case.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_04_conditions_and_control/match_case.ipynb)
 - Наступний урок: [Урок 5. Списки, кортежі та множини](lesson_05.md). Досі замовлення зберігало лише суму й кількість. Щоб пам'ятати самі позиції, потрібні колекції.
 
 ## Документація
 
-- Туторіал: [`if`](https://docs.python.org/3/tutorial/controlflow.html#if-statements), [`break` і `continue`](https://docs.python.org/3/tutorial/controlflow.html#break-and-continue-statements)
-- [Перевірка істинності (truth value testing)](https://docs.python.org/3/builtins/stdtypes.html#truth-value-testing), [логічні операції `and`, `or`, `not`](https://docs.python.org/3/builtins/stdtypes.html#boolean-operations-and-or-not), [порівняння](https://docs.python.org/3/builtins/stdtypes.html#comparisons)
+- Туторіал: [`if`](https://docs.python.org/3/tutorial/controlflow.html#if-statements), [`match`](https://docs.python.org/3/tutorial/controlflow.html#match-statements), [`break` і `continue`](https://docs.python.org/3/tutorial/controlflow.html#break-and-continue-statements)
+- [Перевірка істинності (truth value testing)](https://docs.python.org/3/library/stdtypes.html#truth-value-testing), [логічні операції `and`, `or`, `not`](https://docs.python.org/3/library/stdtypes.html#boolean-operations-and-or-not), [порівняння](https://docs.python.org/3/library/stdtypes.html#comparisons)
 - Довідник мови: [порівняння й ланцюжки](https://docs.python.org/3/reference/expressions.html#comparisons), [логічні операції](https://docs.python.org/3/reference/expressions.html#boolean-operations), [пріоритет операторів](https://docs.python.org/3/reference/expressions.html#operator-precedence)
-- Інструкції: [`if`](https://docs.python.org/3/reference/compound_stmts.html#the-if-statement), [`while`](https://docs.python.org/3/reference/compound_stmts.html#the-while-statement), [`break`](https://docs.python.org/3/reference/simple_stmts.html#the-break-statement), [`continue`](https://docs.python.org/3/reference/simple_stmts.html#the-continue-statement)
-- Функції й методи: [`input()`](https://docs.python.org/3/builtins/functions.html#input), [`int()`](https://docs.python.org/3/builtins/functions.html#int), [`bool()`](https://docs.python.org/3/builtins/functions.html#bool), [`str.strip()`](https://docs.python.org/3/builtins/stdtypes.html#str.strip), [`str.lower()`](https://docs.python.org/3/builtins/stdtypes.html#str.lower), [`str.isdecimal()`](https://docs.python.org/3/builtins/stdtypes.html#str.isdecimal), [`None`](https://docs.python.org/3/builtins/constants.html#None), [`random.randint()`](https://docs.python.org/3/library/random.html#random.randint)
+- Інструкції: [`if`](https://docs.python.org/3/reference/compound_stmts.html#the-if-statement), [`match`](https://docs.python.org/3/reference/compound_stmts.html#the-match-statement), [`while`](https://docs.python.org/3/reference/compound_stmts.html#the-while-statement), [`break`](https://docs.python.org/3/reference/simple_stmts.html#the-break-statement), [`continue`](https://docs.python.org/3/reference/simple_stmts.html#the-continue-statement)
+- Функції й методи: [`input()`](https://docs.python.org/3/builtins/functions.html#input), [`int()`](https://docs.python.org/3/builtins/functions.html#int), [`bool()`](https://docs.python.org/3/builtins/functions.html#bool), [`str.strip()`](https://docs.python.org/3/library/stdtypes.html#str.strip), [`str.lower()`](https://docs.python.org/3/library/stdtypes.html#str.lower), [`str.isdecimal()`](https://docs.python.org/3/library/stdtypes.html#str.isdecimal), [`None`](https://docs.python.org/3/builtins/constants.html#None), [`random.randint()`](https://docs.python.org/3/library/random.html#random.randint)
+- [PEP 636 — Structural Pattern Matching: Tutorial](https://peps.python.org/pep-0636/), [PEP 634 — специфікація](https://peps.python.org/pep-0634/)
