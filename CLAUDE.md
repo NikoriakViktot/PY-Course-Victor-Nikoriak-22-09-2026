@@ -399,15 +399,46 @@ If `sync_exams` says "Lesson not found for lesson_id":
 9. Add lesson config to `tools/config.json`
 10. `course.yaml` / `course.json` already list all v5.0 lesson numbers per module — change them only for a lesson outside the v5.0 table
 11. Run `python tools/qa_suite.py --unit` to verify API integration
-12. Push to `main` → webhook triggers `sync_lessons` automatically
+12. Add a step-by-step Mermaid diagram for every algorithm the lesson teaches and an architecture diagram for its `{#architecture}` section (see Mermaid Diagram Standards)
+13. Push to `main` → webhook triggers `sync_lessons` automatically
 
 ---
 
 ## Mermaid Diagram Standards
 
-> Apply to every `diagrams_lesson_NN_*.md` file and any Mermaid block inside notebooks.
+> Apply to every Mermaid block: book pages `docs/**/*.md`, `diagrams_lesson_NN_*.md` files, notebooks.
 
-### Dark-theme color system (mandatory)
+### Algorithm & architecture diagrams — mandatory
+
+Students remember an algorithm when they **see it run**. So diagrams are not decoration — they are part of every lesson:
+
+1. **Every algorithm or control-flow construct a lesson explains** (`if/elif`, loops, `break`/`continue`, `match`, search, sorting, recursion, greedy, DP, …) gets a **step-by-step execution diagram**, not only a generic flowchart:
+   - one `subgraph` per step / iteration / pass, titled with what happens (`"ітерація 2: cooked = 1 → 2"`);
+   - the **state** is shown in the nodes: loop variables, `lo/mid/hi`, `last_end`, `dp[i]`, the list after each pass;
+   - classes carry meaning: `step` — neutral state, `warning` — the element/decision being processed now, `success` — taken / condition true / final result, `error` — rejected / condition false;
+   - use the same concrete data as the code example next to it, so the diagram and the printed output can be compared line by line.
+2. **Several approaches in one lesson** (e.g. greedy vs DP, linear vs binary search) → end with a `flowchart TD` «як обрати».
+3. **Architecture** — every M2+ `## Архітектура … { #architecture }` section, and later lessons on projects/Django/DB, gets a diagram of the architectural decision: components, who depends on whom, data flow; `classDiagram` / `graph LR` for structure, `sequenceDiagram` for calls over time.
+4. **Reference for the style**: the old course `PY-Course-Victor-Nikoriak-23_02`, `module_3/lessons/lesson_27_sorting/diagrams_lesson_27_sorting.md` (a section per algorithm, a `subgraph` per pass, a final «how to choose» flowchart); also `lesson_25_search_hashing`, `lesson_26_trees`, `lesson_28_graphs`.
+5. **Verify rendering**: `mkdocs build --strict` plus opening the page in a browser (Playwright) — no "Syntax error in text". A diagram that doesn't render is worse than none.
+
+When editing an existing lesson, add a missing step-by-step diagram for the algorithm it teaches (status per lesson: `.claude/plan_md/diagram_audit.md`).
+
+### Palettes: light on book pages, dark in notebooks and `diagrams_*.md`
+
+The MkDocs theme is light, so **book pages (`docs/**/*.md`) use the light palette**:
+
+```
+classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
+classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
+classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
+classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+```
+
+**Notebooks and `diagrams_lesson_NN_*.md` use the dark palette:**
+
+### Dark-theme color system (notebooks, `diagrams_*.md`)
 
 ```
 classDef step     fill:#263238,stroke:#90a4ae,color:#ffffff;
@@ -430,7 +461,7 @@ classDef warning  fill:#4a3b00,stroke:#ff9800,color:#ffffff;
 ### Absolute prohibitions
 
 - **Never** use `style NodeID fill:#...` inline — only `classDef` + `class NodeID className`
-- **Never** use light backgrounds: `#e3f2fd`, `#fff9c4`, `#c8e6c9`, `#ffebee`, `#e8f5e9`, etc.
+- **Never** mix palettes: light backgrounds (`#e3f2fd`, `#ffebee`, `#e8f5e9`, …) only on book pages, dark ones only in notebooks / `diagrams_*.md`
 - **Never** use `mindmap` — convert to `flowchart TD` (mindmap is unstable in renderers)
 - **Never** use `\n` inside node labels — use `<br>` instead
 - **Never** style subgraphs with `style SUBGRAPH_ID fill:#...`
@@ -447,11 +478,14 @@ classDef warning  fill:#4a3b00,stroke:#ff9800,color:#ffffff;
 | Use case | Diagram type |
 |----------|-------------|
 | Algorithm steps / flow | `flowchart TD` |
+| Algorithm run on concrete data (step-by-step trace) | `flowchart LR`/`TD` with one `subgraph` per step |
+| Calls over time (client → service → DB) | `sequenceDiagram` |
+| Classes and their relations | `classDiagram` (escape dunders as `#95;#95;init#95;#95;`) |
 | Component comparison (side by side) | `graph LR` |
 | Tree / hierarchy structure | `graph TD` |
 | Taxonomy / categories | `flowchart TD` (not mindmap) |
 
-### Template — every diagram starts with
+### Template — every diagram starts with (dark variant; on book pages swap in the light classDefs above)
 
 ```mermaid
 flowchart TD
@@ -480,6 +514,7 @@ flowchart TD
 | Test API backend | `tools/qa_suite.py --unit` |
 | Load test (concurrent students) | `tools/qa_suite.py --load` |
 | View student progress | `dashboard.ipynb` (run in Jupyter) |
+| Explain an algorithm / control flow / architecture | Mermaid step-by-step diagram — see «Algorithm & architecture diagrams — mandatory»; status in `.claude/plan_md/diagram_audit.md` |
 | Update repo/GitHub workflow docs | `architecture.md` |
 | Update Python mental model doc | `module_1/docs/00_python_mental_model.md` |
 | Add reference doc for a topic | `module_1/docs/<topic>_docs.ipynb` |
