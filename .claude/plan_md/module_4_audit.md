@@ -8,6 +8,14 @@
 
 Зрозуміти, що з наявного матеріалу в `module_4/lessons/` реально покриває кожну з 17 цільових позицій М4 (31–47, включно з «Web Advanced», уже вирішено раніше що це частина М4, не окремий модуль), де є прогалини, і що з мережевого/конкурентного контенту (lesson_30/32/33/34) насправді належить не сюди, а до М2 позиції 27. Рішення щодо спірного контенту — за викладачем; тут лише сформульовані питання.
 
+## Оновлення: джерела зі старого `module_5` і стан позиції 31
+
+- **Рішення викладача (2026-09-26):** у старому репо `PY-Course-Victor-Nikoriak-23_02` Django-матеріал є в `module_5/` — це джерело для М4, попри те що `module_5` як модуль не мігрується. Висновок цього аудиту «Django-матеріалу немає» стосувався лише нового репо.
+  - `lesson_Django_Network_Architecture/network_foundation.md`, `network_mermaid.md` — мережевий фундамент (IP, DNS, порти, TCP, TLS, stateless/cookies, REST): URL/DNS/порти/TCP/TLS використано в уроці 31; REST — джерело для 32; cookies/сесії — для 40.
+  - `lesson_Django_Network_Architecture/Django_*.md`, `DJANGO_*.md`, `django_architecture.md`, `news_portal/`, `simple_django_project/` — для 33–35.
+  - `lesson_Django_ORM_Database/` — для 33 і 38; `lesson_HTML_CSS_Bootstrap/` — для 34; `lesson_Django_Async/` (`07_async_http_clients.md` використано в уроці 31); `lesson_Django_authentication_and_security/` — для 40/46; `lesson_Django_Testing/` — для 41; `lesson_46_Telegram_API/` — для 47; `lesson_Linux_DevOps_Basics/` — для М5.
+- **Позиція 31 — готова:** `docs/modules/m4/lesson_31.md` + `module_4/lessons/lesson_31_http_requests/note_lesson_31_http.ipynb` + `smachno_api.py` (локальний навчальний API на `http.server`). Питання «чи вводити httpx/aiohttp повноцінно» закрито: обидві — з асинхронним `gather`, таблиця й схема вибору. Web scraping (старий `note_lesson_31_web_scraping.ipynb`) не перенесено: не в назві позиції v5.0, а сайт-джерело не перевірити.
+
 ## 1. Облік навантаження М4
 
 Усі 17 позицій М4 — типу «Урок», практикумів немає:

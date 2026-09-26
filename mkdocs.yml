@@ -120,7 +120,9 @@ nav:
       - Огляд модуля: modules/m3_databases.md
       - "29. Основи SQL (PostgreSQL)": modules/m3/lesson_29.md
       - "30. Redis overview": modules/m3/lesson_30.md
-    - "М4. Web (+ Web Advanced)": modules/m4_web.md
+    - "М4. Web (+ Web Advanced)":
+      - Огляд модуля: modules/m4_web.md
+      - "31. HTTP: requests, httpx, aiohttp": modules/m4/lesson_31.md
     - "М5. Production": modules/m5_production.md
     - "М6. Капстоун": modules/m6_capstone.md
     - "Self-paced. AI для розробників (бонус)": modules/bonus_ai.md

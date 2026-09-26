@@ -46,6 +46,8 @@ PY-Course-Victor-Nikoriak-22-09-2026/
 │   └── lessons/                ← lesson_18_functions_first_class/ … lesson_28_practicum_data_structures/ (all of М2)
 ├── module_3/
 │   └── lessons/                ← lesson_29_sql_basics/, lesson_30_redis_overview/ (all of М3; bonus pandas lesson pending — see «Bonus lessons»)
+├── module_4/
+│   └── lessons/                ← lesson_31_http_requests/ (+ smachno_api.py — local training HTTP API, stdlib only); lessons 32–47 pending
 │
 ├── tools/
 │   ├── sync_notebook_metadata.py ← generates the Colab badge + metadata.lms of every notebook
@@ -64,7 +66,7 @@ PY-Course-Victor-Nikoriak-22-09-2026/
     └── notebooks.yml           ← runs tools/sync_notebook_metadata.py --check on push/PR
 ```
 
-**Not yet migrated from the old repo** (planned, not present): `module_4/`, `SETUP.md`, `install_course.*`/`start_course.*`, `dashboard.ipynb`, the old `tools/` scripts (`generate_student.py`, `qa_suite.py`, `client.py`, `config.json` — `tools/` currently holds only the notebook-metadata sync), `generator/`, `run_data/`, `docker-compose.yml`. The old `module_5` (Django/DevOps content) is **deliberately not migrated** — it isn't part of the v5.0 navigation table; see `.claude/plan_md/migration_plan.md` §0. Do not assume any of these exist without checking.
+**Not yet migrated from the old repo** (planned, not present): `module_4` lessons 32–47, `SETUP.md`, `install_course.*`/`start_course.*`, `dashboard.ipynb`, the old `tools/` scripts (`generate_student.py`, `qa_suite.py`, `client.py`, `config.json` — `tools/` currently holds only the notebook-metadata sync), `generator/`, `run_data/`, `docker-compose.yml`. The old `module_5` (Django/DevOps content) is not migrated as a module — it isn't part of the v5.0 navigation table (see `.claude/plan_md/migration_plan.md` §0), but it is the **source material** for М4 lessons: `lesson_Django_Network_Architecture/network_foundation.md` + `network_mermaid.md` (URL/DNS/ports/TCP/TLS → lesson 31, REST → 32), the `Django_*` / `DJANGO_*` files (→ 33–35), `lesson_Django_Async/` (async HTTP → 31, async views → later), `lesson_Django_Testing/` (→ 41), `lesson_46_Telegram_API/` (→ 47) — see `.claude/plan_md/module_4_audit.md`. Do not assume any of these exist without checking.
 
 ---
 
@@ -383,6 +385,7 @@ Reference notebooks in `module_N/docs/` get `lesson_number: null` and keep their
 | 28 | `module_2/lessons/lesson_28_practicum_data_structures` | `practicum_data_structures` | — |
 | 29 | `module_3/lessons/lesson_29_sql_basics` | `sql_basics` | — |
 | 30 | `module_3/lessons/lesson_30_redis_overview` | `redis_overview` | — |
+| 31 | `module_4/lessons/lesson_31_http_requests` | `http_requests` | — |
 
 > ⚠️ When the LMS is switched to this repo, server-side exam JSONs from 23_02 whose `lesson_id` differs
 > from the new slug (last column) must be renamed to the new slug, otherwise `sync_exams` reports
