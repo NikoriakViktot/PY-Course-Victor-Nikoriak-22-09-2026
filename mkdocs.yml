@@ -110,6 +110,7 @@ nav:
       - "23. @property, декоратори класів, dunder": modules/m2/lesson_23.md
       - "24. Ітератори advanced": modules/m2/lesson_24.md
       - "25. Тестування з pytest (+ валідація AI-коду)": modules/m2/lesson_25.md
+      - "26. П5. Динамічне програмування + greedy (вступ)": modules/m2/lesson_26.md
     - "М3. Бази даних": modules/m3_databases.md
     - "М4. Web (+ Web Advanced)": modules/m4_web.md
     - "М5. Production": modules/m5_production.md
