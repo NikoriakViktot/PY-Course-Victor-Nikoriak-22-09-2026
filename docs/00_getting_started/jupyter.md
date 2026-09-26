@@ -88,6 +88,12 @@ jupyter notebook --version
 
 Номери версій у тебе можуть бути новішими.
 
+!!! note "Інші способи встановлення"
+    - **conda / mamba**: `conda install -c conda-forge jupyterlab` (або `mamba install -c conda-forge jupyterlab`) — якщо ти користуєшся Anaconda/Miniconda замість venv.
+    - **`pip install --user jupyterlab`** (без venv) ставить команду `jupyter` у папку користувача, якої може не бути в `PATH`. Тоді `jupyter lab` не знайдеться — див. «Типові проблеми». Для курсу краще venv.
+
+JupyterLab офіційно перевірений в останніх версіях **Firefox**, **Chrome** і **Safari**.
+
 ## Запуск і зупинка
 
 1. Відкрий термінал і **перейди в папку**, де лежать ноутбуки (наприклад, корінь репозиторію курсу). Сервер показує файли саме з цієї папки.
@@ -112,6 +118,34 @@ jupyter notebook --version
 5. Щоб зупинити: у терміналі натисни **Ctrl+C** і підтверди `y` (або Ctrl+C двічі). Збережи ноутбуки перед цим.
 
 Якщо порт 8888 уже зайнятий (запущений інший Jupyter), сервер візьме наступний вільний — 8889, 8890… Дивись адресу в терміналі.
+
+## Інтерфейс JupyterLab
+
+```text
+┌ меню: File  Edit  View  Run  Kernel  Tabs  Settings  Help ────────────┐
+│ ліва     │ робоча область: вкладки ноутбуків,        │ права          │
+│ панель:  │ файлів, терміналів — можна ділити         │ панель:        │
+│ файли,   │ на кілька панелей                         │ властивості,   │
+│ запущені │                                           │ дебагер        │
+│ кернели… │                                           │                │
+└ рядок стану: перемикач Simple, кернел, повідомлення ───────────────────┘
+```
+
+- **Меню** угорі. Кожен пункт показує свою гарячу клавішу:
+    - **File** — файли й папки;
+    - **Edit** — редагування (зокрема очищення виводів);
+    - **View** — вигляд;
+    - **Run** — виконання клітинок;
+    - **Kernel** — керування кернелами;
+    - **Tabs** — відкриті вкладки;
+    - **Settings** — налаштування;
+    - **Help** — довідка.
+- **Ліва бічна панель**: файловий браузер, список вкладок і **запущених кернелів і терміналів** (там же їх можна зупинити), **зміст** (table of contents) ноутбука, менеджер розширень.
+- **Права бічна панель**: інспектор властивостей клітинки й **дебагер**.
+- **Робоча область**: ноутбуки, текстові файли, термінали й консолі відкриваються у вкладках. Перетягни вкладку до краю іншої панелі — і область поділиться, наприклад ноутбук ліворуч, а термінал праворуч. Активна вкладка має кольорову (синю) смужку згори.
+- **Simple Interface** — показати лише одну вкладку, не закриваючи решту. Вмикається перемикачем **Simple** у рядку стану внизу ліворуч або **View → Appearance → Simple Interface**. Коли вимкнеш, повернеться попереднє розташування.
+- **Пошук у ноутбуці** — **Ctrl+F** (macOS **⌘F**). Це вбудований пошук JupyterLab: пошук браузера може не бачити весь ноутбук.
+- **Контекстне меню** — правий клік на клітинці, файлі чи вкладці. Звичайне меню браузера — **Shift** + правий клік.
 
 ## Кернели: як підключити venv
 
@@ -169,7 +203,7 @@ print(sys.executable)
 Note: you may need to restart the kernel to use updated packages.
 ```
 
-Перезапуск потрібен, якщо бібліотеку вже імпортували в цьому кернелі (наприклад, оновлюєш версію): кернел пам'ятає старий імпорт. Меню **Kernel → Restart Kernel…**.
+Перезапуск потрібен, якщо бібліотеку вже імпортували в цьому кернелі (наприклад, оновлюєш версію): кернел пам'ятає старий імпорт. Меню **Kernel → Restart Kernel…** (у командному режимі — **0, 0**).
 
 Для проєкту зі списком залежностей:
 
@@ -188,7 +222,7 @@ Note: you may need to restart the kernel to use updated packages.
 У ноутбука два режими:
 
 - **режим редагування** (edit mode) — курсор у клітинці, пишеш код. Увійти: **Enter** або клік у клітинку;
-- **командний режим** (command mode) — клітинку виділено рамкою, клавіші керують клітинками. Увійти: **Esc**.
+- **командний режим** (command mode) — клітинку виділено рамкою, клавіші керують клітинками. Увійти: **Esc** (або **Ctrl+M**).
 
 | Клавіші | Режим | Дія |
 |---|---|---|
@@ -198,9 +232,13 @@ Note: you may need to restart the kernel to use updated packages.
 | **D, D** (двічі) | командний | видалити клітинку |
 | **M** / **Y** | командний | зробити клітинку Markdown / кодом |
 | **Z** | командний | скасувати видалення клітинки |
+| **I, I** (двічі) | командний | перервати виконання (Interrupt Kernel) |
+| **0, 0** (двічі) | командний | перезапустити кернел (Restart Kernel) |
+| **Ctrl+F** (⌘F) | будь-який | пошук у ноутбуці |
+| **Ctrl+Shift+C** (⌘⇧C) | будь-який | палітра команд: пошук будь-якої дії за назвою |
 | **Ctrl+S** (⌘S) | будь-який | зберегти |
 
-Повний список — у JupyterLab: **Help → Show Keyboard Shortcuts** або палітра команд **Ctrl+Shift+C**.
+Список клавіш для поточної вкладки — **Help → Show Keyboard Shortcuts…** (**Ctrl+Shift+H**). Переглянути всі й змінити — **Settings → Advanced Settings Editor → Keyboard Shortcuts**. Гарячі клавіші в меню показано поруч із кожним пунктом.
 
 ## Корисні magic-команди
 
@@ -247,17 +285,20 @@ print("Привіт з файлу!")
 
 | Симптом | Причина | Що робити |
 |---|---|---|
-| `jupyter: command not found` / «не є внутрішньою командою» | venv не активовано або Jupyter не встановлено в нього | активуй venv; або запусти `python -m jupyter lab` |
+| `jupyter: command not found` / «не є внутрішньою командою» | venv не активовано, Jupyter не встановлено в нього, або (після `pip install --user`) папка з командою не в `PATH` | активуй venv; або запусти `python -m jupyter lab`; на macOS/Linux після `--user` — `~/.local/bin/jupyter lab` |
 | `ModuleNotFoundError`, хоча пакет встановлено | кернел працює на іншому Python | `import sys; print(sys.executable)`; постав пакет через `%pip install`; або зміни кернел |
 | У меню немає кернела `Python Course (.venv)` | venv не зареєстровано | `python -m ipykernel install --user --name python-course --display-name "Python Course (.venv)"` з активованим venv |
 | Після `%pip install` імпортується стара версія | кернел пам'ятає старий імпорт | Kernel → Restart Kernel… |
 | Змінна «не визначена», хоча клітинка з нею є | клітинку не виконано в цьому сеансі кернела | виконай її або Restart Kernel and Run All |
-| Ноутбук «завис», зірочка `[*]` не зникає | довгий чи нескінченний код | Kernel → Interrupt Kernel (у командному режимі — **I, I**) |
+| Ноутбук «завис», зірочка `[*]` не зникає | довгий чи нескінченний код | **Kernel → Interrupt Kernel** (у командному режимі — **I, I**) |
+| Забагато відкритих ноутбуків, комп'ютер гальмує | кожен відкритий ноутбук тримає свій кернел | ліва панель → запущені кернели й термінали → зупини непотрібні |
 | PowerShell: «виконання сценаріїв вимкнено» при активації venv | політика виконання Windows | див. [Налаштування середовища](environment_setup.md), розділ «Активація» |
 
 ## Джерела
 
-- JupyterLab: [Installation](https://jupyterlab.readthedocs.io/en/stable/getting_started/installation.html), [Terminals](https://jupyterlab.readthedocs.io/en/stable/user/terminal.html)
+- [JupyterLab на GitHub](https://github.com/jupyterlab/jupyterlab) — README: встановлення (pip, conda, mamba), запуск, `PATH`, підтримувані браузери
+- JupyterLab: [Installation](https://jupyterlab.readthedocs.io/en/stable/getting_started/installation.html), [The JupyterLab Interface](https://jupyterlab.readthedocs.io/en/stable/user/interface.html) — меню, бічні панелі, робоча область, Simple Interface, пошук, гарячі клавіші; [Terminals](https://jupyterlab.readthedocs.io/en/stable/user/terminal.html)
+- Назви пунктів меню й гарячі клавіші додатково звірено з налаштуваннями (schemas) встановленого JupyterLab 4.6
 - Jupyter Notebook: [Notebook Basics](https://jupyter-notebook.readthedocs.io/en/stable/examples/Notebook/Notebook%20Basics.html) — режими й гарячі клавіші; [Announcing Jupyter Notebook 7](https://blog.jupyter.org/announcing-jupyter-notebook-7-8d6d66126dcf)
 - IPython: [Installing the IPython kernel](https://ipython.readthedocs.io/en/stable/install/kernel_install.html) — кернели для різних середовищ
 - Jake VanderPlas, [Installing Python Packages from a Jupyter Notebook](https://jakevdp.github.io/blog/2017/12/05/installing-python-packages-from-jupyter/) — чому `!pip` іноді ставить пакет «не туди» і звідки взявся `%pip`
