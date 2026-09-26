@@ -661,7 +661,7 @@ caesar_encode("xyz", 3) → 'abc'
 
 ## Документація і джерела
 
-- Python: [складність операцій `list`, `set`, `dict`](https://wiki.python.org/moin/TimeComplexity), [множини в туторіалі](https://docs.python.org/3/tutorial/datastructures.html#sets), [тип `set`](https://docs.python.org/3/builtins/stdtypes.html#set-types-set-frozenset), [`time.perf_counter()`](https://docs.python.org/3/library/time.html#time.perf_counter)
+- Python: [складність операцій `list`, `set`, `dict`](https://wiki.python.org/moin/TimeComplexity), [множини в туторіалі](https://docs.python.org/3/tutorial/datastructures.html#sets), [тип `set`](https://docs.python.org/3/library/stdtypes.html#set-types-set-frozenset), [`time.perf_counter()`](https://docs.python.org/3/library/time.html#time.perf_counter)
 - Для охочих — як цю тему пояснюють відомі курси:
     - MIT 6.0001, [лекція 10 «Understanding Program Efficiency»](https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/resources/lecture-10-understanding-program-efficiency-part-1/): секундомір, підрахунок операцій і порядок росту;
     - Harvard CS50, [тиждень 3 «Algorithms»](https://cs50.harvard.edu/x/weeks/3/): лінійний і бінарний пошук, `O` та `Ω`;

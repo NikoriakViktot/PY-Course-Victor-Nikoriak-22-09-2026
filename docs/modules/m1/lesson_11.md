@@ -559,7 +559,7 @@ first_at_or_after([], 5)        → 0
 ## Документація і джерела
 
 - Модуль [`bisect`](https://docs.python.org/3/library/bisect.html): [`bisect_left`](https://docs.python.org/3/library/bisect.html#bisect.bisect_left), [пошук у відсортованих списках](https://docs.python.org/3/library/bisect.html#searching-sorted-lists)
-- Методи рядків: [`str.startswith`](https://docs.python.org/3/builtins/stdtypes.html#str.startswith); сортування: [Sorting Techniques](https://docs.python.org/3/howto/sorting.html)
+- Методи рядків: [`str.startswith`](https://docs.python.org/3/library/stdtypes.html#str.startswith); сортування: [Sorting Techniques](https://docs.python.org/3/howto/sorting.html)
 - [Складність операцій `list`, `dict`, `set`](https://wiki.python.org/moin/TimeComplexity)
 - Для охочих:
     - Harvard CS50, [тиждень 3 «Algorithms»](https://cs50.harvard.edu/x/weeks/3/) — лінійний і бінарний пошук на прикладі телефонної книги;
