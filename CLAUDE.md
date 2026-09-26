@@ -80,6 +80,22 @@ Examples: `module_1/lessons/lesson_05_lists_tuples_sets/`, `module_2/lessons/les
 
 Materials from the old 23_02 course live in the folder of the v5.0 lesson they belong to (mapping and rationale: `.claude/plan_md/module_1_audit.md`).
 
+### Bonus lessons (outside the 1–52 numbering)
+
+The instructor can add a lesson that is not in the v5.0 table without renumbering the course:
+
+```
+module_<N>/bonus/<slug>/        e.g. module_3/bonus/pandas_data_analysis/
+docs/modules/mN/bonus_<topic>.md
+```
+
+- register it in `tools/lessons_v5.json` → `"bonus": {"<slug>": {"module": N, "after": <lesson it follows>, "title": "Бонус. …"}}`; `sync_notebook_metadata.py` rejects unknown bonus slugs;
+- its notebooks get `metadata.lms.lesson_number: null` and `lesson_slug = <slug>`;
+- in `mkdocs.yml` put it in its module's nav right after lesson `after`, titled «Бонус. …»;
+- `course.yaml` / `course.json` are **not** changed (they list only v5.0 numbers).
+
+Current bonus lessons: `pandas_data_analysis` (module 3, before lesson 29) — instructor's decision: Python is primarily data science today, so М3 opens with pandas, charts and Dash; databases follow.
+
 ### Files inside each lesson
 
 | File pattern | Purpose |

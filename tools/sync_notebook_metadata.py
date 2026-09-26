@@ -10,6 +10,8 @@ For every notebook under module_*/ (course materials only, not assignments/):
   * metadata.colab.include_colab_link = true
   * metadata.lms rebuilt from the location:
       module_N/lessons/lesson_NN_<slug>/...  -> v5.0 lesson NN of module N
+      module_N/bonus/<slug>/...              -> bonus lesson of module N (no number;
+                                                title from "bonus" in lessons_v5.json)
       module_N/docs/...                      -> reference notebook of module N
   * relative links in markdown cells -> absolute URLs (they don't resolve in Colab)
 
@@ -51,6 +53,7 @@ BADGE_CELL_ID = "view-in-github"
 
 LESSON_DIR_RE = re.compile(r"^module_(\d+)/lessons/lesson_(\d+)_([a-z0-9_]+)/")
 MODULE_DOCS_RE = re.compile(r"^module_(\d+)/docs/")
+BONUS_DIR_RE = re.compile(r"^module_(\d+)/bonus/([a-z0-9_]+)/")
 MD_LINK_RE = re.compile(r"(!?)\[([^\]]*)\]\(([^)\s]+)\)")
 HTML_LINK_RE = re.compile(r'((?:href|src)=")([^"]+)(")')
 SCHEME_RE = re.compile(r"^[a-zA-Z][a-zA-Z0-9+.-]*:")
@@ -106,11 +109,22 @@ def build_lms(rel, old):
     name = PurePosixPath(rel).name
     lesson = LESSON_DIR_RE.match(rel)
     docs = MODULE_DOCS_RE.match(rel)
+    bonus = BONUS_DIR_RE.match(rel)
     if lesson:
         module_number, lesson_number, slug = int(lesson[1]), int(lesson[2]), lesson[3]
         info = V5["lessons"].get(str(lesson_number))
         if info is None:
             raise ValueError(f"lesson {lesson_number} is not in tools/lessons_v5.json")
+        title = info["title"]
+        default_type = "notes" if name.startswith(("note_", "notes_")) else "lesson"
+        notebook_type = old.get("notebook_type") or default_type
+    elif bonus:
+        module_number, lesson_number, slug = int(bonus[1]), None, bonus[2]
+        info = V5.get("bonus", {}).get(slug)
+        if info is None:
+            raise ValueError(f"bonus lesson '{slug}' is not in tools/lessons_v5.json (\"bonus\")")
+        if info["module"] != module_number:
+            raise ValueError(f"bonus lesson '{slug}' belongs to module {info['module']} (tools/lessons_v5.json)")
         title = info["title"]
         default_type = "notes" if name.startswith(("note_", "notes_")) else "lesson"
         notebook_type = old.get("notebook_type") or default_type
@@ -121,7 +135,7 @@ def build_lms(rel, old):
         title = old.get("lesson_title") or stem
         notebook_type = "docs"
     else:
-        raise ValueError("notebook must live in module_N/lessons/lesson_NN_<slug>/ or module_N/docs/")
+        raise ValueError("notebook must live in module_N/lessons/lesson_NN_<slug>/, module_N/bonus/<slug>/ or module_N/docs/")
 
     module = MODULES.get(module_number)
     if module is None:
