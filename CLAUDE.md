@@ -34,6 +34,7 @@ PY-Course-Victor-Nikoriak-22-09-2026/
 │
 ├── docs/                       ← the book (docs_dir for mkdocs)
 │   ├── index.md
+│   ├── stylesheets/extra.css, javascripts/sidebars.js ← custom styles; header buttons that collapse the left nav / right TOC (state in localStorage)
 │   ├── 00_getting_started/     ← git/environment/homework-workflow/troubleshooting + github/ subsection
 │   ├── modules/                ← per-module stub pages (М1–М6 + AI bonus), content pending
 │   └── 00_python_mental_model.md, 01_zen_of_python.md, git-cheatsheet.md
