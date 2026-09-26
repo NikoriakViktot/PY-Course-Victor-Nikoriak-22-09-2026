@@ -116,7 +116,9 @@ nav:
       - "26. П5. Динамічне програмування + greedy (вступ)": modules/m2/lesson_26.md
       - "27. Потоки, multiprocessing, asyncio: вступ": modules/m2/lesson_27.md
       - "28. П6. Stack, Queue, Heap, Trie + LRU → ООП-пакет": modules/m2/lesson_28.md
-    - "М3. Бази даних": modules/m3_databases.md
+    - "М3. Бази даних":
+      - Огляд модуля: modules/m3_databases.md
+      - "29. Основи SQL (PostgreSQL)": modules/m3/lesson_29.md
     - "М4. Web (+ Web Advanced)": modules/m4_web.md
     - "М5. Production": modules/m5_production.md
     - "М6. Капстоун": modules/m6_capstone.md
