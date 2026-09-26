@@ -37,6 +37,8 @@ markdown_extensions:
   - pymdownx.snippets
   - admonition
   - pymdownx.details
+  - pymdownx.tabbed:
+      alternate_style: true
   - attr_list
   - md_in_html
   - toc:
@@ -65,6 +67,9 @@ nav:
     - Встановлення Git: 00_getting_started/git_setup.md
     - Налаштування середовища: 00_getting_started/environment_setup.md
     - Ноутбуки в Google Colab: 00_getting_started/colab.md
+    - Jupyter локально: 00_getting_started/jupyter.md
+    - PyCharm: 00_getting_started/pycharm.md
+    - VS Code: 00_getting_started/vscode.md
     - Здача домашніх робіт: 00_getting_started/homework_workflow.md
     - Часті проблеми: 00_getting_started/troubleshooting.md
     - GitHub:

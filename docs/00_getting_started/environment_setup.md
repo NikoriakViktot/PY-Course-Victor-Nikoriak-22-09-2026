@@ -81,6 +81,8 @@ pip list
 
 ## 5. Підключення venv у PyCharm
 
+Коротко нижче; повний гайд — [PyCharm](pycharm.md) (а для VS Code — [VS Code](vscode.md)).
+
 1. **File → Settings**
 2. **Project → Python Interpreter**
 3. **Add Interpreter → Existing Environment**
@@ -90,6 +92,8 @@ pip list
 5. **OK**
 
 ## 6. Використання venv у Jupyter Notebook
+
+Коротко нижче; докладно про запуск Jupyter, кернели й `%pip` — [Jupyter локально](jupyter.md).
 
 Встанови Jupyter kernel:
 

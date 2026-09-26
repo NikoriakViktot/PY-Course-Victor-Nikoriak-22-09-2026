@@ -5,9 +5,12 @@
 1. [Встановлення Git](git_setup.md) — один раз, перед стартом.
 2. [GitHub](github/README.md) — SSH-ключ, fork, clone (докладніше, ніж тут).
 3. [Налаштування середовища](environment_setup.md) — venv, залежності, Jupyter.
-4. [Ноутбуки в Google Colab](colab.md) — як відкрити урок без встановлення Python і зберегти свою копію.
-5. [Здача домашніх робіт](homework_workflow.md) — гілки, коміти, Pull Request.
-6. [Часті проблеми](troubleshooting.md) — якщо щось пішло не так.
+4. [Ноутбуки в Google Colab](colab.md) — як відкрити урок без встановлення Python, зберегти копію, ставити бібліотеки, працювати з файлами й Drive.
+5. [Jupyter локально](jupyter.md) — Notebook і JupyterLab на своєму комп'ютері: запуск, кернели, `%pip`, термінал, гарячі клавіші.
+6. [PyCharm](pycharm.md) — повний гайд: проєкт із venv, запуск, дебагер, пакети, Git, ноутбуки.
+7. [VS Code](vscode.md) — розширення для Python, venv, запуск, дебаг, ноутбуки.
+8. [Здача домашніх робіт](homework_workflow.md) — гілки, коміти, Pull Request.
+9. [Часті проблеми](troubleshooting.md) — якщо щось пішло не так.
 
 ## Як працює курс
 
