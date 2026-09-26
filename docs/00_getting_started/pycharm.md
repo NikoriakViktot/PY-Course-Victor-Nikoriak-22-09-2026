@@ -39,14 +39,42 @@
 
 ## Інтерпретатор: який Python виконує код
 
-Інтерпретатор проєкту — це Python (зазвичай з venv), яким PyCharm запускає код і в який ставить пакети. Поточний інтерпретатор видно в **правому нижньому куті** вікна; клік по ньому — швидка зміна.
+Інтерпретатор проєкту — це Python, яким PyCharm запускає код, перевіряє імпорти й у який ставить пакети. Для роботи потрібен хоча б один інтерпретатор: системний Python або **віртуальне середовище** (venv) — базовий інтерпретатор плюс свої встановлені пакети. PyCharm уміє створювати середовища Virtualenv, pipenv, Poetry, uv, Hatch і conda; для курсу беремо звичайний **Virtualenv (venv)**.
 
-Налаштувати через меню: **Settings** (Windows/Linux: **File → Settings**; macOS: **PyCharm → Settings**) → пункт **Python Interpreter** (розташування в дереві налаштувань залежить від версії, тому найпростіше ввести «interpreter» у пошук угорі вікна Settings) → **Add Interpreter → Add Local Interpreter**:
+Перед налаштуванням Python має бути встановлений: PyCharm лише вказує шлях до нього.
 
-- **новий venv**: тип **Virtualenv** → нове середовище; галочку «Inherit packages from base interpreter» **не** став — тоді venv чистий, як і має бути;
+### Швидко: перемикач у рядку стану
+
+Поточний інтерпретатор видно в **правому нижньому куті** вікна (рядок стану), наприклад `Python 3.12 (lesson_03)`. Клік по ньому відкриває меню **Python Interpreter**:
+
+- список доступних інтерпретаторів — клік перемикає проєкт на вибраний;
+- **Add New Interpreter** — створити новий (наприклад, venv);
+- **Interpreter Settings…** — відкрити налаштування інтерпретатора;
+- **Manage Packages…** — перейти до пакетів поточного інтерпретатора.
+
+### У налаштуваннях
+
+| ОС | Шлях | Клавіші |
+|---|---|---|
+| Windows / Linux | **File → Settings → Python → Interpreter** | **Ctrl+Alt+S**, далі **Python → Interpreter** |
+| macOS | **PyCharm → Settings → Python → Interpreter** | **⌘,** (Command-кома) |
+
+- Випадний список угорі — вибрати інтерпретатор; якщо потрібного немає — **Show All** (там же можна перейменувати чи видалити інтерпретатор кнопкою **Remove Interpreter**).
+- Нижче — таблиця пакетів вибраного інтерпретатора: встановлена версія, остання доступна, стрілка біля пакета, для якого є оновлення.
+
+### Додати venv
+
+**Add Interpreter** (поруч зі списком у налаштуваннях) або **Add New Interpreter** у перемикачі → **Add Local Interpreter**:
+
+- **новий venv**: тип **Virtualenv** → нове середовище, базовий Python 3.10+. Галочку «Inherit packages from base interpreter» **не** став — тоді venv чистий, як і має бути;
 - **наявний venv** (наприклад, створений у терміналі командою `python -m venv .venv`): вибери наявне середовище й вкажи шлях до Python:
     - Windows: `.venv\Scripts\python.exe`
     - macOS / Linux: `.venv/bin/python`
+
+!!! tip "Інтерпретатор за замовчуванням для нових проєктів"
+    **File → New Projects Setup → Settings for New Projects → Python Interpreter** — PyCharm автоматично призначатиме його проєктам, які ще не мають своїх налаштувань (папки `.idea`).
+
+Віддалені інтерпретатори (SSH, Docker, Docker Compose, WSL) — функція **Pro**; для курсу вони не потрібні.
 
 ## Запуск коду
 
@@ -91,7 +119,7 @@
 1. Почни вводити назву пакета в пошук.
 2. Вибери пакет → **Install** (остання версія) або вибери версію зі списку.
 
-Пакет ставиться в **поточний інтерпретатор проєкту**. Альтернатива — вбудований термінал з активованим venv: `pip install назва` або `pip install -r requirements.txt`.
+Пакет ставиться в **поточний інтерпретатор проєкту**; за замовчуванням PyCharm керує пакетами через `pip`. Ті самі пакети з версіями й кнопкою оновлення видно в налаштуваннях **Python → Interpreter** (або **Manage Packages…** у перемикачі інтерпретатора). Альтернатива — вбудований термінал з активованим venv: `pip install назва` або `pip install -r requirements.txt`.
 
 ## Git у PyCharm
 
@@ -142,7 +170,7 @@ Pull Request на GitHub створюй як завжди — на сайті Gi
 
 - JetBrains: [Unified PyCharm overview](https://www.jetbrains.com/help/pycharm/unified-pycharm.html), [PyCharm 2025.1: Unified PyCharm…](https://blog.jetbrains.com/pycharm/2025/04/pycharm-2025-1/), [PyCharm Community Edition is discontinued](https://youtrack.jetbrains.com/articles/SUPPORT-A-4358/PyCharm-Community-Edition-is-discontinued-download-the-unified-PyCharm-instead)
 - [Install PyCharm](https://www.jetbrains.com/help/pycharm/installation-guide.html), [Toolbox App: Installation](https://www.jetbrains.com/help/toolbox-app/installation.html)
-- [Configure a virtualenv environment](https://www.jetbrains.com/help/pycharm/creating-virtual-environment.html), [Configure a Python interpreter](https://www.jetbrains.com/help/pycharm/configuring-python-interpreter.html)
+- [Configure a Python interpreter](https://www.jetbrains.com/help/pycharm/configuring-python-interpreter.html) (оновлено 14 вересня 2026) — перемикач у рядку стану, **Settings → Python → Interpreter**, інтерпретатор для нових проєктів; [Configure a virtualenv environment](https://www.jetbrains.com/help/pycharm/creating-virtual-environment.html)
 - [Debug your first Python application](https://www.jetbrains.com/help/pycharm/debugging-your-first-python-application.html), [Step through the program](https://www.jetbrains.com/help/pycharm/stepping-through-the-program.html)
 - [Install, uninstall, and upgrade packages](https://www.jetbrains.com/help/pycharm/installing-uninstalling-and-upgrading-packages.html), [Terminal settings](https://www.jetbrains.com/help/pycharm/settings-tools-terminal.html)
 - [Commit and push changes to Git repository](https://www.jetbrains.com/help/pycharm/commit-and-push-changes.html), [Main version control shortcuts](https://www.jetbrains.com/help/pycharm/main-version-control-shortcuts.html)
