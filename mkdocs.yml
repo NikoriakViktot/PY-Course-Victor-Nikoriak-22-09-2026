@@ -119,6 +119,7 @@ nav:
     - "М3. Бази даних":
       - Огляд модуля: modules/m3_databases.md
       - "29. Основи SQL (PostgreSQL)": modules/m3/lesson_29.md
+      - "30. Redis overview": modules/m3/lesson_30.md
     - "М4. Web (+ Web Advanced)": modules/m4_web.md
     - "М5. Production": modules/m5_production.md
     - "М6. Капстоун": modules/m6_capstone.md

@@ -79,3 +79,7 @@ v5.0 «М3. Бази даних» — 2 позиції, обидві типу «
 - Джерело: старий `module_5/lesson_52_pandas_dash/` (23_02): `lesson_52_pandas_foundation.ipynb`, `lesson_52_matplotlib_foundation.ipynb`, `lesson_52_seaborn_plotly.ipynb`, `data_analitic.md`, `lesson_52_dash_architecture.md`, `dash_API/`. Обсяг — усе, включно з Dash.
 - Дані — справжні (вибір викладача): HDX WFP «Ukraine — Food Prices» (`wfp_food_prices_ukr.csv`, `wfp_markets_ukr.csv`) і data.gov.ua «Середньомісячна номінальна заробітна плата за регіонами». Старі файли без нових джерел (`exchange-rates_ukr.csv`, `poverty_ukr.csv`, `global-market-monitor.csv`, `external-debt_ukr.csv`) не використовуються.
 - Статус: механізм бонусних уроків готовий; зміст чекає на CSV — `data.humdata.org` і `data.gov.ua` заблоковані мережевою політикою середовища.
+
+## Рішення по позиції 30 (урок створено)
+
+Урок 30 «Redis overview» написано з нуля (`docs/modules/m3/lesson_30.md`, `module_3/lessons/lesson_30_redis_overview/note_lesson_30_redis.ipynb`). Джерела ідей: `module_4/lessons/lesson_30_networking_base/Redis_docs.md` і `redis_socket_lesson/` (23_02) — RESP, producer/consumer, наївна черга задач. Celery й Docker лишено урокам 48–49, Redis у веб-застосунку — уроку 39. Усі відповіді `redis-cli` і Python на сторінці отримано з реального Redis 7.0.15; ноутбук працює в базі 15 і встановлює Redis у Colab (`apt-get install redis-server`, `redis-server --daemonize yes`).

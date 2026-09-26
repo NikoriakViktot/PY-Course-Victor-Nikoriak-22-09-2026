@@ -45,7 +45,7 @@ PY-Course-Victor-Nikoriak-22-09-2026/
 ├── module_2/
 │   └── lessons/                ← lesson_18_functions_first_class/ … lesson_28_practicum_data_structures/ (all of М2)
 ├── module_3/
-│   └── lessons/                ← lesson_29_sql_basics/ (lesson 30 pending)
+│   └── lessons/                ← lesson_29_sql_basics/, lesson_30_redis_overview/ (all of М3; bonus pandas lesson pending — see «Bonus lessons»)
 │
 ├── tools/
 │   ├── sync_notebook_metadata.py ← generates the Colab badge + metadata.lms of every notebook
@@ -64,7 +64,7 @@ PY-Course-Victor-Nikoriak-22-09-2026/
     └── notebooks.yml           ← runs tools/sync_notebook_metadata.py --check on push/PR
 ```
 
-**Not yet migrated from the old repo** (planned, not present): lesson 30 of `module_3/`, `module_4/`, `SETUP.md`, `install_course.*`/`start_course.*`, `dashboard.ipynb`, the old `tools/` scripts (`generate_student.py`, `qa_suite.py`, `client.py`, `config.json` — `tools/` currently holds only the notebook-metadata sync), `generator/`, `run_data/`, `docker-compose.yml`. The old `module_5` (Django/DevOps content) is **deliberately not migrated** — it isn't part of the v5.0 navigation table; see `.claude/plan_md/migration_plan.md` §0. Do not assume any of these exist without checking.
+**Not yet migrated from the old repo** (planned, not present): `module_4/`, `SETUP.md`, `install_course.*`/`start_course.*`, `dashboard.ipynb`, the old `tools/` scripts (`generate_student.py`, `qa_suite.py`, `client.py`, `config.json` — `tools/` currently holds only the notebook-metadata sync), `generator/`, `run_data/`, `docker-compose.yml`. The old `module_5` (Django/DevOps content) is **deliberately not migrated** — it isn't part of the v5.0 navigation table; see `.claude/plan_md/migration_plan.md` §0. Do not assume any of these exist without checking.
 
 ---
 
@@ -382,6 +382,7 @@ Reference notebooks in `module_N/docs/` get `lesson_number: null` and keep their
 | 27 | `module_2/lessons/lesson_27_concurrency_intro` | `concurrency_intro` | — |
 | 28 | `module_2/lessons/lesson_28_practicum_data_structures` | `practicum_data_structures` | — |
 | 29 | `module_3/lessons/lesson_29_sql_basics` | `sql_basics` | — |
+| 30 | `module_3/lessons/lesson_30_redis_overview` | `redis_overview` | — |
 
 > ⚠️ When the LMS is switched to this repo, server-side exam JSONs from 23_02 whose `lesson_id` differs
 > from the new slug (last column) must be renamed to the new slug, otherwise `sync_exams` reports
