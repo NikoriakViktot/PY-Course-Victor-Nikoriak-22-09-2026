@@ -740,6 +740,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Конфігурації запуску (Run/Debug Configurations)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#before-launch" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Before launch: що зробити перед запуском
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
       </ul>
@@ -1412,6 +1429,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Конфігурації запуску (Run/Debug Configurations)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#before-launch" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Before launch: що зробити перед запуском
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
       </ul>
@@ -1763,6 +1797,37 @@
 <p class="admonition-title">Чому «файл не знайдено», хоча він поруч</p>
 <p>Якщо програма читає <code>data.csv</code>, а PyCharm каже <code>FileNotFoundError</code>, найчастіше винна <strong>Working directory</strong>: відносний шлях рахується від неї, а не від місця, де лежить скрипт. Перевір це поле в конфігурації.</p>
 </div>
+<h4 id="before-launch">Before launch: що зробити перед запуском<a class="headerlink" href="#before-launch" title="Permanent link">&para;</a></h4>
+<p>У конфігурації є блок <strong>Before launch</strong> — список задач, які PyCharm виконає <strong>перед</strong> запуском, по черзі згори донизу. Додати задачу — кнопка <strong>+</strong> (<strong>Alt+Insert</strong> / <strong>⌘N</strong>), прибрати — <strong>−</strong> (<strong>Alt+Delete</strong> / <strong>⌘⌫</strong>), змінити порядок — стрілками.</p>
+<table>
+<thead>
+<tr>
+<th>Задача</th>
+<th>Навіщо</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Run Another Configuration</strong></td>
+<td>спершу виконати іншу конфігурацію й дочекатися її кінця. Наприклад, скрипт, що готує дані, перед основною програмою</td>
+</tr>
+<tr>
+<td><strong>Run External tool</strong></td>
+<td>запустити зовнішню програму (скажімо, форматувальник чи скрипт оболонки)</td>
+</tr>
+<tr>
+<td><strong>Launch Web Browser</strong></td>
+<td>відкрити браузер за адресою — знадобиться для веб-застосунків у модулі 4</td>
+</tr>
+</tbody>
+</table>
+<p>Решта задач у списку (Grunt, gulp, npm, TypeScript, File Watchers, Data Source) — для веб- і фронтенд-розробки; у курсі Python вони не потрібні.</p>
+<p>Галочки під списком:</p>
+<ul>
+<li><strong>Show this page</strong> — показувати вікно налаштувань конфігурації перед кожним запуском (зручно, коли щоразу змінюєш параметри);</li>
+<li><strong>Activate tool window</strong> (увімкнено за замовчуванням) — відкривати вікно Run чи Debug під час запуску; якщо вимкнути, відкрити вручну можна <strong>Alt+4</strong> / <strong>Alt+5</strong> (macOS <strong>⌘4</strong> / <strong>⌘5</strong>);</li>
+<li><strong>Focus tool window</strong> — одразу переводити курсор у вікно Run/Debug (корисно, коли програма чекає на <code>input()</code>).</li>
+</ul>
 <p>Щоб поділитися конфігурацією з командою, увімкни в ній <strong>Store as project file</strong> — налаштування збережуться у файл у папці <code>.idea</code> проєкту, і його можна закомітити.</p>
 <h2 id="_7">Дебагер крок за кроком<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h2>
 <p>Дебагер (debugger) дозволяє <strong>зупинити програму</strong> на потрібному рядку й подивитися значення всіх змінних. Це найкращий спосіб зрозуміти, чому код робить не те, що ти очікуєш.</p>
