@@ -44,6 +44,8 @@ PY-Course-Victor-Nikoriak-22-09-2026/
 │   └── lessons/                ← lesson_01_… through lesson_17_… (v5.0 lessons 1–17)
 ├── module_2/
 │   └── lessons/                ← lesson_18_functions_first_class/ … lesson_28_practicum_data_structures/ (all of М2)
+├── module_3/
+│   └── lessons/                ← lesson_29_sql_basics/ (lesson 30 pending)
 │
 ├── tools/
 │   ├── sync_notebook_metadata.py ← generates the Colab badge + metadata.lms of every notebook
@@ -62,7 +64,7 @@ PY-Course-Victor-Nikoriak-22-09-2026/
     └── notebooks.yml           ← runs tools/sync_notebook_metadata.py --check on push/PR
 ```
 
-**Not yet migrated from the old repo** (planned, not present): `module_3/`–`module_4/`, `SETUP.md`, `install_course.*`/`start_course.*`, `dashboard.ipynb`, the old `tools/` scripts (`generate_student.py`, `qa_suite.py`, `client.py`, `config.json` — `tools/` currently holds only the notebook-metadata sync), `generator/`, `run_data/`, `docker-compose.yml`. The old `module_5` (Django/DevOps content) is **deliberately not migrated** — it isn't part of the v5.0 navigation table; see `.claude/plan_md/migration_plan.md` §0. Do not assume any of these exist without checking.
+**Not yet migrated from the old repo** (planned, not present): lesson 30 of `module_3/`, `module_4/`, `SETUP.md`, `install_course.*`/`start_course.*`, `dashboard.ipynb`, the old `tools/` scripts (`generate_student.py`, `qa_suite.py`, `client.py`, `config.json` — `tools/` currently holds only the notebook-metadata sync), `generator/`, `run_data/`, `docker-compose.yml`. The old `module_5` (Django/DevOps content) is **deliberately not migrated** — it isn't part of the v5.0 navigation table; see `.claude/plan_md/migration_plan.md` §0. Do not assume any of these exist without checking.
 
 ---
 
@@ -77,6 +79,22 @@ Examples: `module_1/lessons/lesson_05_lists_tuples_sets/`, `module_2/lessons/les
 `<topic_slug>` becomes the notebook's `metadata.lms.lesson_slug` (see LMS Metadata), so renaming a folder changes the slug.
 
 Materials from the old 23_02 course live in the folder of the v5.0 lesson they belong to (mapping and rationale: `.claude/plan_md/module_1_audit.md`).
+
+### Bonus lessons (outside the 1–52 numbering)
+
+The instructor can add a lesson that is not in the v5.0 table without renumbering the course:
+
+```
+module_<N>/bonus/<slug>/        e.g. module_3/bonus/pandas_data_analysis/
+docs/modules/mN/bonus_<topic>.md
+```
+
+- register it in `tools/lessons_v5.json` → `"bonus": {"<slug>": {"module": N, "after": <lesson it follows>, "title": "Бонус. …"}}`; `sync_notebook_metadata.py` rejects unknown bonus slugs;
+- its notebooks get `metadata.lms.lesson_number: null` and `lesson_slug = <slug>`;
+- in `mkdocs.yml` put it in its module's nav right after lesson `after`, titled «Бонус. …»;
+- `course.yaml` / `course.json` are **not** changed (they list only v5.0 numbers).
+
+Current bonus lessons: `pandas_data_analysis` (module 3, before lesson 29) — instructor's decision: Python is primarily data science today, so М3 opens with pandas, charts and Dash; databases follow.
 
 ### Files inside each lesson
 
@@ -363,6 +381,7 @@ Reference notebooks in `module_N/docs/` get `lesson_number: null` and keep their
 | 26 | `module_2/lessons/lesson_26_practicum_dp_greedy` | `practicum_dp_greedy` | — |
 | 27 | `module_2/lessons/lesson_27_concurrency_intro` | `concurrency_intro` | — |
 | 28 | `module_2/lessons/lesson_28_practicum_data_structures` | `practicum_data_structures` | — |
+| 29 | `module_3/lessons/lesson_29_sql_basics` | `sql_basics` | — |
 
 > ⚠️ When the LMS is switched to this repo, server-side exam JSONs from 23_02 whose `lesson_id` differs
 > from the new slug (last column) must be renamed to the new slug, otherwise `sync_exams` reports

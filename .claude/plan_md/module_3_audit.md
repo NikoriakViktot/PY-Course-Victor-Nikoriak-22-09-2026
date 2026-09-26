@@ -67,3 +67,15 @@ v5.0 «М3. Бази даних» — 2 позиції, обидві типу «
 ## 4. Примітка про обсяг
 
 На відміну від М1 (17 позицій, один явно окреслений модуль), цей аудит фактично покрив два незалежні шари: справжню v5.0 М3 (2 позиції, добре забезпечені матеріалом) і набагато більший банк алгоритмічного контенту, що дублює тематику практикумів М1/М2. Останній варто розглядати разом з майбутнім аудитом самих практикумів М1/М2 (§2 таблиць у `module_1_audit.md`/`module_2_audit.md`), а не як частину М3.
+
+## Рішення по позиції 29 (урок створено)
+
+Урок 29 написано з нуля на сюжеті «Смачно + Таксі» (`docs/modules/m3/lesson_29.md`, `module_3/lessons/lesson_29_sql_basics/note_lesson_29_sql.ipynb`) одразу на PostgreSQL (не sqlite3, як старий `note_lesson_29_sql_basics.ipynb`). Зі старих матеріалів узято ідеї: п'ять підмов SQL (DDL/DML/DQL, транзакції), ключі й зв'язки з `db_architecture_design.md`, JOIN-схеми, `RETURNING`, `EXPLAIN`, CTE з `postgresql/note_lesson_30_postgresql.ipynb`. Не перенесено (поза обсягом одного уроку): `nyc-taxi-pipeline/`, DuckDB/Parquet, Neo4j, JSONB, віконні функції, рівні ізоляції, повна нормалізація 1NF–3NF (лише ідея «не дублювати»). Усі результати запитів на сторінці отримано з реального PostgreSQL 16; в ноутбуці — клітинка встановлення PostgreSQL у Colab (`apt-get install postgresql`, перевірено на Ubuntu 24.04).
+
+## Рішення викладача: М3 починається з pandas (бонусний урок)
+
+Викладач (2026-09-26): «Python зараз — перш за все data science, багато хто хоче в ньому розвиватися; бекенду (Django-моделі тощо) і так буде багато». Тому перед уроком 29 (SQL) іде **бонусний урок без номера** `module_3/bonus/pandas_data_analysis/` — «Бонус. Pandas: аналіз даних, графіки і Dash». Нумерацію 1–52 не змінено (механізм бонусних уроків — `CLAUDE.md`, «Bonus lessons»).
+
+- Джерело: старий `module_5/lesson_52_pandas_dash/` (23_02): `lesson_52_pandas_foundation.ipynb`, `lesson_52_matplotlib_foundation.ipynb`, `lesson_52_seaborn_plotly.ipynb`, `data_analitic.md`, `lesson_52_dash_architecture.md`, `dash_API/`. Обсяг — усе, включно з Dash.
+- Дані — справжні (вибір викладача): HDX WFP «Ukraine — Food Prices» (`wfp_food_prices_ukr.csv`, `wfp_markets_ukr.csv`) і data.gov.ua «Середньомісячна номінальна заробітна плата за регіонами». Старі файли без нових джерел (`exchange-rates_ukr.csv`, `poverty_ukr.csv`, `global-market-monitor.csv`, `external-debt_ukr.csv`) не використовуються.
+- Статус: механізм бонусних уроків готовий; зміст чекає на CSV — `data.humdata.org` і `data.gov.ua` заблоковані мережевою політикою середовища.

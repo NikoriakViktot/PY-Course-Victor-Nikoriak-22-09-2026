@@ -2,6 +2,9 @@
   "_source": "data/PY_UKR_Navigation_table_5 [UPDATE].xlsx, sheet 'Navigation 5.0'. Used by tools/sync_notebook_metadata.py.",
   "course": "python-course",
   "stream": "autumn-2026",
+  "bonus": {
+    "pandas_data_analysis": {"module": 3, "after": 28, "title": "Бонус. Pandas: аналіз даних, графіки і Dash", "type": "Урок (бонус)"}
+  },
   "lessons": {
     "1": {"title": "Вступний урок: знайомство, формат курсу, AI-політика", "type": "Урок"},
     "2": {"title": "Перші кроки та мінімальна робоча програма (+ налаштування середовища)", "type": "Урок"},
