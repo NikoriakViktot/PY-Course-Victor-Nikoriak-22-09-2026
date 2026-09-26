@@ -115,6 +115,7 @@ nav:
       - "25. Тестування з pytest (+ валідація AI-коду)": modules/m2/lesson_25.md
       - "26. П5. Динамічне програмування + greedy (вступ)": modules/m2/lesson_26.md
       - "27. Потоки, multiprocessing, asyncio: вступ": modules/m2/lesson_27.md
+      - "28. П6. Stack, Queue, Heap, Trie + LRU → ООП-пакет": modules/m2/lesson_28.md
     - "М3. Бази даних": modules/m3_databases.md
     - "М4. Web (+ Web Advanced)": modules/m4_web.md
     - "М5. Production": modules/m5_production.md
