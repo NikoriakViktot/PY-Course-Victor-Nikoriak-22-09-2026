@@ -78,16 +78,42 @@
 
 ## Запуск коду
 
-| Дія | Як |
-|---|---|
-| запустити поточний файл | правий клік у редакторі → **Run '<файл>'**, або зелений трикутник ▶ біля `if __name__ == "__main__":` |
-| повторити останній запуск | **Shift+F10** (кнопка ▶ угорі праворуч) |
-| запустити з дебагером | **Shift+F9** (кнопка з жуком) |
-| інтерактивний Python | **Tools → Python Console** або кнопка **Python Console** внизу |
-
-Кожен запуск створює **конфігурацію запуску** (Run/Debug Configuration) — її видно у списку біля кнопки ▶ угорі. Там можна задати аргументи командного рядка, робочу папку, змінні оточення: **Edit Configurations…**.
+| Дія | Windows / Linux | macOS |
+|---|---|---|
+| запустити поточний файл (з контекстного меню чи клавішами) | правий клік у редакторі → **Run '<файл>'**, або **Ctrl+Shift+F10** | **⌃⇧R** (Control+Shift+R) |
+| запустити конфігурацію, вибрану у віджеті Run угорі | кнопка ▶ або **Shift+F10** | ▶ або **⌃R** (Control+R) |
+| вибрати, яку конфігурацію запустити | **Alt+Shift+F10** | **⌃⌥R** (Control+Option+R) |
+| запустити з дебагером | кнопка з жуком або **Shift+F9** | кнопка з жуком |
+| відкрити вікно Run / Debug | **Alt+4** / **Alt+5** | **⌘4** / **⌘5** |
+| інтерактивний Python | **Tools → Python Console** або кнопка **Python Console** внизу | те саме |
 
 Результат з'являється у вікні **Run** внизу. Помилки (traceback) там клікабельні: клік по `File "...", line 12` переносить у потрібний рядок.
+
+### Конфігурації запуску (Run/Debug Configurations)
+
+**Конфігурація** — іменований набір налаштувань: **що** запускати, **яким** інтерпретатором, з **якими** параметрами й змінними оточення. Список конфігурацій — у **віджеті Run** угорі поруч із кнопкою ▶.
+
+- **Тимчасова** конфігурація створюється сама щоразу, коли запускаєш файл через **Run '<файл>'**. Її іконка напівпрозора; PyCharm тримає до 5 тимчасових конфігурацій і видаляє старіші.
+- **Постійна** — збережена: у віджеті Run вибери тимчасову → **Save Configuration**, або створи нову з шаблону. Постійні лишаються в проєкті, доки їх не видалиш. Червоний хрестик на іконці — помилка в налаштуваннях.
+
+Створити чи змінити: **Run → Edit Configurations…** (або віджет Run → **Edit Configurations**) → **+** → шаблон **Python**. Основні поля:
+
+| Поле | Що задає |
+|---|---|
+| **Name** | назва в списку конфігурацій |
+| **Python Interpreter** | яким Python запускати (можна не той, що в проєкті) |
+| **Script path / Module name** | файл `.py` або ім'я модуля (як `python -m модуль`) |
+| **Parameters** | аргументи командного рядка через пробіл; аргумент із пробілами — у лапках |
+| **Working directory** | робоча папка програми — від неї рахуються відносні шляхи до файлів (урок 14). Для запуску з контекстного меню — папка, де лежить скрипт; вона може не збігатися з папкою проєкту |
+| **Environment variables** | змінні оточення; за замовчуванням там `PYTHONUNBUFFERED=1` (вивід одразу з'являється у вікні Run) |
+| **Paths to ".env" files** | файли `.env` зі змінними оточення (ключі API не пишемо в код — їх кладуть у `.env`) |
+
+Приховані параметри відкриває посилання **Modify options**. Кнопка **OK** зберігає конфігурацію, **Run** — зберігає й одразу запускає.
+
+!!! tip "Чому «файл не знайдено», хоча він поруч"
+    Якщо програма читає `data.csv`, а PyCharm каже `FileNotFoundError`, найчастіше винна **Working directory**: відносний шлях рахується від неї, а не від місця, де лежить скрипт. Перевір це поле в конфігурації.
+
+Щоб поділитися конфігурацією з командою, увімкни в ній **Store as project file** — налаштування збережуться у файл у папці `.idea` проєкту, і його можна закомітити.
 
 ## Дебагер крок за кроком
 
@@ -156,7 +182,9 @@ Pull Request на GitHub створюй як завжди — на сайті Gi
 | переформатувати код | **Ctrl+Alt+L** | **⌘⌥L** |
 | закоментувати рядок | **Ctrl+/** | **⌘/** |
 | дублювати рядок | **Ctrl+D** | **⌘D** |
-| запуск / дебаг | **Shift+F10** / **Shift+F9** | див. Keymap |
+| запустити вибрану конфігурацію | **Shift+F10** | **⌃R** |
+| запустити поточний файл | **Ctrl+Shift+F10** | **⌃⇧R** |
+| дебаг | **Shift+F9** | див. Keymap |
 | термінал | **Alt+F12** | див. Keymap |
 | точка зупинки | **Ctrl+F8** | **⌘F8** |
 
@@ -171,6 +199,7 @@ Pull Request на GitHub створюй як завжди — на сайті Gi
 - JetBrains: [Unified PyCharm overview](https://www.jetbrains.com/help/pycharm/unified-pycharm.html), [PyCharm 2025.1: Unified PyCharm…](https://blog.jetbrains.com/pycharm/2025/04/pycharm-2025-1/), [PyCharm Community Edition is discontinued](https://youtrack.jetbrains.com/articles/SUPPORT-A-4358/PyCharm-Community-Edition-is-discontinued-download-the-unified-PyCharm-instead)
 - [Install PyCharm](https://www.jetbrains.com/help/pycharm/installation-guide.html), [Toolbox App: Installation](https://www.jetbrains.com/help/toolbox-app/installation.html)
 - [Configure a Python interpreter](https://www.jetbrains.com/help/pycharm/configuring-python-interpreter.html) (оновлено 14 вересня 2026) — перемикач у рядку стану, **Settings → Python → Interpreter**, інтерпретатор для нових проєктів; [Configure a virtualenv environment](https://www.jetbrains.com/help/pycharm/creating-virtual-environment.html)
+- [Run/debug configurations](https://www.jetbrains.com/help/pycharm/run-debug-configuration.html) (оновлено 17 серпня 2026) — тимчасові й постійні конфігурації, параметри, клавіші запуску для Windows/Linux і macOS
 - [Debug your first Python application](https://www.jetbrains.com/help/pycharm/debugging-your-first-python-application.html), [Step through the program](https://www.jetbrains.com/help/pycharm/stepping-through-the-program.html)
 - [Install, uninstall, and upgrade packages](https://www.jetbrains.com/help/pycharm/installing-uninstalling-and-upgrading-packages.html), [Terminal settings](https://www.jetbrains.com/help/pycharm/settings-tools-terminal.html)
 - [Commit and push changes to Git repository](https://www.jetbrains.com/help/pycharm/commit-and-push-changes.html), [Main version control shortcuts](https://www.jetbrains.com/help/pycharm/main-version-control-shortcuts.html)
