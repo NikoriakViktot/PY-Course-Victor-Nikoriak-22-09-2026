@@ -1413,6 +1413,8 @@
       
         
       
+        
+      
     
     
     
@@ -1702,6 +1704,34 @@
     
   
     25. Тестування з pytest (+ валідація AI-коду)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../m2/lesson_26/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    26. П5. Динамічне програмування + greedy (вступ)
   
 
     
@@ -2420,6 +2450,36 @@
 </tr>
 </tbody>
 </table>
+<p>Покроково — межі звужуються, доки <code>mid</code> не влучить:</p>
+<pre class="mermaid"><code>flowchart TD
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+
+    subgraph K1["крок 1 · low 0, high 10"]
+        direction LR
+        M1{"mid 5 → 930&lt;br&gt;930 &lt; 1120"} --&gt; R1["low = 6&lt;br&gt;ліва половина відкинута"]
+    end
+    subgraph K2["крок 2 · low 6, high 10"]
+        direction LR
+        M2{"mid 8 → 1210&lt;br&gt;1210 &gt; 1120"} --&gt; R2["high = 7"]
+    end
+    subgraph K3["крок 3 · low 6, high 7"]
+        direction LR
+        M3{"mid 6 → 1035&lt;br&gt;1035 &lt; 1120"} --&gt; R3["low = 7"]
+    end
+    subgraph K4["крок 4 · low 7, high 7"]
+        direction LR
+        M4{"mid 7 → 1120"} --&gt; R4["знайдено&lt;br&gt;(7, 4)"]
+    end
+    K1 --&gt; K2 --&gt; K3 --&gt; K4
+
+    class M1,M2,M3,M4 decision
+    class R1,R2,R3 warning
+    class R4 success</code></pre>
+<p>Після кроку 1 лишилося 5 записів з 11, після кроку 2 — 2, після кроку 3 — 1.</p>
 <p>Чотири кроки на 11 записах. Для 1000 (це 16:40) пошук за три кроки звузив межі до порожнього проміжку: <code>low</code> став більшим за <code>high</code> — отже, такої поїздки немає.</p>
 <h3 id="1">Дослід подвоєння: +1 крок<a class="headerlink" href="#1" title="Permanent link">&para;</a></h3>
 <p>Скільки кроків знадобиться на списку з тисячі, двох тисяч, мільйона записів? Візьмемо найгірший випадок — шуканого значення немає:</p>
@@ -2566,6 +2626,35 @@
 </tr>
 </tbody>
 </table>
+<p>Покроково — кожен крок назавжди відкидає одну поїздку:</p>
+<pre class="mermaid"><code>flowchart TD
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+
+    subgraph K1["крок 1 · 120 + 410"]
+        direction LR
+        S1{"530 &gt; 500"} --&gt; A1["right ліворуч&lt;br&gt;410 відкинуто"]
+    end
+    subgraph K2["крок 2 · 120 + 320"]
+        direction LR
+        S2{"440 &lt; 500"} --&gt; A2["left праворуч&lt;br&gt;120 відкинуто"]
+    end
+    subgraph K3["крок 3 · 150 + 320"]
+        direction LR
+        S3{"470 &lt; 500"} --&gt; A3["left праворуч&lt;br&gt;150 відкинуто"]
+    end
+    subgraph K4["крок 4 · 180 + 320"]
+        direction LR
+        S4{"500 = 500"} --&gt; A4["знайшли&lt;br&gt;(180, 320)"]
+    end
+    K1 --&gt; K2 --&gt; K3 --&gt; K4
+
+    class S1,S2,S3,S4 decision
+    class A1,A2,A3 error
+    class A4 success</code></pre>
 <p>Чому можна безпечно відкинути 410 на першому кроці? Бо навіть із <strong>найдешевшою</strong> поїздкою 120 вона дає забагато, а з дорожчими буде ще більше. Кожен крок відкидає одну поїздку назавжди, тому кроків щонайбільше n − 1 — це <code>O(n)</code>.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">pair_with_sum_brute</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="n">target</span><span class="p">):</span>
 <a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>    <span class="n">steps</span> <span class="o">=</span> <span class="mi">0</span>

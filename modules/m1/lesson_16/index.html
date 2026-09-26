@@ -1446,6 +1446,8 @@
       
         
       
+        
+      
     
     
     
@@ -1735,6 +1737,34 @@
     
   
     25. Тестування з pytest (+ валідація AI-коду)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../m2/lesson_26/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    26. П5. Динамічне програмування + greedy (вступ)
   
 
     
@@ -2497,6 +2527,32 @@
 </tr>
 </tbody>
 </table>
+<p>Покроково — словник <code>seen</code> росте, доки доповнення не знайдеться:</p>
+<pre class="mermaid"><code>flowchart TD
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+
+    subgraph K1["крок 1 · value 230"]
+        direction LR
+        Q1{"270 in seen?&lt;br&gt;ні"} --&gt; S1["seen = {230: 0}"]
+    end
+    subgraph K2["крок 2 · value 150"]
+        direction LR
+        Q2{"350 in seen?&lt;br&gt;ні"} --&gt; S2["seen = {230: 0, 150: 1}"]
+    end
+    subgraph K3["крок 3 · value 270"]
+        direction LR
+        Q3{"230 in seen?&lt;br&gt;так, позиція 0"} --&gt; R3["(0, 2)"]
+    end
+    K1 --&gt; K2 --&gt; K3
+
+    class Q1,Q2 decision
+    class S1,S2 step
+    class Q3 warning
+    class R3 success</code></pre>
 <p>Відповідь — позиції <code>(0, 2)</code>: поїздки №1120 і №930 Марти. Один прохід, <code>O(n)</code>, а позиції в журналі збереглися.</p>
 <div class="admonition note">
 <p class="admonition-title">Two Sum</p>
@@ -2584,6 +2640,22 @@
 <a id="__codelineno-19-8" name="__codelineno-19-8" href="#__codelineno-19-8"></a>7 []
 </code></pre></div>
 <p>Щоб знайти 845, не треба переглядати таблицю: <code>845 % 8 = 5</code> — одразу в кошик 5 і порівняти один ключ. Кількість поїздок у таблиці на це не впливає.</p>
+<p>Шлях ключа до кошика, включно з колізією, яку розберемо далі:</p>
+<pre class="mermaid"><code>flowchart LR
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+
+    K["ключ 845"] --&gt; H["hash(845)&lt;br&gt;845"] --&gt; B["845 % 8&lt;br&gt;кошик 5"] --&gt; C["порівняти 1 ключ&lt;br&gt;знайдено"]
+    K2["ключ 1128"] --&gt; H2["hash(1128)&lt;br&gt;1128"] --&gt; B2["1128 % 8&lt;br&gt;кошик 0"] --&gt; C2["кошик 0: [1120, 1128]&lt;br&gt;2 порівняння"]
+
+    class K,K2 step
+    class H,H2,B decision
+    class B2 warning
+    class C success
+    class C2 warning</code></pre>
 <p>А якщо два ключі потрапили в один кошик? Це <strong>колізія</strong>:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">find_in_table</span><span class="p">(</span><span class="n">buckets</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
 <a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>    <span class="n">bucket</span> <span class="o">=</span> <span class="n">buckets</span><span class="p">[</span><span class="nb">hash</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">buckets</span><span class="p">)]</span>

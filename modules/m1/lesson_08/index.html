@@ -1469,6 +1469,8 @@
       
         
       
+        
+      
     
     
     
@@ -1758,6 +1760,34 @@
     
   
     25. Тестування з pytest (+ валідація AI-коду)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../m2/lesson_26/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    26. П5. Динамічне програмування + greedy (вступ)
   
 
     
@@ -2519,6 +2549,42 @@
 </tr>
 </tbody>
 </table>
+<p>Кожна пара — один крок. Покроково для <code>[1, 2, 3, 4]</code> (порівнюються номери на позиціях <code>i</code> і <code>j</code>):</p>
+<pre class="mermaid"><code>flowchart TD
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+
+    subgraph I0["i = 0 · номер 1"]
+        direction LR
+        A1["1 = 2?"] --&gt; A2["1 = 3?"] --&gt; A3["1 = 4?"] --&gt; AS["кроків: 3"]
+    end
+    subgraph I1["i = 1 · номер 2"]
+        direction LR
+        B1["2 = 3?"] --&gt; B2["2 = 4?"] --&gt; BS["кроків: 5"]
+    end
+    subgraph I2["i = 2 · номер 3"]
+        direction LR
+        C1["3 = 4?"] --&gt; CS["кроків: 6"]
+    end
+    subgraph I3["i = 3 · номер 4"]
+        direction LR
+        D1["пар праворуч немає"] --&gt; DS["кроків: 6"]
+    end
+    I0 --&gt; I1 --&gt; I2 --&gt; I3 --&gt; R["(False, 6)"]
+    subgraph FAST["швидка: один прохід з множиною"]
+        direction LR
+        F1["1 in seen? ні"] --&gt; F2["2 in seen? ні"] --&gt; F3["3 in seen? ні"] --&gt; F4["4 in seen? ні"] --&gt; FR["(False, 4)"]
+    end
+    R ~~~ FAST
+
+    class A1,A2,A3,B1,B2,C1,F1,F2,F3,F4 warning
+    class AS,BS,CS,DS,D1 step
+    class R error
+    class FR success</code></pre>
+<p>У повільній функції кожен наступний номер порівнюється з усіма правішими — «трикутник» пар. У швидкій кожен номер перевіряється рівно один раз.</p>
 <p>Разом <code>3 + 2 + 1 = 6</code>. Для n номерів це <code>(n − 1) + (n − 2) + … + 1 = n·(n − 1) / 2</code> порівнянь. Швидка функція робить рівно n кроків — по одному на номер.</p>
 <h3 id="_5">Дослід подвоєння<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h3>
 <p>Тепер головне питання: що станеться, коли поїздок стане <strong>вдвічі більше</strong>?</p>

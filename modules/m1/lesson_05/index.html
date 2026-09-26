@@ -1574,6 +1574,8 @@
       
         
       
+        
+      
     
     
     
@@ -1863,6 +1865,34 @@
     
   
     25. Тестування з pytest (+ валідація AI-коду)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../m2/lesson_26/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    26. П5. Динамічне програмування + greedy (вступ)
   
 
     
@@ -3057,6 +3087,38 @@
 </tr>
 </tbody>
 </table>
+<p>Та сама таблиця покроково — помаранчевим позначено порівняння, зеленим — оновлення максимуму:</p>
+<pre class="mermaid"><code>flowchart TD
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+
+    S["старт&lt;br&gt;max_bill = 540.0 (чек 0)"]
+    subgraph I1["i = 1"]
+        direction LR
+        C1{"320.0 &gt; 540.0?"} -- ні --&gt; K1["max_bill = 540.0"]
+    end
+    subgraph I2["i = 2"]
+        direction LR
+        C2{"980.0 &gt; 540.0?"} -- так --&gt; U2["max_bill = 980.0"]
+    end
+    subgraph I3["i = 3"]
+        direction LR
+        C3{"760.0 &gt; 980.0?"} -- ні --&gt; K3["max_bill = 980.0"]
+    end
+    subgraph I4["i = 4"]
+        direction LR
+        C4{"450.0 &gt; 980.0?"} -- ні --&gt; K4["max_bill = 980.0"]
+    end
+    S --&gt; I1 --&gt; I2 --&gt; I3 --&gt; I4 --&gt; E["i = 5: 5 &lt; 5 — ні&lt;br&gt;Найбільший чек: 980.0"]
+
+    class S step
+    class C1,C2,C3,C4 warning
+    class K1,K3,K4 step
+    class U2,E success</code></pre>
+<p>Максимум змінився лише один раз — на чеку 2. Усі інші кроки лише підтверджують, що більшого не знайшлося.</p>
 <p>Цикл починається з <code>i = 1</code>, бо чек 0 уже взято як стартовий максимум. Чому стартують з першого елемента, а не з <code>0</code>? Якби всі чеки були від'ємні (наприклад, повернення коштів), нуль став би «максимумом», якого немає в даних.</p>
 <h2 id="_14">Множина: лише унікальні значення<a class="headerlink" href="#_14" title="Permanent link">&para;</a></h2>
 <h3 id="_15">Дублікати зникають самі<a class="headerlink" href="#_15" title="Permanent link">&para;</a></h3>

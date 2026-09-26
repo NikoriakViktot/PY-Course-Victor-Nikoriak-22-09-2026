@@ -1452,6 +1452,8 @@
       
         
       
+        
+      
     
     
     
@@ -1741,6 +1743,34 @@
     
   
     25. Тестування з pytest (+ валідація AI-коду)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../m2/lesson_26/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    26. П5. Динамічне програмування + greedy (вступ)
   
 
     
@@ -2572,6 +2602,29 @@
 <a id="__codelineno-16-8" name="__codelineno-16-8" href="#__codelineno-16-8"></a>finally: рядок перевірено
 </code></pre></div>
 <p>У другому виклику <code>print("try: розібрано")</code> не виконався: виняток перервав <code>try</code> на рядку <code>parse_line(line)</code>. <code>else</code> пропущено, бо виняток був. <code>finally</code> спрацював обидва рази.</p>
+<p>Обидва виклики поруч:</p>
+<pre class="mermaid"><code>flowchart TD
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+
+    subgraph OK["check_line(KASA_LINES[0]) — правильний рядок"]
+        direction LR
+        T1["try&lt;br&gt;parse_line — ок"] --&gt; E1["else&lt;br&gt;чек на 540.0"] --&gt; F1["finally&lt;br&gt;рядок перевірено"]
+    end
+    subgraph BAD["check_line(KASA_LINES[2]) — «540,00»"]
+        direction LR
+        T2["try&lt;br&gt;parse_line — ValueError"] --&gt; X2["except&lt;br&gt;could not convert…"] --&gt; F2["finally&lt;br&gt;рядок перевірено"]
+    end
+    OK ~~~ BAD
+
+    class T1,E1 success
+    class T2 warning
+    class X2 error
+    class F1,F2 step</code></pre>
+<p><code>try</code> і <code>finally</code> є в обох шляхах; між ними — або <code>else</code>, або <code>except</code>, але ніколи обидва разом.</p>
 <p>Навіщо <code>else</code>, якщо той самий код можна дописати в кінець <code>try</code>? Щоб у <code>try</code> лишався лише рядок, який ми <strong>очікуємо</strong> побачити впалим. Помилка в коді з <code>else</code> не буде випадково перехоплена чужим <code>except</code>. <code>finally</code> зазвичай закриває те, що відкрили: файл, з'єднання, зміну каси. У <a href="../lesson_14/">уроці 14</a> цю роботу візьме на себе <code>with</code>.</p>
 <h2 id="except">Кілька except і ієрархія винятків<a class="headerlink" href="#except" title="Permanent link">&para;</a></h2>
 <p>Винятки утворюють <strong>дерево</strong>: загальні типи вгорі, конкретні внизу. <code>except</code> ловить свій тип <strong>і всіх його нащадків</strong>:</p>
