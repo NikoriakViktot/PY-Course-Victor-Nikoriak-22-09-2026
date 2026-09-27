@@ -1802,6 +1802,8 @@
       
         
       
+        
+      
     
     
     
@@ -2202,6 +2204,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../m4/lesson_41/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    41. Тестування API (pytest + httpx)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -2482,6 +2512,7 @@
 <li><a href="../m4/lesson_38/">Урок 38. FastAPI + SQLAlchemy: повний CRUD</a> — крок 3 агрегатора: <code>NewsStore</code> → PostgreSQL/SQLite на шарі бази <code>production_bot</code> старого курсу — async-engine і сесія на запит (<code>get_db</code>), <code>NewsRow</code> (<code>Mapped</code>), <code>NewsRepository</code> з тим самим інтерфейсом, SQL, який генерує SQLAlchemy, <code>INSERT … ON CONFLICT DO NOTHING</code> покроково (і чому id «перескакують»); повний CRUD <code>201/404/409/204</code>, пошук; Alembic-міграції; знахідка: з FastAPI 0.118 COMMIT у <code>yield</code>-залежності йде після відповіді → <code>scope="function"</code>; «Знайди помилку» — гонка «перевір, потім встав».</li>
 <li><a href="../m4/lesson_39/">Урок 39. Middlewares і кешування (Redis на практиці)</a> — крок 4 агрегатора: HTTP-middleware (<code>X-Request-ID</code>, <code>X-Process-Time</code>, порядок шарів покроково); кеш <code>GET /api/news</code> і <code>/stats</code> у Redis (cache-aside, версія кешу, інвалідація <strong>після COMMIT</strong>); rate limit з <code>ai_bot</code> старого курсу — <code>429</code> і <code>Retry-After</code>, атомарні <code>INCR</code> + <code>EXPIRE NX</code> замість «ключ без TTL блокує назавжди», межа фіксованого вікна виміряна; фоновий збір <code>202</code> + статус у Redis з polling; «Знайди помилку» — сесія запиту у фоновій задачі: «збережено 168», а в базі 0.</li>
 <li><a href="../m4/lesson_40/">Урок 40. Автентифікація та security basics (JWT, hashing, OWASP)</a> — рефакторинг 4 застосунку нотаток на коді уроку автентифікації старого курсу: нотатки групи (<code>Q(user) | Q(group__in=…)</code>, читати — учасникам, змінювати — автору), знахідка «API обходив перевірку автора» → <code>403</code>; паролі — PBKDF2 з сіллю, скидання листом без розкриття акаунтів; JWT на <code>simplejwt</code> (header.payload.signature покроково, підправлений / чужий / прострочений токен → <code>401</code>, refresh з ротацією, порядок автентифікаторів DRF: <code>401</code> чи <code>403</code>), throttle <code>/api/token/</code>; <code>check --deploy</code>; OWASP Top 10 на нашому коді; «Знайди помилку» — <code>SECRET_KEY</code> у публічному репозиторії.</li>
+<li><a href="../m4/lesson_41/">Урок 41. Тестування API (pytest + httpx)</a> — рефакторинг 5 агрегатора новин: переробляємо лише тести уроку 39 за <code>lesson_Django_Testing</code> старого курсу. Шари unit / integration з маркерами; збережені сторінки rbc.ua як фікстури й тест конвеєра «парсер → модель»; мок мережі й «patch where used» (покрокова діаграма); фейковий HTTP-сервер (<code>aiohttp</code> <code>TestServer</code>) і межа фейку (fakeredis не показує гонок); <code>httpx.AsyncClient</code> + <code>ASGITransport</code> для одночасних запитів; покриття гілок з <code>concurrency = greenlet</code>; прогін на мінімальних версіях залежностей. Тести знайшли 4 помилки: ISO-час відхилявся моделлю, битий байт валив увесь збір, <code>fakerbc.ua</code> проходив перевірку, парсер падав з beautifulsoup4 4.12. «Знайди помилку» — два зелені тести, які разом пропустили помилку контракту.</li>
 </ul>
 <p>Решта уроків — 🚧 у розробці.</p>
 <p><strong>Django-книга викладача.</strong> Уроки М4 про Django ведуть по маршруту Zero to Hero <a href="https://nikoriakviktot.github.io/notes_chat_app/">Django-книги</a>: урок 33 — кроки 1–2, 34 — кроки 2 і 4, 35 — API до нотаток, 38 і 44 — крок 3, 40 — крок 5, 41 — крок 6, 45 — крок 7, 48–49 — кроки 8–9. Код — зі старого курсу, кожен урок — рефакторинг проєкту попереднього (що змінилося, діфи, архітектура до/після); сторінки курсу — стислий урок із практикою, книга — поглиблення (посилання «Поглиблено» в кожному розділі).</p>
