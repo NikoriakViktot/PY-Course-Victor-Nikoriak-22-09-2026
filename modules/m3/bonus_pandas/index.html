@@ -1824,7 +1824,7 @@
   <a href="#national-average-2017" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Що змінилося в даних: «National Average» після 2017 року
+        «National Average» після 2017 року
       
     </span>
   </a>
@@ -2136,6 +2136,8 @@
   
     
     
+      
+        
       
         
       
@@ -2579,6 +2581,66 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../m4/lesson_42/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    42. AI-інструменти розробника + ризики й валідація
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -2816,7 +2878,7 @@
   <a href="#national-average-2017" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Що змінилося в даних: «National Average» після 2017 року
+        «National Average» після 2017 року
       
     </span>
   </a>
@@ -3126,7 +3188,7 @@
 </tr>
 </tbody>
 </table>
-<p>Теорія — у двох довідниках, перенесених зі старого курсу: <a href="../pandas/data_analytics/"><strong>аналіз даних: патерни й мислення</strong></a> (рівні аналітики, «дані = інформація + шум», вісім патернів — агрегація, фільтрація, групування, порівняння, час, простір, зв'язки, розподіл — повний цикл, типові помилки, метрики) і <a href="../pandas/dash_architecture/"><strong>архітектура Dash</strong></a>. На цій сторінці — маршрут уроку, ключові результати на справжніх даних і що довелося виправити в старому коді.</p>
+<p>Теорія — у двох довідниках, перенесених зі старого курсу: <a href="../pandas/data_analytics/"><strong>аналіз даних: патерни й мислення</strong></a> (рівні аналітики, «дані = інформація + шум», вісім патернів — агрегація, фільтрація, групування, порівняння, час, простір, зв'язки, розподіл — повний цикл, типові помилки, метрики) і <a href="../pandas/dash_architecture/"><strong>архітектура Dash</strong></a>. На цій сторінці — маршрут уроку й ключові результати на справжніх даних.</p>
 <p><strong>Що потрібно з попередніх уроків:</strong> списки й словники (М1), функції та <code>lambda</code> (уроки 7, 18), класи й методи (19–23), файли й CSV (14), модулі й pip (12).</p>
 <p><strong>Після уроку ти зможеш:</strong></p>
 <ul>
@@ -3266,8 +3328,8 @@
     class A1,A2 warning
     class C1 success</code></pre>
 <p><code>groupby</code> — ліниве: поки не викликано агрегацію (<code>mean</code>, <code>sum</code>, <code>agg</code>), він лише запам'ятовує, як розбити дані. Докладно — у ноутбуці (розділ 7) і в довіднику, <a href="../pandas/data_analytics/#33-grouping">патерн «Групування»</a>.</p>
-<h3 id="national-average-2017">Що змінилося в даних: «National Average» після 2017 року<a class="headerlink" href="#national-average-2017" title="Permanent link">&para;</a></h3>
-<p>Старий код брав «ціну по Україні» як рядки без області: <code>admin1.isna()</code> — це записи з ринком <strong>National Average</strong>, які WFP рахує сам. Подивимось, які роки вони покривають у свіжому файлі:</p>
+<h3 id="national-average-2017">«National Average» після 2017 року<a class="headerlink" href="#national-average-2017" title="Permanent link">&para;</a></h3>
+<p>«Ціну по Україні» WFP публікує як ринок <strong>National Average</strong> — це рядки без області, <code>admin1.isna()</code>. Подивимось, які роки вони покривають:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">national</span> <span class="o">=</span> <span class="n">food</span><span class="p">[</span><span class="n">food</span><span class="p">[</span><span class="s2">"admin1"</span><span class="p">]</span><span class="o">.</span><span class="n">isna</span><span class="p">()]</span>
 <a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="n">regional</span> <span class="o">=</span> <span class="n">food</span><span class="p">[</span><span class="n">food</span><span class="p">[</span><span class="s2">"admin1"</span><span class="p">]</span><span class="o">.</span><span class="n">notna</span><span class="p">()]</span>
 <a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="nb">print</span><span class="p">(</span><span class="s2">"National Average:"</span><span class="p">,</span> <span class="n">national</span><span class="p">[</span><span class="s2">"date"</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="o">.</span><span class="n">date</span><span class="p">(),</span> <span class="s2">"—"</span><span class="p">,</span> <span class="n">national</span><span class="p">[</span><span class="s2">"date"</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="o">.</span><span class="n">date</span><span class="p">(),</span> <span class="sa">f</span><span class="s2">"(</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">national</span><span class="p">)</span><span class="si">}</span><span class="s2"> рядків)"</span><span class="p">)</span>
@@ -3278,8 +3340,8 @@
 <a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>регіональні ринки: 2014-03-15 — 2026-08-15 (111,273 рядків)
 <a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>Bread (wheat) на рівні країни: 0
 </code></pre></div>
-<p>З 2018 року WFP публікує ціни <strong>лише по регіональних ринках</strong>. Код, написаний на старішій версії файлу, на свіжих даних або падав (<code>KeyError: "['Bread (wheat)'] not in index"</code> у ноутбуці 3), або мовчки обривав графіки на 2017 році — і «злам 2022», про який розповідає ноутбук, просто не було б видно.</p>
-<p>Виправлення — одна нова клітинка в кожному ноутбуці одразу після завантаження; старі клітинки не змінено. Вона дораховує національне середнє як <strong>просте середнє по всіх ринках</strong> — тим самим Split-Apply-Combine:</p>
+<p>З 2018 року WFP публікує ціни <strong>лише по регіональних ринках</strong>. Графік по рядках National Average обривався б на 2017 році — і «зламу 2022» просто не було б видно.</p>
+<p>Тому в ноутбуках 1–3 одразу після завантаження національне середнє дораховується як <strong>просте середнє по всіх ринках</strong> — тим самим Split-Apply-Combine:</p>
 <div class="highlight"><span class="filename">клітинка «🆕 National Average» у ноутбуках 1–3</span><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">add_national_average</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
 <a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>    <span class="n">official_dates</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s2">"admin1"</span><span class="p">]</span><span class="o">.</span><span class="n">isna</span><span class="p">(),</span> <span class="s2">"date"</span><span class="p">])</span>       <span class="c1"># де WFP сам дав National Average</span>
 <a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>    <span class="n">regional</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s2">"admin1"</span><span class="p">]</span><span class="o">.</span><span class="n">notna</span><span class="p">()</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">df</span><span class="p">[</span><span class="s2">"date"</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">official_dates</span><span class="p">)]</span>
@@ -3490,29 +3552,6 @@
 <p><img alt="Dash, вкладка «Ціни на товари»: динаміка ціни цукру 2014–2026 і медіанна ціна по областях" src="../img/bonus_pandas_dash_food.png" /></p>
 <p>Вкладка «Ціни та курс валюти» — ціна товару поруч із курсом UAH/USD і коефіцієнт кореляції:</p>
 <p><img alt="Dash, вкладка «Ціни та курс валюти»: цукор проти курсу UAH/USD, r = 0,863" src="../img/bonus_pandas_dash_correlation.png" /></p>
-<p><strong>Що довелося виправити в <code>dash_API</code>, щоб він запрацював на поточних бібліотеках</strong> (зміни в копії курсу, код старого курсу не змінювався):</p>
-<table>
-<thead>
-<tr>
-<th>Проблема</th>
-<th>Причина</th>
-<th>Виправлення</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>вкладка «Просторовий аналіз»: помилка 500</td>
-<td><code>px.scatter_mapbox</code> прибрано в Plotly 6+</td>
-<td><code>px.scatter_map</code> (MapLibre, без ключа Mapbox), <code>map_style=</code> замість <code>mapbox_style=</code></td>
-</tr>
-<tr>
-<td>попередження React у консолі</td>
-<td><code>html.Tr</code> безпосередньо в <code>html.Table</code></td>
-<td><code>html.Table(html.Tbody(rows))</code></td>
-</tr>
-</tbody>
-</table>
-<p>Решта вкладок відпрацювала на свіжих даних без змін: <code>dash_API</code> від початку не покладався на «National Average» — він рахує по ринках сам.</p>
 <h2 id="practice">Практика<a class="headerlink" href="#practice" title="Permanent link">&para;</a></h2>
 <h3 id="_3">Розібраний приклад: індекс замість двох осей<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h3>
 <p>На вкладці «Ціни та курс валюти» дашборд малює ціну й курс на <strong>двох вертикальних осях</strong>. Такий графік легко «підкрутити»: зсунь масштаб однієї осі — і лінії зійдуться чи розійдуться, хоча дані ті самі. Чесніша альтернатива — звести обидва ряди до спільної бази, як у ноутбуці 2: індекс, 2014 = 100.</p>
@@ -3652,7 +3691,7 @@
 </ul>
 <h2 id="_9">Документація і джерела<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Код: <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_3/bonus/pandas_data_analysis"><code>module_3/bonus/pandas_data_analysis</code></a> — ноутбуки 1–3 і <code>dash_API</code> зі старого курсу (<code>module_5/lesson_52_pandas_dash</code>) з виправленнями під свіжі дані й бібліотеки; ноутбук 4 — новий.</li>
+<li>Код: <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_3/bonus/pandas_data_analysis"><code>module_3/bonus/pandas_data_analysis</code></a> — ноутбуки 1–3 і <code>dash_API</code> зі старого курсу (<code>module_5/lesson_52_pandas_dash</code>); ноутбук 4 — новий.</li>
 <li>pandas: <a href="https://pandas.pydata.org/docs/user_guide/10min.html">10 minutes to pandas</a>, <a href="https://pandas.pydata.org/docs/user_guide/groupby.html">Group by: split-apply-combine</a>, <a href="https://pandas.pydata.org/docs/user_guide/reshaping.html">Reshaping and pivot tables</a>, <a href="https://pandas.pydata.org/docs/user_guide/timeseries.html">Time series</a>, <a href="https://pandas.pydata.org/docs/user_guide/merging.html">Merge, join, concatenate</a></li>
 <li><a href="https://matplotlib.org/stable/users/index.html">Matplotlib</a>, <a href="https://seaborn.pydata.org/tutorial.html">seaborn</a>, <a href="https://plotly.com/python/plotly-express/">Plotly Express</a>, <a href="https://dash.plotly.com/">Dash</a></li>
 <li>Дані: <a href="https://data.humdata.org/dataset/wfp-food-prices-for-ukraine">HDX — Ukraine Food Prices (WFP)</a>, <a href="https://data.humdata.org/group/ukr">HDX — Ukraine</a>, <a href="https://data.gov.ua/">data.gov.ua — середньомісячна заробітна плата за регіонами</a></li>
