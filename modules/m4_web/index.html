@@ -1796,6 +1796,8 @@
       
         
       
+        
+      
     
     
     
@@ -2112,6 +2114,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../m4/lesson_38/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    38. FastAPI + SQLAlchemy: повний CRUD
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -2389,6 +2419,7 @@
 <li><a href="../m4/lesson_35/">Урок 35. DRF overview + Django vs FastAPI</a> — рефакторинг 3 проєкту уроку 34: REST API поруч зі сторінками поверх тих самих services/selectors (код з Django-книги): <code>REST_FRAMEWORK</code>, вхідний і вихідний серіалізатори, <code>ViewSet</code> + <code>DefaultRouter</code>, <code>@action</code> <code>pin</code>, <code>IsAuthenticated</code> і чому <code>403</code>, IDOR → <code>404</code>, <code>PATCH</code> з <code>partial=True</code>, browsable API, OpenAPI (drf-spectacular + <code>extend_schema</code>), тести; той самий API на FastAPI і як обрати; «Знайди помилку» — <code>auto_now</code> не оновлюється з <code>update_fields</code> (справжній баг старого коду).</li>
 <li><a href="../m4/lesson_36/">Урок 36. Typing + Pydantic</a> — крок 1 новинного агрегатора (FastAPI-гілка): парсер <code>parse_rbc_news</code> зі старого курсу з анотаціями типів (<code>list[RawNews]</code>, <code>TypedDict</code>, <code>X | None</code>, <code>Literal</code>), <code>mypy</code> і <code>--strict</code>, модель <code>NewsItem</code> на Pydantic (<code>Field</code>, <code>field_validator</code>, <code>model_validator(mode="before")</code>, <code>frozen</code>), перевірка знімка 168 справжніх новин rbc.ua, <code>validate_news</code> без мовчазних втрат, JSON Schema, <code>TypeAdapter</code>; «Знайди помилку» — URL, розібраний рядком (справжній баг <code>news_dashboard</code>).</li>
 <li><a href="../m4/lesson_37/">Урок 37. FastAPI basics + Postman + OpenAPI</a> — крок 2 агрегатора: FastAPI над <code>NewsItem</code> з <code>news_dashboard</code> старого курсу — маршрути, <code>Query</code> і <code>Literal</code>, <code>422</code>, <code>response_model</code>; сховище через <code>Depends</code> і <code>lifespan</code>, підміна залежностей у тестах; <code>POST /api/scrape</code> (aiohttp, <code>gather</code>, знімок, захист від SSRF); <code>/docs</code> і <code>/openapi.json</code>; колекція Postman з перевірками і newman; виміри <code>fastapi_demo</code>: <code>async def</code> + <code>time.sleep</code> — 20 запитів за 40 с, <code>def</code> і <code>await</code> — за 2 с (і як тест навантаження вимірював сам себе). Довідник: <a href="../m4/fastapi/fastapi_documentation/">FastAPI — архітектура і async</a>.</li>
+<li><a href="../m4/lesson_38/">Урок 38. FastAPI + SQLAlchemy: повний CRUD</a> — крок 3 агрегатора: <code>NewsStore</code> → PostgreSQL/SQLite на шарі бази <code>production_bot</code> старого курсу — async-engine і сесія на запит (<code>get_db</code>), <code>NewsRow</code> (<code>Mapped</code>), <code>NewsRepository</code> з тим самим інтерфейсом, SQL, який генерує SQLAlchemy, <code>INSERT … ON CONFLICT DO NOTHING</code> покроково (і чому id «перескакують»); повний CRUD <code>201/404/409/204</code>, пошук; Alembic-міграції; знахідка: з FastAPI 0.118 COMMIT у <code>yield</code>-залежності йде після відповіді → <code>scope="function"</code>; «Знайди помилку» — гонка «перевір, потім встав».</li>
 </ul>
 <p>Решта уроків — 🚧 у розробці.</p>
 <p><strong>Django-книга викладача.</strong> Уроки М4 про Django ведуть по маршруту Zero to Hero <a href="https://nikoriakviktot.github.io/notes_chat_app/">Django-книги</a>: урок 33 — кроки 1–2, 34 — кроки 2 і 4, 35 — API до нотаток, 38 і 44 — крок 3, 40 — крок 5, 41 — крок 6, 45 — крок 7, 48–49 — кроки 8–9. Код — зі старого курсу, кожен урок — рефакторинг проєкту попереднього (що змінилося, діфи, архітектура до/після); сторінки курсу — стислий урок із практикою, книга — поглиблення (посилання «Поглиблено» в кожному розділі).</p>
