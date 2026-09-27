@@ -1726,6 +1726,8 @@
       
         
       
+        
+      
     
     
     
@@ -1885,6 +1887,34 @@
     
   
     33. Django intro: MVT, ORM, admin
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../m4/lesson_34/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    34. Django: forms, HTML practice
   
 
     
@@ -2199,10 +2229,11 @@
 <li><a href="../m4/lesson_31/">Урок 31. HTTP: requests, httpx, aiohttp</a> — шлях запиту: URL, IP і DNS, порти, TCP-рукостискання, TLS; HTTP як текст (запит сокетом), методи й статус-коди; <code>requests</code>: <code>params</code>, <code>json</code>, заголовки й токен, <code>raise_for_status</code>, тайм-аути й ієрархія винятків, повторні спроби з backoff і чому не для <code>POST</code>, <code>Session</code>; справжній API PyPI; <code>httpx</code> і <code>AsyncClient</code> + <code>gather</code>, <code>aiohttp</code>, потоки; архітектура: свій клієнт до API з доменними винятками, вибір бібліотеки. Практика — на навчальному API диспетчерської <code>smachno_api.py</code>.</li>
 <li><a href="../m4/lesson_32/">Урок 32. REST: принципи дизайну API</a> — метео-API викладача (телеграми SYNOP з ogimet.com, <code>pymetdecoder</code>): усі типи API на одних даних — HTTP+CSV, JSON-RPC, GraphQL, SOAP, gRPC, WebSocket, SSE, webhook з підписом HMAC — і як обрати; REST: ресурси й URL, методи й ідемпотентність, статус-коди й формат помилок, фільтри, <code>fields</code>, пагінація, <code>PATCH</code>, <code>202 Accepted</code>, OpenAPI; кейс v1 → v2; архітектура: репозиторій → FastAPI → клієнт-клас → Streamlit-карта погоди, Docker Compose.</li>
 <li><a href="../m4/lesson_33/">Урок 33. Django intro: MVT, ORM, admin</a> — перший крок застосунку нотаток, що виросте до <a href="https://github.com/NikoriakViktot/notes_chat_app">Notes Chat App</a> викладача (кроки 1–2 маршруту <a href="https://nikoriakviktot.github.io/notes_chat_app/tutorials/">Zero to Hero</a> Django-книги): <code>startproject</code> / <code>startapp</code>, <code>settings.py</code>, MVT і шлях запиту, view, <code>path</code> / <code>include</code>, модель <code>Note</code>, <code>makemigrations</code> / <code>sqlmigrate</code> / <code>migrate</code>, ORM (<code>create</code>, <code>filter</code>, lookups, <code>get</code>, лінивий QuerySet, <code>.query</code>, <code>update</code>, <code>delete</code>), шаблон, адмінка й суперкористувач; практика — <code>is_pinned</code>, <code>priority</code>, блокноти.</li>
-<li><a href="../m4/lesson_35/">Урок 35. DRF overview + Django vs FastAPI</a> — REST API до нотаток уроку 33: налаштування <code>REST_FRAMEWORK</code>, <code>ModelSerializer</code> (явні <code>fields</code>, <code>read_only_fields</code>, <code>validate_&lt;поле&gt;</code>, <code>many=True</code>), <code>ModelViewSet</code> + <code>DefaultRouter</code>, пагінація, <code>IsAuthenticatedOrReadOnly</code> і чому <code>403</code>, а не <code>401</code>, фільтри в <code>get_queryset</code>, <code>@action</code> <code>pin</code>, browsable API, OpenAPI через drf-spectacular, <code>APITestCase</code>; той самий API на FastAPI і як обрати; «Знайди помилку» — <code>fields = "__all__"</code> віддає хеш пароля.</li>
+<li><a href="../m4/lesson_34/">Урок 34. Django: forms, HTML practice</a> — два рефакторинги проєкту уроку 33 на коді старого курсу (кроки 2 і 4 Django-книги): голий HTML → Bootstrap CRUD (<code>ModelForm</code>, PRG, <code>messages</code>, <code>base.html</code>, CSRF) і Bootstrap → crispy dashboard (3-рівневі шаблони, <code>FormHelper</code> + <code>Layout</code>, context processor); «Знайди помилку» — справжній баг старого коду: <code>is_pinned</code> губився при створенні.</li>
+<li><a href="../m4/lesson_35/">Урок 35. DRF overview + Django vs FastAPI</a> — рефакторинг 3 проєкту уроку 34: REST API поруч зі сторінками поверх тих самих services/selectors (код з Django-книги): <code>REST_FRAMEWORK</code>, вхідний і вихідний серіалізатори, <code>ViewSet</code> + <code>DefaultRouter</code>, <code>@action</code> <code>pin</code>, <code>IsAuthenticated</code> і чому <code>403</code>, IDOR → <code>404</code>, <code>PATCH</code> з <code>partial=True</code>, browsable API, OpenAPI (drf-spectacular + <code>extend_schema</code>), тести; той самий API на FastAPI і як обрати; «Знайди помилку» — <code>auto_now</code> не оновлюється з <code>update_fields</code> (справжній баг старого коду).</li>
 </ul>
-<p>Урок 34 (форми, Bootstrap) — 🚧 у розробці; решта уроків — теж.</p>
-<p><strong>Django-книга викладача.</strong> Уроки М4 про Django ведуть по маршруту Zero to Hero <a href="https://nikoriakviktot.github.io/notes_chat_app/">Django-книги</a>: урок 33 — кроки 1–2, 34 — крок 4, 35 — API до нотаток, 38 і 44 — крок 3, 40 — крок 5, 41 — крок 6, 45 — крок 7, 48–49 — кроки 8–9. Сторінки курсу — стислий урок із практикою, книга — поглиблення (посилання «Поглиблено» в кожному розділі).</p>
+<p>Решта уроків — 🚧 у розробці.</p>
+<p><strong>Django-книга викладача.</strong> Уроки М4 про Django ведуть по маршруту Zero to Hero <a href="https://nikoriakviktot.github.io/notes_chat_app/">Django-книги</a>: урок 33 — кроки 1–2, 34 — кроки 2 і 4, 35 — API до нотаток, 38 і 44 — крок 3, 40 — крок 5, 41 — крок 6, 45 — крок 7, 48–49 — кроки 8–9. Код — зі старого курсу, кожен урок — рефакторинг проєкту попереднього (що змінилося, діфи, архітектура до/після); сторінки курсу — стислий урок із практикою, книга — поглиблення (посилання «Поглиблено» в кожному розділі).</p>
 <p>17 уроків (лекції #31–47 у навігаційній таблиці v5.0): HTTP/REST → Django intro → DRF/FastAPI → повний CRUD → middlewares/кешування → auth/security basics → тестування API (лекції #31–41, «Web»), потім AI-інструменти розробника, інтеграція LLM API, архітектура застосунків, WebSockets, security advanced, Telegram Bot API (лекції #42–47, «Web Advanced»).</p>
 <p>«Web Advanced» — це продовження М4, не окремий модуль: обидва блоки йдуть під одним наскрізним номером уроку, а модулі М5/М6 зберігають свої номери одразу після «Web Advanced» без зсуву.</p>
 
