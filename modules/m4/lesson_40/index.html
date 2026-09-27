@@ -2272,7 +2272,7 @@
   <a href="#api-bypass" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Знахідка: API обходив перевірку автора
+        Права в API: групи відкривають ще один вхід
       
     </span>
   </a>
@@ -2398,17 +2398,6 @@
         
       </ul>
     </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#fixes" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Що виправлено й змінено
-      
-    </span>
-  </a>
   
 </li>
       
@@ -2846,7 +2835,7 @@
   <a href="#api-bypass" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Знахідка: API обходив перевірку автора
+        Права в API: групи відкривають ще один вхід
       
     </span>
   </a>
@@ -2972,17 +2961,6 @@
         
       </ul>
     </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#fixes" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Що виправлено й змінено
-      
-    </span>
-  </a>
   
 </li>
       
@@ -3383,8 +3361,8 @@
 <a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>ivan   бачить []; сторінка нотатки → 404
 <a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>Тарас видаляє на сайті → нотатка на місці: True
 </code></pre></div>
-<h3 id="api-bypass">Знахідка: API обходив перевірку автора<a class="headerlink" href="#api-bypass" title="Permanent link">&para;</a></h3>
-<p>Сторінки перевіряють <code>note.user != request.user</code>. А API уроку 35 бере нотатку тим самим селектором <code>get_note_detail</code>, що після зміни <strong>віддає й нотатки групи</strong>, — і перевірки автора там не було. Та сама перевірка, що вище, але через API, <strong>до виправлення</strong>:</p>
+<h3 id="api-bypass">Права в API: групи відкривають ще один вхід<a class="headerlink" href="#api-bypass" title="Permanent link">&para;</a></h3>
+<p>Сторінки перевіряють <code>note.user != request.user</code>. А API уроку 35 бере нотатку тим самим селектором <code>get_note_detail</code>, який тепер <strong>віддає й нотатки групи</strong>. Якщо в API не додати перевірку автора, та сама спроба, що вище, через API дає:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>Тарас через API: PATCH → 200, заголовок став «Зламано учасником групи»
 <a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>Тарас через API: DELETE → 204, нотатки більше немає
 </code></pre></div>
@@ -3759,7 +3737,7 @@
     class S,DB success</code></pre>
 <ul>
 <li><strong>Автентифікація ≠ авторизація.</strong> Сесія чи JWT відповідають лише на «хто ти». «Що тобі можна» вирішує код: selectors (що бачиш) і перевірка автора (що змінюєш).</li>
-<li><strong>Правила — на кожному вході.</strong> Знахідка уроку: сайт і API читали тими самими selectors, але перевірку автора мав лише сайт. Правило, яке треба пам'ятати у двох місцях, колись забудуть — у практиці його винесемо в один DRF-permission.</li>
+<li><strong>Правила — на кожному вході.</strong> Сайт і API читають тими самими selectors, тож перевірка автора потрібна на обох. Правило, яке треба пам'ятати у двох місцях, колись забудуть — у практиці його винесемо в один DRF-permission.</li>
 <li><strong>Секрет — один.</strong> <code>SECRET_KEY</code> підписує сесії, токени скидання й JWT. Він — у змінній середовища, не в git.</li>
 </ul>
 <h3 id="_5">Тести<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h3>
@@ -3776,46 +3754,9 @@
 <a id="__codelineno-23-10" name="__codelineno-23-10" href="#__codelineno-23-10"></a>Destroying test database for alias 'default'...
 </code></pre></div>
 <p><code>hello_app/tests_auth.py</code> — 13 тестів: видимість нотаток групи на сайті, заборона змін для учасника на сайті й в API (<code>403</code>) і <code>404</code> для стороннього, групи у формі — лише свої; JWT: видача, <code>401</code> + <code>WWW-Authenticate</code> без токена, неправильний пароль, refresh, підправлений / чужий / прострочений токен, токен, підписаний <code>SECRET_KEY</code>, приймається (тому ключ — секрет), throttle <code>429</code>; хеш з сіллю, скидання пароля без розкриття акаунтів.</p>
-<h2 id="fixes">Що виправлено й змінено<a class="headerlink" href="#fixes" title="Permanent link">&para;</a></h2>
-<table>
-<thead>
-<tr>
-<th>Де</th>
-<th>Було</th>
-<th>Стало</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>api.py</code> (урок 35) + групи зі старого курсу</td>
-<td>через API учасник групи міняв (<code>200</code>) і видаляв (<code>204</code>) чужі нотатки: <code>get_note_detail</code> віддає нотатки групи, а перевірка автора була лише в HTML-views</td>
-<td><code>_get_own_note</code> для <code>PATCH</code>, <code>DELETE</code>, <code>pin</code> → <code>403</code>; тест</td>
-</tr>
-<tr>
-<td><code>settings.py</code>, <code>DEFAULT_AUTHENTICATION_CLASSES</code></td>
-<td><code>Session</code> + <code>Basic</code>: пароль у кожному запиті; анонім отримував <code>403</code></td>
-<td><code>JWT</code> першим + <code>Session</code>: анонім — <code>401</code> з <code>WWW-Authenticate: Bearer</code></td>
-</tr>
-<tr>
-<td><code>settings.py</code></td>
-<td><code>SECRET_KEY</code>, <code>DEBUG = True</code>, <code>ALLOWED_HOSTS</code> — у коді</td>
-<td>зі змінних середовища (значення для навчання — за замовчуванням)</td>
-</tr>
-<tr>
-<td>— (нове в уроці 40)</td>
-<td>вхід для API лише через сесію</td>
-<td><code>/api/token/</code>, <code>/api/token/refresh/</code>, throttle 5/хв</td>
-</tr>
-<tr>
-<td><code>services.create_note</code></td>
-<td>у старому курсі не приймав <code>is_pinned</code> (виправлено в уроці 34) — конфлікт при перенесенні</td>
-<td><code>is_pinned</code> і <code>group</code> разом</td>
-</tr>
-</tbody>
-</table>
 <h2 id="practice">Практика<a class="headerlink" href="#practice" title="Permanent link">&para;</a></h2>
 <h3 id="_6">Розібраний приклад: правило автора в одному місці<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h3>
-<p>Знахідка уроку сталася, бо правило «змінює лише автор» записане в кількох місцях. У DRF для цього є <strong>permission-клас</strong> з методом <code>has_object_permission</code>:</p>
+<p>Правило «змінює лише автор», записане в кількох місцях, легко забути в одному з них. У DRF для цього є <strong>permission-клас</strong> з методом <code>has_object_permission</code>:</p>
 <ol>
 <li><strong>Безпечні методи</strong> (<code>GET</code>, <code>HEAD</code>, <code>OPTIONS</code> — <code>permissions.SAFE_METHODS</code>) дозволено всім, хто бачить об'єкт: видимість уже вирішили selectors.</li>
 <li><strong>Решта</strong> — лише якщо <code>obj.user_id == request.user.id</code>.</li>

@@ -2392,17 +2392,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#fixes" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Що виправлено в старому коді
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#practice" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3126,17 +3115,6 @@
         
       </ul>
     </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#fixes" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Що виправлено в старому коді
-      
-    </span>
-  </a>
   
 </li>
       
@@ -3952,7 +3930,7 @@
 <p>Поки йшли 10 запитів до <code>/sync-broken</code>, тест щосекунди питав <code>/health</code> — і шість разів поспіль не дочекався відповіді за 2 с: сервер не відповідав <strong>нікому</strong>.</p>
 <div class="admonition warning">
 <p class="admonition-title">Спершу виміряй вимірювач</p>
-<p>Перший запуск старого <code>load_test.py</code> показав «❌ ПРОБЛЕМА» для 500 запитів до <code>/async-correct</code>: 16.56 с замість 2 с. Винен був не сервер, а <strong>клієнт</strong> тесту: <code>httpx.AsyncClient</code> на сотнях одночасних з'єднань сам стає вузьким місцем — 500 запитів до миттєвого <code>/health</code> через httpx тривали 5.66 с, через aiohttp — 0.22 с. Друга вада: тайм-аут 30 с менший за 20 × 2 = 40 с — клієнт обривав запити, а сервер їх усе одно виконував і гальмував наступний вимір (<code>/sync-safe</code> — 11.96 с замість 2 с). Після виправлень (клієнт — aiohttp без ліміту з'єднань, тайм-аут 60 с) — числа в таблиці вище.</p>
+<p>Клієнт навантажувального тесту — теж частина досліду. <code>httpx.AsyncClient</code> на сотнях одночасних з'єднань сам стає вузьким місцем: 500 запитів до миттєвого <code>/health</code> через httpx тривають 5.66 с, через aiohttp — 0.22 с. І тайм-аут клієнта має бути більшим за тривалість тесту (20 × 2 = 40 с): інакше клієнт обриває запити, а сервер їх усе одно виконує й гальмує наступний вимір. Тому <code>load_test.py</code> — на aiohttp без ліміту з'єднань, з тайм-аутом 60 с.</p>
 <p>Правило: коли вимір дивує, перевір, що ти вимірюєш. Клієнт, мережа й тайм-аути — теж частина досліду.</p>
 </div>
 <p>Для CPU-задач (<code>/cpu-broken</code> → <code>/cpu-fixed</code> через <code>ProcessPoolExecutor</code>) і пулу з'єднань з базою — розділи 3–6 <a href="../fastapi/fastapi_documentation/#s3">довідника</a>.</p>
@@ -4004,53 +3982,6 @@
 <a id="__codelineno-21-5" name="__codelineno-21-5" href="#__codelineno-21-5"></a>Success: no issues found in 7 source files
 </code></pre></div>
 <p>Додалось 11 тестів API: порожнє сховище, збір зі знімка й фільтри, повторний збір, відхилені новини зі «скрапера»-заглушки, чотири випадки <code>422</code>, очищення, перелік шляхів в OpenAPI.</p>
-<h2 id="fixes">Що виправлено в старому коді<a class="headerlink" href="#fixes" title="Permanent link">&para;</a></h2>
-<table>
-<thead>
-<tr>
-<th>Де</th>
-<th>Було</th>
-<th>Стало</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>news_dashboard/app/main.py</code></td>
-<td><code>@app.on_event("startup")</code> — застарілий API FastAPI</td>
-<td><code>lifespan</code></td>
-</tr>
-<tr>
-<td><code>main.py</code>, <code>ScrapeRequest.pages</code></td>
-<td>будь-які URL — сервер завантажить що завгодно (SSRF)</td>
-<td>лише сторінки rbc.ua, не більше 20; інше — <code>422</code></td>
-</tr>
-<tr>
-<td><code>main.py</code>, <code>lang</code></td>
-<td>вільний рядок: <code>?lang=en</code> — порожній список без помилки</td>
-<td><code>Literal["uk", "ru"]</code> → <code>422</code></td>
-</tr>
-<tr>
-<td><code>news_dashboard/app/scraper.py</code>, <code>fetch_one</code></td>
-<td>статус відповіді не перевірявся: сторінку «403» розбирало як стрічку, «0 новин, помилки немає»; <code>except Exception</code> ховав будь-які помилки</td>
-<td><code>raise_for_status()</code>; ловимо лише мережеві помилки й тайм-аут</td>
-</tr>
-<tr>
-<td><code>scraper.py</code>, <code>_parse_page</code></td>
-<td>друга копія парсера зі своїм словником категорій (і помилкою з піддоменами, урок 36)</td>
-<td><code>parse_rbc_news</code> + <code>NewsItem</code> з уроку 36</td>
-</tr>
-<tr>
-<td><code>fastapi_demo/load_test.py</code></td>
-<td>клієнт <code>httpx</code> на 500 з'єднаннях сам гальмував вимір; тайм-аут 30 с &lt; 40 с тесту</td>
-<td>клієнт навантаження — <code>aiohttp</code> без ліміту з'єднань, тайм-аут 60 с</td>
-</tr>
-<tr>
-<td><code>load_test.py</code>, docstring</td>
-<td>«<code>uvicorn app.main:app --reload</code>» — порт 8000, а тест стукає на 8001</td>
-<td><code>uvicorn app.main:app --port 8001</code></td>
-</tr>
-</tbody>
-</table>
 <h2 id="practice">Практика<a class="headerlink" href="#practice" title="Permanent link">&para;</a></h2>
 <h3 id="get-apinewssources">Розібраний приклад: ендпоінт <code>GET /api/news/sources</code><a class="headerlink" href="#get-apinewssources" title="Permanent link">&para;</a></h3>
 <p>Задача: список джерел з кількістю новин — <code>{"rbc.ua": 167, "auto.rbc.ua": 1}</code>.</p>

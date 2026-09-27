@@ -2357,17 +2357,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#fixes" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Що виправлено в старому коді
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#practice" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2998,17 +2987,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#fixes" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Що виправлено в старому коді
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#practice" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3548,8 +3526,8 @@
     G--&gt;&gt;F: сесію закрито
     F--&gt;&gt;C: 200 {"id": 7, "category": "Економіка", …}</code></pre>
 <div class="admonition danger">
-<p class="admonition-title">Знахідка: з FastAPI 0.118 COMMIT за замовчуванням іде вже після відповіді</p>
-<p>У старому <code>production_bot</code> зафіксовано FastAPI 0.115.5 — там код після <code>yield</code> виконувався <strong>до</strong> відповіді. З версії 0.118 за замовчуванням — <strong>після</strong>: клієнт отримує <code>200</code>/<code>201</code> ще до COMMIT. Якщо COMMIT не вдасться (обрив з'єднання, обмеження бази, що перевіряється при COMMIT), клієнт уже почув «збережено», а даних немає.</p>
+<p class="admonition-title">З FastAPI 0.118 COMMIT за замовчуванням іде вже після відповіді</p>
+<p>До FastAPI 0.118 код після <code>yield</code> виконувався <strong>до</strong> відповіді. З версії 0.118 за замовчуванням — <strong>після</strong>: клієнт отримує <code>200</code>/<code>201</code> ще до COMMIT. Якщо COMMIT не вдасться (обрив з'єднання, обмеження бази, що перевіряється при COMMIT), клієнт уже почув «збережено», а даних немає.</p>
 <p>Перевірили однією залежністю, що падає після <code>yield</code> (<code>raise</code> замість COMMIT):</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>FastAPI 0.115.0 → 500 Internal Server Error
 <a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>FastAPI 0.117.1 → 500 Internal Server Error
@@ -3557,7 +3535,7 @@
 <a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>FastAPI 0.141.1 → 200 {"ok":true}
 <a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>FastAPI 0.141.1, Depends(dep, scope="function") → 500 Internal Server Error
 </code></pre></div>
-<p>Виправлення — <code>Depends(get_db, scope="function")</code> (є з FastAPI 0.121): залежність завершується <strong>до</strong> відправлення відповіді. Тест <code>test_failed_commit_is_500_not_200</code> закріплює це: без <code>scope="function"</code> він падає.</p>
+<p>Тому — <code>Depends(get_db, scope="function")</code> (є з FastAPI 0.121): залежність завершується <strong>до</strong> відправлення відповіді. Тест <code>test_failed_commit_is_500_not_200</code> закріплює це: без <code>scope="function"</code> він падає.</p>
 </div>
 <h2 id="refactor-3">Рефакторинг 3. Повний CRUD<a class="headerlink" href="#refactor-3" title="Permanent link">&para;</a></h2>
 <table>
@@ -3719,7 +3697,7 @@
 </code></pre></div>
 <div class="admonition warning">
 <p class="admonition-title">Autogenerate — чернетка, а не готова міграція</p>
-<p>Alembic записав <code>server_default=sa.text('now()')</code>: текст функції PostgreSQL. На SQLite такої функції немає — міграція там падала. Виправлено вручну на <code>sa.func.now()</code>: SQLAlchemy підставляє правильний SQL для кожної бази (<code>now()</code> для PostgreSQL, <code>CURRENT_TIMESTAMP</code> для SQLite). Правило: <strong>кожну автоміграцію читай перед комітом</strong>, а <code>alembic check</code> покаже, чи збігаються моделі з базою.</p>
+<p>Alembic записав <code>server_default=sa.text('now()')</code>: текст функції PostgreSQL. На SQLite такої функції немає — міграція там падала. Тому в міграції — <code>sa.func.now()</code>: SQLAlchemy підставляє правильний SQL для кожної бази (<code>now()</code> для PostgreSQL, <code>CURRENT_TIMESTAMP</code> для SQLite). Правило: <strong>кожну автоміграцію читай перед комітом</strong>, а <code>alembic check</code> покаже, чи збігаються моделі з базою.</p>
 </div>
 <h2 id="architecture">Архітектура: було → стало<a class="headerlink" href="#architecture" title="Permanent link">&para;</a></h2>
 <pre class="mermaid"><code>flowchart TD
@@ -3774,48 +3752,6 @@
 <a id="__codelineno-18-8" name="__codelineno-18-8" href="#__codelineno-18-8"></a>Success: no issues found in 9 source files
 </code></pre></div>
 <p><code>tests/conftest.py</code> створює для кожного тесту окремий engine і порожні таблиці (<code>Base.metadata.create_all</code>) і підміняє <code>get_db</code>; за замовчуванням — SQLite у пам'яті, з <code>TEST_DATABASE_URL</code> — PostgreSQL. Додалось 9 тестів CRUD: <code>201</code>, <code>409</code>, <code>422</code>, <code>404</code>, <code>PATCH</code> і збереження змін, <code>204</code>, <code>GROUP BY</code>, пошук, «COMMIT не вдався → <code>500</code>».</p>
-<h2 id="fixes">Що виправлено в старому коді<a class="headerlink" href="#fixes" title="Permanent link">&para;</a></h2>
-<table>
-<thead>
-<tr>
-<th>Де (<code>production_bot</code>)</th>
-<th>Було</th>
-<th>Стало</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>core/database.py</code>, <code>get_db</code></td>
-<td>COMMIT після <code>yield</code> — з FastAPI ≥ 0.118 після відповіді: клієнт бачить успіх, навіть якщо COMMIT не вдався</td>
-<td><code>Depends(get_db, scope="function")</code>; <code>fastapi&gt;=0.121</code>; тест</td>
-</tr>
-<tr>
-<td><code>core/database.py</code>, <code>get_db</code></td>
-<td>анотація <code>-&gt; AsyncSession</code>, хоча це генератор (mypy <code>--strict</code> — помилка)</td>
-<td><code>-&gt; AsyncIterator[AsyncSession]</code></td>
-</tr>
-<tr>
-<td><code>core/database.py</code>, <code>alembic.ini</code></td>
-<td>адреса лише PostgreSQL, у <code>alembic.ini</code> — ще й окремо, з паролем</td>
-<td>одна <code>DATABASE_URL</code> зі змінної середовища для застосунку й міграцій; без неї — SQLite</td>
-</tr>
-<tr>
-<td><code>repositories/base.py</code>, <code>user_repo.py</code></td>
-<td><code>from sqlalchemy import func, select</code> усередині методів; <code>datetime</code> — теж</td>
-<td>імпорти вгорі модуля</td>
-</tr>
-<tr>
-<td>міграція, згенерована autogenerate</td>
-<td><code>server_default=sa.text('now()')</code> — лише PostgreSQL</td>
-<td><code>sa.func.now()</code> — PostgreSQL і SQLite</td>
-</tr>
-<tr>
-<td>— (нове в уроці)</td>
-<td>SQLite <code>lower()</code> знає лише латиницю: пошук «ЗЕЛЕНСЬК» не знаходив «Зеленськ»</td>
-<td><code>lower()</code> з Unicode для SQLite (<code>db.py</code>); тест пошуку на обох базах</td>
-</tr>
-</tbody>
-</table>
 <h2 id="practice">Практика<a class="headerlink" href="#practice" title="Permanent link">&para;</a></h2>
 <h3 id="get-apinewssearchq">Розібраний приклад: пошук <code>GET /api/news/search?q=</code><a class="headerlink" href="#get-apinewssearchq" title="Permanent link">&para;</a></h3>
 <p>В уроці 37 пошук був завданням «спробуй самостійно». Зі старого <code>news_dashboard</code> він виглядав так: <code>{"title": {"$regex": keyword, "$options": "i"}}</code> — рядок користувача ставав <strong>регулярним виразом</strong> у MongoDB. Тепер — SQL:</p>

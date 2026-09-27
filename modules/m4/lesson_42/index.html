@@ -2553,17 +2553,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#fixes" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Що виправлено в коді
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#practice" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3108,17 +3097,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#fixes" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Що виправлено в коді
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#practice" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3407,7 +3385,7 @@
 <tr>
 <td><code>module_5/lesson_53_claude_code/CLAUDE_DOC.md</code></td>
 <td>довідник Claude Code (2025-05, 1153 рядки)</td>
-<td><a href="../ai/claude_code/">довідник книги</a>: звірено з документацією, застаріле виправлено</td>
+<td><a href="../ai/claude_code/">довідник книги</a>: звірено з документацією</td>
 </tr>
 <tr>
 <td>той самий урок: <code>IDEA.md</code>, <code>ROADMAP.md</code>, <code>Prompts_Roadmap.md</code> + <code>depression_dashboard/</code></td>
@@ -3696,7 +3674,7 @@
 <a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>FAILED tests/unit/test_pravda_review.py::test_rss_module_imports_without_system_tz_database
 <a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>3 failed, 18 passed in 0.34s
 </code></pre></div>
-<p>Виправлення — кілька рядків, позначених у коді «Рецензія»:</p>
+<p>Правильний варіант — кілька рядків, позначених у коді «Рецензія»:</p>
 <div class="highlight"><span class="filename">news_hub/rss.py і models.py: код агента → після рецензії</span><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="w"> </span>def _kyiv_datetime(pub_date: str) -&gt; str:
 <a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="gd">-    parsed = parsedate_to_datetime(pub_date)</span>
 <a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="gi">+    try:</span>
@@ -3767,7 +3745,7 @@
 <p>У старому курсі AI отримав рольові промпти («You are a Senior Python Architect and Data Scientist…», 12 етапів від EDA до Docker) і згенерував <strong>Depression Analytics Platform</strong>: Flask API, Streamlit-дашборд, RandomForest, KMeans, IsolationForest, 57-мегабайтний pickle моделі. Застосунок запускався, усі ендпоінти відповідали <code>200</code>, дашборд малював графіки. У промптах жодного разу не попрошено тестів чи критеріїв прийняття; про витік даних сказано одним рядком — і він у коді є.</p>
 <div class="admonition warning">
 <p class="admonition-title">Чутлива тема</p>
-<p>Застосунок оцінює ризик депресії й питає про суїцидальні думки. У курсі це <strong>кейс рецензії коду</strong>, а не інструмент. У копію уроку додано застереження й номер лінії підтримки. Модель на відкритому датасеті не є діагнозом.</p>
+<p>Застосунок оцінює ризик депресії й питає про суїцидальні думки. У курсі це <strong>кейс рецензії коду</strong>, а не інструмент. Застосунок показує застереження й номер лінії підтримки. Модель на відкритому датасеті не є діагнозом.</p>
 </div>
 <p>Рецензія — тестами на синтетичних даних з колонками справжнього датасету (сам датасет у репозиторій не входить). Кожен тест — одна знахідка. На коді старого курсу:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>FAILED tests/test_review.py::test_feature_importance_keeps_descending_order
@@ -3808,7 +3786,7 @@
 <div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>Flask за замовчуванням: {"Academic Pressure":0.11,"Age":0.03,"Risk_Score":0.14,"Suicidal_enc":0.27}
 <a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>sort_keys = False:      {"Suicidal_enc":0.27,"Risk_Score":0.14,"Academic Pressure":0.11,"Age":0.03}
 </code></pre></div>
-<p>Графік «Top Feature Importances» показував перші 12 ознак <strong>за абеткою</strong>. Блок «Strongest positive predictors» — <code>Academic Pressure</code>, <code>Age</code>, <code>CGPA</code>. Жодної помилки, жодного попередження, гарний графік. Виправлення — <code>sort_keys = False</code> у власному JSON-провайдері, а UI тепер сортує сам, не покладаючись на порядок ключів.</p>
+<p>Графік «Top Feature Importances» показував перші 12 ознак <strong>за абеткою</strong>. Блок «Strongest positive predictors» — <code>Academic Pressure</code>, <code>Age</code>, <code>CGPA</code>. Жодної помилки, жодного попередження, гарний графік. Правильно — <code>sort_keys = False</code> у власному JSON-провайдері, а UI сортує сам, не покладаючись на порядок ключів.</p>
 <h3 id="_4">Усі знахідки<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
@@ -3816,7 +3794,7 @@
 <th>#</th>
 <th>Знахідка</th>
 <th>Як доведено</th>
-<th>Виправлення в копії</th>
+<th>Як правильно</th>
 </tr>
 </thead>
 <tbody>
@@ -3882,7 +3860,7 @@
 </tr>
 </tbody>
 </table>
-<p>А ще: пороги ризику в UI (0,3 / 0,5) не збігались з бекендом (0,5 / 0,75); <code>delta="vs overall"</code> — підпис без порівняння; <code>requirements.txt</code> з <code>==</code> під Python 3.11, без колес для 3.13. Усе виправлено й перелічено в <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_42_ai_dev_tools/depression_dashboard/README.md">README проєкту</a>. Streamlit-дашборд після змін пройдено через <code>streamlit.testing.AppTest</code> проти живого бекенду: 5 розділів, форма прогнозу, жодного винятку.</p>
+<p>А ще: пороги ризику в UI (0,3 / 0,5) не збігались з бекендом (0,5 / 0,75); <code>delta="vs overall"</code> — підпис без порівняння; <code>requirements.txt</code> з <code>==</code> під Python 3.11, без колес для 3.13. Streamlit-дашборд після змін пройдено через <code>streamlit.testing.AppTest</code> проти живого бекенду: 5 розділів, форма прогнозу, жодного винятку.</p>
 <p>Жодна з десяти вад не падає з помилкою. Кожна дає <strong>правдоподібну неправду</strong>: відсортований не за тим графік, упевнену назву кластера, прогноз, що реагує на підроблене поле. Це головний ризик AI-коду.</p>
 <h2 id="architecture">Архітектура: де людина, де агент, де перевірки<a class="headerlink" href="#architecture" title="Permanent link">&para;</a></h2>
 <pre class="mermaid"><code>sequenceDiagram
@@ -3916,55 +3894,6 @@
 <li><strong>Мінімальні версії й інші платформи</strong> — <code>requirements.txt</code> мусить казати правду.</li>
 <li><strong>Нічого не пропадає мовчки</strong> — кожна відмова видна: <code>rejected</code>, <code>422</code>, запис у журналі.</li>
 </ol>
-<h2 id="fixes">Що виправлено в коді<a class="headerlink" href="#fixes" title="Permanent link">&para;</a></h2>
-<table>
-<thead>
-<tr>
-<th>Де</th>
-<th>Було</th>
-<th>Хто знайшов</th>
-<th>Стало</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>news_hub/CLAUDE.md</code></td>
-<td>приклад старого курсу описував MongoDB, <code>nlp.py</code>, Streamlit</td>
-<td>звірка з кодом</td>
-<td>команди перевірки й правила проєкту</td>
-</tr>
-<tr>
-<td><code>news_hub/rss.py</code> (код агента)</td>
-<td>новина без <code>&lt;pubDate&gt;</code> валила всю стрічку; <code>-0000</code> — як час сервера</td>
-<td>тест рецензента</td>
-<td>новина без часу; <code>-0000</code> = UTC</td>
-</tr>
-<tr>
-<td><code>news_hub/models.py</code> (код агента)</td>
-<td>без <code>&lt;category&gt;</code> категорія «2026»</td>
-<td>тест рецензента</td>
-<td>розділ — перший сегмент шляху для не-rbc доменів</td>
-</tr>
-<tr>
-<td><code>news_hub/requirements.txt</code></td>
-<td><code>zoneinfo</code> без <code>tzdata</code> — у Windows модуль не імпортується</td>
-<td>тест рецензента (без бази поясів)</td>
-<td><code>tzdata&gt;=2024.1</code></td>
-</tr>
-<tr>
-<td><code>depression_dashboard</code></td>
-<td>10 вад з таблиці вище + пороги, підписи, залежності</td>
-<td><code>tests/test_review.py</code>, AppTest</td>
-<td>див. таблицю й README</td>
-</tr>
-<tr>
-<td><a href="../ai/claude_code/#fixes">довідник Claude Code</a></td>
-<td>моделі, режими, події hooks, Agent SDK, CI — станом на 2025-05</td>
-<td>звірка з документацією й <code>claude --help</code></td>
-<td>виправлено; AI-аудитор помилився в 4 пунктах, їх відкинуто</td>
-</tr>
-</tbody>
-</table>
 <h2 id="practice">Практика<a class="headerlink" href="#practice" title="Permanent link">&para;</a></h2>
 <h3 id="html-rss">Розібраний приклад: HTML-сторінка замість RSS<a class="headerlink" href="#html-rss" title="Permanent link">&para;</a></h3>
 <p>Сайт іноді віддає замість стрічки сторінку помилки чи капчі — з кодом 200. Що зробить <code>parse_pravda_rss</code>?</p>
@@ -4086,7 +4015,7 @@
 </ul>
 <h2 id="_9">Документація і джерела<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Код: <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_4/lessons/lesson_42_ai_dev_tools/news_hub"><code>news_hub</code></a> — <code>rss.py</code> і зміни <code>models.py</code> написав Claude Code за специфікацією, виправлення рецензії позначено; ідея RSS-джерела — <code>task_11/analysis_tonality_2.py</code> з <code>Data_Science_Course_SSWU</code>. <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_4/lessons/lesson_42_ai_dev_tools/depression_dashboard"><code>depression_dashboard</code></a> — з <code>module_5/lesson_53_claude_code/</code> старого курсу, разом з промптами (<code>prompts/</code>).</li>
+<li>Код: <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_4/lessons/lesson_42_ai_dev_tools/news_hub"><code>news_hub</code></a> — <code>rss.py</code> і зміни <code>models.py</code> написав Claude Code за специфікацією, правки рецензента позначено; ідея RSS-джерела — <code>task_11/analysis_tonality_2.py</code> з <code>Data_Science_Course_SSWU</code>. <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_4/lessons/lesson_42_ai_dev_tools/depression_dashboard"><code>depression_dashboard</code></a> — з <code>module_5/lesson_53_claude_code/</code> старого курсу, разом з промптами (<code>prompts/</code>).</li>
 <li><a href="../ai/claude_code/">Довідник: Claude Code</a> — з <code>CLAUDE_DOC.md</code> старого курсу, звірений з документацією.</li>
 <li>Урок 25 — <a href="../../m2/lesson_25/">валідація AI-коду</a>; урок 41 — <a href="../lesson_41/">тест конвеєра, мок і фейк, мінімальні версії</a>.</li>
 <li>Claude Code: <a href="https://code.claude.com/docs/en/best-practices">Best practices</a>, <a href="https://code.claude.com/docs/en/memory">Memory (CLAUDE.md)</a>, <a href="https://code.claude.com/docs/en/permissions">Permissions</a>, <a href="https://code.claude.com/docs/en/hooks">Hooks</a>, <a href="https://code.claude.com/docs/en/headless">Headless (<code>-p</code>)</a>, <a href="https://code.claude.com/docs/en/security">Security</a>.</li>

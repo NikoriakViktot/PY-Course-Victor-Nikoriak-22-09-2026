@@ -3610,7 +3610,7 @@
 </ul>
 <p><strong>Критерії перевірки:</strong> <code>ScrapeReport(source=…, items=valid, rejected=rejected).model_dump()</code> містить <code>total</code>; неправильний <code>source</code> — <code>ValidationError</code>; <code>mypy --strict</code> чистий.</p>
 <h3 id="find-bug">Знайди помилку<a class="headerlink" href="#find-bug" title="Permanent link">&para;</a></h3>
-<p>Так <code>news_dashboard</code> старого курсу визначав категорію новини:</p>
+<p>Так визначають категорію новини, розбираючи URL рядком:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="n">url</span> <span class="o">=</span> <span class="s2">"https://auto.rbc.ua/rus/news/speka-pislya-holodiv-ryatuemo-vid-rizikiv-1778085857.html"</span>
 <a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>
 <a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a><span class="n">url_parts</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">url</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"https://www.rbc.ua"</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"/"</span><span class="p">)</span> <span class="k">if</span> <span class="n">p</span><span class="p">]</span>

@@ -2524,17 +2524,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#fixes" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Що виправлено в довіднику старого курсу
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#_1" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2894,17 +2883,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#fixes" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Що виправлено в довіднику старого курсу
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#_1" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3020,7 +2998,7 @@
 
 
 <h1 id="claude-code">Довідник: Claude Code<a class="headerlink" href="#claude-code" title="Permanent link">&para;</a></h1>
-<p>Довідник до <a href="../../lesson_42/">уроку 42</a>. Основа — <code>module_5/lesson_53_claude_code/CLAUDE_DOC.md</code> зі старого курсу. Кожне твердження звірено з установленим <code>claude</code> (версія 2.1.283, <code>claude --help</code>) і з <a href="https://code.claude.com/docs/en/overview">офіційною документацією</a> станом на 27.09.2026. Застаріле виправлено, список — <a href="#fixes">у кінці сторінки</a>.</p>
+<p>Довідник до <a href="../../lesson_42/">уроку 42</a>. Основа — <code>module_5/lesson_53_claude_code/CLAUDE_DOC.md</code> зі старого курсу. Кожне твердження звірено з установленим <code>claude</code> (версія 2.1.283, <code>claude --help</code>) і з <a href="https://code.claude.com/docs/en/overview">офіційною документацією</a> станом на 27.09.2026.</p>
 <p>Інструмент змінюється щомісяця. Якщо команда з цієї сторінки не працює, джерело правди — <code>claude --help</code>, <code>/help</code> і документація.</p>
 <h2 id="1-claude-code">1. Що таке Claude Code<a class="headerlink" href="#1-claude-code" title="Permanent link">&para;</a></h2>
 <p><strong>Claude Code</strong> — AI-агент для розробки. Він читає код проєкту, редагує файли, запускає команди (тести, лінтер, git) і сам вирішує, що робити далі, доки задачу не виконано. Від чату він відрізняється тим, що <strong>діє</strong> у твоєму репозиторії, а не лише пише текст.</p>
@@ -3596,7 +3574,7 @@
 </code></pre></div>
 <div class="admonition warning">
 <p class="admonition-title">Hook-«чорний список» — не захист</p>
-<p>Приклад старого курсу блокував <code>rm -rf</code> регулярним виразом <code>^rm -rf</code>. Агент (або промпт-ін'єкція в прочитаному файлі) обходить його командою <code>cd / &amp;&amp; rm -rf …</code>, <code>/bin/rm -rf …</code> чи <code>python -c "…"</code>. Небезпечні дії закривають <code>permissions.deny</code> і sandbox (розділ 11). Hook — для перевірок якості, а не як межа безпеки.</p>
+<p>Типовий приклад — hook, що блокує <code>rm -rf</code> регулярним виразом <code>^rm -rf</code>. Агент (або промпт-ін'єкція в прочитаному файлі) обходить його командою <code>cd / &amp;&amp; rm -rf …</code>, <code>/bin/rm -rf …</code> чи <code>python -c "…"</code>. Небезпечні дії закривають <code>permissions.deny</code> і sandbox (розділ 11). Hook — для перевірок якості, а не як межа безпеки.</p>
 </div>
 <h2 id="settings">11. Налаштування, дозволи, sandbox<a class="headerlink" href="#settings" title="Permanent link">&para;</a></h2>
 <p>Налаштування — JSON-файли; якщо один ключ задано в кількох, діє вищий рівень:</p>
@@ -3753,70 +3731,6 @@
 </tbody>
 </table>
 <p>Поглиблено: <a href="https://code.claude.com/docs/en/security">Security</a>, <a href="https://code.claude.com/docs/en/best-practices">Best practices</a>.</p>
-<h2 id="fixes">Що виправлено в довіднику старого курсу<a class="headerlink" href="#fixes" title="Permanent link">&para;</a></h2>
-<p>Старий довідник датовано 2025-05. Ми попросили AI-агента звірити його з документацією. Агент знайшов справжні застарілі місця, але <strong>сам помилився</strong> щонайменше в чотирьох пунктах. Кожне твердження нижче тому перевірено ще раз — за <code>claude --help</code> установленої версії і за документацією.</p>
-<table>
-<thead>
-<tr>
-<th>Старий довідник</th>
-<th>Що не так</th>
-<th>Тепер</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>таблиця моделей з повними назвами</td>
-<td>застаріла за рік</td>
-<td>аліаси <code>--model sonnet</code> / <code>opus</code> / <code>haiku</code>; поточний список — <code>/model</code></td>
-</tr>
-<tr>
-<td>ієрархія CLAUDE.md як «порядок пріоритету» (<code>/.claude/CLAUDE.md</code> для організації)</td>
-<td>файли не перекривають, а доповнюють один одного; шлях організації — інший</td>
-<td>розділ 6</td>
-</tr>
-<tr>
-<td>режими дозволів: 4</td>
-<td>з'явились <code>auto</code> і <code>dontAsk</code>, <code>default</code> у CLI зветься Manual</td>
-<td>таблиця в розділі 11</td>
-</tr>
-<tr>
-<td>події hooks: 9</td>
-<td>понад 30</td>
-<td>головні — у розділі 10, решта — посилання</td>
-</tr>
-<tr>
-<td>hook блокує <code>^rm -rf</code> і друкує JSON разом з <code>exit 2</code></td>
-<td>з кодом 2 JSON ігнорується, причина — у stderr; регулярний вираз легко обійти</td>
-<td>розділ 10: hook — для якості, безпека — <code>deny</code> і sandbox</td>
-</tr>
-<tr>
-<td>«Agent SDK» — приклад <code>anthropic.Anthropic().messages.create(...)</code></td>
-<td>це Client SDK (урок 43), а не Agent SDK</td>
-<td><code>claude-agent-sdk</code>, <code>query(...)</code></td>
-</tr>
-<tr>
-<td>CI: <code>claude --permission-mode bypassPermissions -p</code> у workflow</td>
-<td>Claude Code не встановлено на раннері; повний автопілот на вмісті PR небезпечний</td>
-<td><code>anthropics/claude-code-action@v1</code></td>
-</tr>
-<tr>
-<td><code>sudo apt install claude-code</code> одним рядком; автооновлення за замовчуванням — <code>stable</code></td>
-<td>apt/dnf/apk — лише після підключення підписаного репозиторію; канал за замовчуванням — <code>latest</code></td>
-<td>розділ 2</td>
-</tr>
-<tr>
-<td>посилання <code>docs.anthropic.com/en/docs/claude-code/…</code></td>
-<td>документація переїхала</td>
-<td><code>code.claude.com/docs/en/…</code></td>
-</tr>
-<tr>
-<td>—</td>
-<td>не було: довіра до папки, <code>ask</code>-правила, <code>AGENTS.md</code>, <code>.claude/rules/</code>, skills з <code>paths</code></td>
-<td>розділи 6, 8, 11</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Помилки AI-аудитора (перевірено й відкинуто).</strong> Агент стверджував, що імпорти <code>@path</code> у CLAUDE.md більше не підтримуються, що ключа <code>autoMemoryEnabled</code> немає, що поля skill <code>argument-hint</code> немає і що прапорців <code>--json-schema</code> і <code>--system-prompt</code> немає. Усе це є: <code>@path</code> і <code>autoMemoryEnabled</code> — у документації Memory, <code>argument-hint</code> — у документації Skills, прапорці — у <code>claude --help</code>. Урок той самий, що з кодом: <strong>відповідь AI перевіряють за першоджерелом</strong>.</p>
 <h2 id="_1">Посилання<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
 <ul>
 <li><a href="https://code.claude.com/docs/en/overview">Overview</a>, <a href="https://code.claude.com/docs/en/quickstart">Quickstart</a>, <a href="https://code.claude.com/docs/en/cli-reference">CLI reference</a>, <a href="https://code.claude.com/docs/en/common-workflows">Common workflows</a></li>

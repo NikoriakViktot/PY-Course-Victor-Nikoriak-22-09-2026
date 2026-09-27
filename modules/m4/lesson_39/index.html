@@ -2335,17 +2335,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#fixes" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Що виправлено в старому коді
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#practice" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2898,17 +2887,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#fixes" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Що виправлено в старому коді
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#practice" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3392,7 +3370,7 @@
 <a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a><span class="gi">+    count, _, ttl = await pipe.execute()</span>
 <a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a><span class="gi">+return count &lt;= self.limit, count, max(ttl, 0)</span>
 </code></pre></div>
-<p>Навіщо: у старому коді <code>INCR</code> і <code>EXPIRE</code> — <strong>два окремі</strong> запити. Якщо процес упаде (перезапуск, обрив з'єднання) між ними, ключ залишиться <strong>без TTL</strong>: наступні <code>INCR</code> дадуть 2, 3, 4… — і умова <code>count == 1</code> більше ніколи не спрацює. Користувача заблоковано назавжди. Перевіримо — «падіння» імітуємо, просто не викликаючи <code>EXPIRE</code>:</p>
+<p>Навіщо: якщо <code>INCR</code> і <code>EXPIRE</code> — <strong>два окремі</strong> запити, і процес упаде (перезапуск, обрив з'єднання) між ними, ключ залишиться <strong>без TTL</strong>: наступні <code>INCR</code> дадуть 2, 3, 4… — і умова <code>count == 1</code> більше ніколи не спрацює. Користувача заблоковано назавжди. Перевіримо — «падіння» імітуємо, просто не викликаючи <code>EXPIRE</code>:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">news_hub.middleware</span><span class="w"> </span><span class="kn">import</span> <span class="n">RateLimiter</span>
 <a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>
 <a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>
@@ -3400,23 +3378,23 @@
 <a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>    <span class="n">redis</span> <span class="o">=</span> <span class="n">Redis</span><span class="o">.</span><span class="n">from_url</span><span class="p">(</span><span class="s2">"redis://localhost:6379/0"</span><span class="p">,</span> <span class="n">decode_responses</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>    <span class="k">await</span> <span class="n">redis</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s2">"rate:old"</span><span class="p">,</span> <span class="s2">"rate:scrape:crashed"</span><span class="p">)</span>
 <a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a>
-<a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a>    <span class="k">await</span> <span class="n">redis</span><span class="o">.</span><span class="n">incr</span><span class="p">(</span><span class="s2">"rate:old"</span><span class="p">)</span>                   <span class="c1"># старий код: INCR… і процес «упав» до EXPIRE</span>
+<a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a>    <span class="k">await</span> <span class="n">redis</span><span class="o">.</span><span class="n">incr</span><span class="p">(</span><span class="s2">"rate:old"</span><span class="p">)</span>                   <span class="c1"># INCR… і процес «упав» до EXPIRE</span>
 <a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a>    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
 <a id="__codelineno-12-10" name="__codelineno-12-10" href="#__codelineno-12-10"></a>        <span class="n">count</span> <span class="o">=</span> <span class="k">await</span> <span class="n">redis</span><span class="o">.</span><span class="n">incr</span><span class="p">(</span><span class="s2">"rate:old"</span><span class="p">)</span>
 <a id="__codelineno-12-11" name="__codelineno-12-11" href="#__codelineno-12-11"></a>        <span class="k">if</span> <span class="n">count</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>                             <span class="c1"># ніколи не виконається</span>
 <a id="__codelineno-12-12" name="__codelineno-12-12" href="#__codelineno-12-12"></a>            <span class="k">await</span> <span class="n">redis</span><span class="o">.</span><span class="n">expire</span><span class="p">(</span><span class="s2">"rate:old"</span><span class="p">,</span> <span class="mi">60</span><span class="p">)</span>
-<a id="__codelineno-12-13" name="__codelineno-12-13" href="#__codelineno-12-13"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"старий код: count ="</span><span class="p">,</span> <span class="k">await</span> <span class="n">redis</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"rate:old"</span><span class="p">),</span> <span class="s2">"| TTL ="</span><span class="p">,</span> <span class="k">await</span> <span class="n">redis</span><span class="o">.</span><span class="n">ttl</span><span class="p">(</span><span class="s2">"rate:old"</span><span class="p">))</span>
+<a id="__codelineno-12-13" name="__codelineno-12-13" href="#__codelineno-12-13"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"окремо:     count ="</span><span class="p">,</span> <span class="k">await</span> <span class="n">redis</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"rate:old"</span><span class="p">),</span> <span class="s2">"| TTL ="</span><span class="p">,</span> <span class="k">await</span> <span class="n">redis</span><span class="o">.</span><span class="n">ttl</span><span class="p">(</span><span class="s2">"rate:old"</span><span class="p">))</span>
 <a id="__codelineno-12-14" name="__codelineno-12-14" href="#__codelineno-12-14"></a>
 <a id="__codelineno-12-15" name="__codelineno-12-15" href="#__codelineno-12-15"></a>    <span class="k">await</span> <span class="n">redis</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">"rate:scrape:crashed"</span><span class="p">,</span> <span class="mi">99</span><span class="p">)</span>     <span class="c1"># той самий «залишок» без TTL</span>
 <a id="__codelineno-12-16" name="__codelineno-12-16" href="#__codelineno-12-16"></a>    <span class="n">allowed</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="n">ttl</span> <span class="o">=</span> <span class="k">await</span> <span class="n">RateLimiter</span><span class="p">(</span><span class="n">redis</span><span class="p">)</span><span class="o">.</span><span class="n">hit</span><span class="p">(</span><span class="s2">"crashed"</span><span class="p">,</span> <span class="s2">"scrape"</span><span class="p">)</span>
-<a id="__codelineno-12-17" name="__codelineno-12-17" href="#__codelineno-12-17"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"новий код:  count ="</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="s2">"| дозволено:"</span><span class="p">,</span> <span class="n">allowed</span><span class="p">,</span> <span class="s2">"| TTL ="</span><span class="p">,</span> <span class="n">ttl</span><span class="p">)</span>
+<a id="__codelineno-12-17" name="__codelineno-12-17" href="#__codelineno-12-17"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"транзакція: count ="</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="s2">"| дозволено:"</span><span class="p">,</span> <span class="n">allowed</span><span class="p">,</span> <span class="s2">"| TTL ="</span><span class="p">,</span> <span class="n">ttl</span><span class="p">)</span>
 <a id="__codelineno-12-18" name="__codelineno-12-18" href="#__codelineno-12-18"></a>    <span class="k">await</span> <span class="n">redis</span><span class="o">.</span><span class="n">aclose</span><span class="p">()</span>
 <a id="__codelineno-12-19" name="__codelineno-12-19" href="#__codelineno-12-19"></a>
 <a id="__codelineno-12-20" name="__codelineno-12-20" href="#__codelineno-12-20"></a>
 <a id="__codelineno-12-21" name="__codelineno-12-21" href="#__codelineno-12-21"></a><span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">old_vs_new</span><span class="p">())</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>старий код: count = 4 | TTL = -1
-<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>новий код:  count = 100 | дозволено: False | TTL = 60
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>окремо:     count = 4 | TTL = -1
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>транзакція: count = 100 | дозволено: False | TTL = 60
 </code></pre></div>
 <p><code>TTL = -1</code> — ключ без часу життя: блокування назавжди. <code>EXPIRE … NX</code> ставить TTL, <strong>якщо його немає</strong>, і робить це в тій самій транзакції, що <code>INCR</code>, — навіть «залишок» після збою сам зникне за хвилину.</p>
 <p>Відповідь при перевищенні — <code>429 Too Many Requests</code> з <code>Retry-After</code> (скільки секунд чекати) і <code>X-RateLimit-*</code>:</p>
@@ -3565,48 +3543,6 @@
 <a id="__codelineno-22-5" name="__codelineno-22-5" href="#__codelineno-22-5"></a>Success: no issues found in 12 source files
 </code></pre></div>
 <p>Додалось 9 тестів у <code>tests/test_redis.py</code>: hit/miss, інвалідація після запису і її відсутність після <code>409</code>, заголовки middleware, <code>429</code> з <code>Retry-After</code>, «ключ без TTL лікується» (зі старою логікою <code>ai_bot</code> цей тест падає), фоновий збір — <code>done</code>, <code>failed</code> з текстом помилки, <code>404</code> невідомої задачі. Redis у тестах — <code>fakeredis</code>; ті самі тести на справжніх серверах: <code>TEST_DATABASE_URL=… TEST_REDIS_URL=redis://localhost:6379/15 pytest</code>.</p>
-<h2 id="fixes">Що виправлено в старому коді<a class="headerlink" href="#fixes" title="Permanent link">&para;</a></h2>
-<table>
-<thead>
-<tr>
-<th>Де</th>
-<th>Було</th>
-<th>Стало</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>ai_bot/…/rate_limit_repo.py</code></td>
-<td><code>INCR</code>, потім окремий <code>EXPIRE</code> лише при <code>count == 1</code>: збій між ними — ключ без TTL, блокування назавжди</td>
-<td>транзакція <code>INCR</code> + <code>EXPIRE … NX</code>; «залишок» без TTL лікується</td>
-</tr>
-<tr>
-<td><code>ai_bot/…/rate_limit.py</code></td>
-<td>алгоритм названо «Sliding Window Counter», а це фіксоване вікно</td>
-<td>назву виправлено; межу вікна показано вимірюванням</td>
-</tr>
-<tr>
-<td><code>production_bot/…/redis.py</code></td>
-<td>глобальна змінна <code>_redis_pool</code>, не підміниш у тестах</td>
-<td>клієнт у <code>app.state</code> з <code>lifespan</code>, <code>Depends(get_redis)</code>; <code>fakeredis://</code> для тестів</td>
-</tr>
-<tr>
-<td><code>news_dashboard/…/main.py</code>, <code>/api/scrape/archive</code></td>
-<td>у фонову задачу передавали <code>db</code> запиту; статус задач — у базі новин</td>
-<td>своя сесія бази в задачі; статус — Redis-hash з TTL; помилка → <code>failed</code></td>
-</tr>
-<tr>
-<td>— (урок 39)</td>
-<td>рядки журналу <code>news_hub</code> нікуди не виводились: uvicorn налаштовує лише свої логери</td>
-<td><code>setup_logging()</code> у <code>lifespan</code></td>
-</tr>
-<tr>
-<td>— (урок 39)</td>
-<td>інвалідація кешу в ендпоінті йшла б до COMMIT</td>
-<td>middleware <code>invalidate_cache</code> — після COMMIT</td>
-</tr>
-</tbody>
-</table>
 <h2 id="practice">Практика<a class="headerlink" href="#practice" title="Permanent link">&para;</a></h2>
 <h3 id="get-apinewsnews_id">Розібраний приклад: кеш для <code>GET /api/news/{news_id}</code><a class="headerlink" href="#get-apinewsnews_id" title="Permanent link">&para;</a></h3>
 <p>Картку новини відкривають частіше, ніж стрічку. Закешуємо і її:</p>

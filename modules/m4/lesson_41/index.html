@@ -2435,17 +2435,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#fixes" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Що виправлено в коді
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#practice" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2986,17 +2975,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#fixes" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Що виправлено в коді
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#practice" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3201,7 +3179,7 @@
 <li>парсер і модель перевірено окремо, кожен на своїх даних, — а разом їх не запускав ніхто;</li>
 <li>звіт покриття показує 88%, і навіть ця цифра неточна.</li>
 </ul>
-<p>Сьогодні <code>news_hub</code> не змінюється ззовні — змінюються його <strong>тести</strong>: шість рефакторингів папки <code>tests/</code>. Нові тести знайшли в коді уроків 36–39 <strong>чотири справжні помилки</strong>; їх виправлено в копії проєкту, і кожна розібрана нижче.</p>
+<p>Сьогодні <code>news_hub</code> не змінюється ззовні — змінюються його <strong>тести</strong>: шість рефакторингів папки <code>tests/</code>. Нові тести знаходять у коді уроків 36–39 <strong>чотири помилки</strong>, які старі тести пропускали, — кожну розберемо нижче.</p>
 <table>
 <thead>
 <tr>
@@ -3385,7 +3363,7 @@
 <a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>    <span class="n">valid</span><span class="p">,</span> <span class="n">rejected</span> <span class="o">=</span> <span class="n">validate_news</span><span class="p">(</span><span class="n">parse_rbc_news</span><span class="p">(</span><span class="n">html</span><span class="p">(</span><span class="n">page</span><span class="p">)))</span>
 <a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>    <span class="k">assert</span> <span class="n">rejected</span> <span class="o">==</span> <span class="p">[]</span>
 </code></pre></div>
-<p>На коді уроку 39 цей тест упав: обидві новини з <code>demo_newsline</code> модель <strong>відхилила</strong>. Тести парсера й моделі при цьому були зелені. Чому так сталося — розбір у «<a href="#find-bug">Знайди помилку</a>»; виправлення — <code>field_validator</code> у <code>models.py</code>.</p>
+<p>На коді уроку 39 цей тест упав: обидві новини з <code>demo_newsline</code> модель <strong>відхилила</strong>. Тести парсера й моделі при цьому були зелені. Чому так сталося — розбір у «<a href="#find-bug">Знайди помилку</a>»; правильне рішення — <code>field_validator</code> у <code>models.py</code>.</p>
 <h2 id="refactor-3">Рефакторинг 3. Мок мережі: patch where used<a class="headerlink" href="#refactor-3" title="Permanent link">&para;</a></h2>
 <p><code>fetch_one</code> робить HTTP-запит. У тесті інтернету може не бути, а rbc.ua може відповісти 403 — тест залежав би від погоди. <strong>Мок</strong> замінює <code>aiohttp.ClientSession</code> об'єктом, який відповідає так, як скаже тест: 200 з HTML, 403, тайм-аут, обрив з'єднання.</p>
 <div class="highlight"><span class="filename">tests/unit/test_scraper.py (фрагмент)</span><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">fake_session</span><span class="p">(</span><span class="n">html</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">,</span> <span class="n">error</span><span class="p">:</span> <span class="ne">BaseException</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">mock</span><span class="o">.</span><span class="n">MagicMock</span><span class="p">:</span>
@@ -3536,11 +3514,11 @@
 <div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>resp.text(): UnicodeDecodeError; це aiohttp.ClientError? False
 <a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>урок 41: [('/broken/', 1, None), ('/good/', 1, None)]
 </code></pre></div>
-<p><code>fetch_one</code> ловить лише <code>aiohttp.ClientError</code> і <code>asyncio.TimeoutError</code>. <code>UnicodeDecodeError</code> пролітав повз, <code>asyncio.gather</code> передавав його нагору, і <code>POST /api/scrape</code> відповідав <code>500</code>: новини <strong>решти шести</strong> сторінок губилися через один байт. Виправлення — один аргумент:</p>
+<p><code>fetch_one</code> ловить лише <code>aiohttp.ClientError</code> і <code>asyncio.TimeoutError</code>. <code>UnicodeDecodeError</code> пролітав повз, <code>asyncio.gather</code> передавав його нагору, і <code>POST /api/scrape</code> відповідав <code>500</code>: новини <strong>решти шести</strong> сторінок губилися через один байт. Правильно — один аргумент:</p>
 <div class="highlight"><span class="filename">news_hub/scraper.py: fetch_one</span><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="gd">-            html = await resp.text()</span>
 <a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="gi">+            html = await resp.text(errors="replace")   # один битий байт ≠ втрачена сторінка</span>
 </code></pre></div>
-<p>Під моком цієї помилки не видно в принципі: <code>response.text</code> там — <code>AsyncMock(return_value=html)</code>, готовий рядок, декодування немає. Без виправлення тест <code>test_undecodable_page_does_not_kill_scrape</code> падає, а всі шість мок-тестів — зелені.</p>
+<p>Під моком цієї помилки не видно в принципі: <code>response.text</code> там — <code>AsyncMock(return_value=html)</code>, готовий рядок, декодування немає. Без <code>errors="replace"</code> тест <code>test_undecodable_page_does_not_kill_scrape</code> падає, а всі шість мок-тестів — зелені.</p>
 <p>Ще два тести на фейковому сервері, неможливі з моком: заголовок <code>User-Agent</code> справді дійшов до сервера; <code>scrape_all_async</code> дві «повільні» сторінки бере за ~0,3 с, а <code>scrape_sequential</code> — за ~0,6 с (урок 27 — тепер як тест).</p>
 <h3 id="fakeredis">Межа фейку: fakeredis і гонка<a class="headerlink" href="#fakeredis" title="Permanent link">&para;</a></h3>
 <p>Фейк теж щось спрощує. <code>fakeredis</code> виконує команду одразу і <strong>не віддає керування</strong> циклу подій — тож одночасні корутини на ньому ніколи не перемежовуються. Ось лічильник «прочитати → +1 → записати» (дві команди) і <code>INCR</code> (одна), по 10 одночасних викликів:</p>
@@ -3768,7 +3746,7 @@
 <a id="__codelineno-25-4" name="__codelineno-25-4" href="#__codelineno-25-4"></a>fakerbc.ua       endswith('rbc.ua'): True   is_rbc_host: False
 <a id="__codelineno-25-5" name="__codelineno-25-5" href="#__codelineno-25-5"></a>rbc.ua.evil.com  endswith('rbc.ua'): False  is_rbc_host: False
 </code></pre></div>
-<p><code>POST /api/scrape</code> з <code>{"pages": ["https://fakerbc.ua/"]}</code> змушував сервер завантажити чужий сайт на прохання будь-кого — і те саме пропускала модель <code>NewsItem</code>. Виправлення — одна функція для обох місць:</p>
+<p><code>POST /api/scrape</code> з <code>{"pages": ["https://fakerbc.ua/"]}</code> змушував сервер завантажити чужий сайт на прохання будь-кого — і те саме пропускала модель <code>NewsItem</code>. Правильно — одна функція для обох місць:</p>
 <div class="highlight"><span class="filename">news_hub/models.py</span><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a><span class="gi">+def is_rbc_host(host: str | None) -&gt; bool:</span>
 <a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a><span class="gi">+    """rbc.ua або його піддомен (www., auto.). Не endswith("rbc.ua"): тоді пройшов би і fakerbc.ua."""</span>
 <a id="__codelineno-26-3" name="__codelineno-26-3" href="#__codelineno-26-3"></a><span class="gi">+    return host == "rbc.ua" or (host or "").endswith(".rbc.ua")</span>
@@ -3869,49 +3847,6 @@
 <a id="__codelineno-30-5" name="__codelineno-30-5" href="#__codelineno-30-5"></a>Success: no issues found in 12 source files
 </code></pre></div>
 <p>Було 41 тест у трьох файлах, стало 86 у десяти; покриття 88% (рядки, без greenlet) → 99% (рядки й гілки).</p>
-<h2 id="fixes">Що виправлено в коді<a class="headerlink" href="#fixes" title="Permanent link">&para;</a></h2>
-<table>
-<thead>
-<tr>
-<th>Де</th>
-<th>Було</th>
-<th>Хто знайшов</th>
-<th>Стало</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>models.py</code> (урок 36)</td>
-<td><code>published_time</code> приймав лише «HH:MM»; ISO-час з <code>&lt;time datetime&gt;</code> → новину відхилено</td>
-<td>тест конвеєра на збереженій сторінці</td>
-<td><code>field_validator</code>: з ISO береться час</td>
-</tr>
-<tr>
-<td><code>scraper.py</code> (урок 37, <code>news_dashboard</code>)</td>
-<td><code>resp.text()</code> на битому байті — <code>UnicodeDecodeError</code> повз <code>except</code>, <code>gather</code> губив усі сторінки</td>
-<td>фейковий HTTP-сервер</td>
-<td><code>resp.text(errors="replace")</code></td>
-</tr>
-<tr>
-<td><code>models.py</code>, <code>api.py</code> (36–37)</td>
-<td><code>host.endswith("rbc.ua")</code> пропускав <code>fakerbc.ua</code>: сервер завантажував чужий сайт на запит</td>
-<td>покриття гілок → тест межових значень</td>
-<td><code>is_rbc_host</code></td>
-</tr>
-<tr>
-<td><code>parser.py</code> (урок 36)</td>
-<td>з beautifulsoup4 4.12 <code>_classes</code> падав на тезі без <code>class</code></td>
-<td>прогін на мінімальних версіях</td>
-<td>порожні значення відкидаються</td>
-</tr>
-<tr>
-<td><code>tests/</code> (урок 39)</td>
-<td>один рівень, HTML у рядках, мережа й <code>get_db</code> не тестувались, покриття занижене</td>
-<td>—</td>
-<td>unit / integration, фікстури, мок і фейк, <code>aclient</code>, <code>.coveragerc</code></td>
-</tr>
-</tbody>
-</table>
 <h2 id="practice">Практика<a class="headerlink" href="#practice" title="Permanent link">&para;</a></h2>
 <h3 id="_3">Розібраний приклад: тест ключа кешу<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h3>
 <p><code>NewsCache.key</code> (урок 39) будує ключ з параметрів запиту. Що має бути правдою?</p>
@@ -3994,7 +3929,7 @@
 <summary>Відповідь</summary>
 <p>Кожен тест перевіряє свою половину <strong>на своїх даних</strong>: тест парсера — що він віддає ISO-рядок, тест моделі — що вона приймає «14:19». Ніхто не перевіряв <strong>контракт між ними</strong>: чи приймає модель те, що віддає парсер. Парсер віддає <code>"2024-05-08T10:30:00"</code>, а Pydantic для поля <code>time</code> приймає лише час — <code>"Input should be in a valid time format"</code>. На сайті з контейнерами <code>newsline__item</code> модель відхиляла б <strong>кожну</strong> новину з атрибутом <code>&lt;time datetime&gt;</code>. <code>validate_news</code> не губить їх мовчки, а кладе в <code>rejected</code>. Але звіт <code>POST /api/scrape</code> показував би «знайдено N, збережено 0».</p>
 <p>Ловить <strong>тест конвеєра</strong> (<code>tests/unit/test_pipeline.py</code>): вихід парсера на збереженій сторінці → модель, <code>rejected == []</code>. Правило: коли дві частини з'єднані даними, потрібен хоча б один тест, у якому дані з однієї справді йдуть у другу. Спільна фікстура (<code>demo_newsline.html</code>) для обох тестів дала б те саме.</p>
-<p>Виправлення — <code>field_validator("published_time", mode="before")</code> у <code>NewsItem</code>: з ISO-рядка береться час.</p>
+<p>Правильно — <code>field_validator("published_time", mode="before")</code> у <code>NewsItem</code>: з ISO-рядка береться час.</p>
 </details>
 <h2 id="_6">Підсумок<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
 <table>
