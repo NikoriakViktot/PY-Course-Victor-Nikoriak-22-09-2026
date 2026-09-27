@@ -1722,6 +1722,8 @@
       
         
       
+        
+      
     
     
     
@@ -1853,6 +1855,34 @@
     
   
     32. REST: принципи дизайну API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../m4/lesson_33/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    33. Django intro: MVT, ORM, admin
   
 
     
@@ -2138,8 +2168,10 @@
 <ul>
 <li><a href="../m4/lesson_31/">Урок 31. HTTP: requests, httpx, aiohttp</a> — шлях запиту: URL, IP і DNS, порти, TCP-рукостискання, TLS; HTTP як текст (запит сокетом), методи й статус-коди; <code>requests</code>: <code>params</code>, <code>json</code>, заголовки й токен, <code>raise_for_status</code>, тайм-аути й ієрархія винятків, повторні спроби з backoff і чому не для <code>POST</code>, <code>Session</code>; справжній API PyPI; <code>httpx</code> і <code>AsyncClient</code> + <code>gather</code>, <code>aiohttp</code>, потоки; архітектура: свій клієнт до API з доменними винятками, вибір бібліотеки. Практика — на навчальному API диспетчерської <code>smachno_api.py</code>.</li>
 <li><a href="../m4/lesson_32/">Урок 32. REST: принципи дизайну API</a> — метео-API викладача (телеграми SYNOP з ogimet.com, <code>pymetdecoder</code>): усі типи API на одних даних — HTTP+CSV, JSON-RPC, GraphQL, SOAP, gRPC, WebSocket, SSE, webhook з підписом HMAC — і як обрати; REST: ресурси й URL, методи й ідемпотентність, статус-коди й формат помилок, фільтри, <code>fields</code>, пагінація, <code>PATCH</code>, <code>202 Accepted</code>, OpenAPI; кейс v1 → v2; архітектура: репозиторій → FastAPI → клієнт-клас → Streamlit-карта погоди, Docker Compose.</li>
+<li><a href="../m4/lesson_33/">Урок 33. Django intro: MVT, ORM, admin</a> — перший крок застосунку нотаток, що виросте до <a href="https://github.com/NikoriakViktot/notes_chat_app">Notes Chat App</a> викладача (кроки 1–2 маршруту <a href="https://nikoriakviktot.github.io/notes_chat_app/tutorials/">Zero to Hero</a> Django-книги): <code>startproject</code> / <code>startapp</code>, <code>settings.py</code>, MVT і шлях запиту, view, <code>path</code> / <code>include</code>, модель <code>Note</code>, <code>makemigrations</code> / <code>sqlmigrate</code> / <code>migrate</code>, ORM (<code>create</code>, <code>filter</code>, lookups, <code>get</code>, лінивий QuerySet, <code>.query</code>, <code>update</code>, <code>delete</code>), шаблон, адмінка й суперкористувач; практика — <code>is_pinned</code>, <code>priority</code>, блокноти.</li>
 </ul>
 <p>Решта уроків — 🚧 у розробці.</p>
+<p><strong>Django-книга викладача.</strong> Уроки М4 про Django ведуть по маршруту Zero to Hero <a href="https://nikoriakviktot.github.io/notes_chat_app/">Django-книги</a>: урок 33 — кроки 1–2, 34 — крок 4, 35 — API до нотаток, 38 і 44 — крок 3, 40 — крок 5, 41 — крок 6, 45 — крок 7, 48–49 — кроки 8–9. Сторінки курсу — стислий урок із практикою, книга — поглиблення (посилання «Поглиблено» в кожному розділі).</p>
 <p>17 уроків (лекції #31–47 у навігаційній таблиці v5.0): HTTP/REST → Django intro → DRF/FastAPI → повний CRUD → middlewares/кешування → auth/security basics → тестування API (лекції #31–41, «Web»), потім AI-інструменти розробника, інтеграція LLM API, архітектура застосунків, WebSockets, security advanced, Telegram Bot API (лекції #42–47, «Web Advanced»).</p>
 <p>«Web Advanced» — це продовження М4, не окремий модуль: обидва блоки йдуть під одним наскрізним номером уроку, а модулі М5/М6 зберігають свої номери одразу після «Web Advanced» без зсуву.</p>
 
