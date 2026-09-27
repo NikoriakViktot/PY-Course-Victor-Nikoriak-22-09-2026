@@ -3,7 +3,6 @@
 a = 10.5
 b = 2
 
-
 sum = a + b
 difference = a - b
 quotient = a / b
