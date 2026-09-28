@@ -2459,7 +2459,7 @@
   <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Старт: що дає старий курс
+        Старт: з якого коду починаємо
       
     </span>
   </a>
@@ -3401,7 +3401,7 @@
   <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Старт: що дає старий курс
+        Старт: з якого коду починаємо
       
     </span>
   </a>
@@ -3791,7 +3791,7 @@
 <li><strong>Куди ходить сервер (SSRF).</strong> Адмін додає RSS-джерело за URL, і сервер його завантажує. Але сервер стоїть <strong>усередині</strong> мережі: він бачить localhost, Redis, базу й адресу метаданих хмари <code>169.254.169.254</code>. URL — це прохання до сервера сходити туди від свого імені.</li>
 <li><strong>Хто нам пише (webhook).</strong> Зовнішній планувальник запускає збір запитом до нас. Адреса публічна, тож відрізнити справжній запит від підробленого можна лише за підписом.</li>
 </ol>
-<p>Код — зі старого курсу: адмін-JWT і webhook Telegram з <code>production_bot</code>, захист від SSRF — з <code>OWASP_TOP_10.md</code> уроку про безпеку Django. Кожен шматок переносимо і перевіряємо тестом на атаку.</p>
+<p>Стартовий код: адмін-JWT і webhook Telegram з <code>production_bot</code>, захист від SSRF — з <code>OWASP_TOP_10.md</code>. Кожен шматок переносимо і перевіряємо тестом на атаку.</p>
 <table>
 <thead>
 <tr>
@@ -3847,7 +3847,7 @@
 <li>Робить новий запит на адресу з <code>Location</code> — сам, без питань. Ця адреса може вести куди завгодно, зокрема на інший хост.</li>
 </ol>
 </details>
-<h2 id="_2">Старт: що дає старий курс<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<h2 id="_2">Старт: з якого коду починаємо<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
@@ -3858,7 +3858,7 @@
 </thead>
 <tbody>
 <tr>
-<td><code>module_5/lesson_46_Telegram_API/production_bot/backend/core/security.py</code></td>
+<td><code>production_bot/backend/core/security.py</code></td>
 <td>хеш пароля, <code>create_access_token</code>, <code>decode_token</code></td>
 <td><code>news_hub/security.py</code></td>
 </tr>
@@ -3878,17 +3878,17 @@
 <td><code>news_hub/webhooks.py</code></td>
 </tr>
 <tr>
-<td><code>module_5/lesson_Django_authentication_and_security/OWASP_TOP_10.md</code></td>
+<td><code>OWASP_TOP_10.md</code></td>
 <td>A10 SSRF: «небезпечне завантаження аватара з URL» і захист</td>
 <td><code>news_hub/safe_fetch.py</code></td>
 </tr>
 </tbody>
 </table>
-<p>Теорію — що таке JWT, bcrypt, OWASP Top 10 — старий курс і урок 40 уже пояснили. Тут — як ці шматки поводяться в <strong>нашому</strong> проєкті і які атаки їх обходять.</p>
+<p>Теорію — що таке JWT, bcrypt, OWASP Top 10 — урок 40 уже пояснив. Тут — як ці шматки поводяться в <strong>нашому</strong> проєкті і які атаки їх обходять.</p>
 <h2 id="refactor-1">Рефакторинг 1. Адмін і JWT<a class="headerlink" href="#refactor-1" title="Permanent link">&para;</a></h2>
 <h3 id="bcrypt-passlib">Хеш пароля: bcrypt без passlib<a class="headerlink" href="#bcrypt-passlib" title="Permanent link">&para;</a></h3>
 <p>Старий <code>security.py</code> хешує через <code>passlib</code>, а <code>admin/auth.py</code> робить це <strong>при імпорті модуля</strong>:</p>
-<div class="highlight"><span class="filename">production_bot/backend/api/admin/auth.py (старий курс)</span><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">_ADMIN_PASSWORD_HASH</span> <span class="o">=</span> <span class="n">hash_password</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">ADMIN_PASSWORD</span><span class="p">)</span>
+<div class="highlight"><span class="filename">production_bot/backend/api/admin/auth.py (стартовий код)</span><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">_ADMIN_PASSWORD_HASH</span> <span class="o">=</span> <span class="n">hash_password</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">ADMIN_PASSWORD</span><span class="p">)</span>
 </code></pre></div>
 <p><code>passlib</code> не оновлювався з 2020 року, а <code>bcrypt</code> 5 змінив поведінку. Справжній вивід на чистій установці (<code>passlib 1.7.4</code>, <code>bcrypt 5.0.0</code>):</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>(trapped) error reading bcrypt version
@@ -3912,7 +3912,7 @@
 <p>Межа 72 байти — властивість самого алгоритму bcrypt. Старші версії мовчки обрізали довший пароль, <code>bcrypt</code> 5 кидає <code>ValueError</code> і в <code>checkpw</code>. Без перевірки довжини запит на вхід з довгим паролем закінчувався б <code>500</code>. Тест <code>test_bad_login_is_one_answer</code> надсилає 100 літер «я» (200 байт) і чекає <code>401</code>.</p>
 <p>У середовищі — <strong>хеш</strong>, а не пароль: <code>python -m news_hub.security</code> питає пароль і друкує рядки для <code>.env</code>.</p>
 <h3 id="change-me">Налаштування: без «change-me»<a class="headerlink" href="#change-me" title="Permanent link">&para;</a></h3>
-<div class="highlight"><span class="filename">production_bot/backend/core/config.py (старий курс)</span><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">JWT_SECRET</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">"JWT_SECRET"</span><span class="p">,</span> <span class="s2">"change-me-in-production"</span><span class="p">)</span>
+<div class="highlight"><span class="filename">production_bot/backend/core/config.py (стартовий код)</span><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">JWT_SECRET</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">"JWT_SECRET"</span><span class="p">,</span> <span class="s2">"change-me-in-production"</span><span class="p">)</span>
 <a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="n">ADMIN_PASSWORD</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">"ADMIN_PASSWORD"</span><span class="p">,</span> <span class="s2">"change-me"</span><span class="p">)</span>
 </code></pre></div>
 <p><code>validate()</code> перевіряє лише «не порожній», тож значення за замовчуванням проходить. Хто прочитав код (а він публічний), той підпише токен сам. Справжній вивід:</p>
@@ -3936,7 +3936,7 @@
 <li><strong>задано погано</strong> — застосунок не стартує;</li>
 <li><strong>задано добре</strong> — працює.</li>
 </ul>
-<p>Справжній запуск з секретом зі старого конфігу:</p>
+<p>Справжній запуск з секретом зі стартового конфігу:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>$ JWT_SECRET=change-me-in-production uvicorn news_hub.api:app
 <a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>RuntimeError: JWT_SECRET має бути не коротшим за 32 символи; згенеруй: python -m news_hub.security
 <a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>ERROR:    Application startup failed. Exiting.
@@ -4086,7 +4086,7 @@
 </tbody>
 </table>
 <h3 id="_5">Старий захист: перевірити рядок<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h3>
-<div class="highlight"><span class="filename">OWASP_TOP_10.md, A10 (старий курс)</span><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="n">ALLOWED_HOSTS_FOR_FETCH</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'i.imgur.com'</span><span class="p">,</span> <span class="s1">'avatars.githubusercontent.com'</span><span class="p">]</span>
+<div class="highlight"><span class="filename">OWASP_TOP_10.md, A10 (стартовий код)</span><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="n">ALLOWED_HOSTS_FOR_FETCH</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'i.imgur.com'</span><span class="p">,</span> <span class="s1">'avatars.githubusercontent.com'</span><span class="p">]</span>
 <a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>
 <a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="k">def</span><span class="w"> </span><span class="nf">is_safe_url</span><span class="p">(</span><span class="n">url</span><span class="p">):</span>
 <a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>    <span class="n">parsed</span> <span class="o">=</span> <span class="n">urlparse</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
@@ -4149,7 +4149,7 @@
 </tr>
 <tr>
 <td>перенаправлення вручну, кожне — знову через <code>check_url</code> і resolver, максимум 3</td>
-<td>старий захист обходили саме так</td>
+<td>захист до рефакторингу обходили саме так</td>
 </tr>
 <tr>
 <td>тайм-аут 10 с, до 2 МБ (читаємо частинами), тип <code>application/rss+xml</code> / <code>xml</code></td>
@@ -4229,7 +4229,7 @@
 <h2 id="refactor-3">Рефакторинг 3. Підписані webhook<a class="headerlink" href="#refactor-3" title="Permanent link">&para;</a></h2>
 <p><code>POST /api/webhooks/scrape</code> — зовнішній планувальник (cron на іншому сервері, GitHub Actions за розкладом) запускає збір. JWT йому не видаємо: токен живе 30 хвилин, а cron працює роками. Натомість обидві сторони знають <strong>спільний секрет</strong>.</p>
 <h3 id="_7">Було: секрет у шляху і в заголовку<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h3>
-<div class="highlight"><span class="filename">production_bot/backend/api/webhook.py (старий курс)</span><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="nd">@router</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">WEBHOOK_PATH</span><span class="p">)</span>                       <span class="c1"># "/webhook/{WEBHOOK_SECRET}"</span>
+<div class="highlight"><span class="filename">production_bot/backend/api/webhook.py (стартовий код)</span><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="nd">@router</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">WEBHOOK_PATH</span><span class="p">)</span>                       <span class="c1"># "/webhook/{WEBHOOK_SECRET}"</span>
 <a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">handle_webhook</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 <a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>    <span class="n">secret_header</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"X-Telegram-Bot-Api-Secret-Token"</span><span class="p">)</span>
 <a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a>    <span class="k">if</span> <span class="n">secret_header</span> <span class="o">!=</span> <span class="n">settings</span><span class="o">.</span><span class="n">WEBHOOK_SECRET</span><span class="p">:</span>
@@ -4503,7 +4503,7 @@
 <li>запит до внутрішнього сервера — 0 (як <code>HITS</code> у <code>test_sources_ssrf.py</code>).</li>
 </ul>
 <h3 id="find-bug">Знайди помилку<a class="headerlink" href="#find-bug" title="Permanent link">&para;</a></h3>
-<p>Функція із захистом від SSRF і тест до неї (з уроку безпеки старого курсу, тест зелений):</p>
+<p>Функція із захистом від SSRF і тест до неї (з <code>OWASP_TOP_10.md</code>, тест зелений):</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a><span class="n">ALLOWED_HOSTS_FOR_FETCH</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'i.imgur.com'</span><span class="p">,</span> <span class="s1">'avatars.githubusercontent.com'</span><span class="p">]</span>
 <a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a>
 <a id="__codelineno-26-3" name="__codelineno-26-3" href="#__codelineno-26-3"></a><span class="k">def</span><span class="w"> </span><span class="nf">is_safe_url</span><span class="p">(</span><span class="n">url</span><span class="p">):</span>
@@ -4600,7 +4600,7 @@
 </ul>
 <h2 id="_13">Документація і джерела<a class="headerlink" href="#_13" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Код: <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_4/lessons/lesson_46_security_advanced/news_hub"><code>news_hub</code></a> — <code>security.py</code> з <code>production_bot/backend/core/security.py</code>, <code>api/deps.py</code>, <code>api/admin/auth.py</code>; <code>webhooks.py</code> з <code>api/webhook.py</code>; <code>safe_fetch.py</code> — розділ A10 <code>OWASP_TOP_10.md</code> старого курсу <code>PY-Course-Victor-Nikoriak-23_02</code>.</li>
+<li>Код: <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_4/lessons/lesson_46_security_advanced/news_hub"><code>news_hub</code></a> — <code>security.py</code> з <code>production_bot/backend/core/security.py</code>, <code>api/deps.py</code>, <code>api/admin/auth.py</code>; <code>webhooks.py</code> з <code>api/webhook.py</code>; <code>safe_fetch.py</code> — розділ A10 <code>OWASP_TOP_10.md</code>.</li>
 <li>OWASP: <a href="https://owasp.org/Top10/">Top 10</a>, <a href="https://cheatsheetseries.owasp.org/cheatsheets/Server_Side_Request_Forgery_Prevention_Cheat_Sheet.html">SSRF Prevention Cheat Sheet</a>, <a href="https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html">Password Storage Cheat Sheet</a>, <a href="https://cheatsheetseries.owasp.org/cheatsheets/JSON_Web_Token_for_Java_Cheat_Sheet.html">JSON Web Token for Java Cheat Sheet</a> (атаки на JWT — не лише для Java).</li>
 <li>Бібліотеки: <a href="https://pyjwt.readthedocs.io/en/stable/usage.html">PyJWT</a>, <a href="https://github.com/pyca/bcrypt">bcrypt</a>, <a href="https://docs.aiohttp.org/en/stable/client_reference.html">aiohttp — client reference</a>, Python — <a href="https://docs.python.org/3/library/hmac.html"><code>hmac</code></a>, <a href="https://docs.python.org/3/library/ipaddress.html"><code>ipaddress</code></a>, <a href="https://docs.python.org/3/library/secrets.html"><code>secrets</code></a>.</li>
 <li>FastAPI: <a href="https://fastapi.tiangolo.com/tutorial/security/">Security</a>, <a href="https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/">OAuth2 з JWT</a>.</li>

@@ -2487,12 +2487,12 @@
   <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Старт: що дає старий курс
+        Старт: з якого коду починаємо
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Старт: що дає старий курс">
+    <nav class="md-nav" aria-label="Старт: з якого коду починаємо">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -3357,12 +3357,12 @@
   <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Старт: що дає старий курс
+        Старт: з якого коду починаємо
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Старт: що дає старий курс">
+    <nav class="md-nav" aria-label="Старт: з якого коду починаємо">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -3697,7 +3697,7 @@
 <li><code>/subscribe бюджет</code> — і нова новина про бюджет прийде сама, щойно агрегатор її збере.</li>
 </ul>
 <p>Бот — ще один <strong>вхід</strong> у той самий застосунок. Він читає ту саму базу через той самий <code>NewsRepository</code>, аналізує тим самим <code>analyze_news</code>, а його webhook захищений так само, як webhook уроку 46.</p>
-<p>Код — зі старого курсу: <code>echo_bot</code> і <code>ai_bot</code> (aiogram 3: роутери, middleware, фабрики бота), <code>production_bot</code> (webhook у FastAPI, розсилка). Переносячи його, запускаємо старий код без змін проти «Telegram» і дивимось, що той відповідає.</p>
+<p>Стартовий код: <code>echo_bot</code> і <code>ai_bot</code> (aiogram 3: роутери, middleware, фабрики бота), <code>production_bot</code> (webhook у FastAPI, розсилка). Переносячи його, запускаємо стартовий код без змін проти «Telegram» і дивимось, що той відповідає.</p>
 <table>
 <thead>
 <tr>
@@ -3754,11 +3754,11 @@
 <li><code>==</code> зупиняється на першому неспівпадінні, тож за часом відповіді секрет можна підбирати по символу. <code>compare_digest</code> порівнює за сталий час.</li>
 </ol>
 </details>
-<h2 id="_2">Старт: що дає старий курс<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<h2 id="_2">Старт: з якого коду починаємо<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
-<th>Звідки (<code>module_5/lesson_46_Telegram_API/</code>)</th>
+<th>Звідки</th>
 <th>Що там</th>
 <th>Куди в <code>news_hub</code></th>
 </tr>
@@ -3796,7 +3796,7 @@
 </tr>
 </tbody>
 </table>
-<p>Як Telegram спілкується з ботом — книжкова частина старого курсу (<code>lesson_documentation.md</code>, <code>lesson_mermaid.md</code>) і <a href="https://core.telegram.org/bots/api">документація Bot API</a>. Коротко: бот — це програма, яка отримує від Telegram <strong>update</strong> (JSON з повідомленням користувача) і відповідає викликами HTTP API: <code>https://api.telegram.org/bot&lt;TOKEN&gt;/sendMessage</code>.</p>
+<p>Як Telegram спілкується з ботом — довідники стартового проєкту (<code>lesson_documentation.md</code>, <code>lesson_mermaid.md</code>) і <a href="https://core.telegram.org/bots/api">документація Bot API</a>. Коротко: бот — це програма, яка отримує від Telegram <strong>update</strong> (JSON з повідомленням користувача) і відповідає викликами HTTP API: <code>https://api.telegram.org/bot&lt;TOKEN&gt;/sendMessage</code>.</p>
 <h3 id="telegram-telegram-bot-api">«Telegram» без Telegram: двійник Bot API<a class="headerlink" href="#telegram-telegram-bot-api" title="Permanent link">&para;</a></h3>
 <p><code>api.telegram.org</code> у середовищі, де писали урок, недоступний. Токена бота немає ні там, ні в Colab. Тому всі тести, ноутбук і запуск наживо працюють проти <strong>двійника</strong>: <code>tests/telegram_twin.py</code>. Це aiohttp-сервер, який відповідає у форматі Bot API і записує кожен виклик. aiogram уміє ходити на інший сервер (так працює й офіційний локальний Bot API server):</p>
 <div class="highlight"><span class="filename">news_hub/bot/factory.py</span><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">create_bot</span><span class="p">(</span><span class="n">token</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">api_url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Bot</span><span class="p">:</span>
@@ -3858,7 +3858,7 @@
 </tr>
 </tbody>
 </table>
-<p>Чому не змінна модуля. Справжній вивід старого <code>ai_bot</code>, коли в процесі створюють другий диспетчер (а API, тести й ноутбук створюють):</p>
+<p>Чому не змінна модуля. Справжній вивід стартового <code>ai_bot</code>, коли в процесі створюють другий диспетчер (а API, тести й ноутбук створюють):</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>другий create_dispatcher: Router is already attached to &lt;Dispatcher '0x7f3ed1ce2a50'&gt;
 </code></pre></div>
 <p>Залежності доходять до handler через параметри. aiogram «впорскує» значення з <code>data</code> за іменем, як <code>Depends</code> у FastAPI:</p>
@@ -3906,11 +3906,11 @@
 <h2 id="refactor-2">Рефакторинг 2. Відповідь у HTML: екранування і 4096<a class="headerlink" href="#refactor-2" title="Permanent link">&para;</a></h2>
 <p>Бот відповідає з <code>parse_mode=HTML</code>: <code>&lt;b&gt;</code>, <code>&lt;i&gt;</code>, <code>&lt;a href&gt;</code>. Telegram розбирає розмітку сам і відхиляє повідомлення, у якому «&lt;», «&gt;» чи «&amp;» стоять поза тегом.</p>
 <p>Старий <code>/start</code>:</p>
-<div class="highlight"><span class="filename">ai_bot/app/handlers/commands.py (старий курс)</span><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>    <span class="k">await</span> <span class="n">message</span><span class="o">.</span><span class="n">answer</span><span class="p">(</span>
+<div class="highlight"><span class="filename">ai_bot/app/handlers/commands.py (стартовий код)</span><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>    <span class="k">await</span> <span class="n">message</span><span class="o">.</span><span class="n">answer</span><span class="p">(</span>
 <a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>        <span class="sa">f</span><span class="s2">"Привіт, &lt;b&gt;</span><span class="si">{</span><span class="n">user</span><span class="o">.</span><span class="n">first_name</span><span class="si">}</span><span class="s2">&lt;/b&gt;! 🤖</span><span class="se">\n\n</span><span class="s2">"</span>
 <a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>        <span class="o">...</span>
 </code></pre></div>
-<p><code>first_name</code> — те, що користувач написав у профілі. Справжній вивід старого коду без змін (aiogram 3.15.0 з його <code>requirements.txt</code>) проти двійника:</p>
+<p><code>first_name</code> — те, що користувач написав у профілі. Справжній вивід стартового коду без змін (aiogram 3.15.0 з його <code>requirements.txt</code>) проти двійника:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>/start від 'Олена': надіслано
 <a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>/start від '&lt;Олена&gt;': TelegramBadRequest: Telegram server says - Bad Request: can't parse entities: unexpected character at byte offset 11
 <a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>/start від 'Tom &amp; Jerry': TelegramBadRequest: Telegram server says - Bad Request: can't parse entities: unsupported entity at byte offset 15
@@ -3930,7 +3930,7 @@
 </code></pre></div>
 <h3 id="_3">Довге повідомлення: різати між рядками<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h3>
 <p>Telegram приймає до 4096 символів. Старий <code>split_long_message</code> різав кожні 4000:</p>
-<div class="highlight"><span class="filename">ai_bot/app/utils/formatter.py (старий курс)</span><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>    <span class="k">return</span> <span class="p">[</span><span class="n">text</span><span class="p">[</span><span class="n">i</span><span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="n">MAX_MESSAGE_LEN</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">),</span> <span class="n">MAX_MESSAGE_LEN</span><span class="p">)]</span>
+<div class="highlight"><span class="filename">ai_bot/app/utils/formatter.py (стартовий код)</span><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>    <span class="k">return</span> <span class="p">[</span><span class="n">text</span><span class="p">[</span><span class="n">i</span><span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="n">MAX_MESSAGE_LEN</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">),</span> <span class="n">MAX_MESSAGE_LEN</span><span class="p">)]</span>
 </code></pre></div>
 <p>Розріз може припасти всередину <code>&lt;pre&gt;…&lt;/pre&gt;</code> чи <code>&amp;amp;</code>. Справжній вивід на довгій відповіді AI з блоком коду (<code>format_ai_response</code> + <code>split_long_message</code>):</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>частин: 4 | невалідних: ["Bad Request: can't parse entities: can't find end tag corres", "Bad Request: can't parse entities: can't find end tag corres"]
@@ -4283,7 +4283,7 @@
 <a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a>Success: no issues found in 26 source files
 </code></pre></div>
 <h2 id="min-versions">Мінімальні версії залежностей<a class="headerlink" href="#min-versions" title="Permanent link">&para;</a></h2>
-<div class="highlight"><span class="filename">requirements.txt (нове)</span><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>aiogram&gt;=3.15           # урок 47: Telegram-бот (у старому курсі — 3.15.0)
+<div class="highlight"><span class="filename">requirements.txt (нове)</span><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>aiogram&gt;=3.15           # урок 47: Telegram-бот (у стартовому коді — 3.15.0)
 </code></pre></div>
 <p>Усі тести проходять на трьох наборах:</p>
 <ul>
@@ -4341,7 +4341,7 @@
 <li>тест у <code>tests/integration/test_bot.py</code>.</li>
 </ul>
 <h3 id="find-bug">Знайди помилку<a class="headerlink" href="#find-bug" title="Permanent link">&para;</a></h3>
-<p>Handler зі старого курсу і його тест (тест зелений):</p>
+<p>Handler зі стартового коду і його тест (тест зелений):</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="nd">@router</span><span class="o">.</span><span class="n">message</span><span class="p">(</span><span class="n">CommandStart</span><span class="p">())</span>
 <a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">cmd_start</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="n">Message</span><span class="p">,</span> <span class="n">history_repo</span><span class="p">:</span> <span class="n">HistoryRepository</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a>    <span class="n">user</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">from_user</span>
@@ -4434,7 +4434,7 @@
 </ul>
 <h2 id="_10">Документація і джерела<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Код: <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_4/lessons/lesson_47_telegram_bot/news_hub"><code>news_hub</code></a> — <code>bot/</code> з <code>ai_bot/app/</code> і <code>echo_bot/</code>, <code>notify.py</code> з <code>production_bot/backend/workers/notifications.py</code>, webhook — з <code>production_bot/backend/api/webhook.py</code> старого курсу <code>PY-Course-Victor-Nikoriak-23_02</code>.</li>
+<li>Код: <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_4/lessons/lesson_47_telegram_bot/news_hub"><code>news_hub</code></a> — <code>bot/</code> з <code>ai_bot/app/</code> і <code>echo_bot/</code>, <code>notify.py</code> з <code>production_bot/backend/workers/notifications.py</code>, webhook — з <code>production_bot/backend/api/webhook.py</code>.</li>
 <li>Telegram: <a href="https://core.telegram.org/bots/api">Bot API</a>, <a href="https://core.telegram.org/bots/api#html-style">HTML style</a>, <a href="https://core.telegram.org/bots/api#setwebhook">setWebhook</a>, <a href="https://core.telegram.org/bots/webhooks">webhooks</a>, <a href="https://core.telegram.org/bots/faq#my-bot-is-hitting-limits-how-do-i-avoid-this">Bots FAQ: ліміти</a>, <a href="https://github.com/tdlib/telegram-bot-api">локальний Bot API server</a>, <a href="https://core.telegram.org/bots/features#botfather">@BotFather</a>.</li>
 <li>aiogram 3: <a href="https://docs.aiogram.dev/en/latest/">документація</a>, <a href="https://docs.aiogram.dev/en/latest/dispatcher/router.html">Router</a>, <a href="https://docs.aiogram.dev/en/latest/dispatcher/middlewares.html">Middlewares</a>, <a href="https://docs.aiogram.dev/en/latest/dispatcher/dependency_injection.html">Dependency injection</a>, <a href="https://docs.aiogram.dev/en/latest/dispatcher/webhook.html">webhook</a>.</li>
 <li>Уроки курсу: <a href="../lesson_39/">39 — Redis і rate limit</a>, <a href="../lesson_43/">43 — LLM API</a>, <a href="../lesson_46/">46 — Security advanced</a>.</li>

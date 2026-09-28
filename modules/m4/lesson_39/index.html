@@ -2231,7 +2231,7 @@
   <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Старт: що дає старий курс
+        Старт: з якого коду починаємо
       
     </span>
   </a>
@@ -3335,7 +3335,7 @@
   <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Старт: що дає старий курс
+        Старт: з якого коду починаємо
       
     </span>
   </a>
@@ -3720,7 +3720,7 @@
 <li>До відповіді — завдяки <code>Depends(get_db, scope="function")</code>. Сьогодні це знадобиться для кешу.</li>
 </ol>
 </details>
-<h2 id="_2">Старт: що дає старий курс<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<h2 id="_2">Старт: з якого коду починаємо<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
@@ -4001,7 +4001,7 @@
 </code></pre></div>
 <p>Для захисту від спаму зборами цього досить — простота важить більше. Де потрібна точність (платне API), беруть <strong>ковзне вікно</strong> — див. «Спробуй самостійно».</p>
 <h2 id="refactor-4">Рефакторинг 4. Фоновий збір: 202 і статус задачі<a class="headerlink" href="#refactor-4" title="Permanent link">&para;</a></h2>
-<p>Живий збір — сім сторінок rbc.ua з тайм-аутом 15 с кожна (урок 37). Тримати HTTP-запит відкритим стільки часу погано: клієнт може відвалитись за тайм-аутом, проксі — обірвати з'єднання. Рішення зі старого <code>news_dashboard</code> (<code>/api/scrape/archive</code>): відповісти <strong>одразу</strong> і працювати у фоні.</p>
+<p>Живий збір — сім сторінок rbc.ua з тайм-аутом 15 с кожна (урок 37). Тримати HTTP-запит відкритим стільки часу погано: клієнт може відвалитись за тайм-аутом, проксі — обірвати з'єднання. Рішення з прототипу <code>news_dashboard</code> (<code>/api/scrape/archive</code>): відповісти <strong>одразу</strong> і працювати у фоні.</p>
 <div class="highlight"><span class="filename">news_hub/api.py (фрагмент)</span><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="nd">@app</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">"/api/scrape/jobs"</span><span class="p">,</span> <span class="n">response_model</span><span class="o">=</span><span class="n">JobStatus</span><span class="p">,</span> <span class="n">status_code</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_202_ACCEPTED</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
 <a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">start_scrape_job</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">ScrapeRequest</span><span class="p">,</span> <span class="n">background</span><span class="p">:</span> <span class="n">BackgroundTasks</span><span class="p">,</span> <span class="n">redis</span><span class="p">:</span> <span class="n">RedisDep</span><span class="p">,</span>
 <a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>                           <span class="n">scrapers</span><span class="p">:</span> <span class="n">ScrapersDep</span><span class="p">,</span> <span class="n">session_factory</span><span class="p">:</span> <span class="o">...</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">JobStatus</span><span class="p">:</span>
@@ -4141,7 +4141,7 @@
 </ul>
 <p><strong>Критерії перевірки:</strong> демонстрація «межі вікна» з рефакторингу 3 пропускає не більше 3 запитів за будь-які 2 секунди; тест з <code>fakeredis</code>; <code>mypy --strict</code> чистий.</p>
 <h3 id="find-bug">Знайди помилку<a class="headerlink" href="#find-bug" title="Permanent link">&para;</a></h3>
-<p>Колега вирішив, що окрема <code>session_factory</code> для фону — зайве ускладнення, і передав у задачу <strong>репозиторій запиту</strong>, як старий <code>news_dashboard</code> передавав <code>db</code>. Перевіримо в процесі, через <code>TestClient</code>:</p>
+<p>Колега вирішив, що окрема <code>session_factory</code> для фону — зайве ускладнення, і передав у задачу <strong>репозиторій запиту</strong>, як прототип <code>news_dashboard</code> передавав <code>db</code>. Перевіримо в процесі, через <code>TestClient</code>:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">BackgroundTasks</span>
 <a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a>
 <a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">news_hub.api</span><span class="w"> </span><span class="kn">import</span> <span class="n">JobStore</span><span class="p">,</span> <span class="n">RedisDep</span><span class="p">,</span> <span class="n">RepoDep</span><span class="p">,</span> <span class="n">app</span>
@@ -4259,7 +4259,7 @@
 </ul>
 <h2 id="_9">Документація і джерела<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Код: <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_4/lessons/lesson_39_middleware_redis/news_hub"><code>news_hub</code></a> — Redis-клієнт з <code>production_bot/backend/core/redis.py</code>, rate limit з <code>ai_bot/app/middlewares/rate_limit.py</code> і <code>repositories/rate_limit_repo.py</code> (старий курс, <code>module_5/lesson_46_Telegram_API</code>), фоновий збір — з <code>news_dashboard/app/main.py</code> (<code>module_4/lessons/lesson_34_asyncio</code>).</li>
+<li>Код: <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_4/lessons/lesson_39_middleware_redis/news_hub"><code>news_hub</code></a> — Redis-клієнт з <code>production_bot/backend/core/redis.py</code>, rate limit з <code>ai_bot/app/middlewares/rate_limit.py</code> і <code>repositories/rate_limit_repo.py</code> (стартовий код), фоновий збір — з <code>news_dashboard/app/main.py</code>.</li>
 <li>Урок 30 курсу — <a href="../../m3/lesson_30/">Redis overview</a>: cache-aside, <code>INCR</code>/<code>EXPIRE</code>, pipeline, sorted set.</li>
 <li>FastAPI: <a href="https://fastapi.tiangolo.com/tutorial/middleware/">Middleware</a>, <a href="https://fastapi.tiangolo.com/tutorial/background-tasks/">Background Tasks</a>, <a href="https://fastapi.tiangolo.com/advanced/custom-response/">Custom Response</a></li>
 <li>Redis: <a href="https://redis.io/docs/latest/commands/incr/">INCR — pattern: rate limiter</a>, <a href="https://redis.io/docs/latest/commands/expire/">EXPIRE (опції NX/XX/GT/LT)</a>, <a href="https://redis.io/docs/latest/develop/interact/transactions/">Transactions</a>, <a href="https://redis.io/docs/latest/commands/keys/">KEYS — не для продакшену</a></li>

@@ -2377,7 +2377,7 @@
   <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Старт: що дає старий курс
+        Старт: з якого коду починаємо
       
     </span>
   </a>
@@ -3473,7 +3473,7 @@
   <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Старт: що дає старий курс
+        Старт: з якого коду починаємо
       
     </span>
   </a>
@@ -3879,7 +3879,7 @@
 <li>як налаштувати проєкт, щоб агент працював за його правилами, а не за своїми здогадками;</li>
 <li>як перевірити те, що агент написав, — навіть коли всі його тести зелені.</li>
 </ul>
-<p>Відповіді — на двох справжніх експериментах. Перший: Claude Code <strong>двічі</strong> додає в <code>news_hub</code> нове джерело новин — з голим запитом і з налаштованим проєктом та тестами-специфікацією; обидва результати перевіряємо. Другий: проєкт <code>depression_dashboard</code>, який AI згенерував у старому курсі, рецензуємо тестами — і знаходимо десять вад у застосунку, що «працював».</p>
+<p>Відповіді — на двох справжніх експериментах. Перший: Claude Code <strong>двічі</strong> додає в <code>news_hub</code> нове джерело новин — з голим запитом і з налаштованим проєктом та тестами-специфікацією; обидва результати перевіряємо. Другий: проєкт <code>depression_dashboard</code>, який згенерував AI, рецензуємо тестами — і знаходимо десять вад у застосунку, що «працював».</p>
 <table>
 <thead>
 <tr>
@@ -3934,28 +3934,28 @@
 <li>Що <code>requirements.txt</code> каже правду: проєкт працює з найстарішими версіями, які він дозволяє. В уроці 41 так знайшли падіння парсера з beautifulsoup4 4.12.</li>
 </ol>
 </details>
-<h2 id="_2">Старт: що дає старий курс<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<h2 id="_2">Старт: з якого коду починаємо<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
-<th>Звідки</th>
+<th>Що є</th>
 <th>Що там</th>
 <th>Куди</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>module_5/lesson_53_claude_code/CLAUDE_DOC.md</code></td>
+<td><code>CLAUDE_DOC.md</code></td>
 <td>довідник Claude Code (2025-05, 1153 рядки)</td>
 <td><a href="../ai/claude_code/">довідник книги</a>: звірено з документацією</td>
 </tr>
 <tr>
-<td>той самий урок: <code>IDEA.md</code>, <code>ROADMAP.md</code>, <code>Prompts_Roadmap.md</code> + <code>depression_dashboard/</code></td>
+<td><code>IDEA.md</code>, <code>ROADMAP.md</code>, <code>Prompts_Roadmap.md</code> + <code>depression_dashboard/</code></td>
 <td>промпти й проєкт Flask + Streamlit + scikit-learn, який AI за ними згенерував</td>
 <td><code>lesson_42_ai_dev_tools/depression_dashboard/</code> — кейс рецензії (рефакторинг 3)</td>
 </tr>
 <tr>
-<td><code>Data_Science_Course_SSWU/task_11/analysis_tonality_2.py</code></td>
+<td>скрипт аналізу тональності <code>analysis_tonality_2.py</code></td>
 <td>розбір RSS «Української правди» через <code>feedparser</code></td>
 <td>нове джерело <code>news_hub</code> — його пише AI (рефакторинг 2)</td>
 </tr>
@@ -3969,8 +3969,8 @@
 <h2 id="refactor-1">Рефакторинг 1. Проєкт, у якому AI може працювати<a class="headerlink" href="#refactor-1" title="Permanent link">&para;</a></h2>
 <p>Агент бачить лише те, що є в репозиторії та в запиті. Він не знає, що в <code>news_hub</code> домени перевіряють без <code>endswith</code>, що тести не ходять у мережу, що <code>pytest -m unit</code> треба запускати після кожної зміни. Усе це треба <strong>записати</strong>.</p>
 <h3 id="claudemd">CLAUDE.md<a class="headerlink" href="#claudemd" title="Permanent link">&para;</a></h3>
-<p>Старий довідник мав приклад <code>CLAUDE.md</code> саме для нашого агрегатора — ще з тих часів, коли проєкт був <code>news_dashboard</code>:</p>
-<div class="highlight"><span class="filename">CLAUDE.md: приклад старого курсу → news_hub (урок 42)</span><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="gd">-# Проект: News Dashboard API</span>
+<p>Довідник <code>CLAUDE_DOC.md</code> мав приклад <code>CLAUDE.md</code> саме для нашого агрегатора — ще з тих часів, коли проєкт був <code>news_dashboard</code>:</p>
+<div class="highlight"><span class="filename">CLAUDE.md: стартовий приклад → news_hub (урок 42)</span><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="gd">-# Проект: News Dashboard API</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="gd">-## Технологічний стек</span>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="gd">-- Python 3.12, FastAPI 0.115, MongoDB (motor 3.7)</span>
 <a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="gd">-## Команди розробки</span>
@@ -3995,7 +3995,7 @@
 <a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="gi">+- Не змінюй наявні тести, щоб вони пройшли. Якщо тест здається хибним — зупинись і поясни.</span>
 <a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a><span class="gi">+- Нових залежностей не додавай; якщо без неї ніяк — зупинись і поясни.</span>
 </code></pre></div>
-<p>Старий приклад описує MongoDB, <code>app/nlp.py</code> і Streamlit — нічого з цього в <code>news_hub</code> немає. Застарілий <code>CLAUDE.md</code> гірший за відсутній: агент упевнено піде шукати <code>motor</code>. Новий файл містить <strong>команди перевірки</strong> і <strong>правила, яких не видно з коду</strong>: кожне з них — урок попередніх занять (<code>endswith</code> — урок 41, мережа в тестах — урок 41, «не змінюй тести» — урок 25). Повний файл — <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_42_ai_dev_tools/news_hub/CLAUDE.md"><code>news_hub/CLAUDE.md</code></a>.</p>
+<p>Цей приклад описує MongoDB, <code>app/nlp.py</code> і Streamlit — нічого з цього в <code>news_hub</code> немає. Застарілий <code>CLAUDE.md</code> гірший за відсутній: агент упевнено піде шукати <code>motor</code>. Новий файл містить <strong>команди перевірки</strong> і <strong>правила, яких не видно з коду</strong>: кожне з них — урок попередніх занять (<code>endswith</code> — урок 41, мережа в тестах — урок 41, «не змінюй тести» — урок 25). Повний файл — <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_42_ai_dev_tools/news_hub/CLAUDE.md"><code>news_hub/CLAUDE.md</code></a>.</p>
 <h3 id="hook-skill">Дозволи, hook, skill<a class="headerlink" href="#hook-skill" title="Permanent link">&para;</a></h3>
 <p><code>CLAUDE.md</code> — <strong>контекст</strong>: агент зазвичай його виконує, але не гарантовано. Те, що мусить виконатися, живе в <code>.claude/settings.json</code>:</p>
 <div class="highlight"><span class="filename">news_hub/.claude/settings.json</span><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="p">{</span>
@@ -4085,7 +4085,7 @@
 </code></pre></div>
 <p>Так і задумано: <code>allow</code>-правила з <code>.claude/settings.json</code> діють лише після того, як ти <strong>довірив папку</strong> (діалог при першому інтерактивному запуску). Інакше будь-який клонований репозиторій сам собі дозволив би команди. <code>deny</code> і <code>ask</code> діють одразу. <code>claude -p</code> діалог пропускає, тому в недовіреній папці «мовчки» ігнорує <code>allow</code> з файлу. Для чесного порівняння обидва експериментальні запуски нижче отримали однакові дозволи прапорцем <code>--allowedTools</code>. Поглиблено: <a href="../ai/claude_code/#settings">довідник, розділ 11</a>.</p>
 <h2 id="refactor-2">Рефакторинг 2. Експеримент: одне завдання — два запити<a class="headerlink" href="#refactor-2" title="Permanent link">&para;</a></h2>
-<p>Задача: додати друге джерело — RSS «Української правди». Ідея — зі скрипта <code>task_11</code> курсу SSWU (<code>feedparser</code>). Сама стрічка з середовища, де писався урок, недоступна (мережева політика). Тому зразок — <code>tests/fixtures/pravda_rss.xml</code>, <strong>навчальний знімок у форматі RSS 2.0</strong> з вигаданими заголовками. У ньому навмисно є те, що буває в справжніх стрічках: <code>pubDate</code> з <code>+0300</code> і в GMT, <code>&amp;quot;</code> у заголовку, <code>&lt;p&gt;</code> в описі, дубль, закороткий заголовок, новина з сестринського сайту <code>epravda.com.ua</code>.</p>
+<p>Задача: додати друге джерело — RSS «Української правди». Ідея — зі скрипта аналізу тональності <code>analysis_tonality_2.py</code> (<code>feedparser</code>). Сама стрічка з середовища, де писався урок, недоступна (мережева політика). Тому зразок — <code>tests/fixtures/pravda_rss.xml</code>, <strong>навчальний знімок у форматі RSS 2.0</strong> з вигаданими заголовками. У ньому навмисно є те, що буває в справжніх стрічках: <code>pubDate</code> з <code>+0300</code> і в GMT, <code>&amp;quot;</code> у заголовку, <code>&lt;p&gt;</code> в описі, дубль, закороткий заголовок, новина з сестринського сайту <code>epravda.com.ua</code>.</p>
 <p>Два запуски Claude Code в режимі <code>claude -p</code> на двох копіях проєкту зі станом уроку 41:</p>
 <table>
 <thead>
@@ -4304,12 +4304,12 @@
 </ul>
 <p>Поглиблено: <a href="https://code.claude.com/docs/en/best-practices">Best practices</a>, <a href="https://code.claude.com/docs/en/common-workflows">Common workflows</a>.</p>
 <h2 id="refactor-3">Рефакторинг 3. Рецензія AI-проєкту тестами: <code>depression_dashboard</code><a class="headerlink" href="#refactor-3" title="Permanent link">&para;</a></h2>
-<p>У старому курсі AI отримав рольові промпти («You are a Senior Python Architect and Data Scientist…», 12 етапів від EDA до Docker) і згенерував <strong>Depression Analytics Platform</strong>: Flask API, Streamlit-дашборд, RandomForest, KMeans, IsolationForest, 57-мегабайтний pickle моделі. Застосунок запускався, усі ендпоінти відповідали <code>200</code>, дашборд малював графіки. У промптах жодного разу не попрошено тестів чи критеріїв прийняття; про витік даних сказано одним рядком — і він у коді є.</p>
+<p>AI отримав рольові промпти («You are a Senior Python Architect and Data Scientist…», 12 етапів від EDA до Docker) і згенерував <strong>Depression Analytics Platform</strong>: Flask API, Streamlit-дашборд, RandomForest, KMeans, IsolationForest, 57-мегабайтний pickle моделі. Застосунок запускався, усі ендпоінти відповідали <code>200</code>, дашборд малював графіки. У промптах жодного разу не попрошено тестів чи критеріїв прийняття; про витік даних сказано одним рядком — і він у коді є.</p>
 <div class="admonition warning">
 <p class="admonition-title">Чутлива тема</p>
 <p>Застосунок оцінює ризик депресії й питає про суїцидальні думки. У курсі це <strong>кейс рецензії коду</strong>, а не інструмент. Застосунок показує застереження й номер лінії підтримки. Модель на відкритому датасеті не є діагнозом.</p>
 </div>
-<p>Рецензія — тестами на синтетичних даних з колонками справжнього датасету (сам датасет у репозиторій не входить). Кожен тест — одна знахідка. На коді старого курсу:</p>
+<p>Рецензія — тестами на синтетичних даних з колонками справжнього датасету (сам датасет у репозиторій не входить). Кожен тест — одна знахідка. На згенерованому коді:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>FAILED tests/test_review.py::test_feature_importance_keeps_descending_order
 <a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>FAILED tests/test_review.py::test_correlations_keep_order_by_strength
 <a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>FAILED tests/test_review.py::test_cluster_names_agree_with_profiles
@@ -4369,7 +4369,7 @@
 <tr>
 <td>2</td>
 <td>назви кластерів вшиті в UI: «Sleep Deprived» — кластер, що спить <strong>найбільше</strong> (8,15 год), «Financially Stressed» — кластер з 2 людей</td>
-<td>центроїди моделі старого курсу; тест «назва відповідає профілю»</td>
+<td>центроїди згенерованої моделі; тест «назва відповідає профілю»</td>
 <td>назву дає профіль кластера порівняно з середнім</td>
 </tr>
 <tr>
@@ -4577,8 +4577,8 @@
 </ul>
 <h2 id="_9">Документація і джерела<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Код: <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_4/lessons/lesson_42_ai_dev_tools/news_hub"><code>news_hub</code></a> — <code>rss.py</code> і зміни <code>models.py</code> написав Claude Code за специфікацією, правки рецензента позначено; ідея RSS-джерела — <code>task_11/analysis_tonality_2.py</code> з <code>Data_Science_Course_SSWU</code>. <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_4/lessons/lesson_42_ai_dev_tools/depression_dashboard"><code>depression_dashboard</code></a> — з <code>module_5/lesson_53_claude_code/</code> старого курсу, разом з промптами (<code>prompts/</code>).</li>
-<li><a href="../ai/claude_code/">Довідник: Claude Code</a> — з <code>CLAUDE_DOC.md</code> старого курсу, звірений з документацією.</li>
+<li>Код: <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_4/lessons/lesson_42_ai_dev_tools/news_hub"><code>news_hub</code></a> — <code>rss.py</code> і зміни <code>models.py</code> написав Claude Code за специфікацією, правки рецензента позначено; ідея RSS-джерела — скрипт аналізу тональності <code>analysis_tonality_2.py</code>. <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_4/lessons/lesson_42_ai_dev_tools/depression_dashboard"><code>depression_dashboard</code></a> — проєкт, який згенерував AI, разом з промптами (<code>prompts/</code>).</li>
+<li><a href="../ai/claude_code/">Довідник: Claude Code</a> — звірений з установленим <code>claude</code> і з документацією.</li>
 <li>Урок 25 — <a href="../../m2/lesson_25/">валідація AI-коду</a>; урок 41 — <a href="../lesson_41/">тест конвеєра, мок і фейк, мінімальні версії</a>.</li>
 <li>Claude Code: <a href="https://code.claude.com/docs/en/best-practices">Best practices</a>, <a href="https://code.claude.com/docs/en/memory">Memory (CLAUDE.md)</a>, <a href="https://code.claude.com/docs/en/permissions">Permissions</a>, <a href="https://code.claude.com/docs/en/hooks">Hooks</a>, <a href="https://code.claude.com/docs/en/headless">Headless (<code>-p</code>)</a>, <a href="https://code.claude.com/docs/en/security">Security</a>.</li>
 <li>Flask: <a href="https://flask.palletsprojects.com/en/stable/api/#flask.json.provider.DefaultJSONProvider.sort_keys">JSON provider, <code>sort_keys</code></a>; scikit-learn: <a href="https://scikit-learn.org/stable/common_pitfalls.html#data-leakage">Common pitfalls — data leakage</a>; Python: <a href="https://docs.python.org/3/library/zoneinfo.html#data-sources"><code>zoneinfo</code> і пакет <code>tzdata</code></a>; Streamlit: <a href="https://docs.streamlit.io/develop/api-reference/app-testing">AppTest</a>.</li>

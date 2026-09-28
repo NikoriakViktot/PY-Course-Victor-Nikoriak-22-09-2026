@@ -4674,7 +4674,7 @@
 <p>У Compose карта звертається до API за адресою <code>http://api:8032</code>, а не <code>localhost</code>: кожен контейнер — окремий «комп'ютер» у спільній мережі, а <code>api</code> — ім'я сервісу.</p>
 <h2 id="practice">Практика<a class="headerlink" href="#practice" title="Permanent link">&para;</a></h2>
 <h3 id="api_3">Розібраний приклад: середньодобова температура через API<a class="headerlink" href="#api_3" title="Permanent link">&para;</a></h3>
-<p>У курсі Data Science викладача клієнт <code>TelegramDataLoader</code> завантажував спостереження з API і рахував середньодобові значення в pandas. Зробимо те саме через <code>MeteoClient</code> — з пагінацією і лише потрібними полями:</p>
+<p>Клієнт викладача <code>TelegramDataLoader</code> завантажував спостереження з API і рахував середньодобові значення в pandas. Зробимо те саме через <code>MeteoClient</code> — з пагінацією і лише потрібними полями:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-40-1" name="__codelineno-40-1" href="#__codelineno-40-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 <a id="__codelineno-40-2" name="__codelineno-40-2" href="#__codelineno-40-2"></a>
 <a id="__codelineno-40-3" name="__codelineno-40-3" href="#__codelineno-40-3"></a><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
@@ -4852,7 +4852,7 @@
 <li>Інші типи: <a href="https://www.jsonrpc.org/specification">JSON-RPC 2.0</a>, <a href="https://graphql.org/learn/">GraphQL</a>, <a href="https://grpc.io/docs/what-is-grpc/introduction/">gRPC</a> і <a href="https://protobuf.dev/">Protocol Buffers</a>, <a href="https://www.rfc-editor.org/rfc/rfc6455">WebSocket — RFC 6455</a>, <a href="https://html.spec.whatwg.org/multipage/server-sent-events.html">Server-Sent Events — стандарт HTML</a></li>
 <li>Бібліотеки: <a href="https://fastapi.tiangolo.com/">FastAPI</a>, <a href="https://strawberry.rocks/docs">Strawberry GraphQL</a>, <a href="https://grpc.io/docs/languages/python/quickstart/">grpcio</a>, <a href="https://websockets.readthedocs.io/">websockets</a>, <a href="https://pypi.org/project/pymetdecoder/">pymetdecoder</a>, <a href="https://docs.streamlit.io/">Streamlit</a>, <a href="https://spec.openapis.org/oas/latest.html">OpenAPI</a></li>
 <li>Дані: <a href="https://www.ogimet.com/">ogimet.com</a> — телеграми SYNOP; код КН-01 / WMO FM 12 SYNOP</li>
-<li>Проєкт викладача: <a href="https://github.com/NikoriakViktot/ogimet"><code>NikoriakViktot/ogimet</code></a> (перша версія API) і його розвиток — <code>ogimet-main</code> у старому курсі та клієнт у курсі Data Science</li>
+<li>Проєкт викладача: <a href="https://github.com/NikoriakViktot/ogimet"><code>NikoriakViktot/ogimet</code></a> (перша версія API) і його розвиток — <code>ogimet-main</code> та клієнт <code>meteo_parser/telegram_filter.py</code></li>
 </ul>
 
 

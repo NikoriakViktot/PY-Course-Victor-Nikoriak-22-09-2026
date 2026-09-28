@@ -2431,7 +2431,7 @@
   <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Старт: що дає старий курс
+        Старт: з якого коду починаємо
       
     </span>
   </a>
@@ -3351,7 +3351,7 @@
   <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Старт: що дає старий курс
+        Старт: з якого коду починаємо
       
     </span>
   </a>
@@ -3680,7 +3680,7 @@
 <h1 id="45-websockets">Урок 45. WebSockets + практика: чат<a class="headerlink" href="#45-websockets" title="Permanent link">&para;</a></h1>
 <p>У нотатках є групи: «Сім'я» бачить спільні нотатки й списки покупок (урок 40). Сьогодні група отримує <strong>чат</strong> — повідомлення з'являються в усіх учасників одразу, без оновлення сторінки.</p>
 <p>HTTP так не вміє: розмову завжди починає браузер — «запитав → отримав». Щоб дізнатися про нове повідомлення, довелося б питати сервер щосекунди. <strong>WebSocket</strong> — постійний двосторонній канал: відкривається одним HTTP-запитом і лишається відкритим, писати в нього може і браузер, і сервер (урок 32, «WebSocket і SSE»).</p>
-<p>Код чату — зі старого курсу, це крок 7B <a href="https://nikoriakviktot.github.io/notes_chat_app/tutorials/07_async_django/">Django-книги</a>: Django Channels, consumer, channel layer, JS-клієнт. Переносячи його в проєкт уроку 44, перевіряємо тим самим правилом: <strong>consumer — ще один транспорт</strong> над тими самими selectors і services. Дві знахідки дорогою:</p>
+<p>Стартовий код чату — це крок 7B <a href="https://nikoriakviktot.github.io/notes_chat_app/tutorials/07_async_django/">Django-книги</a>: Django Channels, consumer, channel layer, JS-клієнт. Переносячи його в проєкт уроку 44, перевіряємо тим самим правилом: <strong>consumer — ще один транспорт</strong> над тими самими selectors і services. Дві знахідки дорогою:</p>
 <ul>
 <li>учасник, якого вилучили з групи, з відкритою вкладкою далі <strong>читає й пише</strong> в чат;</li>
 <li>будь-який сайт, відкритий у браузері учасника, може під'єднатися до чату від його імені.</li>
@@ -3747,11 +3747,11 @@
 <li>Cookie <code>sessionid</code>: браузер надсилає його з кожним запитом до нашого сайту, Django за ним знаходить сесію й користувача. Сьогодні важливо: браузер надсилає цей cookie і тоді, коли запит ініціює <strong>чужа</strong> сторінка.</li>
 </ol>
 </details>
-<h2 id="_2">Старт: що дає старий курс<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<h2 id="_2">Старт: з якого коду починаємо<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
-<th>Звідки (<code>module_5/lesson_Django_Async/notes_chat_app/</code>)</th>
+<th>Звідки (<code>notes_chat_app/</code>)</th>
 <th>Що там</th>
 <th>Куди в проєкті</th>
 </tr>
@@ -3892,8 +3892,8 @@
 </code></pre></div>
 <p>Поглиблено: <a href="https://nikoriakviktot.github.io/notes_chat_app/tutorials/07_async_django/7b_asgi_stack/">ASGI-стек</a>, <a href="https://nikoriakviktot.github.io/notes_chat_app/tutorials/07_async_django/7b_channels_settings/">налаштування Channels</a>.</p>
 <h2 id="refactor-2">Рефакторинг 2. Consumer — ще один транспорт<a class="headerlink" href="#refactor-2" title="Permanent link">&para;</a></h2>
-<p>Consumer — «view для WebSocket»: view обробляє один запит і завершується, consumer живе, поки відкрите з'єднання. У старому курсі він сам ходив у базу — три власні ORM-хелпери:</p>
-<div class="highlight"><span class="filename">notes_app/consumers.py (старий курс, скорочено)</span><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>    <span class="nd">@database_sync_to_async</span>
+<p>Consumer — «view для WebSocket»: view обробляє один запит і завершується, consumer живе, поки відкрите з'єднання. До рефакторингу він сам ходив у базу — три власні ORM-хелпери:</p>
+<div class="highlight"><span class="filename">notes_app/consumers.py (до рефакторингу, скорочено)</span><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>    <span class="nd">@database_sync_to_async</span>
 <a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">check_membership</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group_pk</span><span class="p">,</span> <span class="n">user</span><span class="p">):</span>
 <a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>        <span class="k">try</span><span class="p">:</span>
 <a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>            <span class="n">group</span> <span class="o">=</span> <span class="n">Group</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pk</span><span class="o">=</span><span class="n">group_pk</span><span class="p">)</span>
@@ -3912,7 +3912,7 @@
 <table>
 <thead>
 <tr>
-<th>Було (consumer старого курсу)</th>
+<th>Було (consumer до рефакторингу)</th>
 <th>Стало</th>
 <th>Де</th>
 </tr>
@@ -4036,7 +4036,7 @@
 <p><code>type: 'chat_message'</code> у <code>group_send</code> — ім'я <strong>методу</strong>, який channel layer викличе в кожному consumer групи (<code>chat.message</code> теж стане <code>chat_message</code>). Consumer Анни не надсилає своє повідомлення напряму — воно приходить до неї тим самим шляхом, що й до Олени, вже з <code>id</code> і часом із бази.</p>
 <p>Поглиблено: <a href="https://nikoriakviktot.github.io/notes_chat_app/tutorials/07_async_django/7b_consumer/">consumer: життєвий цикл, <code>database_sync_to_async</code>, <code>group_send</code></a>.</p>
 <h2 id="refactor-3">Рефакторинг 3. Права — на кожне повідомлення<a class="headerlink" href="#refactor-3" title="Permanent link">&para;</a></h2>
-<p>Consumer старого курсу перевіряв членство <strong>один раз</strong> — у <code>connect()</code>. Далі з'єднання живе годинами. Що, якщо Анну вилучили з групи, а її вкладка лишилась відкритою? Справжній запуск коду старого курсу (<code>WebsocketCommunicator</code>, про нього — у розділі «Тести»):</p>
+<p>Consumer до рефакторингу перевіряв членство <strong>один раз</strong> — у <code>connect()</code>. Далі з'єднання живе годинами. Що, якщо Анну вилучили з групи, а її вкладка лишилась відкритою? Справжній запуск стартового коду (<code>WebsocketCommunicator</code>, про нього — у розділі «Тести»):</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>Анна в групі: False
 <a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>Анна отримала: Обговорюємо подарунок для Анни
 <a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>збережено від Анни: 1
@@ -4102,7 +4102,7 @@
     class m4,j2 error
     class j1 warning</code></pre>
 <p>Подія йде <strong>після COMMIT</strong> з тієї ж причини, що інвалідація кешу в уроці 39: якби consumer отримав її до COMMIT і щось перевірив у базі, він побачив би старе членство.</p>
-<p>Клієнт теж має знати про відмову. JS старого курсу при будь-якому закритті, крім 1000/1001, перепідключався з backoff до 30 секунд — безкінечно. Відмову в handshake (не учасник) браузер бачить як <code>1006</code>, так само як обрив мережі. Тепер коди <code>4000–4999</code> («застосунок відмовив») — без перепідключення, а після 5 невдалих спроб поспіль — повідомлення замість нових спроб:</p>
+<p>Клієнт теж має знати про відмову. Стартовий JS при будь-якому закритті, крім 1000/1001, перепідключався з backoff до 30 секунд — безкінечно. Відмову в handshake (не учасник) браузер бачить як <code>1006</code>, так само як обрив мережі. Тепер коди <code>4000–4999</code> («застосунок відмовив») — без перепідключення, а після 5 невдалих спроб поспіль — повідомлення замість нових спроб:</p>
 <div class="highlight"><span class="filename">hello_app/static/hello_app/js/group_chat.js (фрагмент)</span><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">code</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mf">4000</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nx">event</span><span class="p">.</span><span class="nx">code</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mf">5000</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="w">                </span><span class="nx">setStatus</span><span class="p">(</span><span class="s1">'forbidden'</span><span class="p">);</span>
 <a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="w">                </span><span class="k">return</span><span class="p">;</span>
@@ -4124,7 +4124,7 @@
 <p>HTML-форми захищає CSRF-токен (урок 34). У WebSocket-рукостисканні токена немає, а cookie сесії браузер надсилає на наш сайт <strong>з будь-якої сторінки</strong>. Сайт <code>evil.example</code>, відкритий у сусідній вкладці, може виконати:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="ow">new</span><span class="w"> </span><span class="nx">WebSocket</span><span class="p">(</span><span class="s2">"wss://notes.example/ws/groups/7/chat/"</span><span class="p">)</span><span class="w">   </span><span class="c1">// cookie Олени піде разом із запитом</span>
 </code></pre></div>
-<p>…і отримає історію чату від імені Олени. Це <strong>Cross-Site WebSocket Hijacking</strong>. Справжній запуск стеку старого курсу (<code>AuthMiddlewareStack(URLRouter(...))</code>) з cookie Олени і заголовком <code>Origin: https://evil.example</code>:</p>
+<p>…і отримає історію чату від імені Олени. Це <strong>Cross-Site WebSocket Hijacking</strong>. Справжній запуск стартового стеку (<code>AuthMiddlewareStack(URLRouter(...))</code>) з cookie Олени і заголовком <code>Origin: https://evil.example</code>:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>з evil.example: (True, None)
 </code></pre></div>
 <p><code>(True, None)</code> — з'єднання прийнято. Браузер не дає сторінці підробити заголовок <code>Origin</code> — там завжди адреса сторінки, яка відкриває з'єднання. Тож сервер має його перевірити: <code>AllowedHostsOriginValidator</code> пускає лише <code>Origin</code> з <code>ALLOWED_HOSTS</code> (у <code>DEBUG</code> з порожнім списком — <code>localhost</code>, <code>127.0.0.1</code>, <code>[::1]</code>).</p>
@@ -4217,7 +4217,7 @@
 <tbody>
 <tr>
 <td><code>tests_consumers.py</code></td>
-<td>тести старого курсу без змін: підключення, відмова анонімові й чужому, розсилка, збереження, історія, ізоляція груп</td>
+<td>тести стартового проєкту без змін: підключення, відмова анонімові й чужому, розсилка, збереження, історія, ізоляція груп</td>
 <td>9</td>
 </tr>
 <tr>
@@ -4256,7 +4256,7 @@
 <a id="__codelineno-14-10" name="__codelineno-14-10" href="#__codelineno-14-10"></a>
 <a id="__codelineno-14-11" name="__codelineno-14-11" href="#__codelineno-14-11"></a>OK
 </code></pre></div>
-<p><code>tests_chat.py</code> на коді старого курсу дає 9 червоних тестів: консюмер не реагує на вилучення з групи (два тести), вилученому дозволено писати, <code>Origin</code> не перевіряється (три тести), ORM у consumer, JS перепідключається після відмови, багаторядковий <code>{# … #}</code> у шаблоні потрапляє на сторінку. 14 навмисних поломок нового коду — кожну ловить хоча б один тест.</p>
+<p><code>tests_chat.py</code> на стартовому коді дає 9 червоних тестів: консюмер не реагує на вилучення з групи (два тести), вилученому дозволено писати, <code>Origin</code> не перевіряється (три тести), ORM у consumer, JS перепідключається після відмови, багаторядковий <code>{# … #}</code> у шаблоні потрапляє на сторінку. 14 навмисних поломок нового коду — кожну ловить хоча б один тест.</p>
 <p>Наживо — <code>runserver</code> (daphne) і два браузери (Playwright): повідомлення Анни з'являється в Олени без оновлення сторінки. <code>&lt;b&gt;Хліб&lt;/b&gt;</code> показується як текст, а не жирним — <code>escapeHtml</code> працює. Боб (не в групі): сторінка чату — <code>404</code>, WebSocket — закрито в рукостисканні. Олена вилучає Анну на сторінці групи — у вкладці Анни статус «Немає доступу до чату цієї групи».</p>
 <h2 id="min-versions">Мінімальні версії залежностей<a class="headerlink" href="#min-versions" title="Permanent link">&para;</a></h2>
 <div class="highlight"><span class="filename">requirements.txt (нове)</span><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>channels&gt;=4.0                        # урок 45: WebSocket — consumers, routing, channel layer
@@ -4428,7 +4428,7 @@
 </ul>
 <h2 id="_11">Документація і джерела<a class="headerlink" href="#_11" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Код: <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_4/lessons/lesson_45_websocket_chat/crispy_notes_project"><code>crispy_notes_project</code></a> — проєкт уроку 44 + чат з <code>module_5/lesson_Django_Async/notes_chat_app/</code> старого курсу <code>PY-Course-Victor-Nikoriak-23_02</code>.</li>
+<li>Код: <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_4/lessons/lesson_45_websocket_chat/crispy_notes_project"><code>crispy_notes_project</code></a> — проєкт уроку 44 + чат зі стартового <code>notes_chat_app</code>.</li>
 <li>Django-книга, крок 7B: <a href="https://nikoriakviktot.github.io/notes_chat_app/tutorials/07_async_django/">огляд кроку</a>, <a href="https://nikoriakviktot.github.io/notes_chat_app/tutorials/07_async_django/7b_websocket_protocol/">WebSocket-протокол</a>, <a href="https://nikoriakviktot.github.io/notes_chat_app/tutorials/07_async_django/7b_asgi_stack/">ASGI-стек</a>, <a href="https://nikoriakviktot.github.io/notes_chat_app/tutorials/07_async_django/7b_channels_settings/">налаштування Channels</a>, <a href="https://nikoriakviktot.github.io/notes_chat_app/tutorials/07_async_django/7b_consumer/">consumer</a>, <a href="https://nikoriakviktot.github.io/notes_chat_app/tutorials/07_async_django/7b_websocket_client/">JS-клієнт</a>, <a href="https://nikoriakviktot.github.io/notes_chat_app/tutorials/07_async_django/checkpoint/">чекпоінт</a>; <a href="https://nikoriakviktot.github.io/notes_chat_app/tutorials/06_testing/test_consumers/">тести consumers</a>; <a href="https://nikoriakviktot.github.io/notes_chat_app/tutorials/09_deployment/redis/">Redis і Channel Layer</a>.</li>
 <li>Django Channels: <a href="https://channels.readthedocs.io/en/latest/tutorial/index.html">tutorial</a>, <a href="https://channels.readthedocs.io/en/latest/topics/consumers.html">consumers</a>, <a href="https://channels.readthedocs.io/en/latest/topics/channel_layers.html">channel layers</a>, <a href="https://channels.readthedocs.io/en/latest/topics/security.html">security — <code>AllowedHostsOriginValidator</code></a>, <a href="https://channels.readthedocs.io/en/latest/topics/testing.html">testing — <code>WebsocketCommunicator</code></a>, <a href="https://channels.readthedocs.io/en/latest/topics/databases.html">database access</a>.</li>
 <li>Протокол: <a href="https://www.rfc-editor.org/rfc/rfc6455">RFC 6455 — The WebSocket Protocol</a> (коди закриття — §7.4; 4000–4999 — для застосунків); <a href="https://developer.mozilla.org/en-US/docs/Web/API/WebSocket">MDN — WebSocket API</a>; <a href="https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/11-Client-side_Testing/10-Testing_WebSockets">OWASP — Cross-Site WebSocket Hijacking</a>.</li>

@@ -2708,12 +2708,12 @@
   <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Старт: що дає старий курс
+        Старт: з якого коду починаємо
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Старт: що дає старий курс">
+    <nav class="md-nav" aria-label="Старт: з якого коду починаємо">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -3373,12 +3373,12 @@
   <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Старт: що дає старий курс
+        Старт: з якого коду починаємо
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Старт: що дає старий курс">
+    <nav class="md-nav" aria-label="Старт: з якого коду починаємо">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -3726,7 +3726,7 @@
 <p><strong>Docker Compose</strong> описує всю систему одним файлом <code>docker-compose.yml</code>: які контейнери, з яких образів, у якій мережі, з якими томами й змінними, у якому порядку запускаються. Одна команда — <code>docker compose up -d --wait</code> — і вона або повністю працює, або каже, що саме не так.</p>
 <p>Сьогодні так запускаються обидва проєкти курсу:</p>
 <ul>
-<li><strong><code>news_hub</code></strong>: nginx → API → PostgreSQL + Redis; міграції — окремим кроком; Telegram-бот. Основа — <code>docker-compose.yml</code> з <code>production_bot</code> старого курсу;</li>
+<li><strong><code>news_hub</code></strong>: nginx → API → PostgreSQL + Redis; міграції — окремим кроком; Telegram-бот. Основа — <code>docker-compose.yml</code> зі стартового <code>production_bot</code>;</li>
 <li><strong><code>crispy_notes_project</code></strong> (Django, чат на WebSocket): nginx → daphne → PostgreSQL + Redis. Основа — <code>Dockerfile</code>, <code>entrypoint.sh</code>, <code>nginx.conf</code> і <code>docker-compose.yml</code> з <a href="https://nikoriakviktot.github.io/notes_chat_app/">Django-книги</a> (кроки 8–9).</li>
 </ul>
 <p>Як і раніше, спершу запускаємо старі файли <strong>без змін</strong> і дивимось, що ламається. Потім виправляємо — і показуємо, як це все переноситься на сервер.</p>
@@ -3777,7 +3777,7 @@
 <li>Лічильник у Redis за ключем <code>rate:login:&lt;IP клієнта&gt;</code>: 5 спроб за 300 с, далі 429. IP береться з <code>request.client.host</code>.</li>
 </ol>
 </details>
-<h2 id="_2">Старт: що дає старий курс<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<h2 id="_2">Старт: з якого коду починаємо<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
@@ -3788,7 +3788,7 @@
 </thead>
 <tbody>
 <tr>
-<td><code>module_5/lesson_46_Telegram_API/production_bot/docker-compose.yml</code></td>
+<td><code>production_bot/docker-compose.yml</code></td>
 <td>сервіси <code>bot</code> (FastAPI + aiogram), <code>nginx</code>, <code>postgres</code>, <code>redis</code>, <code>migrate</code>; healthchecks, томи</td>
 <td><code>news_hub/docker-compose.yml</code></td>
 </tr>
@@ -4626,7 +4626,7 @@
 </ul>
 <h2 id="_8">Документація і джерела<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Код: <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_5/lessons/lesson_49_compose_deploy/news_hub"><code>news_hub</code></a> — <code>docker-compose.yml</code> і <code>nginx.conf</code> з <code>module_5/lesson_46_Telegram_API/production_bot/</code> старого курсу <code>PY-Course-Victor-Nikoriak-23_02</code>; <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_5/lessons/lesson_49_compose_deploy/crispy_notes_project"><code>crispy_notes_project</code></a> — Docker-файли з Django-книги <a href="https://nikoriakviktot.github.io/notes_chat_app/">notes_chat_app</a>.</li>
+<li>Код: <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_5/lessons/lesson_49_compose_deploy/news_hub"><code>news_hub</code></a> — <code>docker-compose.yml</code> і <code>nginx.conf</code> зі стартового <code>production_bot</code>; <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_5/lessons/lesson_49_compose_deploy/crispy_notes_project"><code>crispy_notes_project</code></a> — Docker-файли з Django-книги <a href="https://nikoriakviktot.github.io/notes_chat_app/">notes_chat_app</a>.</li>
 <li>Поглиблено в Django-книзі: крок 8–9 — Docker Compose, entrypoint, nginx, PostgreSQL, Redis, production checklist (<a href="https://nikoriakviktot.github.io/notes_chat_app/">розділ «Деплой»</a>).</li>
 <li>Docker Compose: <a href="https://docs.docker.com/reference/compose-file/">Compose file reference</a>, <a href="https://docs.docker.com/reference/compose-file/services/">services: depends_on, healthcheck, profiles</a>, <a href="https://docs.docker.com/reference/compose-file/interpolation/">interpolation</a>, <a href="https://docs.docker.com/compose/how-tos/environment-variables/"><code>.env</code> і env_file</a>, <a href="https://docs.docker.com/reference/compose-file/networks/">networks</a>, <a href="https://docs.docker.com/compose/how-tos/startup-order/">startup order</a>.</li>
 <li>Docker і firewall: <a href="https://docs.docker.com/engine/network/packet-filtering-firewalls/">Packet filtering and firewalls</a>.</li>

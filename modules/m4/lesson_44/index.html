@@ -2403,7 +2403,7 @@
   <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Старт: що дає старий курс
+        Старт: з якого коду починаємо
       
     </span>
   </a>
@@ -3402,7 +3402,7 @@
   <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Старт: що дає старий курс
+        Старт: з якого коду починаємо
       
     </span>
   </a>
@@ -3858,7 +3858,7 @@
 <li><code>app.dependency_overrides[get_llm_client] = lambda: fake</code> — ендпоінт отримує клієнт через <code>Depends</code> і не знає, який саме.</li>
 </ol>
 </details>
-<h2 id="_2">Старт: що дає старий курс<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<h2 id="_2">Старт: з якого коду починаємо<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
@@ -3869,22 +3869,22 @@
 </thead>
 <tbody>
 <tr>
-<td><code>lesson_Django_ORM_Database/notes_project_cbv/hello_app/views.py</code></td>
+<td><code>notes_project_cbv/hello_app/views.py</code></td>
 <td>ті самі сторінки нотаток, записників і тегів як class-based views; <code>UserQuerySetMixin</code></td>
 <td><code>views.py</code>: <code>NoteListView</code> … <code>TagCreateView</code></td>
 </tr>
 <tr>
-<td><code>lesson_Django_ORM_Database/notes_project/README.md</code></td>
+<td><code>notes_project/README.md</code></td>
 <td>«03 Application layers»: тонкі views, selectors читають, services пишуть; крок 10 — PostgreSQL</td>
 <td>правила доступу в <code>selectors.py</code>, <code>hello_project/database.py</code></td>
 </tr>
 <tr>
-<td><code>lesson_Django_Network_Architecture/DJANGO_PROJECT_STRUCTURE.md</code></td>
+<td><code>DJANGO_PROJECT_STRUCTURE.md</code></td>
 <td>пари «погано / добре»: ORM у view проти selector, логіка в моделі проти service</td>
 <td>«Куди класти код» нижче</td>
 </tr>
 <tr>
-<td><code>module_4/lessons/lesson_34_asyncio/lesson_34_fastapi_documentation.md</code></td>
+<td>довідник FastAPI до прототипу <code>news_dashboard</code></td>
 <td>§5 Dependency Injection, §7 Repository, §8 Unit of Work</td>
 <td>каталог патернів</td>
 </tr>
@@ -4076,7 +4076,7 @@
 </code></pre></div>
 <p>Поглиблено: <a href="https://nikoriakviktot.github.io/notes_chat_app/tutorials/03_crud_and_architecture/services_and_selectors/">services і selectors — матриця відповідальності</a>, <a href="https://nikoriakviktot.github.io/notes_chat_app/06_application_architecture/django_selectors_full/">selectors: мова домену замість мови ORM</a>.</p>
 <h2 id="refactor-2">Рефакторинг 2. Class-based views<a class="headerlink" href="#refactor-2" title="Permanent link">&para;</a></h2>
-<p>Нотатки, записники й теги — class-based views з <code>notes_project_cbv</code> старого курсу. Порівняй редагування нотатки:</p>
+<p>Нотатки, записники й теги — class-based views зі стартового <code>notes_project_cbv</code>. Порівняй редагування нотатки:</p>
 <div class="highlight"><span class="filename">FBV (урок 40) — 30 рядків</span><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="nd">@login_required</span>
 <a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="k">def</span><span class="w"> </span><span class="nf">note_edit</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">pk</span><span class="p">):</span>
 <a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>    <span class="n">user_groups</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">groups</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
@@ -4149,7 +4149,7 @@
 </table>
 <p>Три міксини проєкту:</p>
 <div class="highlight"><span class="filename">hello_app/views.py (фрагмент)</span><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">SelectorQuerySetMixin</span><span class="p">:</span>
-<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="w">    </span><span class="sd">"""QuerySet для Detail/Update/Delete бере функція selectors — `UserQuerySetMixin` старого курсу."""</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="w">    </span><span class="sd">"""QuerySet для Detail/Update/Delete бере функція selectors — `UserQuerySetMixin` стартового коду."""</span>
 <a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>    <span class="n">selector</span> <span class="o">=</span> <span class="kc">None</span>
 <a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>
 <a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_queryset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -4212,7 +4212,7 @@
     class b3 warning
     class c3 error
     class d1,d2 success</code></pre>
-<p>Перший крок — пастка, на яку ми самі натрапили, переносячи <code>NoteListView</code>. У старому коді фільтри (<code>?tag=</code>, <code>?notebook=</code>) розбирав допоміжний метод; зручне місце, щоб зробити це «один раз на запит», здається <code>setup()</code>. Але <code>setup()</code> виконується <strong>до</strong> <code>dispatch()</code>, тобто до <code>LoginRequiredMixin</code>: анонім з <code>/notes/?tag=1</code> дійшов би до запиту <code>Tag.objects.get(user=AnonymousUser)</code> і отримав <code>TypeError</code>. Правильно — у <code>get()</code>, після всіх перевірок <code>dispatch()</code>:</p>
+<p>Перший крок — пастка, на яку ми самі натрапили, переносячи <code>NoteListView</code>. У стартовому коді фільтри (<code>?tag=</code>, <code>?notebook=</code>) розбирав допоміжний метод; зручне місце, щоб зробити це «один раз на запит», здається <code>setup()</code>. Але <code>setup()</code> виконується <strong>до</strong> <code>dispatch()</code>, тобто до <code>LoginRequiredMixin</code>: анонім з <code>/notes/?tag=1</code> дійшов би до запиту <code>Tag.objects.get(user=AnonymousUser)</code> і отримав <code>TypeError</code>. Правильно — у <code>get()</code>, після всіх перевірок <code>dispatch()</code>:</p>
 <div class="highlight"><span class="filename">hello_app/views.py — NoteListView (фрагмент)</span><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="w">        </span><span class="sd">"""Фільтри з ?q=&amp;tag=&amp;notebook= — один раз на запит (потрібні і в get_queryset, і в контексті).</span>
 <a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>
@@ -4684,12 +4684,12 @@
 </ul>
 <h2 id="_12">Документація і джерела<a class="headerlink" href="#_12" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Код: <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_4/lessons/lesson_44_architecture_patterns/crispy_notes_project"><code>crispy_notes_project</code></a> — проєкт уроку 40 + CBV з <code>module_5/lesson_Django_ORM_Database/notes_project_cbv/</code> старого курсу <code>PY-Course-Victor-Nikoriak-23_02</code>; <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_4/lessons/lesson_43_llm_api/news_hub"><code>news_hub</code></a> уроку 43.</li>
+<li>Код: <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_4/lessons/lesson_44_architecture_patterns/crispy_notes_project"><code>crispy_notes_project</code></a> — проєкт уроку 40 + CBV зі стартового <code>notes_project_cbv</code>; <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_4/lessons/lesson_43_llm_api/news_hub"><code>news_hub</code></a> уроку 43.</li>
 <li>Django-книга, крок 3: <a href="https://nikoriakviktot.github.io/notes_chat_app/tutorials/03_crud_and_architecture/">огляд</a>, <a href="https://nikoriakviktot.github.io/notes_chat_app/tutorials/03_crud_and_architecture/services_and_selectors/">services і selectors</a>, <a href="https://nikoriakviktot.github.io/notes_chat_app/tutorials/03_crud_and_architecture/cbv/">CBV</a>, <a href="https://nikoriakviktot.github.io/notes_chat_app/tutorials/03_crud_and_architecture/queryset_deep/">QuerySet глибше</a>, <a href="https://nikoriakviktot.github.io/notes_chat_app/tutorials/03_crud_and_architecture/postgresql/">PostgreSQL</a>, <a href="https://nikoriakviktot.github.io/notes_chat_app/tutorials/03_crud_and_architecture/checkpoint/">типові помилки</a>; частина VI — <a href="https://nikoriakviktot.github.io/notes_chat_app/06_application_architecture/">архітектура застосунку</a>.</li>
 <li>Django: <a href="https://docs.djangoproject.com/en/5.2/topics/class-based-views/">class-based views</a>, <a href="https://docs.djangoproject.com/en/5.2/ref/class-based-views/generic-editing/">generic editing views</a>, <a href="https://docs.djangoproject.com/en/5.2/topics/auth/default/#the-loginrequiredmixin-mixin"><code>LoginRequiredMixin</code></a>, <a href="https://docs.djangoproject.com/en/5.2/ref/models/querysets/#distinct"><code>distinct()</code></a>, <a href="https://docs.djangoproject.com/en/5.2/topics/testing/tools/#django.test.TransactionTestCase.assertNumQueries"><code>assertNumQueries</code></a>, <a href="https://docs.djangoproject.com/en/5.2/ref/databases/#postgresql-notes">PostgreSQL notes</a>; <a href="https://github.com/django/django/blob/stable/5.2.x/django/utils/http.py"><code>url_has_allowed_host_and_scheme</code></a>.</li>
 <li>Python: <a href="https://docs.python.org/3/library/ast.html"><code>ast</code></a>, <a href="https://docs.python.org/3/library/urllib.parse.html#urllib.parse.urlsplit"><code>urllib.parse.urlsplit</code></a>, <a href="https://docs.python.org/3/howto/mro.html">MRO</a>.</li>
 <li>Патерни: Martin Fowler — <a href="https://martinfowler.com/eaaCatalog/serviceLayer.html">Service Layer</a>, <a href="https://martinfowler.com/eaaCatalog/repository.html">Repository</a>, <a href="https://martinfowler.com/eaaCatalog/unitOfWork.html">Unit of Work</a>, <a href="https://martinfowler.com/bliki/CQRS.html">CQRS</a>; <a href="https://refactoring.guru/uk/design-patterns/catalog">refactoring.guru — Strategy, Decorator, Factory Method, Template Method</a>.</li>
-<li>Старий курс: <code>lesson_34_fastapi_documentation.md</code> (§5 DI, §7 Repository, §8 Unit of Work), <code>DJANGO_PROJECT_STRUCTURE.md</code>.</li>
+<li><a href="../fastapi/fastapi_documentation/">Довідник: FastAPI — архітектура, async і production-патерни</a>: §5 DI, §7 Repository, §8 Unit of Work.</li>
 </ul>
 
 

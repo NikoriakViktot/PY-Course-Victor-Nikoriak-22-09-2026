@@ -3420,10 +3420,10 @@
 <h1 id="cv-html-pdf">Бонус. CV розробника: HTML → PDF<a class="headerlink" href="#cv-html-pdf" title="Permanent link">&para;</a></h1>
 <p>Курс закінчується фінальним проєктом (уроки 51–52), а після нього — пошук роботи чи стажування. Перше, що побачить рекрутер, — не код, а <strong>CV</strong>. Цей бонус-урок (поза нумерацією 1–52) — про дві речі:</p>
 <ol>
-<li><strong>що</strong> писати: як з «я робив» зробити «я створив цінність» — туторіал старого курсу;</li>
+<li><strong>що</strong> писати: як з «я робив» зробити «я створив цінність» — туторіал;</li>
 <li><strong>як</strong> робити CV інженерно: зміст і дизайн у HTML, PDF — однією командою, версії — у Git.</li>
 </ol>
-<p>Код — <code>CV_maker</code> зі старого курсу (<code>module_5/CV_maker/</code>): HTML-резюме викладача, скрипт <code>generate_cv_pdf.py</code> (<code>pdfkit</code> → <code>wkhtmltopdf</code>), README з інструкціями і туторіал.</p>
+<p>Стартовий код — <code>CV_maker</code>: HTML-резюме викладача, скрипт <code>generate_cv_pdf.py</code> (<code>pdfkit</code> → <code>wkhtmltopdf</code>), README з інструкціями і туторіал.</p>
 <table>
 <thead>
 <tr>
@@ -3489,10 +3489,10 @@
     class D1,D2 success</code></pre>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nb">cd</span><span class="w"> </span>module_6/bonus/cv_maker
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>pip<span class="w"> </span>install<span class="w"> </span>pdfkit<span class="w">                               </span><span class="c1"># + wkhtmltopdf (README: Windows, macOS, Linux)</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>python<span class="w"> </span>generate_cv_pdf.py<span class="w">                        </span><span class="c1"># CV викладача, як у старому курсі</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>python<span class="w"> </span>generate_cv_pdf.py<span class="w">                        </span><span class="c1"># CV викладача</span>
 <a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>python<span class="w"> </span>generate_cv_pdf.py<span class="w"> </span>cv_template.html<span class="w"> </span>CV_Name_Surname.pdf
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>PDF created: …/module_6/bonus/cv_maker/CV_Viktor_Nikoriak_GeoAI.pdf     ← 5 сторінок, як PDF у старому курсі
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>PDF created: …/module_6/bonus/cv_maker/CV_Viktor_Nikoriak_GeoAI.pdf     ← 5 сторінок
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>PDF created: /tmp/CV_Template.pdf                                          ← шаблон: 1 сторінка
 </code></pre></div>
 <p>Шаблон <code>cv_template.html</code> — той самий CSS, що в CV викладача (кольори, розриви сторінок, <code>keep-together</code>), а замість змісту — поля в <code>[дужках]</code> і підказка з формулою пункту. Розділ, для якого нічого написати, видаляй цілком: порожній розділ гірший за відсутній.</p>
@@ -3575,7 +3575,7 @@
 </details>
 <h2 id="_3">Документація і джерела<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Код: <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_6/bonus/cv_maker"><code>cv_maker</code></a> — <code>module_5/CV_maker/</code> старого курсу <code>PY-Course-Victor-Nikoriak-23_02</code> (README, туторіал, HTML-CV викладача, <code>generate_cv_pdf.py</code>).</li>
+<li>Код: <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_6/bonus/cv_maker"><code>cv_maker</code></a> — README, туторіал, HTML-CV викладача, <code>generate_cv_pdf.py</code>.</li>
 <li><a href="https://pypi.org/project/pdfkit/">pdfkit</a>, <a href="https://wkhtmltopdf.org/">wkhtmltopdf</a>, <a href="https://playwright.dev/python/docs/api/class-page#page-pdf">Playwright для Python: <code>page.pdf()</code></a>.</li>
 <li>CSS для друку: <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/break-inside"><code>break-inside</code> / <code>page-break-inside</code></a>.</li>
 </ul>

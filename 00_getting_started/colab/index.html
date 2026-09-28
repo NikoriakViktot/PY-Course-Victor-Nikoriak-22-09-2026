@@ -1861,11 +1861,11 @@
 </code></pre></div>
 <p>Шлях після <code>%cd</code> — це папка уроку, який ти відкрив.</p>
 <h2 id="could-not-find-ipynb">Помилка «Could not find … .ipynb»<a class="headerlink" href="#could-not-find-ipynb" title="Permanent link">&para;</a></h2>
-<p>Кнопка Colab зберігає повний шлях до файлу в репозиторії. Ця помилка означає, що за цим шляхом файлу немає: ноутбук перенесли, або кнопка веде на старий репозиторій курсу. Відкрий ноутбук через книгу курсу або вручну (спосіб 2) і повідом викладача.</p>
+<p>Кнопка Colab зберігає повний шлях до файлу в репозиторії. Ця помилка означає, що за цим шляхом файлу немає: ноутбук перенесли, або кнопка веде на інший репозиторій. Відкрий ноутбук через книгу курсу або вручну (спосіб 2) і повідом викладача.</p>
 <h2 id="_8">Для викладача: як не зламати посилання<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h2>
 <ul>
 <li><strong>Джерело правди — репозиторій на GitHub.</strong> Кнопку Colab (перша клітинка з <code>id: view-in-github</code>) і <code>metadata.lms</code> генерує скрипт. Вручну їх не редагуй.</li>
-<li><strong>Зберігаєш зміни з Colab:</strong> File → Save a copy in GitHub → репозиторій <code>NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026</code>, гілка <code>main</code>. У полі <strong>File path</strong> вкажи повний шлях, наприклад <code>module_1/lessons/lesson_07_functions/note_lesson_07_functions.ipynb</code>. За замовчуванням Colab підставляє лише ім'я файлу, і тоді ноутбук потрапляє в корінь репозиторію: саме так посилання зламалися після переїзду зі старого курсу. Галочку «Include a link to Colaboratory» не знімай.</li>
+<li><strong>Зберігаєш зміни з Colab:</strong> File → Save a copy in GitHub → репозиторій <code>NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026</code>, гілка <code>main</code>. У полі <strong>File path</strong> вкажи повний шлях, наприклад <code>module_1/lessons/lesson_07_functions/note_lesson_07_functions.ipynb</code>. За замовчуванням Colab підставляє лише ім'я файлу, і тоді ноутбук потрапляє в корінь репозиторію, і посилання на нього ламаються. Галочку «Include a link to Colaboratory» не знімай.</li>
 <li>
 <p><strong>Додав, переніс або перейменував ноутбук</strong> — запусти:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>python<span class="w"> </span>tools/sync_notebook_metadata.py

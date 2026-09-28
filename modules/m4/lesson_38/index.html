@@ -2200,10 +2200,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#production_bot" class="md-nav__link">
+  <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Старт: що дає production_bot старого курсу
+        Старт: з якого коду починаємо
       
     </span>
   </a>
@@ -2245,7 +2245,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_2" class="md-nav__link">
+  <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
       
         Дві моделі однієї новини
@@ -2312,7 +2312,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#_3" class="md-nav__link">
+  <a href="#_4" class="md-nav__link">
     <span class="md-ellipsis">
       
         Дані переживають перезапуск
@@ -2390,7 +2390,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_4" class="md-nav__link">
+  <a href="#_5" class="md-nav__link">
     <span class="md-ellipsis">
       
         Зміни приклад
@@ -2428,7 +2428,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_5" class="md-nav__link">
+  <a href="#_6" class="md-nav__link">
     <span class="md-ellipsis">
       
         Підсумок
@@ -2440,7 +2440,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#_6" class="md-nav__link">
+  <a href="#_7" class="md-nav__link">
     <span class="md-ellipsis">
       
         Самоперевірка
@@ -2451,7 +2451,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_7" class="md-nav__link">
+  <a href="#_8" class="md-nav__link">
     <span class="md-ellipsis">
       
         Що далі
@@ -2467,7 +2467,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_8" class="md-nav__link">
+  <a href="#_9" class="md-nav__link">
     <span class="md-ellipsis">
       
         Документація і джерела
@@ -3382,10 +3382,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#production_bot" class="md-nav__link">
+  <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Старт: що дає production_bot старого курсу
+        Старт: з якого коду починаємо
       
     </span>
   </a>
@@ -3427,7 +3427,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_2" class="md-nav__link">
+  <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
       
         Дві моделі однієї новини
@@ -3494,7 +3494,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#_3" class="md-nav__link">
+  <a href="#_4" class="md-nav__link">
     <span class="md-ellipsis">
       
         Дані переживають перезапуск
@@ -3572,7 +3572,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_4" class="md-nav__link">
+  <a href="#_5" class="md-nav__link">
     <span class="md-ellipsis">
       
         Зміни приклад
@@ -3610,7 +3610,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_5" class="md-nav__link">
+  <a href="#_6" class="md-nav__link">
     <span class="md-ellipsis">
       
         Підсумок
@@ -3622,7 +3622,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#_6" class="md-nav__link">
+  <a href="#_7" class="md-nav__link">
     <span class="md-ellipsis">
       
         Самоперевірка
@@ -3633,7 +3633,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_7" class="md-nav__link">
+  <a href="#_8" class="md-nav__link">
     <span class="md-ellipsis">
       
         Що далі
@@ -3649,7 +3649,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_8" class="md-nav__link">
+  <a href="#_9" class="md-nav__link">
     <span class="md-ellipsis">
       
         Документація і джерела
@@ -3747,7 +3747,7 @@
 
 <h1 id="38-fastapi-sqlalchemy-crud">Урок 38. FastAPI + SQLAlchemy: повний CRUD<a class="headerlink" href="#38-fastapi-sqlalchemy-crud" title="Permanent link">&para;</a></h1>
 <p>В уроці 37 агрегатор став HTTP-сервісом, але новини лежать у <code>NewsStore</code> — словнику в пам'яті процесу. Зупинили сервер — новин немає; запустили два процеси uvicorn — у кожного свої новини. Сьогодні агрегатор отримує <strong>базу даних</strong>: новини переживають перезапуск, унікальність <code>url</code> гарантує сама база, а API вміє повний CRUD окремої новини.</p>
-<p>Знову не з нуля: у старому курсі є готовий шар бази — <code>production_bot</code> з уроку про Telegram (<code>module_5/lesson_46_Telegram_API</code>): async SQLAlchemy 2.0, репозиторії, Alembic-міграції. Беремо його і робимо три рефакторинги <code>news_hub</code> з уроку 37.</p>
+<p>Знову не з нуля: є готовий шар бази — стартовий <code>production_bot</code> (Telegram-бот з адмін-API): async SQLAlchemy 2.0, репозиторії, Alembic-міграції. Беремо його і робимо три рефакторинги <code>news_hub</code> з уроку 37.</p>
 <table>
 <thead>
 <tr>
@@ -3817,7 +3817,7 @@
 <li>Щоб замінити реалізацію, не чіпаючи ендпоінтів. Сьогодні саме це й зробимо: <code>NewsStore</code> → <code>NewsRepository</code>.</li>
 </ol>
 </details>
-<h2 id="production_bot">Старт: що дає <code>production_bot</code> старого курсу<a class="headerlink" href="#production_bot" title="Permanent link">&para;</a></h2>
+<h2 id="_2">Старт: з якого коду починаємо<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
 <p><code>production_bot</code> — Telegram-бот з адмін-API на FastAPI. Нам потрібен його <strong>шар бази</strong>, а не бот:</p>
 <table>
 <thead>
@@ -3925,7 +3925,7 @@
 <a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a>CREATE INDEX ix_news_lang ON news (lang)
 <a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a>CREATE INDEX ix_news_source ON news (source)
 </code></pre></div>
-<h3 id="_2">Дві моделі однієї новини<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h3>
+<h3 id="_3">Дві моделі однієї новини<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -4057,7 +4057,7 @@
 </code></pre></div>
 <p>Дірки в id — нормальні: <strong>id — ідентифікатор, а не лічильник новин</strong>. Скільки новин — питай <code>count(*)</code> (<code>/api/news/count</code>), а не найбільший id. На SQLite (ноутбук заняття) та сама послідовність дає id = 169: там <code>INTEGER PRIMARY KEY</code> бере найбільший id + 1 і пропущені рядки номерів не забирають. Одна програма — різні id на різних базах; ще одна причина не рахувати новини за id.</p>
 <h2 id="session">Сесія на запит і COMMIT до відповіді<a class="headerlink" href="#session" title="Permanent link">&para;</a></h2>
-<p><code>get_db</code> — зі старого <code>database.py</code> майже без змін:</p>
+<p><code>get_db</code> — зі стартового <code>database.py</code> майже без змін:</p>
 <div class="highlight"><span class="filename">news_hub/db.py</span><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_db</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">AsyncIterator</span><span class="p">[</span><span class="n">AsyncSession</span><span class="p">]:</span>
 <a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="w">    </span><span class="sd">"""FastAPI Depends: одна сесія (і одна транзакція) на HTTP-запит."""</span>
 <a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>    <span class="k">async</span> <span class="k">with</span> <span class="n">SessionFactory</span><span class="p">()</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
@@ -4198,7 +4198,7 @@
 <a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>DELETE 204 ''
 <a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>GET    404 {'detail': 'новини 338 немає'}
 </code></pre></div>
-<h3 id="_3">Дані переживають перезапуск<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h3>
+<h3 id="_4">Дані переживають перезапуск<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
 <p>Новини тепер у PostgreSQL, а не в процесі сервера. Порахуємо їх <strong>окремою програмою</strong> — без FastAPI, лише через репозиторій:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>$ python -c "import asyncio; from news_hub.db import SessionFactory; from news_hub.repository import NewsRepository; print(asyncio.run(NewsRepository(SessionFactory()).count()))"
 <a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>169
@@ -4316,7 +4316,7 @@
 <p><code>tests/conftest.py</code> створює для кожного тесту окремий engine і порожні таблиці (<code>Base.metadata.create_all</code>) і підміняє <code>get_db</code>; за замовчуванням — SQLite у пам'яті, з <code>TEST_DATABASE_URL</code> — PostgreSQL. Додалось 9 тестів CRUD: <code>201</code>, <code>409</code>, <code>422</code>, <code>404</code>, <code>PATCH</code> і збереження змін, <code>204</code>, <code>GROUP BY</code>, пошук, «COMMIT не вдався → <code>500</code>».</p>
 <h2 id="practice">Практика<a class="headerlink" href="#practice" title="Permanent link">&para;</a></h2>
 <h3 id="get-apinewssearchq">Розібраний приклад: пошук <code>GET /api/news/search?q=</code><a class="headerlink" href="#get-apinewssearchq" title="Permanent link">&para;</a></h3>
-<p>В уроці 37 пошук був завданням «спробуй самостійно». Зі старого <code>news_dashboard</code> він виглядав так: <code>{"title": {"$regex": keyword, "$options": "i"}}</code> — рядок користувача ставав <strong>регулярним виразом</strong> у MongoDB. Тепер — SQL:</p>
+<p>В уроці 37 пошук був завданням «спробуй самостійно». У прототипі <code>news_dashboard</code> він виглядав так: <code>{"title": {"$regex": keyword, "$options": "i"}}</code> — рядок користувача ставав <strong>регулярним виразом</strong> у MongoDB. Тепер — SQL:</p>
 <ol>
 <li><strong>Репозиторій.</strong> <code>NewsRow.title.icontains(q, autoescape=True)</code> → <code>title ILIKE '%' || :q || '%'</code> у PostgreSQL. <code>q</code> — параметр; <code>autoescape=True</code> — символи <code>%</code> і <code>_</code> у запиті шукаються буквально, а не як «будь-що».</li>
 <li><strong>Ендпоінт.</strong> <code>q: str = Query(min_length=2, max_length=60)</code> — порожній чи надто довгий пошук відсічено до SQL.</li>
@@ -4332,7 +4332,7 @@
 <a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a>'%%' → 0 []
 <a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a>422
 </code></pre></div>
-<h3 id="_4">Зміни приклад<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
+<h3 id="_5">Зміни приклад<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h3>
 <ol>
 <li>Додай до пошуку фільтр <code>lang: Literal["uk", "ru"] | None</code> — у репозиторії це ще одна умова <code>.where(...)</code>.</li>
 <li>Додай у <code>NewsRepository</code> метод <code>latest(limit)</code> — найновіші за <code>scraped_at</code> (<code>order_by(NewsRow.scraped_at.desc())</code>), і ендпоінт <code>GET /api/news/latest</code>. Не забудь про порядок маршрутів.</li>
@@ -4393,7 +4393,7 @@
 <p>У тестах з одним користувачем цей код працює завжди — помилка проявляється лише під паралельними запитами. Найгірший вид помилок: у розробці її не видно.</p>
 <p>Виправлення — не перевіряти в Python, а <strong>віддати рішення базі одним оператором</strong>: <code>INSERT … ON CONFLICT (url) DO NOTHING</code> у <code>NewsRepository.add_many</code>. База перевіряє унікальність атомарно, тому два одночасні збори просто вставлять кожну новину рівно один раз. Для одиничного <code>POST /api/news</code> — те саме правило з іншого боку: <code>UNIQUE</code> у таблиці + <code>IntegrityError</code> → <code>409</code>.</p>
 </details>
-<h2 id="_5">Підсумок<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
+<h2 id="_6">Підсумок<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
@@ -4448,7 +4448,7 @@
 </tr>
 </tbody>
 </table>
-<h3 id="_6">Самоперевірка<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h3>
+<h3 id="_7">Самоперевірка<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h3>
 <ol>
 <li>Чим <code>NewsRow</code> відрізняється від <code>NewsItem</code> і чому не одна модель на все?</li>
 <li>Навіщо <code>flush()</code> у <code>repo.create</code>, якщо COMMIT однаково буде в <code>get_db</code>?</li>
@@ -4468,14 +4468,14 @@
 <li><code>naive_add_many</code> вирішує в Python між <code>SELECT</code> і <code>COMMIT</code> — інший збір встигає втрутитись. <code>add_many</code> робить один <code>INSERT … ON CONFLICT DO NOTHING</code>: унікальність перевіряє база атомарно.</li>
 </ol>
 </details>
-<h3 id="_7">Що далі<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h3>
+<h3 id="_8">Що далі<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Ноутбук заняття: <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_38_fastapi_sqlalchemy/note_lesson_38_sqlalchemy.ipynb"><code>note_lesson_38_sqlalchemy.ipynb</code></a> <a href="https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_38_fastapi_sqlalchemy/note_lesson_38_sqlalchemy.ipynb"><img alt="Open In Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></a>.</li>
 <li>Урок 39 — middleware і Redis: кеш <code>GET /api/news</code> перед репозиторієм, rate limit на <code>POST /api/scrape</code>, фоновий збір.</li>
 </ul>
-<h2 id="_8">Документація і джерела<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h2>
+<h2 id="_9">Документація і джерела<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Код: <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_4/lessons/lesson_38_fastapi_sqlalchemy/news_hub"><code>news_hub</code></a> — шар бази з <code>production_bot</code> старого курсу (<code>module_5/lesson_46_Telegram_API</code>: <code>backend/core/database.py</code>, <code>backend/repositories/base.py</code>, <code>migrations/</code>, <code>docker-compose.yml</code>), API — з уроку 37.</li>
+<li>Код: <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_4/lessons/lesson_38_fastapi_sqlalchemy/news_hub"><code>news_hub</code></a> — шар бази зі стартового <code>production_bot</code> (<code>backend/core/database.py</code>, <code>backend/repositories/base.py</code>, <code>migrations/</code>, <code>docker-compose.yml</code>), API — з уроку 37.</li>
 <li>Довідник курсу: <a href="../fastapi/fastapi_documentation/">FastAPI: архітектура, async і production-патерни</a>, розділи 6–8.</li>
 <li>SQLAlchemy 2.0: <a href="https://docs.sqlalchemy.org/en/20/orm/quickstart.html">ORM Quick Start</a>, <a href="https://docs.sqlalchemy.org/en/20/orm/declarative_tables.html">Declarative Mapping</a>, <a href="https://docs.sqlalchemy.org/en/20/orm/extensions/asyncio.html">Asynchronous I/O</a>, <a href="https://docs.sqlalchemy.org/en/20/orm/session_basics.html">Session Basics</a>, <a href="https://docs.sqlalchemy.org/en/20/dialects/postgresql.html#insert-on-conflict-upsert">INSERT…ON CONFLICT (PostgreSQL)</a></li>
 <li>FastAPI: <a href="https://fastapi.tiangolo.com/tutorial/sql-databases/">SQL (Relational) Databases</a>, <a href="https://fastapi.tiangolo.com/tutorial/dependencies/dependencies-with-yield/">Dependencies with yield</a></li>

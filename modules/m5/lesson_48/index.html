@@ -2680,12 +2680,12 @@
   <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Старт: що дає старий курс
+        Старт: з якого коду починаємо
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Старт: що дає старий курс">
+    <nav class="md-nav" aria-label="Старт: з якого коду починаємо">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -3412,12 +3412,12 @@
   <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Старт: що дає старий курс
+        Старт: з якого коду починаємо
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Старт: що дає старий курс">
+    <nav class="md-nav" aria-label="Старт: з якого коду починаємо">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -3802,7 +3802,7 @@
 <h1 id="48-docker">Урок 48. Docker<a class="headerlink" href="#48-docker" title="Permanent link">&para;</a></h1>
 <p>Агрегатор <code>news_hub</code> уже вміє все: збирає новини, зберігає їх у базі, кешує в Redis, аналізує моделлю, захищає запис і має Telegram-бота. Але запускається він «у мене на комп'ютері»: потрібен правильний Python, <code>pip install</code>, змінні середовища, <code>alembic upgrade</code>. На сервері, у колеги чи в CI все це треба повторити — і десь неодмінно буде інша версія чогось.</p>
 <p>Сьогодні агрегатор стає <strong>образом Docker</strong>. Це один файл-рецепт (<code>Dockerfile</code>), з якого на будь-якій машині з Docker виходить той самий застосунок з тими самими бібліотеками.</p>
-<p>Основа — <code>Dockerfile</code> з <code>production_bot</code> старого курсу. Ми збираємо його над <code>news_hub</code> без змін, дивимось, що потрапило в образ, скільки він важить і як зупиняється. Потім виправляємо крок за кроком.</p>
+<p>Основа — <code>Dockerfile</code> зі стартового <code>production_bot</code>. Ми збираємо його над <code>news_hub</code> без змін, дивимось, що потрапило в образ, скільки він важить і як зупиняється. Потім виправляємо крок за кроком.</p>
 <table>
 <thead>
 <tr>
@@ -3863,8 +3863,8 @@
 <li>Після <code>yield</code> — закриває сесію бота, клієнт LLM, з'єднання з Redis і пул бази. Якщо процес вбити, ця частина не виконається.</li>
 </ol>
 </details>
-<h2 id="_2">Старт: що дає старий курс<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
-<div class="highlight"><span class="filename">production_bot/Dockerfile (старий курс)</span><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">FROM</span><span class="w"> </span><span class="s">python:3.12-slim</span>
+<h2 id="_2">Старт: з якого коду починаємо<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<div class="highlight"><span class="filename">production_bot/Dockerfile (стартовий код)</span><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">FROM</span><span class="w"> </span><span class="s">python:3.12-slim</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="k">WORKDIR</span><span class="w"> </span><span class="s">/app</span>
 <a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>
@@ -4603,7 +4603,7 @@
 </ul>
 <h2 id="_10">Документація і джерела<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Код: <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_5/lessons/lesson_48_docker/news_hub"><code>news_hub</code></a> — <code>Dockerfile</code> з <code>module_5/lesson_46_Telegram_API/production_bot/Dockerfile</code> старого курсу <code>PY-Course-Victor-Nikoriak-23_02</code>.</li>
+<li>Код: <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_5/lessons/lesson_48_docker/news_hub"><code>news_hub</code></a> — <code>Dockerfile</code> зі стартового <code>production_bot</code>.</li>
 <li>Docker: <a href="https://docs.docker.com/reference/dockerfile/">Dockerfile reference</a>, <a href="https://docs.docker.com/build/cache/">build cache</a>, <a href="https://docs.docker.com/build/concepts/context/#dockerignore-files">.dockerignore</a>, <a href="https://docs.docker.com/build/building/best-practices/">best practices</a>, <a href="https://docs.docker.com/reference/dockerfile/#healthcheck">HEALTHCHECK</a>, <a href="https://docs.docker.com/reference/dockerfile/#shell-and-exec-form">shell і exec форми</a>, <a href="https://docs.docker.com/engine/storage/volumes/">volumes</a>, <a href="https://docs.docker.com/engine/network/">networking</a>, <a href="https://docs.docker.com/reference/cli/docker/container/run/#env"><code>docker run --env-file</code></a>.</li>
 <li>Python-образи: <a href="https://hub.docker.com/_/python">python на Docker Hub</a> (варіанти <code>slim</code>, <code>alpine</code>).</li>
 <li>uvicorn: <a href="https://www.uvicorn.org/deployment/">deployment</a>, <a href="https://www.uvicorn.org/settings/">налаштування</a> (<code>--workers</code>: «Defaults to the $WEB_CONCURRENCY environment variable if available, or 1»). FastAPI: <a href="https://fastapi.tiangolo.com/deployment/docker/">FastAPI in Containers</a>.</li>

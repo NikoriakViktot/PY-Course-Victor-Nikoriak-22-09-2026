@@ -2375,7 +2375,7 @@
   <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Старт: що дає старий курс
+        Старт: з якого коду починаємо
       
     </span>
   </a>
@@ -3423,7 +3423,7 @@
   <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Старт: що дає старий курс
+        Старт: з якого коду починаємо
       
     </span>
   </a>
@@ -3825,7 +3825,7 @@
 <p>Відкрий <code>GET /api/news/stats</code> агрегатора після збору знімка rbc.ua:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="p">{</span><span class="nt">"total"</span><span class="p">:</span><span class="w"> </span><span class="mi">168</span><span class="p">,</span><span class="w"> </span><span class="nt">"category"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"Новини"</span><span class="p">:</span><span class="w"> </span><span class="mi">168</span><span class="p">},</span><span class="w"> </span><span class="nt">"lang"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"ru"</span><span class="p">:</span><span class="w"> </span><span class="mi">138</span><span class="p">,</span><span class="w"> </span><span class="nt">"uk"</span><span class="p">:</span><span class="w"> </span><span class="mi">30</span><span class="p">},</span><span class="w"> </span><span class="nt">"source"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"rbc.ua"</span><span class="p">:</span><span class="w"> </span><span class="mi">167</span><span class="p">,</span><span class="w"> </span><span class="nt">"auto.rbc.ua"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">}}</span>
 </code></pre></div>
-<p>Усі 168 новин — у категорії «Новини». Це розділ сайту з URL (<code>/rus/news/…</code>), а не тема: політика, економіка й погода лежать в одному кошику. У старому курсі тему, тональність і ключові слова рахував <code>nlp.py</code> — за списками основ слів. Сьогодні це робить <strong>мовна модель</strong> (LLM) через API.</p>
+<p>Усі 168 новин — у категорії «Новини». Це розділ сайту з URL (<code>/rus/news/…</code>), а не тема: політика, економіка й погода лежать в одному кошику. У прототипі <code>news_dashboard</code> тему, тональність і ключові слова рахував <code>nlp.py</code> — за списками основ слів. Сьогодні це робить <strong>мовна модель</strong> (LLM) через API.</p>
 <p>Модель розуміє заголовок цілком, але має чотири властивості, яких немає у звичайної функції:</p>
 <ul>
 <li>відповідає <strong>повільно</strong> (секунди) і <strong>платно</strong> — за кожен токен;</li>
@@ -3894,18 +3894,18 @@
 <li><code>app.dependency_overrides[залежність] = підміна</code> — FastAPI викликає підміну замість оригіналу. Мережу підмінюють на зовнішній межі, а код між межею й відповіддю виконується справжній.</li>
 </ol>
 </details>
-<h2 id="_2">Старт: що дає старий курс<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<h2 id="_2">Старт: з якого коду починаємо<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
-<th>Звідки</th>
+<th>Що є</th>
 <th>Що там</th>
 <th>Куди в <code>news_hub</code></th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>module_5/lesson_46_Telegram_API/ai_bot/app/services/ai_service.py</code></td>
+<td>стартовий <code>ai_bot</code>: <code>app/services/ai_service.py</code></td>
 <td>Gemini через <code>google-genai</code>: <code>MODEL_POOL</code> з переходом на наступну модель, circuit breaker у Redis, тайм-аут</td>
 <td><code>news_hub/llm.py</code></td>
 </tr>
@@ -3915,7 +3915,7 @@
 <td><code>LLM_*</code>, <code>GEMINI_*</code> у <code>llm.py</code></td>
 </tr>
 <tr>
-<td><code>module_4/lessons/lesson_34_asyncio/news_dashboard/app/nlp.py</code></td>
+<td>прототип <code>news_dashboard</code>: <code>app/nlp.py</code></td>
 <td>тональність за основами слів, ключові слова за частотою</td>
 <td><code>news_hub/analysis.py</code> — <code>NewsAnalysis</code> від моделі</td>
 </tr>
@@ -4064,8 +4064,8 @@
 </code></pre></div>
 <p>Немає ключа — застосунок <strong>стартує</strong>: стрічка, пошук і збір працюють, а аналіз відповідає <code>503</code>. Модель Anthropic задає змінна <code>ANTHROPIC_MODEL</code>: назви моделей змінюються частіше за код.</p>
 <h2 id="refactor-2">Рефакторинг 2. Асинхронний клієнт і пул моделей<a class="headerlink" href="#refactor-2" title="Permanent link">&para;</a></h2>
-<p>Старий код запускав синхронний виклик SDK у потоці й щоразу створював новий клієнт:</p>
-<div class="highlight"><span class="filename">ai_service.py (старий курс, скорочено)</span><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">text</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">to_thread</span><span class="p">(</span><span class="n">_call_gemini_sync</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">conversation</span><span class="p">,</span> <span class="n">sys_prompt</span><span class="p">)</span>
+<p>Стартовий код запускав синхронний виклик SDK у потоці й щоразу створював новий клієнт:</p>
+<div class="highlight"><span class="filename">ai_service.py (стартовий код, скорочено)</span><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">text</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">to_thread</span><span class="p">(</span><span class="n">_call_gemini_sync</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">conversation</span><span class="p">,</span> <span class="n">sys_prompt</span><span class="p">)</span>
 <a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
 <a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="k">def</span><span class="w"> </span><span class="nf">_call_gemini_sync</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">prompt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">system_prompt</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>    <span class="n">client</span> <span class="o">=</span> <span class="n">genai</span><span class="o">.</span><span class="n">Client</span><span class="p">(</span><span class="n">api_key</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">GEMINI_API_KEY</span><span class="p">,</span>
@@ -4952,7 +4952,7 @@
 </ul>
 <h2 id="_13">Документація і джерела<a class="headerlink" href="#_13" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Код: <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_4/lessons/lesson_43_llm_api/news_hub"><code>news_hub</code></a> — <code>llm.py</code> з <code>ai_bot/app/services/ai_service.py</code>, <code>analysis.py</code> замість <code>news_dashboard/app/nlp.py</code> старого курсу <code>PY-Course-Victor-Nikoriak-23_02</code>.</li>
+<li>Код: <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_4/lessons/lesson_43_llm_api/news_hub"><code>news_hub</code></a> — <code>llm.py</code> з <code>ai_bot/app/services/ai_service.py</code>, <code>analysis.py</code> замість <code>news_dashboard/app/nlp.py</code> (прототип).</li>
 <li>Gemini API: <a href="https://ai.google.dev/gemini-api/docs/text-generation">генерація тексту</a>, <a href="https://ai.google.dev/gemini-api/docs/structured-output">structured output</a>, <a href="https://ai.google.dev/gemini-api/docs/models">моделі</a>, <a href="https://ai.google.dev/gemini-api/docs/rate-limits">ліміти</a>, <a href="https://ai.google.dev/gemini-api/docs/pricing">ціни</a>, <a href="https://ai.google.dev/gemini-api/docs/troubleshooting">помилки</a>; SDK <a href="https://googleapis.github.io/python-genai/">google-genai</a>; ключ — <a href="https://aistudio.google.com/apikey">Google AI Studio</a>.</li>
 <li>Anthropic: <a href="https://platform.claude.com/docs/en/build-with-claude/structured-outputs">structured outputs</a>, <a href="https://platform.claude.com/docs/en/api/errors">помилки</a>, <a href="https://platform.claude.com/docs/en/about-claude/pricing">ціни</a>; SDK <a href="https://github.com/anthropics/anthropic-sdk-python">anthropic-sdk-python</a>.</li>
 <li>Безпека: <a href="https://genai.owasp.org/llm-top-10/">OWASP Top 10 for LLM Applications</a>, <a href="https://genai.owasp.org/llmrisk/llm01-prompt-injection/">LLM01 Prompt Injection</a>.</li>

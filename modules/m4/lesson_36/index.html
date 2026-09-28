@@ -2115,7 +2115,7 @@
   <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Старт: що дає парсер зі старого курсу
+        Старт: з якого коду починаємо
       
     </span>
   </a>
@@ -3324,7 +3324,7 @@
   <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Старт: що дає парсер зі старого курсу
+        Старт: з якого коду починаємо
       
     </span>
   </a>
@@ -3624,7 +3624,7 @@
 
 
 <h1 id="36-typing-pydantic">Урок 36. Typing + Pydantic<a class="headerlink" href="#36-typing-pydantic" title="Permanent link">&para;</a></h1>
-<p>З цього уроку FastAPI-гілка курсу будує <strong>новинний агрегатор</strong>: парсер стрічки новин, який крок за кроком обростає API, базою, кешем, підсумками від Gemini й Telegram-ботом. Починаємо не з нуля: у старому курсі вже є робочий парсер rbc.ua — функція <code>parse_rbc_news</code> з уроку про web scraping — і 168 новин, які вона зібрала.</p>
+<p>З цього уроку FastAPI-гілка курсу будує <strong>новинний агрегатор</strong>: парсер стрічки новин, який крок за кроком обростає API, базою, кешем, підсумками від Gemini й Telegram-ботом. Починаємо не з нуля: вже є робочий парсер rbc.ua — функція <code>parse_rbc_news</code> з уроку про web scraping — і 168 новин, які вона зібрала.</p>
 <p>Парсер повертає <code>list[dict]</code>. Словник нічого не гарантує: ключ може бути з одруківкою, значення — порожнім рядком, «дата» — лише <code>"14:19"</code>, URL — з чужого домену. Сьогодні два рефакторинги цього коду: <strong>анотації типів</strong> (їх перевіряє <code>mypy</code> до запуску) і <strong>Pydantic-модель</strong> <code>NewsItem</code> (вона перевіряє дані під час роботи). Pydantic — фундамент FastAPI: у наступному уроці ця сама модель стане відповіддю API.</p>
 <table>
 <thead>
@@ -3681,7 +3681,7 @@
 <p><strong>Ноутбук заняття:</strong> <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_36_typing_pydantic/note_lesson_36_pydantic.ipynb"><code>note_lesson_36_pydantic.ipynb</code></a> <a href="https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_36_typing_pydantic/note_lesson_36_pydantic.ipynb"><img alt="Open In Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></a> — типи й моделі на справжніх новинах з перевірками.</p>
 <div class="admonition note">
 <p class="admonition-title">Звідки дані</p>
-<p>Сайт <code>www.rbc.ua</code> зараз недоступний із середовища, де збирався курс, тому агрегатор працює на <strong>знімку</strong> — 168 новинах, які <code>parse_rbc_news</code> зібрала в старому курсі (<code>data/rbc_news_snapshot.json</code>). Код парсера той самий; як запустити його на свіжій сторінці — у <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_36_typing_pydantic/news_hub/README.md"><code>README.md</code></a> проєкту.</p>
+<p>Сайт <code>www.rbc.ua</code> зараз недоступний із середовища, де збирався курс, тому агрегатор працює на <strong>знімку</strong> — 168 новинах, які <code>parse_rbc_news</code> зібрала раніше (<code>data/rbc_news_snapshot.json</code>). Код парсера той самий; як запустити його на свіжій сторінці — у <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_36_typing_pydantic/news_hub/README.md"><code>README.md</code></a> проєкту.</p>
 </div>
 <h2 id="_1">Пригадай<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
 <ol>
@@ -3697,7 +3697,7 @@
 <li>Типи й обмеження полів; <code>is_valid()</code> → <code>False</code>, помилки за полями, API — <code>400</code>. Pydantic робить те саме, FastAPI поверне <code>422</code>.</li>
 </ol>
 </details>
-<h2 id="_2">Старт: що дає парсер зі старого курсу<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<h2 id="_2">Старт: з якого коду починаємо<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
 <p>Функція <code>parse_rbc_news(html) -&gt; list[dict]</code> шукає на сторінці контейнери новин, а якщо їх немає — посилання <code>/news/</code> з текстом «14:19 Заголовок». Кожна новина — словник з п'ятьма рядками. Подивимось на те, що вона насправді зібрала (у папці <code>news_hub</code>):</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">Counter</span>
@@ -3792,7 +3792,7 @@
 <tbody>
 <tr>
 <td><code>news_hub/parser.py</code></td>
-<td><code>parse_rbc_news</code> з ноутбука старого курсу: анотації всіх функцій, <code>list[dict]</code> → <code>list[RawNews]</code>, дві стратегії — окремі функції</td>
+<td><code>parse_rbc_news</code> зі стартового ноутбука: анотації всіх функцій, <code>list[dict]</code> → <code>list[RawNews]</code>, дві стратегії — окремі функції</td>
 <td>mypy бачить ключі новини; функцію легше тестувати</td>
 </tr>
 <tr>
@@ -4067,7 +4067,7 @@
 <a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>без часу публікації: 31
 <a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>2 перевірених; ['title: String should have at least 10 characters', 'url: Value error, очікуємо новину з rbc.ua', 'published_time: Input should be in a valid time format, hour value is outside expected range of 0-23']
 </code></pre></div>
-<p>Увесь знімок пройшов перевірку — парсер старого курсу збирав коректні новини. Але тепер це <strong>доведено</strong> кодом і тестом <code>test_snapshot_is_valid</code>, а не припущено.</p>
+<p>Увесь знімок пройшов перевірку — стартовий парсер збирав коректні новини. Але тепер це <strong>доведено</strong> кодом і тестом <code>test_snapshot_is_valid</code>, а не припущено.</p>
 <h3 id="json-schema">JSON Schema: опис моделі для інших програм<a class="headerlink" href="#json-schema" title="Permanent link">&para;</a></h3>
 <p>З моделі Pydantic будує <strong>JSON Schema</strong> — машинний опис полів і обмежень. FastAPI вставить його у <code>/docs</code> і OpenAPI-схему (урок 37), клієнт на іншій мові згенерує з нього свої класи:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="n">schema</span> <span class="o">=</span> <span class="n">NewsItem</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">()</span>
@@ -4101,7 +4101,7 @@
     classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
     classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
 
-    subgraph BEFORE ["старий курс: словники скрізь"]
+    subgraph BEFORE ["до рефакторингу: словники скрізь"]
         direction LR
         H0["HTML rbc.ua"] --&gt; P0["parse_rbc_news&lt;br&gt;list of dict"] --&gt; U0["pandas, CSV, JSON&lt;br&gt;KeyError під час запуску"]
     end
@@ -4143,7 +4143,7 @@
 <li><code>urlsplit(url)</code> ділить URL на частини: <code>hostname</code> → <code>www.rbc.ua</code>, <code>path</code> → <code>/ukr/news/…</code>;</li>
 <li><code>source</code> — домен без <code>www.</code>;</li>
 <li>перша частина шляху → <code>lang</code> через <code>LANGS = {"ukr": "uk", "rus": "ru"}</code>;</li>
-<li>друга → <code>category</code> через словник <code>CATEGORIES</code> зі старого <code>news_dashboard</code>;</li>
+<li>друга → <code>category</code> через словник <code>CATEGORIES</code> з прототипу <code>news_dashboard</code>;</li>
 <li><code>derived | {…}</code> — значення, які прийшли непорожніми, мають пріоритет над виведеними.</li>
 </ol>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="k">for</span> <span class="n">url</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"https://www.rbc.ua/ukr/news/budget-1.html"</span><span class="p">,</span>
@@ -4275,11 +4275,11 @@
 <h3 id="_9">Що далі<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Ноутбук заняття: <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_36_typing_pydantic/note_lesson_36_pydantic.ipynb"><code>note_lesson_36_pydantic.ipynb</code></a> <a href="https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_36_typing_pydantic/note_lesson_36_pydantic.ipynb"><img alt="Open In Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></a>.</li>
-<li>Урок 37 — FastAPI над <code>NewsItem</code>: <code>GET /api/news</code>, <code>POST /api/scrape</code>, <code>/docs</code> з JSON Schema, Postman. Основа — <code>news_dashboard</code> старого курсу.</li>
+<li>Урок 37 — FastAPI над <code>NewsItem</code>: <code>GET /api/news</code>, <code>POST /api/scrape</code>, <code>/docs</code> з JSON Schema, Postman. Основа — прототип <code>news_dashboard</code>.</li>
 </ul>
 <h2 id="_10">Документація і джерела<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Код: <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_4/lessons/lesson_36_typing_pydantic/news_hub"><code>news_hub</code></a>; <code>parse_rbc_news</code> і знімок — з уроку про web scraping старого курсу (<code>module_4/lessons/lesson_31_http_requests</code>), словник категорій — з <code>news_dashboard</code> (<code>module_4/lessons/lesson_34_asyncio</code>).</li>
+<li>Код: <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_4/lessons/lesson_36_typing_pydantic/news_hub"><code>news_hub</code></a>; <code>parse_rbc_news</code> і знімок — зі стартового ноутбука про web scraping, словник категорій — з прототипу <code>news_dashboard</code>.</li>
 <li>Python: <a href="https://docs.python.org/3/library/typing.html">typing</a>, <a href="https://mypy.readthedocs.io/en/stable/cheat_sheet_py3.html">Type hints cheat sheet (mypy)</a>, <a href="https://docs.python.org/3/library/urllib.parse.html#urllib.parse.urlsplit">urllib.parse.urlsplit</a></li>
 <li>Pydantic: <a href="https://docs.pydantic.dev/latest/concepts/models/">Models</a>, <a href="https://docs.pydantic.dev/latest/concepts/fields/">Fields</a>, <a href="https://docs.pydantic.dev/latest/concepts/validators/">Validators</a>, <a href="https://docs.pydantic.dev/latest/concepts/fields/#the-computed_field-decorator">Computed fields</a>, <a href="https://docs.pydantic.dev/latest/concepts/type_adapter/">Type Adapter</a>, <a href="https://docs.pydantic.dev/latest/concepts/json_schema/">JSON Schema</a></li>
 <li>FastAPI: <a href="https://fastapi.tiangolo.com/python-types/">Python Types Intro</a> — навіщо FastAPI анотації</li>

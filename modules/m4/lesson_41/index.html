@@ -2287,7 +2287,7 @@
   <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Старт: що дає старий курс
+        Старт: з якого коду починаємо
       
     </span>
   </a>
@@ -3379,7 +3379,7 @@
   <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Старт: що дає старий курс
+        Старт: з якого коду починаємо
       
     </span>
   </a>
@@ -3809,33 +3809,33 @@
 <li>Щоразу, коли ендпоінт просить <code>get_db</code>, FastAPI викликає <code>test_db</code>. Сам <code>get_db</code> при цьому не виконується — це стане важливим сьогодні.</li>
 </ol>
 </details>
-<h2 id="_2">Старт: що дає старий курс<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<h2 id="_2">Старт: з якого коду починаємо<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
-<th>Звідки</th>
+<th>Що є</th>
 <th>Що там</th>
 <th>Куди в <code>news_hub</code></th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>lesson_Django_Testing/TESTING_FOUNDATIONS.md</code></td>
+<td><code>TESTING_FOUNDATIONS.md</code></td>
 <td>піраміда тестів: багато швидких unit, менше integration</td>
 <td><code>tests/unit/</code> і <code>tests/integration/</code>, маркери</td>
 </tr>
 <tr>
-<td><code>lesson_Django_Testing/MOCKING_AND_PATCHING.md</code></td>
+<td><code>MOCKING_AND_PATCHING.md</code></td>
 <td>«patch where used»; «мокай зовнішні межі, а не всю систему»</td>
 <td><code>tests/unit/test_scraper.py</code> — мок мережі</td>
 </tr>
 <tr>
-<td><code>lesson_Django_Testing/TEST_DATA_AND_FIXTURES.md</code></td>
+<td><code>TEST_DATA_AND_FIXTURES.md</code></td>
 <td>фабрики: у тесті видно лише важливі поля</td>
 <td><code>tests/factories.py</code> → <code>make_raw(...)</code></td>
 </tr>
 <tr>
-<td>ноутбук <code>note_lesson_31_web_scraping.ipynb</code> (урок 31 старого курсу)</td>
+<td>ноутбук web scraping</td>
 <td>справжній фрагмент стрічки rbc.ua (клітинка 44), демо-розмітка (клітинка 12)</td>
 <td><code>tests/fixtures/*.html</code></td>
 </tr>
@@ -3891,7 +3891,7 @@
 <h2 id="refactor-2">Рефакторинг 2. Збережені сторінки замість рядків у тесті<a class="headerlink" href="#refactor-2" title="Permanent link">&para;</a></h2>
 <p>Тести парсера в уроці 36 містили HTML прямо в коді — рядки, які автор тесту придумав сам. Тепер розмітка лежить у файлах <code>tests/fixtures/</code>:</p>
 <ul>
-<li><code>rbc_newsline_item.html</code> — <strong>справжній</strong> фрагмент стрічки rbc.ua з ноутбука web scraping старого курсу: <code>div.item &gt; a &gt; span.time</code>, контейнерів <code>newsline__item</code> немає;</li>
+<li><code>rbc_newsline_item.html</code> — <strong>справжній</strong> фрагмент стрічки rbc.ua з ноутбука web scraping: <code>div.item &gt; a &gt; span.time</code>, контейнерів <code>newsline__item</code> немає;</li>
 <li><code>demo_newsline.html</code> — демо-розмітка з того ж ноутбука: контейнери <code>newsline__item</code>, час в атрибуті <code>&lt;time datetime="…"&gt;</code>.</li>
 </ul>
 <p>Файл видно в браузері; коли сайт змінить розмітку, його оновлюють збереженою сторінкою — і тести показують, що зламалось. Фікстура віддає вміст за назвою:</p>
@@ -4564,7 +4564,7 @@
 </ul>
 <h2 id="_9">Документація і джерела<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Код: <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_4/lessons/lesson_41_api_testing/news_hub"><code>news_hub</code></a> — тести уроку 39, перебудовані за <code>lesson_Django_Testing/</code> старого курсу (<code>TESTING_FOUNDATIONS.md</code>, <code>MOCKING_AND_PATCHING.md</code>, <code>TEST_DATA_AND_FIXTURES.md</code>); HTML-фікстури — з <code>module_4/lessons/lesson_31_http_requests/note_lesson_31_web_scraping.ipynb</code> старого курсу.</li>
+<li>Код: <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_4/lessons/lesson_41_api_testing/news_hub"><code>news_hub</code></a> — тести уроку 39, перебудовані за <code>TESTING_FOUNDATIONS.md</code>, <code>MOCKING_AND_PATCHING.md</code>, <code>TEST_DATA_AND_FIXTURES.md</code>; HTML-фікстури — з ноутбука web scraping.</li>
 <li>Урок 25 курсу — <a href="../../m2/lesson_25/">pytest і тестування</a>: fixtures, <code>parametrize</code>, mock, покриття, піраміда тестів.</li>
 <li>Django-книга, частина VIII: <a href="https://nikoriakviktot.github.io/notes_chat_app/08_testing_and_quality/testing_foundations_full/">основи тестування</a>, <a href="https://nikoriakviktot.github.io/notes_chat_app/08_testing_and_quality/pytest_basics_full/">pytest</a>, <a href="https://nikoriakviktot.github.io/notes_chat_app/08_testing_and_quality/mocking_and_patching_full/">Mock і patch</a>, <a href="https://nikoriakviktot.github.io/notes_chat_app/08_testing_and_quality/test_data_and_fixtures_full/">тестові дані й фікстури</a>, <a href="https://nikoriakviktot.github.io/notes_chat_app/08_testing_and_quality/testing_practice_project_full/">практика</a>.</li>
 <li>pytest: <a href="https://docs.pytest.org/en/stable/how-to/mark.html">markers</a>, <a href="https://docs.pytest.org/en/stable/reference/reference.html#pytest.hookspec.pytest_collection_modifyitems">hooks: pytest_collection_modifyitems</a>, <a href="https://docs.pytest.org/en/stable/how-to/monkeypatch.html">monkeypatch</a>; <a href="https://pytest-asyncio.readthedocs.io/">pytest-asyncio</a>; <a href="https://pytest-cov.readthedocs.io/">pytest-cov</a>.</li>
