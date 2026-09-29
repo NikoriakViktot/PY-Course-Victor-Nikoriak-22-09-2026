@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="uk">
+<head><meta charset="utf-8"><title>Нотатки</title></head>
+<body>
+  <h1>Нотатки ({{ notes|length }})</h1>
+  <ul>
+    {% for note in notes %}
+      <li><strong>{{ note.title }}</strong> — {{ note.content|default:"без тексту" }}</li>
+    {% empty %}
+      <li>Нотаток ще немає.</li>
+    {% endfor %}
+  </ul>
+</body>
+</html>

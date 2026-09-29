@@ -224,9 +224,19 @@ generator/
 dashboard/
 
 data/
+# дані уроку 32 (фікстура й знімок ogimet) — публікуємо
+!module_4/lessons/lesson_32_rest_api_design/meteo_api/data/
 
 module_2/lessons/lesson_21_module2_review/amazon_ecommerce_1M.csv
 
 
 
 .idea/
+# дані бонус-уроку М3 — у репозиторії (правило data/ вище їх не стосується)
+!module_3/bonus/pandas_data_analysis/data/
+# знімок стрічки rbc.ua для news_hub (уроки 36+) — без нього не працюють тести й ноутбуки
+!module_4/lessons/*/news_hub/data/
+module_3/bonus/pandas_data_analysis/data/wfpvam_foodprices.csv
+
+# локальна SQLite-база news_hub (урок 38+)
+module_4/lessons/*/news_hub/*.db

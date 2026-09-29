@@ -1,7 +1,0 @@
-{
-  "project_name": "Restaurant Weekly Report",
-  "currency": "UAH",
-  "input_file": "orders.csv",
-  "output_file": "report.json",
-  "date_column": "order_date"
-}

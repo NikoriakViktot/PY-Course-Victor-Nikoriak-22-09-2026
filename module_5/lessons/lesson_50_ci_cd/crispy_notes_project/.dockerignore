@@ -1,0 +1,19 @@
+# Урок 49: в образ — лише потрібне для роботи (див. урок 48)
+.env
+.env.*
+**/__pycache__
+**/*.py[cod]
+.venv/
+*.sqlite3
+db.sqlite3
+staticfiles/
+.git/
+.idea/
+.vscode/
+Dockerfile
+.dockerignore
+docker-compose*.yml
+nginx/
+scripts/
+backups/
+README.md

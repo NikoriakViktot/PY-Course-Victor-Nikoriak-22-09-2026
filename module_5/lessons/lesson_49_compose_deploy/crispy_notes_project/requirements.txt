@@ -1,0 +1,11 @@
+Django>=5.2,<6.0
+django-crispy-forms>=2.3
+crispy-bootstrap5>=2024.2
+django-debug-toolbar>=4.4.3          # урок 44: debug_toolbar_urls() і Django 5.2 (4.0 падає на get_storage_class)
+djangorestframework>=3.16
+drf-spectacular>=0.28
+djangorestframework-simplejwt>=5.3   # урок 40: JWT для API
+psycopg[binary]>=3.1.8               # урок 44: драйвер PostgreSQL (psycopg 3; Django 5.2 — від 3.1.8)
+channels>=4.0                        # урок 45: WebSocket — consumers, routing, channel layer
+daphne>=4.0                          # урок 45: ASGI-сервер; першим в INSTALLED_APPS — runserver через ASGI
+channels-redis>=4.0                  # урок 45: RedisChannelLayer (REDIS_URL); без Redis — InMemoryChannelLayer

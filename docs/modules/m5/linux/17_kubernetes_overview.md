@@ -1,0 +1,297 @@
+# 17. Kubernetes: огляд
+
+!!! info "Довідник бонус-уроку «Linux для розробника»"
+    Розділ перевірено: кожну команду виконано в контейнерах Ubuntu, Debian і `python:3.12-slim`. Урок з вправами — [Бонус. Linux](../bonus_linux.md).
+
+## Навіщо це потрібно
+
+Ти освоїв Docker і Docker Compose. Один сервер, один `docker compose up` — і все працює. Але що якщо у тебе 50 контейнерів, 10 серверів, і система має сама перезапускатися при падінні, масштабуватися при навантаженні і оновлюватися без зупинки?
+
+Для цього існує **Kubernetes**.
+
+> Цей файл — тільки огляд. Kubernetes — окремий великий курс. Тут ти отримаєш ментальну модель: навіщо він існує і коли стає потрібним.
+
+---
+
+## Просте пояснення
+
+> Docker Compose зручний, коли у тебе один сервер або невеликий проєкт. Kubernetes потрібен, коли контейнерів багато, серверів багато, і система має сама перезапускати, масштабувати й розподіляти навантаження між ними.
+
+Docker Compose — пульт від одного TV. Kubernetes — система управління цілим кінотеатром із сотнями екранів, де кожен показує різний фільм, і якщо один екран зламався — система сама переключає глядачів на інший.
+
+---
+
+## Коли Docker Compose вже недостатньо
+
+| Ситуація | Docker Compose | Kubernetes |
+|---|---|---|
+| 1 сервер, 5 контейнерів | Відмінно | Надлишок |
+| 3+ сервери | Складно | Призначений для цього |
+| Auto-scaling | Ні | Так |
+| Self-healing (авто-перезапуск) | Частково | Так, автоматично |
+| Zero-downtime deployment | Складно | Вбудовано |
+| 100+ мікросервісів | Важко керувати | Для цього і існує |
+
+---
+
+## Ключові терміни
+
+| Термін | Що означає |
+|---|---|
+| **Cluster** | Набір серверів (nodes), якими керує Kubernetes |
+| **Node** | Один сервер у кластері (фізичний або VM) |
+| **Pod** | Мінімальна одиниця Kubernetes. Містить 1+ контейнер |
+| **Deployment** | Описує бажаний стан Pods (скільки реплік, який image) |
+| **Service** | Стабільна адреса для набору Pods (load balancing) |
+| **Namespace** | Логічна ізоляція всередині кластера |
+| **ConfigMap** | Конфігурація (без секретів) для Pods |
+| **Secret** | Чутливі дані (паролі, ключі) для Pods; за замовчуванням лише base64, не шифрування |
+| **Ingress** | Аналог Nginx reverse proxy для кластера |
+
+---
+
+## Архітектура кластера
+
+```mermaid
+flowchart TD
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+
+    Internet["Інтернет"] --> Ingress["Ingress Controller<br>(аналог Nginx)"]
+
+    subgraph Cluster["Kubernetes Cluster"]
+        Ingress --> Service1["Service: django-web"]
+        Service1 --> Pod1["Pod: django app #1"]
+        Service1 --> Pod2["Pod: django app #2"]
+        Service1 --> Pod3["Pod: django app #3"]
+
+        Pod1 --> ServiceDB["Service: postgres"]
+        Pod2 --> ServiceDB
+        Pod3 --> ServiceDB
+
+        ServiceDB --> PodDB["Pod: PostgreSQL"]
+
+        subgraph Node1["Node 1 (сервер)"]
+            Pod1
+            PodDB
+        end
+
+        subgraph Node2["Node 2 (сервер)"]
+            Pod2
+            Pod3
+        end
+    end
+
+    class Internet,Pod1,Pod2,Pod3,PodDB step
+    class Ingress,Service1,ServiceDB decision
+```
+
+Kubernetes автоматично:
+- Розміщує Pods на вільних Node
+- Перезапускає Pod якщо він впав
+- Балансує трафік між Pods
+- Замінює Pods при оновленні (по одному, без downtime)
+
+---
+
+## Базові маніфести (для ознайомлення)
+
+### Deployment
+
+```yaml
+# deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: django-web
+spec:
+  replicas: 3             # 3 копії Django
+  selector:
+    matchLabels:
+      app: django-web
+  template:
+    metadata:
+      labels:
+        app: django-web
+    spec:
+      containers:
+        - name: django
+          image: myapp:v1.2.3
+          ports:
+            - containerPort: 8000
+          resources:
+            requests:
+              cpu: 250m   # потрібно для HPA: відсоток CPU рахується від requests
+          env:
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: myapp-secrets
+                  key: secret-key
+```
+
+### Service
+
+```yaml
+# service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: django-service
+spec:
+  selector:
+    app: django-web
+  ports:
+    - port: 80
+      targetPort: 8000
+```
+
+---
+
+## Self-healing — автоматичне відновлення
+
+Якщо Pod впав — Kubernetes помічає це через **health checks** і автоматично запускає новий:
+
+```yaml
+livenessProbe:
+  httpGet:
+    path: /health/
+    port: 8000
+  initialDelaySeconds: 10
+  periodSeconds: 30
+```
+
+Django-ендпоінт `/health/` повертає `200 OK` — значить все добре. Якщо повертає помилку кілька разів підряд — Kubernetes перезапускає контейнер.
+
+---
+
+## Horizontal Pod Autoscaler
+
+```yaml
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: django-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: django-web
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+```
+
+При навантаженні CPU > 70% від `requests` — Kubernetes автоматично збільшує кількість Pods (потрібен metrics-server у кластері). Навантаження спало — зменшує.
+
+---
+
+## Kubernetes vs Docker Compose
+
+```mermaid
+flowchart LR
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+
+    subgraph Simple ["Малий проєкт (1 сервер)"]
+        direction TB
+        DC["Docker Compose"]
+        DC1["✓ Простий<br>✓ Швидкий старт"]
+        DC2["✓ Достатній"]
+        DC --- DC1 --- DC2
+    end
+
+    subgraph Complex ["Складний проєкт (10+ серверів)"]
+        direction TB
+        K8s["Kubernetes"]
+        K1["✓ Auto-scaling<br>✓ Self-healing"]
+        K2["✓ Zero-downtime updates<br>✓ Multi-node"]
+        K8s --- K1 --- K2
+    end
+
+    Simple -->|"зростає"| Complex
+
+    class DC,K8s success
+    class DC1,DC2,K1,K2 step
+```
+
+---
+
+## Managed Kubernetes
+
+Якщо не хочеш підтримувати кластер вручну — хмарні провайдери пропонують Kubernetes як сервіс:
+
+| Провайдер | Сервіс |
+|---|---|
+| Google Cloud | GKE (Google Kubernetes Engine) |
+| AWS | EKS (Elastic Kubernetes Service) |
+| Azure | AKS (Azure Kubernetes Service) |
+| DigitalOcean | DOKS |
+
+Ти описуєш Deployments і Services → хмара керує Node, networking, оновленнями master.
+
+---
+
+## Що треба вивчити перед Kubernetes
+
+Kubernetes — складна система. Починати з нього без фундаменту — марна трата часу.
+
+```text
+1. ✅ Linux та термінал
+2. ✅ Docker та Dockerfile
+3. ✅ Docker Compose
+4. ✅ Деплой вручну (без Kubernetes)
+5. ✅ CI/CD базовий
+    ↓
+6. → Kubernetes
+```
+
+---
+
+## Практичне завдання
+
+### Завдання 1
+Поясни своїми словами: чим Kubernetes відрізняється від Docker Compose? Наведи 3 конкретні ситуації, коли Kubernetes потрібен.
+
+### Завдання 2
+Намалюй схему Kubernetes-кластера для типового Django-проєкту: що буде Pods, що Services, що Ingress.
+
+### Завдання 3
+Встанови Minikube (локальний Kubernetes для навчання):
+```bash
+# Встановити minikube
+curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+sudo install minikube-linux-amd64 /usr/local/bin/minikube
+
+minikube start
+kubectl get nodes                  # якщо kubectl не встановлений:
+kubectl get pods --all-namespaces  # minikube kubectl -- get pods --all-namespaces
+```
+
+---
+
+## Самоперевірка
+
+- [ ] Я можу пояснити, що таке Kubernetes і навіщо він потрібен
+- [ ] Я розумію різницю між Cluster, Node і Pod
+- [ ] Я знаю, коли Docker Compose достатній, а коли потрібен Kubernetes
+- [ ] Я розумію концепцію self-healing і auto-scaling
+- [ ] Я знаю наступні кроки для вивчення Kubernetes
+
+---
+
+## Короткий підсумок
+
+Kubernetes — оркестратор контейнерів для складних систем з багатьма серверами. Автоматично перезапускає, масштабує і оновлює Pods. Для маленьких проєктів — Docker Compose достатній. Kubernetes стає актуальним, коли виростаєш з одного сервера. Наступний файл — roadmap і куди рухатися далі.

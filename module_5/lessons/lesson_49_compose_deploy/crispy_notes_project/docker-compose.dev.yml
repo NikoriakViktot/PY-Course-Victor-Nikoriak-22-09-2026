@@ -1,0 +1,11 @@
+# Розробка (урок 49): база й Redis з docker-compose.yml, а Django — python manage.py runserver на своєму комп'ютері.
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d db redis
+#   export DATABASE_URL=postgres://notes_user:<POSTGRES_PASSWORD з .env>@localhost:5432/notes_db REDIS_URL=redis://localhost:6379/0
+# Порти — лише на 127.0.0.1. На сервері цей файл не використовують.
+services:
+  db:
+    ports:
+      - "127.0.0.1:5432:5432"
+  redis:
+    ports:
+      - "127.0.0.1:6379:6379"

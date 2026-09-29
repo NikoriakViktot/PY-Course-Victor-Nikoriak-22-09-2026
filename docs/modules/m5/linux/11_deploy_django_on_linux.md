@@ -1,0 +1,303 @@
+# 11. Деплой Django на Linux
+
+!!! info "Довідник бонус-уроку «Linux для розробника»"
+    Розділ перевірено: кожну команду виконано в контейнерах Ubuntu, Debian і `python:3.12-slim`. Урок з вправами — [Бонус. Linux](../bonus_linux.md).
+
+## Навіщо це потрібно
+
+Ти написав Django-проєкт. Він працює на ноутбуці. Тепер треба зробити так, щоб його побачили реальні користувачі — через інтернет, 24/7. Це і є **деплой**.
+
+Цей файл — покрокова інструкція: від `git clone` до працюючого сайту.
+
+---
+
+## Що таке деплой
+
+Деплой — це процес переносу коду з локального середовища розробки на сервер, де він буде доступний користувачам.
+
+```mermaid
+flowchart TD
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+
+    Local["Local Django project<br>(ноутбук, DEBUG=True)"] --> Git["Push to Git<br>(GitHub/GitLab)"]
+    Git --> Server["Pull on Linux server<br>(Ubuntu)"]
+    Server --> Venv["Створити virtualenv<br>Встановити залежності"]
+    Venv --> Env["Налаштувати .env<br>(DEBUG=False, DB credentials)"]
+    Env --> Migrate["python manage.py migrate"]
+    Migrate --> Static["python manage.py collectstatic"]
+    Static --> AppServer["Запустити Gunicorn/Uvicorn"]
+    AppServer --> Nginx["Nginx приймає запити<br>і проксує до app server"]
+    Nginx --> Users["Користувачі"]
+
+    class Local,Git,Server,Venv,Migrate,Static,AppServer,Nginx step
+    class Env warning
+    class Users success
+```
+
+---
+
+## Підготовка сервера
+
+```bash
+# Підключитися до сервера
+ssh ubuntu@your_server_ip
+
+# Оновити систему
+sudo apt update && sudo apt upgrade -y
+
+# Встановити необхідні пакети
+sudo apt install python3 python3-venv python3-pip git nginx -y
+
+# Встановити PostgreSQL (якщо використовуєш)
+sudo apt install postgresql postgresql-contrib -y
+```
+
+---
+
+## Налаштування PostgreSQL на сервері
+
+```bash
+sudo -u postgres psql
+
+-- Всередині psql:
+CREATE DATABASE myapp_db;
+CREATE USER myapp_user WITH PASSWORD 'strong_password_here';
+GRANT ALL PRIVILEGES ON DATABASE myapp_db TO myapp_user;
+-- PostgreSQL 15+: без цього migrate впаде з "permission denied for schema public"
+ALTER DATABASE myapp_db OWNER TO myapp_user;
+\q
+```
+
+---
+
+## Клонування і налаштування проєкту
+
+```bash
+# Перейти в директорію для веб-проєктів
+cd /var/www/
+
+# Клонувати репозиторій
+sudo git clone https://github.com/you/myproject.git myapp
+sudo chown -R $USER:$USER /var/www/myapp
+cd /var/www/myapp
+
+# Створити virtualenv
+python3 -m venv .venv
+source .venv/bin/activate
+
+# Встановити залежності
+pip install -r requirements.txt
+
+# Встановити Gunicorn (якщо немає в requirements.txt)
+pip install gunicorn
+```
+
+---
+
+## Файл .env на сервері
+
+```bash
+nano /var/www/myapp/.env
+```
+
+```env
+DEBUG=False
+SECRET_KEY=your-production-secret-key-very-long-and-random
+DATABASE_URL=postgres://myapp_user:strong_password_here@localhost:5432/myapp_db
+ALLOWED_HOSTS=your-domain.com,www.your-domain.com,your_server_ip
+STATIC_ROOT=/var/www/myapp/staticfiles
+MEDIA_ROOT=/var/www/myapp/media
+```
+
+```bash
+chmod 600 /var/www/myapp/.env
+```
+
+> Django сам `.env` не читає: `settings.py` має брати ці значення через `python-decouple` або `os.environ` (див. [08. Environment Variables і секрети](08_environment_variables_and_secrets.md)). Без `STATIC_ROOT` у settings `collectstatic` падає з `ImproperlyConfigured`.
+
+> `DEBUG=False` на production — обов'язково. Інакше Django показує stack traces з даними бази.
+
+---
+
+## Міграції і статика
+
+```bash
+source /var/www/myapp/.venv/bin/activate
+cd /var/www/myapp
+
+python manage.py migrate
+python manage.py collectstatic --noinput
+python manage.py createsuperuser   # якщо потрібен адмін
+```
+
+`collectstatic` збирає всі статичні файли (CSS, JS, images) в одну директорію `STATIC_ROOT`. Звідти Nginx роздає їх напряму, не чіпаючи Django.
+
+---
+
+## Перевірка що Django запускається
+
+```bash
+# Тест — запустити і подивитися чи є помилки
+python manage.py check --deploy
+
+# Запустити Gunicorn вручну (для перевірки)
+gunicorn myapp.wsgi:application --bind 0.0.0.0:8000
+```
+
+Якщо відкрити `http://your_server_ip:8000` в браузері — має відкритися сайт (без CSS, бо Nginx ще не налаштований).
+
+Зупини Gunicorn: `Ctrl+C`
+
+---
+
+## Systemd service для Django
+
+Створи файл сервісу:
+
+```bash
+sudo nano /etc/systemd/system/myapp.service
+```
+
+```ini
+[Unit]
+Description=Django Application - myapp
+After=network.target
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/myapp
+RuntimeDirectory=myapp
+EnvironmentFile=/var/www/myapp/.env
+ExecStart=/var/www/myapp/.venv/bin/gunicorn \
+    myapp.wsgi:application \
+    --workers 3 \
+    --bind unix:/run/myapp/myapp.sock \
+    --log-file /var/log/myapp/gunicorn.log \
+    --access-logfile /var/log/myapp/access.log
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+```
+
+```bash
+# Створити директорію для логів
+sudo mkdir -p /var/log/myapp
+sudo chown www-data:www-data /var/log/myapp
+
+# Передати права на проєкт www-data
+sudo chown -R www-data:www-data /var/www/myapp
+
+# Запустити і увімкнути автостарт
+sudo systemctl daemon-reload
+sudo systemctl start myapp
+sudo systemctl enable myapp
+sudo systemctl status myapp
+```
+
+> `--bind unix:/run/myapp/myapp.sock` — Gunicorn слухає на Unix socket замість TCP-порту. Це швидше і безпечніше для local-комунікації з Nginx.
+>
+> `RuntimeDirectory=myapp` — systemd створює `/run/myapp/` з власником `www-data` перед стартом і видаляє після зупинки. Сам `/run/` належить root, тож `www-data` не може створити сокет прямо в ньому (Gunicorn падає з `Can't connect to /run/myapp.sock`).
+
+---
+
+## Nginx конфігурація
+
+```bash
+sudo nano /etc/nginx/sites-available/myapp
+```
+
+```nginx
+server {
+    listen 80;
+    server_name your-domain.com www.your-domain.com;
+
+    location /static/ {
+        alias /var/www/myapp/staticfiles/;
+    }
+
+    location /media/ {
+        alias /var/www/myapp/media/;
+    }
+
+    location / {
+        proxy_pass http://unix:/run/myapp/myapp.sock;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+}
+```
+
+```bash
+# Активувати конфіг
+sudo ln -s /etc/nginx/sites-available/myapp /etc/nginx/sites-enabled/
+sudo nginx -t              # перевірити синтаксис
+sudo systemctl restart nginx
+```
+
+---
+
+## Чому не можна використовувати runserver на production
+
+| `runserver` | Gunicorn |
+|---|---|
+| Один процес (dev-сервер) | Кілька workers (паралельні запити) |
+| Розроблений для debug | Оптимізований для production |
+| Не підтримує Unix sockets | Підтримує |
+| Повільний | Швидкий |
+| Без SSL | Nginx додає SSL |
+
+---
+
+## Типові помилки при деплої
+
+**Помилка 1:** `DisallowedHost at /`
+> Додай домен і IP до `ALLOWED_HOSTS` у `.env`
+
+**Помилка 2:** CSS/JS не завантажуються
+> Виконай `python manage.py collectstatic`. Перевір шлях `STATIC_ROOT` і конфіг Nginx.
+
+**Помилка 3:** `502 Bad Gateway`
+> Gunicorn не запущений або не може підключитися до сокета. `systemctl status myapp`
+
+**Помилка 4:** Помилки з базою даних
+> Перевір `DATABASE_URL` у `.env`. Чи є доступ від `www-data` до PostgreSQL?
+
+---
+
+## Практичне завдання
+
+### Завдання 1
+Підготуй `requirements.txt` для production: додай `gunicorn`, `psycopg2-binary`, `python-decouple`.
+
+### Завдання 2
+Запусти Gunicorn вручну і перевір що сайт відкривається:
+```bash
+gunicorn myapp.wsgi:application --bind 0.0.0.0:8000 --log-level debug
+```
+
+### Завдання 3
+Напиши systemd unit file для свого проєкту і поясни кожен рядок.
+
+---
+
+## Самоперевірка
+
+- [ ] Я можу пояснити всі кроки деплою Django від git clone до запущеного сайту
+- [ ] Я знаю, що `DEBUG=False` обов'язковий на production
+- [ ] Я розумію навіщо `collectstatic` і що таке `STATIC_ROOT`
+- [ ] Я вмію написати systemd unit file для Django
+- [ ] Я знаю, чому `runserver` не можна використовувати на production
+
+---
+
+## Короткий підсумок
+
+Деплой Django — це: клонувати код, налаштувати `.env`, створити virtualenv, встановити залежності, виконати міграції і collectstatic, запустити Gunicorn через systemd, налаштувати Nginx. Далі розберемо Nginx і Gunicorn детальніше.

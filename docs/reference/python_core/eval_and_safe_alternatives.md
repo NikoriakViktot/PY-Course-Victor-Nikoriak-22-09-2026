@@ -1,6 +1,6 @@
 # `eval()` в Python: від «зручної функції» до «дірки в безпеці»
 
-Довідник про вбудовану функцію `eval()` — що вона робить, чому вона небезпечна з чужим вводом, і чим її замінити залежно від задачі. Наскрізний приклад — CLI-калькулятор без `eval()` ([`cli_calculator.py`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_12_modules_stdlib/calculator_project/cli_calculator.py)); `calculator_project/` — матеріал зі старого курсу, тепер лежить у папці Уроку 12 (`lesson_12_modules_stdlib/`, модулі та `import`); концептуально пов'язаний також з Уроком 17 (міні-проєкт CLI).
+Довідник про вбудовану функцію `eval()` — що вона робить, чому вона небезпечна з чужим вводом, і чим її замінити залежно від задачі. Наскрізний приклад — CLI-калькулятор без `eval()` ([`cli_calculator.py`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_12_modules_stdlib/calculator_project/cli_calculator.py)); `calculator_project/` лежить у папці Уроку 12 (`lesson_12_modules_stdlib/`, модулі та `import`); концептуально пов'язаний також з Уроком 17 (міні-проєкт CLI).
 
 ## Що таке `eval()`?
 

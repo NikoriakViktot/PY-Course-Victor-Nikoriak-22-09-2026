@@ -19,7 +19,7 @@ git pull upstream main
 
 ## Colab: «Could not find … .ipynb» / «There was an error loading this notebook»
 
-Кнопка Colab веде на шлях, де файлу вже немає (ноутбук перенесли або кнопка з репозиторію старого курсу). Відкрий ноутбук через книгу курсу або заміни в адресі GitHub `https://github.com/` на `https://colab.research.google.com/github/`. Докладно: [Ноутбуки в Google Colab](colab.md).
+Кнопка Colab веде на шлях, де файлу вже немає (ноутбук перенесли або кнопка веде на інший репозиторій). Відкрий ноутбук через книгу курсу або заміни в адресі GitHub `https://github.com/` на `https://colab.research.google.com/github/`. Докладно: [Ноутбуки в Google Colab](colab.md).
 
 ## Permission denied
 

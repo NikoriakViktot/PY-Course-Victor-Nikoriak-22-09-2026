@@ -1,4 +1,6 @@
-# Алгоритмічне мислення у Python — Урок 8
+# Алгоритмічне мислення у Python — Урок 7: дашборд ресторану
+
+> Код: [`restaurant_dashboard/`](restaurant_dashboard/) — `pipeline.py` (чисті функції), `app.py` (інтерфейс на Streamlit), `test_pipeline.py` (перевірки). Запуск — у [README](restaurant_dashboard/README.md).
 
 ## Завдання
 
@@ -6,7 +8,7 @@
 фільтрує чеки в реальному часі й одразу бачить KPI, графіки, таблиці.
 
 **Проблема, яку вирішуємо:**
-Аналітичний код з урока 7 — один великий блок.
+Аналітичний код з уроку 6 — один великий блок.
 Щоб змінити фільтр, треба переписувати весь цикл.
 Щоб підключити UI — неможливо, код не розбитий на частини.
 
@@ -19,7 +21,7 @@
         ↓
 Pipeline: apply_filters → enrich_all → calc_kpis → ...
         ↓
-Dash callback викликає pipeline при кожній зміні UI
+Streamlit перезапускає app.py при кожній зміні фільтра → один виклик run_pipeline()
 ```
 
 **Що виконує алгоритм:**
@@ -99,8 +101,12 @@ G --> H[зберігається у пам'яті раз і назавжди]
 ```
 
 ```python
-ALL_ORDERS: list[Order] = load_orders()
-# викликається один раз при імпорті модуля
+@st.cache_data
+def cached_orders():
+    return load_orders()
+
+ALL_ORDERS = cached_orders()
+# st.cache_data: seaborn завантажується один раз, далі Streamlit бере результат з кешу
 ```
 
 ```
@@ -329,7 +335,7 @@ Reducer Pattern:
 # 8. group_by_day() — Редьюсер з групуванням
 
 **Задача:** порахувати виручку, чайові, кількість чеків по кожному дню.
-Той самий Counting Pattern з урока 7, але тепер у функції.
+Той самий Counting Pattern з уроку 6, але тепер у функції.
 
 ```mermaid
 flowchart TD
@@ -355,7 +361,7 @@ J --> K["list of dict — відсортований за виручкою"]
 ```
 
 ```python
-# Counting Pattern (урок 7) → тепер у функції (урок 8)
+# Counting Pattern (урок 6) → тепер у функції (урок 7)
 rev[o.day]  += o.total_bill   # defaultdict(float)
 cnt[o.day]  += 1              # defaultdict(int)
 ```
@@ -395,7 +401,7 @@ I --> J
 ```
 
 ```
-Grouping Pattern (урок 7) → агрегат списків
+Grouping Pattern (урок 6) → агрегат списків
 tip_pcts["Dinner"] = [14.0, 16.1, 5.9, ...]  → середнє
 ```
 
@@ -498,12 +504,12 @@ sorted() + зріз → Leader Algorithm для N кращих
 ```mermaid
 flowchart TD
 
-START["run_pipeline(days, times, smoker, sexes, size_range, bill_range)"]
+START["run_pipeline(orders, days, times, smoker, size_range, bill_range, sexes)"]
 
 START --> S1
 
 subgraph S1["STEP 1 — FILTER"]
-  F1["apply_filters(ALL_ORDERS, ...)"]
+  F1["apply_filters(orders, ...)"]
   F1 --> F2["List[Order] — N чеків"]
 end
 
@@ -529,8 +535,9 @@ S3 --> RESULT["return dict з усіма результатами"]
 ```
 
 ```python
-def run_pipeline(days, times, smoker, size_range, bill_range, sexes) -> dict:
-    filtered = apply_filters(ALL_ORDERS, days, times, smoker, size_range, bill_range, sexes)
+def run_pipeline(orders, days, times, smoker, size_range, bill_range, sexes) -> dict:
+    # чеки приходять параметром, а не з глобальної змінної — функція чиста
+    filtered = apply_filters(orders, days, times, smoker, size_range, bill_range, sexes)
     enriched = enrich_all(filtered)
     return {
         "count":    len(enriched),
@@ -552,44 +559,52 @@ def run_pipeline(days, times, smoker, size_range, bill_range, sexes) -> dict:
 
 ---
 
-# 14. Dash Callback — UI як обгортка навколо pipeline
+# 14. Streamlit — UI як обгортка навколо pipeline
 
-**Задача:** при зміні будь-якого фільтра у sidebar перерахувати все і оновити UI.
+**Задача:** при зміні будь-якого фільтра на бічній панелі перерахувати все і оновити сторінку.
+
+Streamlit працює просто: після кожної зміни віджета він **перезапускає `app.py` згори донизу**. Віджети повертають поточні значення фільтрів, а далі йде один виклик `run_pipeline(...)`.
 
 ```mermaid
 flowchart TD
 
-UI["Sidebar UI"]
-UI --> I1["f-day    Checklist"]
-UI --> I2["f-time   Checklist"]
-UI --> I3["f-smoker Checklist"]
-UI --> I4["f-sex    Checklist"]
-UI --> I5["f-size   RangeSlider"]
-UI --> I6["f-bill   RangeSlider"]
+UI["Бічна панель"]
+UI --> I1["st.multiselect: день"]
+UI --> I2["st.multiselect: зміна"]
+UI --> I3["st.multiselect: курці"]
+UI --> I4["st.multiselect: стать"]
+UI --> I5["st.slider: гостей"]
+UI --> I6["st.slider: сума"]
 
-I1 --> CB["@app.callback  update()"]
-I2 --> CB
-I3 --> CB
-I4 --> CB
-I5 --> CB
-I6 --> CB
+I1 --> RR["Streamlit перезапускає app.py"]
+I2 --> RR
+I3 --> RR
+I4 --> RR
+I5 --> RR
+I6 --> RR
 
-CB --> PL["run_pipeline(days, times, smoker, sexes, size_range, bill_range)"]
+RR --> PL["run_pipeline(ALL_ORDERS, days, times, smoker, size_range, bill_range, sexes)"]
 
-PL --> O1["kpis → kpi-revenue, kpi-tips, kpi-avg, kpi-pct"]
-PL --> O2["by_day   → ch-day   Figure"]
-PL --> O3["by_time  → ch-time  Figure"]
-PL --> O4["enriched → ch-scatter Figure"]
-PL --> O5["by_size  → ch-size  Figure"]
-PL --> O6["enriched → ch-dist  Figure"]
-PL --> O7["by_sex   → ch-sex   Figure"]
-PL --> O8["top_tips → top-table"]
-PL --> O9["enriched → orders-table"]
+PL --> O1["kpis → 4 × st.metric"]
+PL --> O2["by_day   → графік виручки по днях"]
+PL --> O3["by_time  → обід чи вечеря"]
+PL --> O4["enriched → рахунок і чайові"]
+PL --> O5["by_size  → розмір столу"]
+PL --> O6["enriched → розподіл чайових"]
+PL --> O7["by_sex   → виручка за статтю"]
+PL --> O8["top_tips → st.dataframe топ-5"]
+PL --> O9["enriched → st.dataframe усіх чеків"]
+```
+
+```python
+days = st.multiselect("День", list(DAY_UA), format_func=DAY_UA.get, key="f_day")
+...
+data = run_pipeline(ALL_ORDERS, days, times, smoker, size_range, bill_range, sexes)
 ```
 
 ```
-Dash callback = обгортка навколо run_pipeline()
-Кожна зміна фільтра → callback → pipeline → 14 Output-оновлень
+Streamlit = інтерфейс навколо run_pipeline()
+Кожна зміна фільтра → перезапуск app.py → один виклик pipeline → нова сторінка
 ```
 
 ---
@@ -622,16 +637,16 @@ KPI  --> UI1["4 KPI картки"]
 DAY  --> UI2["Bar: виручка по днях"]
 TIME --> UI3["Bar: Lunch vs Dinner"]
 ELIST --> UI4["Scatter: рахунок vs чайові"]
-SIZE --> UI5["Bar: розмір столу + colorbar"]
+SIZE --> UI5["Bar: розмір столу"]
 ELIST --> UI6["Histogram: розподіл Tip%"]
-SEX  --> UI7["Pie: стать клієнтів"]
+SEX  --> UI7["Bar: виручка за статтю"]
 TOP  --> UI8["Таблиця топ-5 Tip%"]
 ELIST --> UI9["Таблиця всіх чеків"]
 ```
 
 ---
 
-# 16. Типи функцій у app.py
+# 16. Типи функцій у pipeline.py
 
 | Функція | Тип | Вхід | Вихід |
 |---|---|---|---|
@@ -651,23 +666,22 @@ ELIST --> UI9["Таблиця всіх чеків"]
 | `group_by_size` | Редьюсер | `List[RichOrder]` | `list[dict]` |
 | `group_by_sex` | Редьюсер | `List[RichOrder]` | `list[dict]` |
 | `top_by_tip_pct` | Редьюсер | `List[RichOrder]`, `int` | `List[RichOrder]` |
-| `run_pipeline` | Оркестратор | 6 параметрів фільтрів | `dict` з усім |
-| `update` | Dash callback | 6 Input | 14 Output |
+| `run_pipeline` | Оркестратор | чеки + 6 параметрів фільтрів | `dict` з усім |
 
 ---
 
-# 17. Порівняння: Урок 7 vs Урок 8
+# 17. Порівняння: Урок 6 vs Урок 7
 
 ```mermaid
 graph LR
 
-A[Урок 7] --> A1[for order in orders]
+A[Урок 6] --> A1[for order in orders]
 A --> A2[if order.day == day]
 A --> A3[rev += order.total_bill]
 A --> A4[cnt += 1]
 A --> A5[Один великий блок]
 
-B[Урок 8] --> B1["apply_filters()  — Предикати"]
+B[Урок 7] --> B1["apply_filters()  — Предикати"]
 B --> B2["enrich_all()     — Трансформер"]
 B --> B3["calc_kpis()      — Редьюсер"]
 B --> B4["run_pipeline()   — Оркестратор"]
@@ -676,12 +690,12 @@ B --> B5[Маленькі чисті функції]
 A5 -.->|рефакторинг| B5
 ```
 
-| | Урок 7 | Урок 8 |
+| | Урок 6 | Урок 7 |
 |---|---|---|
 | Код | Один великий for-блок | Маленькі функції |
 | Зміна фільтра | Переписати весь цикл | Змінити параметр |
 | Тестування | Важко — все разом | Кожна функція окремо |
-| UI | Неможливо підключити | `run_pipeline()` → Dash callback |
+| UI | Неможливо підключити | `run_pipeline()` → Streamlit |
 | Читабельність | `rev += bill` | `calc_kpis(enriched)` |
 
 ---
@@ -694,7 +708,7 @@ A5 -.->|рефакторинг| B5
 Трансформер    = (Order) → RichOrder, форма змінюється, кількість — ні
 Редьюсер       = List[RichOrder] → dict, багато → одне
 Pipeline       = Filter → Map → Reduce
-Dash callback  = UI-обгортка навколо pipeline
+Streamlit      = UI-обгортка навколо pipeline
 ```
 
 Три рядки, які пояснюють весь дашборд:

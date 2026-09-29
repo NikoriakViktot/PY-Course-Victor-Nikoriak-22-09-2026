@@ -1,0 +1,35 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: depression_backend
+    ports:
+      - "5050:5050"
+    volumes:
+      - models:/app/models      # урок 42: іменований том (був оголошений, але не використовувався)
+      - ../data:/data:ro        # урок 42: було ../data:/app/../data — працювало випадково (/app/.. = /)
+    environment:
+      FLASK_DEBUG: "false"
+      FLASK_HOST: "0.0.0.0"
+      FLASK_PORT: "5050"
+      DATA_DIR: /data
+      MODELS_DIR: /app/models
+      ADMIN_TOKEN: ${ADMIN_TOKEN:-}   # порожній — POST /api/train вимкнено
+    restart: unless-stopped
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile.streamlit
+    container_name: depression_dashboard
+    ports:
+      - "8501:8501"
+    environment:
+      BACKEND_URL: http://backend:5050
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  models:

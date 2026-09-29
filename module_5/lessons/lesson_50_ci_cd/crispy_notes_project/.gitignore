@@ -1,0 +1,4 @@
+# Урок 49: локальні файли стеку — не в git
+.env
+backups/
+staticfiles/

@@ -1,0 +1,269 @@
+market_id,market,countryiso3,admin1,admin2,latitude,longitude
+1295,National Average,UKR,,,,
+1858,Cherkasy,UKR,Cherkaska,Cherkaska,49.44,32.06
+1859,Chernihiv,UKR,Chernihivska,Chernihivska,51.5,31.29
+1860,Chernivtsi,UKR,Chernivetska,Chernivetska,48.29,25.94
+1861,Dnipropetrovsk,UKR,Dnipropetrovska,Dniprovska,48.46,35.05
+1862,Donetsk,UKR,Donetska,Donetska,48.02,37.8
+1863,Ivano-Frankivsk,UKR,Ivano-Frankivska,Ivano-Frankivska,48.92,24.71
+1864,Kharkiv,UKR,Kharkivska,Kharkivska,49.99,36.23
+1865,Kherson,UKR,Khersonska,Khersonska,46.64,32.62
+1866,Khmelnytskiy,UKR,Khmelnytska,Khmelnytska,49.42,26.99
+1867,Kirovohrad,UKR,Kirovohradska,Kirovohradska,48.51,32.26
+1868,m. Sevastopol,UKR,Sevastopol,Sevastopolska,44.62,33.53
+1869,Kyiv city,UKR,Kyiv,Kyivska,50.45,30.52
+1870,Luhansk,UKR,Luhanska,Luhanska,48.57,39.31
+1871,Lviv,UKR,Lvivska,Lvivska,49.84,24.03
+1872,Mykolaiv,UKR,Mykolaivska,Mykolaivska,46.98,31.99
+1873,Odesa,UKR,Odeska,Odeska,46.48,30.72
+1874,Poltava,UKR,Poltavska,Poltavska,49.59,34.55
+1875,Rivne,UKR,Rivnenska,Rivnenska,50.62,26.25
+1876,Sumy,UKR,Sumska,Sumska,50.91,34.8
+1877,Ternopyl,UKR,Ternopilska,Ternopilska,49.55,25.59
+1878,Vinnytsya,UKR,Vinnytska,Vinnytska,49.23,28.47
+1879,Volyn,UKR,Volynska,Lutska,50.75,25.33
+1880,Zakarpattya,UKR,Zakarpatska,Uzhhorodska,48.62,22.29
+1881,Zaporizhzhya,UKR,Zaporizka,Zaporizka,47.84,35.14
+1882,Zhytomyr,UKR,Zhytomyrska,Zhytomyrska,50.25,28.66
+1883,Crimea,UKR,Avtonomna Respublika Krym,Simferopolska,44.95,34.1
+1884,Kyiv,UKR,Kyiv,Kyivska,50.45,30.52
+7958,Izium,UKR,Kharkivska,Iziumska,49.21,37.25
+7959,Kupiansk,UKR,Kharkivska,Kupianska,49.72,37.58
+7960,Balakliia,UKR,Kharkivska,Balakliiskyi,49.46,36.86
+7961,Chuhuiv,UKR,Kharkivska,Chuhuivska,49.83,36.69
+7962,Liubotyn,UKR,Kharkivska,Liubotynska,49.95,35.93
+7963,Lozova,UKR,Kharkivska,Blyzniukivskyi,48.88,36.38
+7964,Pervomaiskyi,UKR,Kharkivska,Pervomaiska,49.38,36.22
+7965,Vovchansk,UKR,Kharkivska,Vovchanskyi,50.3,36.94
+7966,Bohodukhiv,UKR,Kharkivska,Bohodukhivskyi,50.16,35.51
+7967,Derhachi,UKR,Kharkivska,Derhachivskyi,50.12,36.12
+8000,Izium peski,UKR,Kharkivska,Iziumska,49.22,37.27
+8001,Izium railway,UKR,Kharkivska,Iziumska,49.22,37.3
+8002,Izium left bank,UKR,Kharkivska,Iziumska,49.2,37.28
+8004,Siversk,UKR,Donetska,Bakhmutskyi,48.87,38.1
+8005,Soledar,UKR,Donetska,Bakhmutskyi,48.68,38.1
+8006,Lyman,UKR,Luhanska,Troitskyi,49.65,38.35
+8007,Sviatohirsk,UKR,Donetska,Slovianska,49.03,37.57
+8008,Marhanets,UKR,Dnipropetrovska,Marhanetska,47.64,34.63
+8009,Ocheretino,UKR,Donetska,Yasynuvatskyi,48.25,37.6
+8010,Avdiivka,UKR,Donetska,Avdiivska,48.14,37.74
+8011,Orikhiv,UKR,Zaporizka,Orikhivskyi,47.57,35.79
+8012,Zelenodolsk,UKR,Dnipropetrovska,Apostolivskyi,47.56,33.65
+8013,Nikopol,UKR,Dnipropetrovska,Nikopolska,47.57,34.4
+8014,Huliaipole,UKR,Zaporizka,Huliaipilskyi,47.65,36.27
+8015,Sloviansk,UKR,Donetska,Slovianska,48.87,37.62
+8016,Apostolove,UKR,Dnipropetrovska,Apostolivskyi,47.67,33.73
+8017,Bakhmut,UKR,Donetska,Bakhmutska,48.6,38
+8018,Vuhledar,UKR,Donetska,Vuhledarska,47.78,37.25
+8122,Kupiansk Left Bank ,UKR,Kharkivska,Kupianska,49.71,37.63
+8123,Kupiansk Right Bank,UKR,Kharkivska,Kupianska,49.72,37.6
+8194,Pisky-Rad'kivs'ki ,UKR,Kharkivska,Borivskyi,49.27,37.61
+8195,Borova,UKR,Kharkivska,Borivskyi,49.38,37.63
+8196,Shyikivka,UKR,Kharkivska,Borivskyi,49.35,37.75
+8197,Pidlyman,UKR,Kharkivska,Borivskyi,49.34,37.6
+8198,Bilozerka,UKR,Khersonska,Bilozerskyi,46.63,32.44
+8314,Oskil,UKR,Kharkivska,Iziumskyi,49.19,37.43
+8315,Kushuhum,UKR,Zaporizka,Zaporizkyi,47.71,35.22
+8316,Druzhkivka,UKR,Donetska,Druzhkivska,48.62,37.53
+8317,Kostiantynivka,UKR,Donetska,Kostiantynivska,48.53,37.71
+8318,Lyptsi,UKR,Kharkivska,Kharkivskyi,50.21,36.41
+8319,Tsirkuny,UKR,Kharkivska,Kharkivskyi,50.08,36.38
+8320,Bilenke,UKR,Zaporizka,Zaporizkyi,47.63,35.03
+8321,Dolynske,UKR,Zaporizka,Zaporizkyi,47.79,34.94
+8322,Novomykolaivka,UKR,Zaporizka,Novomykolaivskyi,47.98,35.91
+8323,Kramatorsk,UKR,Donetska,Kramatorska,48.75,37.58
+8324,Pokrovskyi,UKR,Dnipropetrovska,Ordzhonikidzevska,47.66,34.07
+8325,Zolochiv,UKR,Kharkivska,Zolochivskyi,50.28,35.98
+8326,Shevchenkove,UKR,Kharkivska,Shevchenkivskyi,49.69,37.18
+8327,Malynivka,UKR,Zaporizka,Huliaipilskyi,47.68,36.47
+8328,Stepne,UKR,Zaporizka,Zaporizkyi,47.8,35.31
+8329,Komyshuvakha,UKR,Zaporizka,Orikhivskyi,47.72,35.53
+8330,Myrnohrad,UKR,Donetska,Dymytrivska,48.3,37.27
+8331,Vilhuvatka,UKR,Kharkivska,Novovodolazkyi,49.8,35.94
+8332,Pokrov,UKR,Dnipropetrovska,Pokrovskyi,47.99,36.23
+8333,Stepnohirsk,UKR,Zaporizka,Vasylivskyi,47.59,35.36
+8334,Tavriiske,UKR,Zaporizka,Orikhivskyi,47.67,35.7
+8335,Vozdvyzhivka,UKR,Zaporizka,Huliaipilskyi,47.75,36.08
+8336,Yampil,UKR,Donetska,Lymanska,48.94,37.95
+8337,Velikiy Burluk,UKR,Kharkivska,Velykoburlutskyi,50.06,37.38
+8338,Dvorichna,UKR,Kharkivska,Dvorichanskyi,49.86,37.67
+8339,Kindrashivka,UKR,Kharkivska,Kupianskyi,49.77,37.58
+8340,Kurylivka,UKR,Kharkivska,Kupianskyi,49.66,37.7
+8341,Petropavlivka,UKR,Kharkivska,Kupianskyi,49.73,37.71
+8342,Toretsk,UKR,Donetska,Toretska,48.4,37.86
+8343,Kurakhove,UKR,Donetska,Marinskyi,47.99,37.29
+8344,Selydove,UKR,Donetska,Selydivska,48.2,37.29
+8345,Velyka Novosilka,UKR,Donetska,Velykonovosilkivskyi,47.84,36.85
+8409,Amvrosiivka,UKR,Donetska,Amvrosiivskyi,47.79,38.49
+8410,Bilytske,UKR,Donetska,Dobropilska,48.4,37.17
+8411,Bilozerske,UKR,Donetska,Dobropilska,48.53,37.06
+8412,Bunhe,UKR,Donetska,Yenakiivska,48.22,38.28
+8413,Volnovakha,UKR,Donetska,Volnovaskyi,47.59,37.5
+8414,Vuhlehirsk,UKR,Donetska,Bakhmutskyi,48.31,38.27
+8415,Hirnyk,UKR,Donetska,Selydivska,48.06,37.37
+8416,Horlivka,UKR,Donetska,Kostiantynivskyi,48.38,37.97
+8417,Debaltseve,UKR,Donetska,Debaltsevcka,48.33,38.41
+8418,Dobropilla,UKR,Donetska,Dobropilska,48.47,37.08
+8419,Dokuchaievsk,UKR,Donetska,Dokuchaievska,47.75,37.68
+8420,Zhdanivka,UKR,Donetska,Druzhkivska,48.15,38.26
+8421,Zalizne,UKR,Donetska,Toretska,48.37,37.88
+8422,Zuhres,UKR,Donetska,Khartsyzka,48.01,38.28
+8423,Ilovaisk,UKR,Donetska,Khartsyzka,47.93,38.21
+8424,Krasnohorivka,UKR,Donetska,Marinskyi,48,37.52
+8425,Makiivka,UKR,Donetska,Donetska,47.97,37.94
+8426,Maryinka,UKR,Donetska,Donetska,47.94,37.53
+8427,Mariupol,UKR,Donetska,Mariupolska,47.13,37.56
+8428,Mykolaivka,UKR,Donetska,Pokrovskyi,48.18,37.39
+8429,Mospyne,UKR,Donetska,Donetska,47.88,38.07
+8430,Novoazovsk,UKR,Donetska,Novoazovskyi,47.12,38.09
+8431,Novohrodivka,UKR,Donetska,Novohrodivska,48.2,37.34
+8432,Rodynske,UKR,Donetska,Pokrovska,48.35,37.21
+8433,Svitlodarsk,UKR,Donetska,Bakhmutskyi,48.44,38.22
+8434,Snizhne,UKR,Donetska,Snizhnianska,48.02,38.76
+8435,Ukrayinsk,UKR,Donetska,Selydivska,48.09,37.36
+8436,Khrestivka,UKR,Donetska,Kirovska,48.15,38.36
+8437,Chasiv Yar,UKR,Donetska,Bakhmutskyi,48.58,37.84
+8438,Chystiakove,UKR,Donetska,Torezka,48.03,38.62
+8439,Shakhtarsk,UKR,Donetska,Shakhtarskyi,48.08,38.38
+8440,Yasynuvata,UKR,Donetska,Yasynuvatska,48.13,37.86
+8441,Snihurivka (Mykolaivska),UKR,Mykolaivska,Bashtanskyi,47.46,32.1
+8442,Voznesensk,UKR,Mykolaivska,Voznesenskyi,47.55,31.32
+8443,Nova Odesa,UKR,Mykolaivska,Novoodeskyi,47.3,31.78
+8444,Novyi Buh,UKR,Mykolaivska,Novobuzkyi,47.69,32.51
+8445,Ochakiv,UKR,Mykolaivska,Ochakivska,46.62,31.54
+8446,Pervomaisk,UKR,Kirovohradska,Malovyskivskyi,48.46,31.72
+8447,Yuzhnoukrainsk,UKR,Mykolaivska,Yuzhnoukrainska,47.82,31.19
+8448,Snihurivka (Cherkaska),UKR,Cherkaska,Zolotoniskyi,49.6,32.04
+8449,Arbuzynka,UKR,Mykolaivska,Arbuzynskyi,47.91,31.32
+8450,Berezanka,UKR,Mykolaivska,Berezanskyi,46.86,31.39
+8451,Bereznehuvate,UKR,Mykolaivska,Bereznehuvatskyi,47.31,32.85
+8452,Bratske,UKR,Zaporizka,Mykhailivskyi,47.14,35.33
+8453,Veselynove,UKR,Mykolaivska,Veselynivskyi,47.36,31.24
+8454,Vradiivka,UKR,Mykolaivska,Vradiivskyi,47.86,30.59
+8455,Ielanets,UKR,Mykolaivska,Yelanetskyi,47.7,31.85
+8456,Kazanka,UKR,Mykolaivska,Kazankivskyi,47.84,32.83
+8457,Oleksandrivka,UKR,Mykolaivska,Snihurivskyi,46.84,32.75
+8458,Olshanske,UKR,Mykolaivska,Mykolaivskyi,47.17,31.77
+8459,Pervomaiske,UKR,Mykolaivska,Vitovskyi,47.04,32.44
+8460,Tokarivka,UKR,Mykolaivska,Veselynivskyi,47.3,31.02
+8461,Kostiantynivka_Mykolaivska,UKR,Mykolaivska,Novoodeskyi,47.1,31.92
+8462,Lyman_Donetska,UKR,Donetska,Dobropilskyi,48.41,36.86
+8613,Yunakivka,UKR,Sumska,Sumskyi,51.12,35.03
+8614,Sad,UKR,Sumska,Sumskyi,50.88,34.71
+8615,Bilopillia,UKR,Sumska,Bilopilskyi,51.14,34.31
+8616,Buryn,UKR,Sumska,Burynskyi,51.19,33.83
+8617,Vorozhba,UKR,Sumska,Bilopilskyi,51.17,34.23
+8618,Hlukhiv,UKR,Sumska,Hlukhivska,51.68,33.91
+8619,Konotop,UKR,Sumska,Konotopska,51.23,33.2
+8620,Krolevets,UKR,Sumska,Krolevetskyi,51.55,33.38
+8621,Lebedyn,UKR,Sumska,Lebedynska,50.58,34.48
+8622,Okhtyrka,UKR,Sumska,Okhtyrskyi,50.3,34.93
+8623,Putyvl,UKR,Sumska,Putyvlskyi,51.32,33.88
+8624,Romny,UKR,Sumska,Romenska,50.74,33.48
+8625,Seredyna-Buda,UKR,Sumska,Seredyno-Budskyi,52.19,34.03
+8626,Shalyhyne,UKR,Sumska,Hlukhivskyi,51.57,34.11
+8627,Chupakhivka,UKR,Sumska,Okhtyrskyi,50.38,34.59
+8628,Khotin,UKR,Sumska,Sumskyi,51.07,34.77
+8629,Uhroyidy,UKR,Sumska,Krasnopilskyi,50.86,35.27
+8630,Terny,UKR,Sumska,Nedryhailivskyi,50.99,33.97
+8631,Stepanivka,UKR,Sumska,Bilopilskyi,51.15,34.46
+8632,Svesa,UKR,Sumska,Yampilskyi,51.95,33.94
+8633,Nyzy,UKR,Sumska,Sumskyi,50.78,34.78
+8634,Nedryhailiv,UKR,Sumska,Nedryhailivskyi,50.83,33.88
+8635,Mykolayivka,UKR,Sumska,Romenskyi,50.8,33.43
+8636,Lypova Dolyna,UKR,Sumska,Lypovodolynskyi,50.56,33.81
+8637,Kyrykivka,UKR,Sumska,Velykopysarivskyi,50.34,35.15
+8638,Krasnopillia,UKR,Sumska,Krasnopilskyi,50.77,35.28
+8639,Znob-Novhorodske,UKR,Sumska,Seredyno-Budskyi,52.26,33.6
+8640,Esman,UKR,Sumska,Hlukhivskyi,51.77,34.07
+8641,Duboviazivka,UKR,Sumska,Konotopskyi,51.13,33.38
+8642,Voronizh,UKR,Sumska,Shostkynskyi,51.77,33.47
+8643,Velyka Pysarivka,UKR,Sumska,Velykopysarivskyi,50.42,35.48
+8644,Shostka,UKR,Sumska,Shostkynska,51.86,33.49
+8645,Trostianets,UKR,Sumska,Trostianetskyi,50.47,34.96
+8646,Druzhba,UKR,Sumska,Yampilskyi,52.04,33.95
+8647,Beryslav,UKR,Khersonska,Beryslavskyi,46.84,33.43
+8648,Henichesk,UKR,Khersonska,Henicheskyi,46.17,34.8
+8649,Hola Prystan,UKR,Khersonska,Holoprystanska,46.53,32.54
+8650,Kakhovka,UKR,Khersonska,Kakhovska,46.81,33.48
+8651,Nova Kakhovka,UKR,Khersonska,Novokakhovska,46.76,33.36
+8652,Oleshky,UKR,Khersonska,Oleshkivskyi,46.62,32.73
+8653,Skadovsk,UKR,Khersonska,Skadovskyi,46.12,32.92
+8654,Tavriisk,UKR,Khersonska,Kakhovskyi,46.75,33.44
+8655,Antonivka,UKR,Khersonska,Khersonska,46.68,32.73
+8656,Arkhanhelske,UKR,Khersonska,Vysokopilskyi,47.44,33.4
+8657,Askaniia-Nova,UKR,Khersonska,Chaplynskyi,46.45,33.87
+8658,Bila Krynytsia,UKR,Khersonska,Velykooleksandrivskyi,47.35,33.2
+8659,Brylivka,UKR,Khersonska,Oleshkivskyi,46.42,33.15
+8660,Velyka Lepetykha,UKR,Khersonska,Velykolepetyskyi,47.18,33.94
+8661,Velyka Oleksandrivka,UKR,Khersonska,Velykooleksandrivskyi,47.32,33.32
+8662,Verkhnii Rohachyk,UKR,Khersonska,Verkhnorohachytskyi,47.24,34.34
+8663,Vysokopillia,UKR,Khersonska,Vysokopilskyi,47.49,33.53
+8664,Hornostaivka,UKR,Khersonska,Hornostaivskyi,47,33.73
+8665,Dnipriany,UKR,Khersonska,Novokakhovska,46.75,33.26
+8666,Zelenivka,UKR,Khersonska,Khersonska,46.72,32.66
+8667,Ivanivka,UKR,Khersonska,Bilozerskyi,46.75,33.03
+8668,Kalanchak,UKR,Khersonska,Kalanchatskyi,46.25,33.29
+8669,Kalynivska,UKR,Khersonska,Velykooleksandrivskyi,47.11,32.97
+8670,Kozatske,UKR,Khersonska,Beryslavskyi,46.79,33.34
+8671,Komyshany,UKR,Khersonska,Khersonska,46.64,32.51
+8672,Lazurne,UKR,Khersonska,Skadovskyi,46.08,32.52
+8673,Berdiansk,UKR,Zaporizka,Berdianska,46.76,36.79
+8674,Vasylivka,UKR,Zaporizka,Vasylivskyi,47.44,35.27
+8675,Vil'niansk,UKR,Zaporizka,Vilnianskyi,47.94,35.43
+8676,Dniprorudne,UKR,Zaporizka,Vasylivskyi,47.39,35.01
+8677,Enerhodar,UKR,Zaporizka,Enerhodarska,47.49,34.65
+8678,Kamianka-Dniprovska,UKR,Zaporizka,Kamiansko-Dniprovskyi,47.49,34.43
+8679,Melitopol,UKR,Zaporizka,Melitopolskyi,46.82,35.39
+8680,Molochansk,UKR,Zaporizka,Tokmatskyi,47.21,35.6
+8681,Polohy,UKR,Zaporizka,Polohivskyi,47.48,36.25
+8682,Prymorsk,UKR,Zaporizka,Prymorskyi,46.73,36.35
+8683,Tokmak,UKR,Zaporizka,Tokmatska,47.25,35.71
+8684,Andriivka,UKR,Zaporizka,Vilnianskyi,48,35.17
+8685,Balabyne,UKR,Zaporizka,Zaporizkyi,47.74,35.22
+8686,Vesele,UKR,Zaporizka,Veselivskyi,47.02,34.92
+8687,Zaliznychne,UKR,Zaporizka,Huliaipilskyi,47.65,36.17
+8688,Kamiane,UKR,Zaporizka,Vilnianskyi,47.87,35.4
+8689,Kamianka,UKR,Zaporizka,Bilmatskyi,47.36,36.65
+8690,Komysh-Zoria,UKR,Zaporizka,Bilmatskyi,47.33,36.7
+8691,Kyrylivka,UKR,Zaporizka,Yakymivskyi,46.37,35.37
+8692,Malokaterynivka,UKR,Zaporizka,Zaporizkyi,47.65,35.26
+8693,Mykhailivka,UKR,Zaporizka,Mykhailivskyi,47.27,35.22
+8694,Pryazovske,UKR,Zaporizka,Pryazovskyi,46.74,35.65
+8695,Pryshyb,UKR,Zaporizka,Mykhailivskyi,47.25,35.32
+8696,Rozivka,UKR,Zaporizka,Rozivskyi,47.39,37.07
+8697,Ternuvate,UKR,Zaporizka,Novomykolaivskyi,47.83,36.13
+8698,Chernihivka,UKR,Zaporizka,Chernihivskyi,47.2,36.22
+8699,Yakymivka,UKR,Zaporizka,Yakymivskyi,46.69,35.15
+8700,Mykolaiv Korabelnyi,UKR,Mykolaivska,Mykolaivska,46.87,32.02
+8701,Mykolaiv Inhulskyi,UKR,Mykolaivska,Mykolaivska,46.95,32.06
+8702,Mykolaiv Zavodskyi,UKR,Mykolaivska,Mykolaivska,46.96,31.95
+8703,Mykolaiv Centralnyi,UKR,Mykolaivska,Mykolaivska,46.98,32
+8745,Myropillia,UKR,Sumska,Krasnopilskyi,51.03,35.25
+8960,Novovorontsovka,UKR,Khersonska,Novovorontsovskyi,47.49,33.92
+8961,Tiahynka,UKR,Khersonska,Beryslavskyi,46.78,33.06
+8962,Horohivske,UKR,Mykolaivska,Snihurivskyi,46.96,32.7
+8963,Mylove,UKR,Khersonska,Beryslavskyi,47.07,33.63
+8964,Novooleksandrivka,UKR,Mykolaivska,Bashtanskyi,47.27,33.88
+8965,Dariivka,UKR,Khersonska,Bilozerskyi,46.75,32.79
+9103,Pokrovsk (Nikopolskyi),UKR,Dnipropetrovska,Ordzhonikidzevska,47.65,34.11
+9142,Novoyehorivka,UKR,Mykolaivska,Bashtanskyi,47.33,32.49
+9143,Dobre,UKR,Mykolaivska,Bashtanskyi,47.31,32.44
+9144,Slyvyne,UKR,Mykolaivska,Mykolaivskyi,47.01,31.85
+9145,Kyriakivka,UKR,Mykolaivska,Mykolaivskyi,47.06,31.85
+9146,Petrivka,UKR,Mykolaivska,Mykolaivskyi,47,31.75
+9147,Kalynivka,UKR,Mykolaivska,Vitovskyi,47.05,32.18
+9148,Peresadivka,UKR,Mykolaivska,Vitovskyi,47.12,32.19
+9149,Mіshkovo-Pogorilove,UKR,Mykolaivska,Vitovskyi,46.99,32.12
+9150,Voskresenke,UKR,Mykolaivska,Vitovskyi,47.02,32.15
+9151,Vesniane,UKR,Mykolaivska,Mykolaivskyi,46.98,31.88
+9152,Bashtanka,UKR,Mykolaivska,Bashtanskyi,47.41,32.44
+9681,Vakulove,UKR,Dnipropetrovska,Sofiivskyi,47.9,33.93
+9732,Tomakivka,UKR,Dnipropetrovska,Tomakivskyi,47.82,34.75
+10091,Hrushivka,UKR,Dnipropetrovska,Apostolivskyi,47.59,34.02
+10092,Nyva Trudova,UKR,Dnipropetrovska,Apostolivskyi,47.73,33.62
+10129,Chkalovske,UKR,Kharkivska,Chuhuivskyi,49.71,36.93
+10130,Mezhova,UKR,Dnipropetrovska,Mezhivskyi,48.26,36.72
+10131,Kushugum,UKR,Zaporizka,Zaporizkyi,47.71,35.22
+10241,Malynivka (Kharkivska),UKR,Kharkivska,Chuhuivskyi,49.8,36.71
+10510,Pokrovske,UKR,Dnipropetrovska,Pokrovskyi,47.99,36.23

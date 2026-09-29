@@ -10,12 +10,19 @@ For every notebook under module_*/ (course materials only, not assignments/):
   * metadata.colab.include_colab_link = true
   * metadata.lms rebuilt from the location:
       module_N/lessons/lesson_NN_<slug>/...  -> v5.0 lesson NN of module N
+      module_N/bonus/<slug>/...              -> bonus lesson of module N (no number;
+                                                title from "bonus" in lessons_v5.json)
       module_N/docs/...                      -> reference notebook of module N
   * relative links in markdown cells -> absolute URLs (they don't resolve in Colab)
 
 For docs/**/*.md:
   * links to files of this repo on GitHub must point at existing files
   * each GitHub link to a notebook gets an "Open in Colab" badge next to it
+    (except links with attributes `{ … }`, e.g. the solutions link below)
+  * a notebook that has a student copy (<name>_student.ipynb, tools/generate_student.py)
+    is linked as exercises + solutions, never directly:
+      [Відкрити вправи в Colab](<colab …_student.ipynb>){ .md-button .md-button--primary }
+      [Переглянути розв’язки](<github master .ipynb>){ .solutions-link }
 
 Sources of truth: course.json (repo, branch, modules), tools/lessons_v5.json
 (stream, lesson titles), mkdocs.yml (site_url).
@@ -51,6 +58,7 @@ BADGE_CELL_ID = "view-in-github"
 
 LESSON_DIR_RE = re.compile(r"^module_(\d+)/lessons/lesson_(\d+)_([a-z0-9_]+)/")
 MODULE_DOCS_RE = re.compile(r"^module_(\d+)/docs/")
+BONUS_DIR_RE = re.compile(r"^module_(\d+)/bonus/([a-z0-9_]+)/")
 MD_LINK_RE = re.compile(r"(!?)\[([^\]]*)\]\(([^)\s]+)\)")
 HTML_LINK_RE = re.compile(r'((?:href|src)=")([^"]+)(")')
 SCHEME_RE = re.compile(r"^[a-zA-Z][a-zA-Z0-9+.-]*:")
@@ -64,7 +72,7 @@ DOCS_REPO_LINK_RE = re.compile(
     re.I,
 )
 DOCS_NOTEBOOK_LINK_RE = re.compile(
-    r"(\[[^\]]*\]\(https://github\.com/" + REPO_URL_RE + r"/blob/" + BRANCH_URL_RE + r"/([^)\s]+\.ipynb)\))"
+    r"(\[[^\]]*\]\(https://github\.com/" + REPO_URL_RE + r"/blob/" + BRANCH_URL_RE + r"/([^)\s]+\.ipynb)\))(?!\{)"
     r"( \[!\[Open In Colab\]\([^)]*\)\]\([^)]*\))?",
     re.I,
 )
@@ -106,11 +114,22 @@ def build_lms(rel, old):
     name = PurePosixPath(rel).name
     lesson = LESSON_DIR_RE.match(rel)
     docs = MODULE_DOCS_RE.match(rel)
+    bonus = BONUS_DIR_RE.match(rel)
     if lesson:
         module_number, lesson_number, slug = int(lesson[1]), int(lesson[2]), lesson[3]
         info = V5["lessons"].get(str(lesson_number))
         if info is None:
             raise ValueError(f"lesson {lesson_number} is not in tools/lessons_v5.json")
+        title = info["title"]
+        default_type = "notes" if name.startswith(("note_", "notes_")) else "lesson"
+        notebook_type = old.get("notebook_type") or default_type
+    elif bonus:
+        module_number, lesson_number, slug = int(bonus[1]), None, bonus[2]
+        info = V5.get("bonus", {}).get(slug)
+        if info is None:
+            raise ValueError(f"bonus lesson '{slug}' is not in tools/lessons_v5.json (\"bonus\")")
+        if info["module"] != module_number:
+            raise ValueError(f"bonus lesson '{slug}' belongs to module {info['module']} (tools/lessons_v5.json)")
         title = info["title"]
         default_type = "notes" if name.startswith(("note_", "notes_")) else "lesson"
         notebook_type = old.get("notebook_type") or default_type
@@ -121,7 +140,7 @@ def build_lms(rel, old):
         title = old.get("lesson_title") or stem
         notebook_type = "docs"
     else:
-        raise ValueError("notebook must live in module_N/lessons/lesson_NN_<slug>/ or module_N/docs/")
+        raise ValueError("notebook must live in module_N/lessons/lesson_NN_<slug>/, module_N/bonus/<slug>/ or module_N/docs/")
 
     module = MODULES.get(module_number)
     if module is None:
@@ -240,15 +259,40 @@ def dump_notebook(nb, like_text):
     return text + "\n" if like_text.endswith("\n") else text
 
 
+EXERCISES_PAIR_RE = re.compile(
+    r"\[Відкрити вправи в Colab\]\(https://colab\.research\.google\.com/github/" + REPO_URL_RE + r"/blob/" + BRANCH_URL_RE
+    + r"/([^)\s]+_student\.ipynb)\)\{ \.md-button \.md-button--primary \} "
+    r"\[Переглянути розв’язки\]\(https://github\.com/" + REPO_URL_RE + r"/blob/" + BRANCH_URL_RE
+    + r"/([^)\s]+\.ipynb)\)\{ \.solutions-link \}"
+)
+
+
+def has_student_copy(target):
+    return target.endswith(".ipynb") and not target.endswith("_student.ipynb") \
+        and (ROOT / (target[:-len(".ipynb")] + "_student.ipynb")).is_file()
+
+
 def sync_doc(path, errors):
     """Return (text, synced_text) of a docs page; record links to missing files in errors."""
     rel = path.relative_to(ROOT).as_posix()
     text = path.read_bytes().decode("utf-8")
 
+    # Ноутбук зі студентською копією — лише повною парою: кнопка вправ на X_student.ipynb, одразу за нею розв’язки на X.ipynb
+    paired = set()
+    for m in EXERCISES_PAIR_RE.finditer(text):
+        student, master = unquote(m[1]), unquote(m[2])
+        if student == master[:-len(".ipynb")] + "_student.ipynb":
+            paired.update(range(m.start(), m.end()))
+
     for m in DOCS_REPO_LINK_RE.finditer(text):
         target = unquote((m[1] or m[2]).rstrip("/"))
         if not (ROOT / target).exists():
             errors.append(f"{rel}: link to missing file {target}")
+        elif (has_student_copy(target) or target.endswith("_student.ipynb")) and m.start() not in paired:
+            master = target.replace("_student.ipynb", ".ipynb")
+            errors.append(f"{rel}: {master} has a student copy — link it as the pair "
+                          f"[Відкрити вправи в Colab](<colab {master[:-6]}_student.ipynb>){{ .md-button .md-button--primary }} "
+                          f"[Переглянути розв’язки](<github {master}>){{ .solutions-link }}")
 
     def badge_sub(m):
         return m[1] + " " + BADGE_MD.format(url=colab_url(unquote(m[2])))

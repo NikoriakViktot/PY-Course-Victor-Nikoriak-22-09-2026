@@ -1,1 +1,0 @@
-{'name': 'Alice', 'score': 150, 'active': True}

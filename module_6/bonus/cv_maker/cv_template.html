@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<title>CV — Ім'я Прізвище</title>
+<!-- Шаблон CV для курсу (М6, бонус «CV розробника»). Стиль — як у cv_viktor_nikoriak_GeoAI.html.
+     Заміни все в [квадратних дужках]; розділ без змісту — видали цілком. PDF:
+     python generate_cv_pdf.py cv_template.html CV_Name_Surname.pdf -->
+<style>
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    margin: 28px 42px;
+    line-height: 1.42;
+    color: #222;
+}
+
+h1 {
+    color: #003366;
+    margin-bottom: 8px;
+    font-size: 34px;
+}
+
+h2 {
+    color: #003366;
+    margin-top: 24px;
+    margin-bottom: 12px;
+    border-bottom: 2px solid #003366;
+    padding-bottom: 4px;
+    page-break-after: avoid;
+    break-after: avoid;
+    font-size: 25px;
+}
+
+h3 {
+    color: #004d4d;
+    margin-top: 16px;
+    margin-bottom: 8px;
+    page-break-after: avoid;
+    break-after: avoid;
+    font-size: 20px;
+}
+
+p {
+    font-size: 15px;
+    margin-top: 6px;
+    margin-bottom: 8px;
+}
+
+li {
+    font-size: 15px;
+    margin-bottom: 3px;
+}
+a{
+color:#1a0dab;
+text-decoration:none;
+}
+
+.contact{
+font-size:14px;
+}
+
+.quote{
+font-style:italic;
+border-left:4px solid #003366;
+padding-left:12px;
+margin-top:20px;
+margin-bottom:20px;
+color:#444;
+}
+
+.cert-list li {
+margin-bottom: 8px;
+}
+
+.keep-together {
+    page-break-inside: avoid;
+    break-inside: avoid;
+}
+
+.experience-item,
+.project-item,
+.award-item,
+.education-item,
+.publication-item {
+    margin-bottom: 20px;
+}
+
+.experience-header,
+.project-header,
+.award-header,
+.education-header,
+.publication-header {
+    page-break-inside: avoid;
+    break-inside: avoid;
+}
+
+ul {
+    margin-top: 6px;
+    margin-bottom: 10px;
+}
+
+h2,
+h3 {
+    page-break-after: avoid;
+    break-after: avoid;
+}
+
+</style>
+</head>
+
+<body>
+
+<h1>[Ім'я Прізвище]</h1>
+
+<div class="contact">
+[Python Developer | Backend | Data]<br>
+Email: [name@example.com]<br>
+GitHub: <a href="https://github.com/[username]">github.com/[username]</a><br>
+LinkedIn: <a href="https://www.linkedin.com/in/[profile]">linkedin.com/in/[profile]</a>
+</div>
+
+<h2>Professional Summary</h2>
+<p>
+[Роль] with [досвід/бекграунд], focused on [спеціалізація]. Built [найсильніший проєкт] using
+[ключові технології]. [Один доказ: результат, метрика, нагорода, open source].
+</p>
+
+<h2>Technical Skills</h2>
+<ul>
+<li><b>Backend:</b> Python, FastAPI, Django, Django REST Framework, SQLAlchemy, Pydantic</li>
+<li><b>Data &amp; storage:</b> PostgreSQL, Redis, Alembic, pandas</li>
+<li><b>Infrastructure:</b> Docker, Docker Compose, nginx, GitHub Actions, Linux</li>
+<li><b>Quality:</b> pytest, mypy --strict, integration tests, CI</li>
+</ul>
+
+<h2>Projects</h2>
+
+<div class="project-item">
+<div class="project-header keep-together">
+<h3>[Назва проєкту] — <a href="https://github.com/[username]/[repo]">github.com/[username]/[repo]</a></h3>
+<p><i>[Стек: FastAPI, PostgreSQL, Redis, Docker, GitHub Actions]</i></p>
+</div>
+<ul>
+<!-- Формула: сильне дієслово + що зроблено + чим + яка цінність (CV_mini_tutorial_UA.md, розділ 2) -->
+<li>[Built] [що] using [чим], [для чого / результат].</li>
+<li>[Designed] [що] with [чим], [що це дало: безпека, швидкість, надійність].</li>
+<li>[Automated] [що] with [чим], [результат: кожен PR перевіряється за N хвилин].</li>
+</ul>
+</div>
+
+<h2>Experience</h2>
+
+<div class="experience-item">
+<div class="experience-header keep-together">
+<h3>[Посада] — [Компанія]</h3>
+<p><i>[Місто] | [MM.YYYY – MM.YYYY]</i></p>
+</div>
+<ul>
+<li>[Сильне дієслово] [що] [чим] [результат].</li>
+</ul>
+</div>
+
+<h2>Education</h2>
+
+<div class="education-item keep-together">
+<h3>[Курс / спеціальність] — [Заклад]</h3>
+<p><i>[YYYY – YYYY]</i></p>
+</div>
+
+<h2>Languages</h2>
+<ul>
+<li>Ukrainian — Native</li>
+<li>English — [B2 / Upper-Intermediate]</li>
+</ul>
+
+</body>
+</html>

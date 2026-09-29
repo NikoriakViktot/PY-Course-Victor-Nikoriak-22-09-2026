@@ -76,7 +76,7 @@ PY-Course-Victor-Nikoriak-22-09-2026
 ```
 module_N/lessons/lesson_NN_topic_slug/     ← NN = номер уроку за програмою v5.0
 ├── note_lesson_NN_*.ipynb ← Основний ноутбук заняття (v5.0)
-├── notes_*.ipynb          ← Конспект викладача (зокрема зі старого курсу 23_02)
+├── notes_*.ipynb          ← Конспект викладача
 ├── *_student.ipynb        ← Версія для студентів
 └── *.py                   ← Приклади модулів
 ```

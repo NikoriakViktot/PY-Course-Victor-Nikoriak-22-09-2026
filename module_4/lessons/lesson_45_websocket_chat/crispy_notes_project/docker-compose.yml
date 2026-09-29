@@ -1,0 +1,36 @@
+# PostgreSQL для проєкту нотаток — сторінка «PostgreSQL» кроку 3 Django-книги (notes_db / notes_user / notes_pass);
+# урок 45: Redis — channel layer чату (сторінка «Redis і Channel Layer» кроку 9 книги).
+#   docker compose up -d db redis
+#   export DATABASE_URL=postgres://notes_user:notes_pass@localhost:5432/notes_db   # Windows: set DATABASE_URL=...
+#   export REDIS_URL=redis://localhost:6379/0
+#   python manage.py migrate && python manage.py runserver    # daphne: HTTP і WebSocket
+# Без DATABASE_URL проєкт працює на SQLite, як і раніше. Сам застосунок у контейнері — урок 48 (Docker).
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: notes_db
+      POSTGRES_USER: notes_user
+      POSTGRES_PASSWORD: notes_pass    # лише для навчання на своєму комп'ютері
+    ports:
+      - "5432:5432"
+    volumes:
+      - notes_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U notes_user -d notes_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  notes_pgdata:

@@ -88,10 +88,12 @@ base: main                                  ←  compare: ВАША_ГІЛКА_З
 
 Після вибору GitHub одразу покаже **Able to merge** (гілки сумісні, конфліктів немає), кількість **commit**-ів і **changed files** — файлів, які реально потраплять у Pull Request.
 
-![Гілка з домашнім завданням обрана, видно commit і changed files](images_pull_request/04_homework_branch_selected.jpg)
-
 !!! danger "Найпоширеніша помилка"
     Уважно перевірте, щоб випадково не вийшло `base: main` і `compare: main` одночасно — тоді GitHub порівнює `main` сам із собою і не побачить жодної різниці. Правильно: `base: main`, `compare: ВАША_ГІЛКА_З_ДЗ`.
+
+![Гілка з домашнім завданням обрана, видно commit і changed files](images_pull_request/04_homework_branch_selected.jpg)
+
+
 
 ### 5. Перегляньте зміни та натисніть Create pull request
 

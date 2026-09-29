@@ -1,0 +1,11 @@
+.venv
+__pycache__
+*.pyc
+*.pyo
+.pytest_cache
+notebooks
+# урок 42: модель (57 МБ) потрапляла в обидва образи, зокрема в Streamlit
+models
+data
+tests
+prompts

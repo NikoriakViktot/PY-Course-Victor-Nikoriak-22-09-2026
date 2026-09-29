@@ -1,0 +1,146 @@
+# CI/CD для проєкту нотаток — урок 50 курсу (module_5/lessons/lesson_50_ci_cd/crispy_notes_project).
+# Основа — .github/workflows/django-tests.yml Django-книги notes_chat_app (крок 8 книги: тести й CI).
+# Що змінено і чому — docs/modules/m5/lesson_50.md.
+
+name: crispy_notes — CI/CD
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'module_5/lessons/lesson_50_ci_cd/crispy_notes_project/**'
+      - '.github/workflows/crispy_notes.yml'
+  pull_request:
+    paths:
+      - 'module_5/lessons/lesson_50_ci_cd/crispy_notes_project/**'
+      - '.github/workflows/crispy_notes.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PROJECT: module_5/lessons/lesson_50_ci_cd/crispy_notes_project
+
+defaults:
+  run:
+    working-directory: module_5/lessons/lesson_50_ci_cd/crispy_notes_project
+
+jobs:
+  tests:
+    name: manage.py test · Python ${{ matrix.python }} · PostgreSQL
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.10", "3.13"]
+    services:
+      db:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: notes_db
+          POSTGRES_USER: notes_user
+          POSTGRES_PASSWORD: notes_pass    # одноразова база CI; не секрет
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgres://notes_user:notes_pass@localhost:5432/notes_db
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+          cache-dependency-path: ${{ env.PROJECT }}/requirements.txt
+      - run: pip install -r requirements.txt
+      - run: python manage.py check
+      - name: міграції не забуті (зміна моделі без makemigrations → червоний CI)
+        run: python manage.py makemigrations --check --dry-run
+      - name: усі тести (Django сам знаходить tests*.py — списку модулів немає)
+        run: python manage.py test
+
+  min-versions:
+    name: manage.py test · мінімальні версії (Python 3.10, SQLite)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+      - run: uv venv --python 3.10 .venv
+      - run: uv pip install --resolution lowest-direct -r requirements.txt
+      - run: .venv/bin/python manage.py test
+
+  deploy-check:
+    name: manage.py check --deploy (налаштування сервера)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      DJANGO_DEBUG: "0"
+      DJANGO_HTTPS: "1"
+      DJANGO_ALLOWED_HOSTS: notes.example
+      DJANGO_CSRF_TRUSTED_ORIGINS: https://notes.example
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: ${{ env.PROJECT }}/requirements.txt
+      - run: pip install -r requirements.txt
+      - name: DEBUG=0 без ключа не має стартувати
+        run: |
+          if python manage.py check 2> err.txt; then echo "стартував без DJANGO_SECRET_KEY" >&2; exit 1; fi
+          grep -q "задай DJANGO_SECRET_KEY" err.txt
+      - name: з ключем — check --deploy без помилок (попередження W005/W008/W021 — свідомі, див. урок 49)
+        run: DJANGO_SECRET_KEY="$(openssl rand -base64 48)" python manage.py check --deploy --fail-level ERROR
+
+  docker:
+    name: образ і smoke-тест Compose
+    needs: tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - name: .env для smoke — випадкові секрети
+        run: HTTP_PORT=8080 python3 scripts/make_env.py
+      - name: smoke — стек через nginx, вхід формою, статика (урок 49)
+        run: ./scripts/smoke.sh
+
+  publish:
+    name: публікація образу в ghcr.io
+    needs: [tests, min-versions, deploy-check, docker]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v5
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/crispy_notes
+          tags: |
+            type=sha
+            type=raw,value=latest
+      - uses: docker/build-push-action@v6
+        with:
+          context: ${{ env.PROJECT }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
