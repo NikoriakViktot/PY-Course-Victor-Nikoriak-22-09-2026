@@ -13,7 +13,7 @@
         <link rel="canonical" href="https://nikoriakviktot.github.io/PY-Course-Victor-Nikoriak-22-09-2026/modules/m2/lesson_19/">
       
       
-        <link rel="prev" href="../lesson_18/">
+        <link rel="prev" href="../../m2_python_advanced/">
       
       
         <link rel="next" href="../lesson_20/">
@@ -27,7 +27,7 @@
     
     
       
-        <title>19. Класи, простір імен - PY Course — Viktor Nikoriak</title>
+        <title>19. Функції як об'єкти першого класу - PY Course — Viktor Nikoriak</title>
       
     
     
@@ -114,7 +114,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              19. Класи, простір імен
+              19. Функції як об'єкти першого класу
             
           </span>
         </div>
@@ -812,34 +812,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../m1/lesson_07/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    7. Функції
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../m1/lesson_08/" class="md-nav__link">
         
   
@@ -847,7 +819,7 @@
   <span class="md-ellipsis">
     
   
-    8. П1. Big O + базові задачі
+    8. Функції
   
 
     
@@ -875,7 +847,7 @@
   <span class="md-ellipsis">
     
   
-    9. Декоратори
+    9. П1. Big O + базові задачі
   
 
     
@@ -903,7 +875,7 @@
   <span class="md-ellipsis">
     
   
-    10. Ітератори й генератори
+    10. Декоратори
   
 
     
@@ -931,7 +903,7 @@
   <span class="md-ellipsis">
     
   
-    11. П2. Пошук
+    11. Ітератори й генератори
   
 
     
@@ -959,7 +931,7 @@
   <span class="md-ellipsis">
     
   
-    12. Модулі та стандартна бібліотека
+    12. П2. Пошук
   
 
     
@@ -987,7 +959,7 @@
   <span class="md-ellipsis">
     
   
-    13. Винятки та обробка помилок
+    13. Модулі та стандартна бібліотека
   
 
     
@@ -1015,7 +987,7 @@
   <span class="md-ellipsis">
     
   
-    14. Файли I/O, JSON
+    14. Винятки та обробка помилок
   
 
     
@@ -1043,7 +1015,7 @@
   <span class="md-ellipsis">
     
   
-    15. Git & GitHub: система
+    15. Файли I/O, JSON
   
 
     
@@ -1071,7 +1043,7 @@
   <span class="md-ellipsis">
     
   
-    16. П3. Хеш-структури
+    16. Git & GitHub: система
   
 
     
@@ -1099,7 +1071,35 @@
   <span class="md-ellipsis">
     
   
-    17. Узагальнення + фінальний проєкт
+    17. П3. Хеш-структури
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../m1/lesson_18/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    18. Узагальнення + фінальний проєкт
   
 
     
@@ -1238,34 +1238,6 @@
                 
   
   
-  
-  
-    <li class="md-nav__item">
-      <a href="../lesson_18/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    18. Функції як об'єкти першого класу
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
     
   
   
@@ -1285,7 +1257,7 @@
   <span class="md-ellipsis">
     
   
-    19. Класи, простір імен
+    19. Функції як об'єкти першого класу
   
 
     
@@ -1303,7 +1275,7 @@
   <span class="md-ellipsis">
     
   
-    19. Класи, простір імен
+    19. Функції як об'єкти першого класу
   
 
     
@@ -1343,7 +1315,7 @@
   <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Усе — об'єкти, і в кожного є клас
+        Функція — це об'єкт
       
     </span>
   </a>
@@ -1351,41 +1323,13 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#order" class="md-nav__link">
+  <a href="#if" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Перший клас: Order
+        Словник команд замість ланцюжка if
       
     </span>
   </a>
-  
-    <nav class="md-nav" aria-label="Перший клас: Order">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#self" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Що таке self
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#repr" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        repr: як об'єкт себе показує
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -1393,30 +1337,19 @@
   <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Атрибути класу й простір імен
+        Функція як аргумент
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Атрибути класу й простір імен">
+    <nav class="md-nav" aria-label="Функція як аргумент">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#self_1" class="md-nav__link">
+  <a href="#callback" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Пастка: присвоєння через self
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#_4" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Клас — не оточення для методів
+        Callback: що робити, вирішує той, хто викликає
       
     </span>
   </a>
@@ -1429,44 +1362,83 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Функція, що створює функції
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Функція, що створює функції">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#legb" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Де функція шукає змінні: LEGB
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#nonlocal" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        nonlocal: змінити захоплену змінну
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lambda-map-filter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        lambda, map і filter
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#_5" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Методи класу й статичні методи
+        Конвеєр з функцій
       
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#isinstance-type" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        isinstance і type
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#architecture" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Архітектура: де живе стан сервісу
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Архітектура: де живе стан сервісу">
+    <nav class="md-nav" aria-label="Конвеєр з функцій">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
   <a href="#_6" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Схема класів
+        Кроки мають бути чистими
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Декоратор — це теж фабрика
       
     </span>
   </a>
@@ -1491,32 +1463,43 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#deliveryservice" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Розібраний приклад: DeliveryService
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#_7" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Зміни приклад: звіт водіїв
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#_8" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Спробуй самостійно: промокод як клас
+        Розібраний приклад: оформлення замовлення
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#drivers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Зміни приклад: команда drivers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Спробуй самостійно: промокод з обмеженням
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Знайди помилку
       
     </span>
   </a>
@@ -1529,7 +1512,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_9" class="md-nav__link">
+  <a href="#_11" class="md-nav__link">
     <span class="md-ellipsis">
       
         Підсумок
@@ -1541,7 +1524,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#_10" class="md-nav__link">
+  <a href="#_12" class="md-nav__link">
     <span class="md-ellipsis">
       
         Самоперевірка
@@ -1552,7 +1535,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_11" class="md-nav__link">
+  <a href="#_13" class="md-nav__link">
     <span class="md-ellipsis">
       
         Що далі
@@ -1568,7 +1551,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_12" class="md-nav__link">
+  <a href="#_14" class="md-nav__link">
     <span class="md-ellipsis">
       
         Документація і джерела
@@ -1601,7 +1584,7 @@
   <span class="md-ellipsis">
     
   
-    20. Наслідування, поліморфізм
+    20. Класи, простір імен
   
 
     
@@ -1629,7 +1612,7 @@
   <span class="md-ellipsis">
     
   
-    21. Інкапсуляція, область видимості
+    21. Наслідування, поліморфізм
   
 
     
@@ -1657,7 +1640,7 @@
   <span class="md-ellipsis">
     
   
-    22. П4. Рекурсія, divide & conquer, backtracking
+    22. Інкапсуляція, область видимості
   
 
     
@@ -1685,7 +1668,7 @@
   <span class="md-ellipsis">
     
   
-    23. @property, декоратори класів, dunder
+    23. П4. Рекурсія, divide & conquer, backtracking
   
 
     
@@ -1713,7 +1696,7 @@
   <span class="md-ellipsis">
     
   
-    24. Ітератори advanced
+    24. @property, декоратори класів, dunder
   
 
     
@@ -1741,7 +1724,7 @@
   <span class="md-ellipsis">
     
   
-    25. Тестування з pytest (+ валідація AI-коду)
+    25. Ітератори advanced
   
 
     
@@ -1769,7 +1752,7 @@
   <span class="md-ellipsis">
     
   
-    26. П5. Динамічне програмування + greedy (вступ)
+    26. Тестування з pytest (+ валідація AI-коду)
   
 
     
@@ -1797,7 +1780,7 @@
   <span class="md-ellipsis">
     
   
-    27. Потоки, multiprocessing, asyncio: вступ
+    27. П5. Динамічне програмування + greedy (вступ)
   
 
     
@@ -1825,7 +1808,35 @@
   <span class="md-ellipsis">
     
   
-    28. П6. Stack, Queue, Heap, Trie + LRU → ООП-пакет
+    28. Потоки, multiprocessing, asyncio: вступ
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lesson_29/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    29. П6. Stack, Queue, Heap, Trie + LRU → ООП-пакет
   
 
     
@@ -2011,14 +2022,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../m3/lesson_29/" class="md-nav__link">
+      <a href="../../m3/lesson_30/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    29. Основи SQL (PostgreSQL)
+    30. Основи SQL (PostgreSQL)
   
 
     
@@ -2039,14 +2050,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../m3/lesson_30/" class="md-nav__link">
+      <a href="../../m3/lesson_31/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    30. Redis overview
+    31. Redis overview
   
 
     
@@ -2198,34 +2209,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../m4/lesson_31/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    31. HTTP: requests, httpx, aiohttp
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../m4/lesson_32/" class="md-nav__link">
         
   
@@ -2233,7 +2216,7 @@
   <span class="md-ellipsis">
     
   
-    32. REST: принципи дизайну API
+    32. HTTP: requests, httpx, aiohttp
   
 
     
@@ -2261,7 +2244,7 @@
   <span class="md-ellipsis">
     
   
-    33. Django intro: MVT, ORM, admin
+    33. REST: принципи дизайну API
   
 
     
@@ -2289,7 +2272,7 @@
   <span class="md-ellipsis">
     
   
-    34. Django: forms, HTML practice
+    34. Django intro: MVT, ORM, admin
   
 
     
@@ -2317,7 +2300,7 @@
   <span class="md-ellipsis">
     
   
-    35. DRF overview + Django vs FastAPI
+    35. Django: forms, HTML practice
   
 
     
@@ -2345,7 +2328,35 @@
   <span class="md-ellipsis">
     
   
-    36. Typing + Pydantic
+    36. DRF overview + Django vs FastAPI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../m4/lesson_37/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    37. Typing + Pydantic
   
 
     
@@ -2392,14 +2403,14 @@
   
   
   
-    <a href="../../m4/lesson_37/" class="md-nav__link">
+    <a href="../../m4/lesson_38/" class="md-nav__link">
       
   
   
   <span class="md-ellipsis">
     
   
-    37. FastAPI basics + Postman + OpenAPI
+    38. FastAPI basics + Postman + OpenAPI
   
 
     
@@ -2426,34 +2437,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../m4/lesson_38/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    38. FastAPI + SQLAlchemy: повний CRUD
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../m4/lesson_39/" class="md-nav__link">
         
   
@@ -2461,7 +2444,7 @@
   <span class="md-ellipsis">
     
   
-    39. Middlewares і кешування (Redis на практиці)
+    39. FastAPI + SQLAlchemy: повний CRUD
   
 
     
@@ -2489,7 +2472,7 @@
   <span class="md-ellipsis">
     
   
-    40. Автентифікація та security basics (JWT, hashing, OWASP)
+    40. Middlewares і кешування (Redis на практиці)
   
 
     
@@ -2517,7 +2500,35 @@
   <span class="md-ellipsis">
     
   
-    41. Тестування API (pytest + httpx)
+    41. Автентифікація та security basics (JWT, hashing, OWASP)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../m4/lesson_42/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    42. Тестування API (pytest + httpx)
   
 
     
@@ -2564,14 +2575,14 @@
   
   
   
-    <a href="../../m4/lesson_42/" class="md-nav__link">
+    <a href="../../m4/lesson_43/" class="md-nav__link">
       
   
   
   <span class="md-ellipsis">
     
   
-    42. AI-інструменти розробника + ризики й валідація
+    43. AI-інструменти розробника + ризики й валідація
   
 
     
@@ -2598,34 +2609,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../m4/lesson_43/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    43. Інтеграція LLM API (Gemini / Anthropic)
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../m4/lesson_44/" class="md-nav__link">
         
   
@@ -2633,7 +2616,7 @@
   <span class="md-ellipsis">
     
   
-    44. Архітектура застосунків і патерни
+    44. Інтеграція LLM API (Gemini / Anthropic)
   
 
     
@@ -2661,7 +2644,7 @@
   <span class="md-ellipsis">
     
   
-    45. WebSockets + практика: чат
+    45. Архітектура застосунків і патерни
   
 
     
@@ -2689,7 +2672,7 @@
   <span class="md-ellipsis">
     
   
-    46. Security advanced
+    46. WebSockets + практика: чат
   
 
     
@@ -2717,7 +2700,35 @@
   <span class="md-ellipsis">
     
   
-    47. Telegram Bot API
+    47. Security advanced
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../m4/lesson_48/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    48. Telegram Bot API
   
 
     
@@ -2903,34 +2914,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../m5/lesson_48/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    48. Docker
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../m5/lesson_49/" class="md-nav__link">
         
   
@@ -2938,7 +2921,7 @@
   <span class="md-ellipsis">
     
   
-    49. Docker Compose + деплой
+    49. Docker
   
 
     
@@ -2966,7 +2949,35 @@
   <span class="md-ellipsis">
     
   
-    50. CI/CD (GitHub Actions)
+    50. Docker Compose + деплой
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../m5/lesson_51/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    51. CI/CD (GitHub Actions)
   
 
     
@@ -3090,14 +3101,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../m6/lesson_51/" class="md-nav__link">
+      <a href="../../m6/lesson_52/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    51. Робота над фінальним проєктом
+    52. Робота над фінальним проєктом
   
 
     
@@ -3118,14 +3129,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../m6/lesson_52/" class="md-nav__link">
+      <a href="../../m6/lesson_53/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    52. Випускний: питч фінального проєкту
+    53. Випускний: питч фінального проєкту
   
 
     
@@ -3346,7 +3357,7 @@
   <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Усе — об'єкти, і в кожного є клас
+        Функція — це об'єкт
       
     </span>
   </a>
@@ -3354,41 +3365,13 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#order" class="md-nav__link">
+  <a href="#if" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Перший клас: Order
+        Словник команд замість ланцюжка if
       
     </span>
   </a>
-  
-    <nav class="md-nav" aria-label="Перший клас: Order">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#self" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Що таке self
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#repr" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        repr: як об'єкт себе показує
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -3396,30 +3379,19 @@
   <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Атрибути класу й простір імен
+        Функція як аргумент
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Атрибути класу й простір імен">
+    <nav class="md-nav" aria-label="Функція як аргумент">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#self_1" class="md-nav__link">
+  <a href="#callback" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Пастка: присвоєння через self
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#_4" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Клас — не оточення для методів
+        Callback: що робити, вирішує той, хто викликає
       
     </span>
   </a>
@@ -3432,44 +3404,83 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Функція, що створює функції
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Функція, що створює функції">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#legb" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Де функція шукає змінні: LEGB
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#nonlocal" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        nonlocal: змінити захоплену змінну
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lambda-map-filter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        lambda, map і filter
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#_5" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Методи класу й статичні методи
+        Конвеєр з функцій
       
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#isinstance-type" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        isinstance і type
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#architecture" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Архітектура: де живе стан сервісу
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Архітектура: де живе стан сервісу">
+    <nav class="md-nav" aria-label="Конвеєр з функцій">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
   <a href="#_6" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Схема класів
+        Кроки мають бути чистими
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Декоратор — це теж фабрика
       
     </span>
   </a>
@@ -3494,32 +3505,43 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#deliveryservice" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Розібраний приклад: DeliveryService
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#_7" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Зміни приклад: звіт водіїв
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#_8" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Спробуй самостійно: промокод як клас
+        Розібраний приклад: оформлення замовлення
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#drivers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Зміни приклад: команда drivers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Спробуй самостійно: промокод з обмеженням
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Знайди помилку
       
     </span>
   </a>
@@ -3532,7 +3554,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_9" class="md-nav__link">
+  <a href="#_11" class="md-nav__link">
     <span class="md-ellipsis">
       
         Підсумок
@@ -3544,7 +3566,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#_10" class="md-nav__link">
+  <a href="#_12" class="md-nav__link">
     <span class="md-ellipsis">
       
         Самоперевірка
@@ -3555,7 +3577,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_11" class="md-nav__link">
+  <a href="#_13" class="md-nav__link">
     <span class="md-ellipsis">
       
         Що далі
@@ -3571,7 +3593,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_12" class="md-nav__link">
+  <a href="#_14" class="md-nav__link">
     <span class="md-ellipsis">
       
         Документація і джерела
@@ -3667,335 +3689,217 @@
   
 
 
-<h1 id="19">Урок 19. Класи, простір імен<a class="headerlink" href="#19" title="Permanent link">&para;</a></h1>
-<p>Сервіс «Смачно + Таксі» з фінального проєкту модуля 1 тримає дані окремо від дій. Є список <code>orders</code> з <code>NamedTuple</code> і десяток функцій, які цей список приймають: <code>add_order(orders, …)</code>, <code>cafe_stats(orders)</code>, <code>find_order(orders, …)</code>. Працює, поки код пише одна людина, яка пам'ятає правила. А нова розробниця додала замовлення напряму — <code>orders.append(Order(7, …))</code> — і в системі з'явилися два замовлення №7. Хоча <code>add_order</code> сама рахувала номери, ніщо не змушувало нею користуватися.</p>
-<p>В уроці 18 лічильник <code>make_counter</code> уже тримав <strong>стан</strong> (<code>count</code>) і <strong>поведінку</strong> (<code>next_id</code>) разом, у замиканні. Сьогодні зробимо це явно й для всього сервісу. <strong>Клас</strong> описує, які дані має об'єкт і що з ними можна робити, а правила — наприклад, «номери замовлень видає лише сам сервіс» — живуть поруч із даними.</p>
-<p>А ще з цього уроку в кожному розділі модуля 2 з'являється <strong>архітектура</strong>: схема з блоків і стрілок, кілька можливих рішень однієї задачі та чесне порівняння їхніх переваг і ціни.</p>
-<p><strong>Що потрібно з попередніх уроків:</strong> <code>NamedTuple</code> (урок 5), функції (урок 7), модулі (урок 12), фінальний проєкт (урок 17), замикання й LEGB (урок 18).</p>
+<h1 id="19">Урок 19. Функції як об'єкти першого класу<a class="headerlink" href="#19" title="Permanent link">&para;</a></h1>
+<p>Карантин 2020-го минув, а доставка лишилася. Система «Смачно + Таксі» з фінального проєкту модуля 1 працює щодня, і власниця щотижня просить щось нове. Нова команда <code>drivers</code>. Промокод <code>SUMMER10</code> на літо, <code>STUDENT15</code> для студентів, <code>NIGHT5</code> для нічних замовлень. Сортувати доставки то за вартістю, то за районом. Надсилати клієнтові SMS, коли водій виїхав, а тепер ще й у Telegram.</p>
+<p>Кожне таке прохання в коді модуля 1 означає ще один <code>elif</code> в <code>app.py</code>, ще одну майже однакову функцію <code>apply_summer10</code>, ще один <code>if channel == "sms"</code>. Код росте не від нових ідей, а від копіювання.</p>
+<p>Усе це розв'язує одна ідея, з якої починається модуль 2: <strong>функція — це такий самий об'єкт, як число чи рядок</strong>. Її можна покласти у змінну, у словник, передати в іншу функцію, повернути з функції. Декоратори з <a href="../../m1/lesson_10/">уроку 10</a> вже спиралися на цю ідею — сьогодні розберемо її повністю.</p>
+<p><strong>Що потрібно з попередніх уроків:</strong> функції й <code>return</code> (урок 8), декоратори (урок 10), генератори (урок 11), словники й <code>Counter</code> (уроки 6, 13, 17), фінальний проєкт модуля 1 (урок 18).</p>
 <p><strong>Після уроку ти зможеш:</strong></p>
 <ul>
-<li>пояснити, що все в Python — об'єкти, і що клас — це теж об'єкт, який створює інші об'єкти;</li>
-<li>оголошувати клас з <code>__init__</code>, атрибутами й методами, пояснювати, що таке <code>self</code>;</li>
-<li>розрізняти атрибути екземпляра й атрибути класу, передбачати, де Python шукає атрибут;</li>
-<li>писати <code>__repr__</code>, <code>@classmethod</code> як альтернативний конструктор і <code>@staticmethod</code>;</li>
-<li>порівнювати три архітектури одного сервісу — функції над даними, замикання, класи — і малювати схему класів.</li>
+<li>зберігати функції в змінних, списках і словниках, будувати словник команд замість ланцюжка <code>if</code>;</li>
+<li>передавати функцію як аргумент: <code>key=</code> для <code>sorted</code> і <code>max</code>, зворотні виклики (callback);</li>
+<li>створювати функції іншою функцією — фабрики й замикання, змінювати захоплену змінну через <code>nonlocal</code>;</li>
+<li>писати <code>lambda</code> і обирати між <code>map</code> / <code>filter</code> і comprehension;</li>
+<li>збирати конвеєр з функцій і пояснювати, чому його кроки мають бути чистими.</li>
 </ul>
-<p><strong>Задача розділу.</strong> Клас <code>DeliveryService</code>, який сам видає номери замовлень, не дає додати доставку до неіснуючого замовлення й будує звіт. Повний код — у розділі <a href="#practice">«Практика»</a>.</p>
-<p><strong>Ноутбук заняття:</strong> <a class="md-button md-button--primary" href="https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_19_classes_namespace/note_lesson_19_classes_student.ipynb">Відкрити вправи в Colab</a> <a class="solutions-link" href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_19_classes_namespace/note_lesson_19_classes.ipynb">Переглянути розв’язки</a></p>
+<p><strong>Задача розділу.</strong> Оформлення замовлення: промокод із реєстру, вартість доставки за районом і округлення — як конвеєр з функцій, а команди системи — як словник. Повний код — у розділі <a href="#practice">«Практика»</a>.</p>
+<p><strong>Ноутбук заняття:</strong> <a class="md-button md-button--primary" href="https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_19_functions_first_class/note_lesson_19_functions_first_class_student.ipynb">Відкрити вправи в Colab</a> <a class="solutions-link" href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_19_functions_first_class/note_lesson_19_functions_first_class.ipynb">Переглянути розв’язки</a></p>
 <h2 id="_1">Пригадай<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
-<p>Дай відповідь подумки:</p>
+<p>Дай відповідь подумки, нічого не запускаючи:</p>
 <ol>
-<li>Що надрукує <code>b = a; b.append(4); print(a)</code> для списку <code>a = [1, 2, 3]</code>?</li>
-<li>Що зберігає замикання <code>next_id</code>, створене <code>make_counter()</code> в уроці 18?</li>
-<li>Чим <code>Order(1, …)</code> з <code>NamedTuple</code> відрізняється від словника <code>{"id": 1, …}</code>?</li>
+<li>Що отримує на вхід і що повертає декоратор <code>require_role</code> з уроку 10?</li>
+<li>Що робить <code>max(revenue, key=revenue.get)</code> з уроку 15?</li>
+<li>Як <code>app.py</code> фінального проєкту вирішує, яку команду виконати?</li>
 </ol>
 <details class="success">
 <summary>Відповіді</summary>
 <ol>
-<li><code>[1, 2, 3, 4]</code>: <code>a</code> і <code>b</code> — ярлики одного об'єкта.</li>
-<li>Змінну <code>count</code> з оточуючої функції; кожен виклик <code>make_counter</code> створює свій лічильник.</li>
-<li>Поля фіксовані й доступні через крапку (<code>order.bill</code>), кортеж незмінний; у словнику ключі можна додавати й міняти як завгодно.</li>
+<li>Отримує функцію, повертає нову функцію-обгортку. Уже тоді функція була даними.</li>
+<li>Повертає ключ словника з найбільшим значенням: <code>max</code> викликає <code>revenue.get</code> для кожного ключа і порівнює результати.</li>
+<li>Ланцюжком <code>if command == "add-order" …</code>, <code>if command == "import" …</code> — по одному на кожну команду.</li>
 </ol>
 </details>
-<h2 id="_2">Усе — об'єкти, і в кожного є клас<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
-<p>Число, рядок, список, функція — усе це <strong>об'єкти</strong>. У кожного об'єкта є <strong>тип</strong>, або <strong>клас</strong>: він визначає, що з об'єктом можна робити.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nb">print</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="mi">540</span><span class="p">),</span> <span class="nb">type</span><span class="p">(</span><span class="s2">"Поділ"</span><span class="p">),</span> <span class="nb">type</span><span class="p">([</span><span class="mi">540</span><span class="p">,</span> <span class="mi">320</span><span class="p">]))</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nb">print</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="mi">540</span><span class="p">,</span> <span class="nb">object</span><span class="p">),</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">len</span><span class="p">,</span> <span class="nb">object</span><span class="p">))</span>
+<h2 id="_2">Функція — це об'єкт<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<p>Ім'я функції <strong>без дужок</strong> — це сама функція. <strong>З дужками</strong> — її виклик і результат:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">fee_for</span><span class="p">(</span><span class="n">district</span><span class="p">):</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="sd">"""Вартість доставки за районом."""</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="k">return</span> <span class="p">{</span><span class="s2">"Поділ"</span><span class="p">:</span> <span class="mi">60</span><span class="p">,</span> <span class="s2">"Оболонь"</span><span class="p">:</span> <span class="mi">80</span><span class="p">}</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">district</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="nb">print</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">fee_for</span><span class="p">))</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="nb">print</span><span class="p">(</span><span class="n">fee_for</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="nb">print</span><span class="p">(</span><span class="n">fee_for</span><span class="p">(</span><span class="s2">"Поділ"</span><span class="p">))</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>&lt;class 'int'&gt; &lt;class 'str'&gt; &lt;class 'list'&gt;
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>True True
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>&lt;class 'function'&gt;
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>fee_for
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>60
 </code></pre></div>
-<p><code>"Поділ".upper()</code> працює, бо в класу <code>str</code> є метод <code>upper</code>. <code>[540].append(320)</code> — бо в класу <code>list</code> є <code>append</code>. Клас — це креслення, а об'єкти (<strong>екземпляри</strong>) — конкретні речі, зроблені за ним: <code>"Поділ"</code> і <code>"Оболонь"</code> — два екземпляри одного класу <code>str</code>.</p>
-<p>І сам клас — теж об'єкт. Його клас — <code>type</code>:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nb">print</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="nb">int</span><span class="p">),</span> <span class="nb">type</span><span class="p">(</span><span class="nb">str</span><span class="p">))</span>
+<p><code>fee_for</code> — об'єкт типу <code>function</code> з іменем і докстрінгом, як <code>540</code> — об'єкт типу <code>int</code>. А раз це об'єкт, з ним можна робити те саме, що з будь-яким значенням. Покласти в іншу змінну:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">delivery_fee</span> <span class="o">=</span> <span class="n">fee_for</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="nb">print</span><span class="p">(</span><span class="n">delivery_fee</span><span class="p">(</span><span class="s2">"Оболонь"</span><span class="p">),</span> <span class="n">delivery_fee</span> <span class="ow">is</span> <span class="n">fee_for</span><span class="p">)</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>&lt;class 'type'&gt; &lt;class 'type'&gt;
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>80 True
 </code></pre></div>
-<p>Досі ми користувалися чужими класами. Тепер напишемо свій.</p>
-<h2 id="order">Перший клас: Order<a class="headerlink" href="#order" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
-<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>
-<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="k">class</span><span class="w"> </span><span class="nc">Order</span><span class="p">:</span>
-<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">    </span><span class="sd">"""Замовлення кафе."""</span>
-<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>
-<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">order_id</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">bill</span><span class="p">,</span> <span class="n">tip</span><span class="p">,</span> <span class="n">guests</span><span class="p">):</span>
-<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="n">order_id</span>
-<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">time</span> <span class="o">=</span> <span class="n">time</span>
-<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">bill</span> <span class="o">=</span> <span class="n">bill</span>
-<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">tip</span> <span class="o">=</span> <span class="n">tip</span>
-<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">guests</span> <span class="o">=</span> <span class="n">guests</span>
-<a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a>
-<a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">total</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a><span class="w">        </span><span class="sd">"""Чек разом з чайовими."""</span>
-<a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">bill</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">tip</span>
-<a id="__codelineno-4-17" name="__codelineno-4-17" href="#__codelineno-4-17"></a>
-<a id="__codelineno-4-18" name="__codelineno-4-18" href="#__codelineno-4-18"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">per_guest</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<a id="__codelineno-4-19" name="__codelineno-4-19" href="#__codelineno-4-19"></a>        <span class="k">return</span> <span class="nb">round</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bill</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">guests</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-<a id="__codelineno-4-20" name="__codelineno-4-20" href="#__codelineno-4-20"></a>
-<a id="__codelineno-4-21" name="__codelineno-4-21" href="#__codelineno-4-21"></a>
-<a id="__codelineno-4-22" name="__codelineno-4-22" href="#__codelineno-4-22"></a><span class="n">order</span> <span class="o">=</span> <span class="n">Order</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">datetime</span><span class="p">(</span><span class="mi">2024</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">19</span><span class="p">,</span> <span class="mi">18</span><span class="p">,</span> <span class="mi">30</span><span class="p">),</span> <span class="mf">540.0</span><span class="p">,</span> <span class="mf">50.0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-<a id="__codelineno-4-23" name="__codelineno-4-23" href="#__codelineno-4-23"></a><span class="nb">print</span><span class="p">(</span><span class="n">order</span><span class="o">.</span><span class="n">bill</span><span class="p">,</span> <span class="n">order</span><span class="o">.</span><span class="n">total</span><span class="p">(),</span> <span class="n">order</span><span class="o">.</span><span class="n">per_guest</span><span class="p">())</span>
+<p>Нової функції не створилося: <code>delivery_fee</code> і <code>fee_for</code> — два ярлики одного об'єкта, як <code>b = a</code> для списку в уроці 3.</p>
+<p>Покласти в список і пройти циклом:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">bills</span> <span class="o">=</span> <span class="p">[</span><span class="mf">540.0</span><span class="p">,</span> <span class="mf">320.0</span><span class="p">,</span> <span class="mf">980.0</span><span class="p">]</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="k">for</span> <span class="n">summary</span> <span class="ow">in</span> <span class="p">[</span><span class="nb">len</span><span class="p">,</span> <span class="nb">sum</span><span class="p">,</span> <span class="nb">max</span><span class="p">]:</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">summary</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">summary</span><span class="p">(</span><span class="n">bills</span><span class="p">))</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>540.0 590.0 270.0
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>len 3
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>sum 1840.0
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>max 980.0
 </code></pre></div>
-<ul>
-<li><strong><code>class Order:</code></strong> оголошує клас — новий тип, як <code>int</code> чи <code>list</code>;</li>
-<li><strong><code>Order(1, …)</code></strong> створює екземпляр: Python робить порожній об'єкт і викликає <code>__init__</code>, щоб його заповнити;</li>
-<li><strong><code>__init__</code></strong> — метод-ініціалізатор. Він присвоює <strong>атрибути екземпляра</strong>: <code>self.bill = bill</code> кладе значення в конкретний об'єкт;</li>
-<li><strong>метод</strong> — функція, оголошена в класі. <code>order.total()</code> — виклик методу конкретного замовлення.</li>
-</ul>
-<h3 id="self">Що таке self<a class="headerlink" href="#self" title="Permanent link">&para;</a></h3>
-<p><code>self</code> — це <strong>той самий об'єкт</strong>, у якого викликали метод. Коли ти пишеш <code>order.total()</code>, Python насправді викликає <code>Order.total(order)</code>:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="nb">print</span><span class="p">(</span><span class="n">Order</span><span class="o">.</span><span class="n">total</span><span class="p">(</span><span class="n">order</span><span class="p">)</span> <span class="o">==</span> <span class="n">order</span><span class="o">.</span><span class="n">total</span><span class="p">())</span>
+<p>Функції, які об'єкт мови дозволяє зберігати, передавати й повертати так само, як будь-яке значення, називають <strong>об'єктами першого класу</strong> (first-class objects). У Python функції саме такі.</p>
+<h2 id="if">Словник команд замість ланцюжка if<a class="headerlink" href="#if" title="Permanent link">&para;</a></h2>
+<p>У фінальному проєкті <code>app.py</code> вибирав команду ланцюжком <code>if</code>. Кожна нова команда — ще одна гілка, і функція <code>run</code> росте без кінця. Але якщо функції — дані, то «яку функцію викликати для якої команди» — це просто <strong>словник</strong>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">cmd_report</span><span class="p">(</span><span class="n">orders</span><span class="p">):</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>    <span class="k">return</span> <span class="sa">f</span><span class="s2">"Замовлень: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">orders</span><span class="p">)</span><span class="si">}</span><span class="s2">, виторг: </span><span class="si">{</span><span class="nb">sum</span><span class="p">(</span><span class="n">orders</span><span class="p">)</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> грн"</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="k">def</span><span class="w"> </span><span class="nf">cmd_top</span><span class="p">(</span><span class="n">orders</span><span class="p">):</span>
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>    <span class="k">return</span> <span class="sa">f</span><span class="s2">"Найбільший чек: </span><span class="si">{</span><span class="nb">max</span><span class="p">(</span><span class="n">orders</span><span class="p">)</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> грн"</span>
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="n">COMMANDS</span> <span class="o">=</span> <span class="p">{</span>
+<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>    <span class="s2">"report"</span><span class="p">:</span> <span class="n">cmd_report</span><span class="p">,</span>
+<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>    <span class="s2">"top"</span><span class="p">:</span> <span class="n">cmd_top</span><span class="p">,</span>
+<a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a><span class="p">}</span>
+<a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a>
+<a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a>
+<a id="__codelineno-6-15" name="__codelineno-6-15" href="#__codelineno-6-15"></a><span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="n">command</span><span class="p">,</span> <span class="n">orders</span><span class="p">):</span>
+<a id="__codelineno-6-16" name="__codelineno-6-16" href="#__codelineno-6-16"></a>    <span class="n">handler</span> <span class="o">=</span> <span class="n">COMMANDS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+<a id="__codelineno-6-17" name="__codelineno-6-17" href="#__codelineno-6-17"></a>    <span class="k">if</span> <span class="n">handler</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-6-18" name="__codelineno-6-18" href="#__codelineno-6-18"></a>        <span class="k">return</span> <span class="sa">f</span><span class="s2">"Помилка: невідома команда </span><span class="si">{</span><span class="n">command</span><span class="si">}</span><span class="s2">. Є: </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">COMMANDS</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>
+<a id="__codelineno-6-19" name="__codelineno-6-19" href="#__codelineno-6-19"></a>    <span class="k">return</span> <span class="n">handler</span><span class="p">(</span><span class="n">orders</span><span class="p">)</span>
+<a id="__codelineno-6-20" name="__codelineno-6-20" href="#__codelineno-6-20"></a>
+<a id="__codelineno-6-21" name="__codelineno-6-21" href="#__codelineno-6-21"></a>
+<a id="__codelineno-6-22" name="__codelineno-6-22" href="#__codelineno-6-22"></a><span class="n">orders</span> <span class="o">=</span> <span class="p">[</span><span class="mf">540.0</span><span class="p">,</span> <span class="mf">320.0</span><span class="p">,</span> <span class="mf">980.0</span><span class="p">]</span>
+<a id="__codelineno-6-23" name="__codelineno-6-23" href="#__codelineno-6-23"></a><span class="nb">print</span><span class="p">(</span><span class="n">run</span><span class="p">(</span><span class="s2">"report"</span><span class="p">,</span> <span class="n">orders</span><span class="p">))</span>
+<a id="__codelineno-6-24" name="__codelineno-6-24" href="#__codelineno-6-24"></a><span class="nb">print</span><span class="p">(</span><span class="n">run</span><span class="p">(</span><span class="s2">"top"</span><span class="p">,</span> <span class="n">orders</span><span class="p">))</span>
+<a id="__codelineno-6-25" name="__codelineno-6-25" href="#__codelineno-6-25"></a><span class="nb">print</span><span class="p">(</span><span class="n">run</span><span class="p">(</span><span class="s2">"fly"</span><span class="p">,</span> <span class="n">orders</span><span class="p">))</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>True
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>Замовлень: 3, виторг: 1840.00 грн
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>Найбільший чек: 980.00 грн
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>Помилка: невідома команда fly. Є: report, top
 </code></pre></div>
-<p>Метод — звичайна функція з уроку 7, перший параметр якої — об'єкт. Назва <code>self</code> — домовленість, а не ключове слово, але так пишуть усі.</p>
-<pre class="mermaid"><code>flowchart TD
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
-
-    C["class Order&lt;br&gt;креслення: __init__, total, per_guest"] -- "Order(1, ..., 540.0, ...)" --&gt; A["order №1&lt;br&gt;bill = 540.0, guests = 2"]
-    C -- "Order(2, ..., 320.0, ...)" --&gt; B["order №2&lt;br&gt;bill = 320.0, guests = 1"]
-    A -- "order.total()" --&gt; T["Order.total(self=order №1)&lt;br&gt;590.0"]
-
-    class C warning
-    class A,B step
-    class T success</code></pre>
-<p>Два екземпляри — два окремі набори атрибутів, але методи в них спільні: вони живуть у класі.</p>
-<h3 id="repr"><strong>repr</strong>: як об'єкт себе показує<a class="headerlink" href="#repr" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="nb">print</span><span class="p">(</span><span class="n">order</span><span class="p">)</span>
+<p>Нова команда — нова функція і <strong>один рядок</strong> у словнику. <code>run</code> не змінюється. Такий словник називають <strong>таблицею диспетчеризації</strong> (dispatch table). Бонус: список доступних команд для підказки береться з того самого словника й ніколи не застаріє.</p>
+<h2 id="_3">Функція як аргумент<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<p>Функцію, яка приймає або повертає іншу функцію, називають <strong>функцією вищого порядку</strong>. Ти вже користувався ними: <code>sorted</code>, <code>max</code>, <code>min</code> приймають параметр <code>key</code> — функцію, яку викликають для кожного елемента, щоб отримати значення для порівняння.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">NamedTuple</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="k">class</span><span class="w"> </span><span class="nc">Delivery</span><span class="p">(</span><span class="n">NamedTuple</span><span class="p">):</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>    <span class="n">order_id</span><span class="p">:</span> <span class="nb">int</span>
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>    <span class="n">district</span><span class="p">:</span> <span class="nb">str</span>
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>    <span class="n">fare</span><span class="p">:</span> <span class="nb">int</span>
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>    <span class="n">driver</span><span class="p">:</span> <span class="nb">str</span>
+<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>
+<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a>
+<a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a><span class="n">deliveries</span> <span class="o">=</span> <span class="p">[</span>
+<a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a>    <span class="n">Delivery</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">"Оболонь"</span><span class="p">,</span> <span class="mi">230</span><span class="p">,</span> <span class="s2">"D-3"</span><span class="p">),</span>
+<a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a>    <span class="n">Delivery</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s2">"Поділ"</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="s2">"D-1"</span><span class="p">),</span>
+<a id="__codelineno-8-14" name="__codelineno-8-14" href="#__codelineno-8-14"></a>    <span class="n">Delivery</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="s2">"Оболонь"</span><span class="p">,</span> <span class="mi">270</span><span class="p">,</span> <span class="s2">"D-3"</span><span class="p">),</span>
+<a id="__codelineno-8-15" name="__codelineno-8-15" href="#__codelineno-8-15"></a>    <span class="n">Delivery</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="s2">"Печерськ"</span><span class="p">,</span> <span class="mi">150</span><span class="p">,</span> <span class="s2">"D-2"</span><span class="p">),</span>
+<a id="__codelineno-8-16" name="__codelineno-8-16" href="#__codelineno-8-16"></a><span class="p">]</span>
+<a id="__codelineno-8-17" name="__codelineno-8-17" href="#__codelineno-8-17"></a>
+<a id="__codelineno-8-18" name="__codelineno-8-18" href="#__codelineno-8-18"></a>
+<a id="__codelineno-8-19" name="__codelineno-8-19" href="#__codelineno-8-19"></a><span class="k">def</span><span class="w"> </span><span class="nf">by_fare</span><span class="p">(</span><span class="n">delivery</span><span class="p">):</span>
+<a id="__codelineno-8-20" name="__codelineno-8-20" href="#__codelineno-8-20"></a>    <span class="k">return</span> <span class="n">delivery</span><span class="o">.</span><span class="n">fare</span>
+<a id="__codelineno-8-21" name="__codelineno-8-21" href="#__codelineno-8-21"></a>
+<a id="__codelineno-8-22" name="__codelineno-8-22" href="#__codelineno-8-22"></a>
+<a id="__codelineno-8-23" name="__codelineno-8-23" href="#__codelineno-8-23"></a><span class="nb">print</span><span class="p">([</span><span class="n">d</span><span class="o">.</span><span class="n">order_id</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">deliveries</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">by_fare</span><span class="p">)])</span>
+<a id="__codelineno-8-24" name="__codelineno-8-24" href="#__codelineno-8-24"></a><span class="nb">print</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">deliveries</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">by_fare</span><span class="p">)</span><span class="o">.</span><span class="n">order_id</span><span class="p">)</span>
 </code></pre></div>
-<p>Вивід — щось на кшталт:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>&lt;__main__.Order object at 0x7f3a2c1b9d50&gt;
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>[4, 2, 1, 3]
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>3
 </code></pre></div>
-<p>Шістнадцяткове число — адреса об'єкта в пам'яті, і вона щоразу інша. Для людини це марно. Метод <code>__repr__</code> каже Python, як показувати об'єкт — у <code>print</code>, у списках, у налагоджувачі:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">Order</span><span class="p">:</span>
-<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="w">    </span><span class="sd">"""Замовлення кафе."""</span>
+<p><code>sorted</code> нічого не знає про доставки. Він лише викликає <code>by_fare(d)</code> для кожного елемента й сортує за результатом. Зміни <code>key</code> — зміниться порядок, а сам <code>sorted</code> той самий.</p>
+<p>Ключ може повертати кортеж — тоді порівняння йде по черзі: спершу район, у межах району — вартість:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">by_district_then_fare</span><span class="p">(</span><span class="n">delivery</span><span class="p">):</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>    <span class="k">return</span> <span class="p">(</span><span class="n">delivery</span><span class="o">.</span><span class="n">district</span><span class="p">,</span> <span class="n">delivery</span><span class="o">.</span><span class="n">fare</span><span class="p">)</span>
 <a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>
-<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">order_id</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">bill</span><span class="p">,</span> <span class="n">tip</span><span class="p">,</span> <span class="n">guests</span><span class="p">):</span>
-<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="n">order_id</span>
-<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">time</span> <span class="o">=</span> <span class="n">time</span>
-<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">bill</span> <span class="o">=</span> <span class="n">bill</span>
-<a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">tip</span> <span class="o">=</span> <span class="n">tip</span>
-<a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">guests</span> <span class="o">=</span> <span class="n">guests</span>
-<a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a>
-<a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<a id="__codelineno-10-12" name="__codelineno-10-12" href="#__codelineno-10-12"></a>        <span class="k">return</span> <span class="sa">f</span><span class="s2">"Order(№</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="si">:</span><span class="s2">%Y-%m-%d %H:%M</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">bill</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> грн)"</span>
-<a id="__codelineno-10-13" name="__codelineno-10-13" href="#__codelineno-10-13"></a>
-<a id="__codelineno-10-14" name="__codelineno-10-14" href="#__codelineno-10-14"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">total</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<a id="__codelineno-10-15" name="__codelineno-10-15" href="#__codelineno-10-15"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">bill</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">tip</span>
-<a id="__codelineno-10-16" name="__codelineno-10-16" href="#__codelineno-10-16"></a>
-<a id="__codelineno-10-17" name="__codelineno-10-17" href="#__codelineno-10-17"></a>
-<a id="__codelineno-10-18" name="__codelineno-10-18" href="#__codelineno-10-18"></a><span class="n">orders</span> <span class="o">=</span> <span class="p">[</span><span class="n">Order</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">datetime</span><span class="p">(</span><span class="mi">2024</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">19</span><span class="p">,</span> <span class="mi">18</span><span class="p">,</span> <span class="mi">30</span><span class="p">),</span> <span class="mf">540.0</span><span class="p">,</span> <span class="mf">50.0</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
-<a id="__codelineno-10-19" name="__codelineno-10-19" href="#__codelineno-10-19"></a>          <span class="n">Order</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">datetime</span><span class="p">(</span><span class="mi">2024</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">19</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="mf">320.0</span><span class="p">,</span> <span class="mf">30.0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]</span>
-<a id="__codelineno-10-20" name="__codelineno-10-20" href="#__codelineno-10-20"></a><span class="nb">print</span><span class="p">(</span><span class="n">orders</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-<a id="__codelineno-10-21" name="__codelineno-10-21" href="#__codelineno-10-21"></a><span class="nb">print</span><span class="p">(</span><span class="n">orders</span><span class="p">)</span>
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">deliveries</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">by_district_then_fare</span><span class="p">):</span>
+<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">district</span><span class="p">,</span> <span class="n">d</span><span class="o">.</span><span class="n">fare</span><span class="p">)</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>Order(№1, 2024-07-19 18:30, 540.00 грн)
-<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>[Order(№1, 2024-07-19 18:30, 540.00 грн), Order(№2, 2024-07-19 12:10, 320.00 грн)]
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>Оболонь 230
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>Оболонь 270
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>Печерськ 150
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>Поділ 180
 </code></pre></div>
-<p>Імена з двома підкресленнями з обох боків — <code>__init__</code>, <code>__repr__</code> — <strong>спеціальні методи</strong> (dunder methods). Python викликає їх сам у певні моменти. Їм присвячено урок 23.</p>
-<h2 id="_3">Атрибути класу й простір імен<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
-<p>Атрибут можна покласти не лише в екземпляр, а й у <strong>сам клас</strong>. Такий атрибут один на всіх — наприклад, вартість доставки за районами, однакова для всіх доставок:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">Delivery</span><span class="p">:</span>
-<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>    <span class="n">FEES</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"Поділ"</span><span class="p">:</span> <span class="mi">60</span><span class="p">,</span> <span class="s2">"Оболонь"</span><span class="p">:</span> <span class="mi">80</span><span class="p">,</span> <span class="s2">"Печерськ"</span><span class="p">:</span> <span class="mi">90</span><span class="p">}</span>
-<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>
-<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">order_id</span><span class="p">,</span> <span class="n">district</span><span class="p">,</span> <span class="n">driver</span><span class="p">):</span>
-<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">order_id</span> <span class="o">=</span> <span class="n">order_id</span>
-<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">district</span> <span class="o">=</span> <span class="n">district</span>
-<a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">driver</span> <span class="o">=</span> <span class="n">driver</span>
-<a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a>
-<a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">fare</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<a id="__codelineno-12-10" name="__codelineno-12-10" href="#__codelineno-12-10"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">FEES</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">district</span><span class="p">]</span>
-<a id="__codelineno-12-11" name="__codelineno-12-11" href="#__codelineno-12-11"></a>
-<a id="__codelineno-12-12" name="__codelineno-12-12" href="#__codelineno-12-12"></a>
-<a id="__codelineno-12-13" name="__codelineno-12-13" href="#__codelineno-12-13"></a><span class="n">first</span> <span class="o">=</span> <span class="n">Delivery</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">"Оболонь"</span><span class="p">,</span> <span class="s2">"D-3"</span><span class="p">)</span>
-<a id="__codelineno-12-14" name="__codelineno-12-14" href="#__codelineno-12-14"></a><span class="n">second</span> <span class="o">=</span> <span class="n">Delivery</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s2">"Поділ"</span><span class="p">,</span> <span class="s2">"D-1"</span><span class="p">)</span>
-<a id="__codelineno-12-15" name="__codelineno-12-15" href="#__codelineno-12-15"></a><span class="nb">print</span><span class="p">(</span><span class="n">first</span><span class="o">.</span><span class="n">fare</span><span class="p">(),</span> <span class="n">second</span><span class="o">.</span><span class="n">fare</span><span class="p">())</span>
-<a id="__codelineno-12-16" name="__codelineno-12-16" href="#__codelineno-12-16"></a><span class="nb">print</span><span class="p">(</span><span class="n">first</span><span class="o">.</span><span class="n">FEES</span> <span class="ow">is</span> <span class="n">second</span><span class="o">.</span><span class="n">FEES</span> <span class="ow">is</span> <span class="n">Delivery</span><span class="o">.</span><span class="n">FEES</span><span class="p">)</span>
-</code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>80 60
-<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>True
-</code></pre></div>
-<p>У кожного об'єкта свій <strong>простір імен</strong> — словник атрибутів <code>__dict__</code>. У класу теж:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="nb">print</span><span class="p">(</span><span class="n">first</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">)</span>
-<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="nb">print</span><span class="p">(</span><span class="s2">"FEES"</span> <span class="ow">in</span> <span class="n">Delivery</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">,</span> <span class="s2">"FEES"</span> <span class="ow">in</span> <span class="n">first</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">)</span>
-</code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>{'order_id': 1, 'district': 'Оболонь', 'driver': 'D-3'}
-<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>True False
-</code></pre></div>
-<p>У <code>first</code> немає <code>FEES</code>, але <code>first.FEES</code> працює. Бо атрибут через крапку Python шукає <strong>спершу в екземплярі, потім у класі</strong>:</p>
-<pre class="mermaid"><code>flowchart TD
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
-
-    Q["first.FEES"] --&gt; I{"є в first.__dict__?"}
-    I -- так --&gt; R1["беремо з екземпляра"]
-    I -- ні --&gt; K{"є в Delivery.__dict__?"}
-    K -- так --&gt; R2["беремо з класу"]
-    K -- ні --&gt; E["AttributeError"]
-
-    class Q step
-    class I,K decision
-    class R1,R2 success
-    class E error</code></pre>
-<h3 id="self_1">Пастка: присвоєння через self<a class="headerlink" href="#self_1" title="Permanent link">&para;</a></h3>
-<p>Лічильник доставок у класі:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">Courier</span><span class="p">:</span>
-<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>    <span class="n">trips</span> <span class="o">=</span> <span class="mi">0</span>
-<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>
-<a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
-<a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
-<a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a>
-<a id="__codelineno-16-7" name="__codelineno-16-7" href="#__codelineno-16-7"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">deliver</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<a id="__codelineno-16-8" name="__codelineno-16-8" href="#__codelineno-16-8"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">trips</span> <span class="o">+=</span> <span class="mi">1</span>
-<a id="__codelineno-16-9" name="__codelineno-16-9" href="#__codelineno-16-9"></a>
-<a id="__codelineno-16-10" name="__codelineno-16-10" href="#__codelineno-16-10"></a>
-<a id="__codelineno-16-11" name="__codelineno-16-11" href="#__codelineno-16-11"></a><span class="n">courier</span> <span class="o">=</span> <span class="n">Courier</span><span class="p">(</span><span class="s2">"D-3"</span><span class="p">)</span>
-<a id="__codelineno-16-12" name="__codelineno-16-12" href="#__codelineno-16-12"></a><span class="n">courier</span><span class="o">.</span><span class="n">deliver</span><span class="p">()</span>
-<a id="__codelineno-16-13" name="__codelineno-16-13" href="#__codelineno-16-13"></a><span class="n">courier</span><span class="o">.</span><span class="n">deliver</span><span class="p">()</span>
-<a id="__codelineno-16-14" name="__codelineno-16-14" href="#__codelineno-16-14"></a><span class="nb">print</span><span class="p">(</span><span class="n">courier</span><span class="o">.</span><span class="n">trips</span><span class="p">,</span> <span class="n">Courier</span><span class="o">.</span><span class="n">trips</span><span class="p">)</span>
-<a id="__codelineno-16-15" name="__codelineno-16-15" href="#__codelineno-16-15"></a><span class="nb">print</span><span class="p">(</span><span class="n">courier</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">)</span>
-</code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>2 0
-<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>{'name': 'D-3', 'trips': 2}
-</code></pre></div>
-<p><code>self.trips += 1</code> — це <code>self.trips = self.trips + 1</code>. <strong>Читання</strong> <code>self.trips</code> знайшло 0 у класі. А <strong>присвоєння</strong> <code>self.trips = …</code> завжди пише в екземпляр і створює там власний атрибут, який далі <strong>затінює</strong> класовий. Для особистого лічильника водія це саме те, що треба. А щоб рахувати поїздки <strong>всіх</strong> водіїв разом, пиши в клас явно: <code>Courier.trips += 1</code>.</p>
 <div class="admonition warning">
-<p class="admonition-title">Змінюваний атрибут класу — спільний для всіх</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">Cart</span><span class="p">:</span>
-<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>    <span class="n">items</span> <span class="o">=</span> <span class="p">[]</span>
-<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>
-<a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dish</span><span class="p">):</span>
-<a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dish</span><span class="p">)</span>
-<a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a>
-<a id="__codelineno-18-7" name="__codelineno-18-7" href="#__codelineno-18-7"></a>
-<a id="__codelineno-18-8" name="__codelineno-18-8" href="#__codelineno-18-8"></a><span class="n">oksana</span><span class="p">,</span> <span class="n">taras</span> <span class="o">=</span> <span class="n">Cart</span><span class="p">(),</span> <span class="n">Cart</span><span class="p">()</span>
-<a id="__codelineno-18-9" name="__codelineno-18-9" href="#__codelineno-18-9"></a><span class="n">oksana</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">"борщ"</span><span class="p">)</span>
-<a id="__codelineno-18-10" name="__codelineno-18-10" href="#__codelineno-18-10"></a><span class="nb">print</span><span class="p">(</span><span class="n">taras</span><span class="o">.</span><span class="n">items</span><span class="p">)</span>
-</code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>['борщ']
-</code></pre></div>
-<p><code>self.items.append</code> — не присвоєння, а зміна <strong>того самого</strong> списку в класі. Кошик Тараса «отримав» борщ Оксани. Власні змінювані дані створюй у <code>__init__</code>: <code>self.items = []</code>.</p>
+<p class="admonition-title">Функція, а не її результат</p>
+<p><code>key=by_fare</code> — передаємо <strong>функцію</strong>. <code>key=by_fare(d)</code> — передали б <strong>результат</strong> одного виклику, число. <code>sorted</code> спробує викликати число як функцію й впаде з <code>TypeError: 'int' object is not callable</code>. Та сама пастка — <code>if word.isupper:</code> без дужок: це завжди правда, бо функція-об'єкт істинна.</p>
 </div>
-<h3 id="_4">Клас — не оточення для методів<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
-<p>В уроці 18 внутрішня функція бачила змінні зовнішньої — правило LEGB, рівень E. Клас так <strong>не</strong> працює: метод не бачить атрибути класу просто за іменем.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">Menu</span><span class="p">:</span>
-<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>    <span class="n">VAT</span> <span class="o">=</span> <span class="mf">0.2</span>
-<a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a>
-<a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">price_with_vat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">price</span><span class="p">):</span>
-<a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a>        <span class="k">return</span> <span class="n">price</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">VAT</span><span class="p">)</span>
-<a id="__codelineno-20-6" name="__codelineno-20-6" href="#__codelineno-20-6"></a>
-<a id="__codelineno-20-7" name="__codelineno-20-7" href="#__codelineno-20-7"></a>
-<a id="__codelineno-20-8" name="__codelineno-20-8" href="#__codelineno-20-8"></a><span class="k">try</span><span class="p">:</span>
-<a id="__codelineno-20-9" name="__codelineno-20-9" href="#__codelineno-20-9"></a>    <span class="n">Menu</span><span class="p">()</span><span class="o">.</span><span class="n">price_with_vat</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
-<a id="__codelineno-20-10" name="__codelineno-20-10" href="#__codelineno-20-10"></a><span class="k">except</span> <span class="ne">NameError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
-<a id="__codelineno-20-11" name="__codelineno-20-11" href="#__codelineno-20-11"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+<h3 id="callback">Callback: що робити, вирішує той, хто викликає<a class="headerlink" href="#callback" title="Permanent link">&para;</a></h3>
+<p>Водій виїхав — клієнта треба повідомити. Як саме — SMS, Telegram чи просто запис у журнал — функція доставки знати не повинна. Вона отримує функцію повідомлення аргументом і <strong>викликає її у потрібний момент</strong>. Таку функцію називають <strong>зворотним викликом</strong> (callback):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">dispatch</span><span class="p">(</span><span class="n">delivery</span><span class="p">,</span> <span class="n">notify</span><span class="p">):</span>
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="w">    </span><span class="sd">"""Відправляє водія і повідомляє клієнта через notify(текст)."""</span>
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>    <span class="n">notify</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Замовлення №</span><span class="si">{</span><span class="n">delivery</span><span class="o">.</span><span class="n">order_id</span><span class="si">}</span><span class="s2">: водій </span><span class="si">{</span><span class="n">delivery</span><span class="o">.</span><span class="n">driver</span><span class="si">}</span><span class="s2"> виїхав, </span><span class="si">{</span><span class="n">delivery</span><span class="o">.</span><span class="n">fare</span><span class="si">}</span><span class="s2"> грн"</span><span class="p">)</span>
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>
+<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a><span class="k">def</span><span class="w"> </span><span class="nf">notify_sms</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+<a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"SMS:"</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+<a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a>
+<a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a>
+<a id="__codelineno-12-10" name="__codelineno-12-10" href="#__codelineno-12-10"></a><span class="k">def</span><span class="w"> </span><span class="nf">notify_telegram</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+<a id="__codelineno-12-11" name="__codelineno-12-11" href="#__codelineno-12-11"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"Telegram:"</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+<a id="__codelineno-12-12" name="__codelineno-12-12" href="#__codelineno-12-12"></a>
+<a id="__codelineno-12-13" name="__codelineno-12-13" href="#__codelineno-12-13"></a>
+<a id="__codelineno-12-14" name="__codelineno-12-14" href="#__codelineno-12-14"></a><span class="n">dispatch</span><span class="p">(</span><span class="n">deliveries</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">notify_sms</span><span class="p">)</span>
+<a id="__codelineno-12-15" name="__codelineno-12-15" href="#__codelineno-12-15"></a><span class="n">dispatch</span><span class="p">(</span><span class="n">deliveries</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">notify_telegram</span><span class="p">)</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>name 'VAT' is not defined
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>SMS: Замовлення №1: водій D-3 виїхав, 230 грн
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>Telegram: Замовлення №2: водій D-1 виїхав, 180 грн
 </code></pre></div>
-<p>Метод шукає <code>VAT</code> за LEGB: локально, в оточуючих <strong>функціях</strong>, у модулі, серед вбудованих. Простору імен класу серед них немає. До атрибутів класу — лише через крапку: <code>self.VAT</code> або <code>Menu.VAT</code>.</p>
-<h2 id="_5">Методи класу й статичні методи<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
-<p>Замовлення часто приходять рядком каси (уроки 13–14). Хочеться створювати <code>Order</code> одразу з рядка — <strong>альтернативний конструктор</strong>. Для цього є <code>@classmethod</code>: метод отримує не екземпляр, а <strong>сам клас</strong> (<code>cls</code>) і повертає новий об'єкт. А правило, якому не потрібні ні екземпляр, ні клас — наприклад, «яка година — який прийом їжі», — оформлюють <code>@staticmethod</code>:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">Order</span><span class="p">:</span>
-<a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a><span class="w">    </span><span class="sd">"""Замовлення кафе."""</span>
-<a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a>
-<a id="__codelineno-22-4" name="__codelineno-22-4" href="#__codelineno-22-4"></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">order_id</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">bill</span><span class="p">,</span> <span class="n">tip</span><span class="p">,</span> <span class="n">guests</span><span class="p">):</span>
-<a id="__codelineno-22-5" name="__codelineno-22-5" href="#__codelineno-22-5"></a>        <span class="k">if</span> <span class="n">bill</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
-<a id="__codelineno-22-6" name="__codelineno-22-6" href="#__codelineno-22-6"></a>            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"сума чека має бути більшою за 0, а маємо </span><span class="si">{</span><span class="n">bill</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-<a id="__codelineno-22-7" name="__codelineno-22-7" href="#__codelineno-22-7"></a>        <span class="k">if</span> <span class="n">guests</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
-<a id="__codelineno-22-8" name="__codelineno-22-8" href="#__codelineno-22-8"></a>            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"гостей має бути хоча б один, а маємо </span><span class="si">{</span><span class="n">guests</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-<a id="__codelineno-22-9" name="__codelineno-22-9" href="#__codelineno-22-9"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="n">order_id</span>
-<a id="__codelineno-22-10" name="__codelineno-22-10" href="#__codelineno-22-10"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">time</span> <span class="o">=</span> <span class="n">time</span>
-<a id="__codelineno-22-11" name="__codelineno-22-11" href="#__codelineno-22-11"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">bill</span> <span class="o">=</span> <span class="n">bill</span>
-<a id="__codelineno-22-12" name="__codelineno-22-12" href="#__codelineno-22-12"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">tip</span> <span class="o">=</span> <span class="n">tip</span>
-<a id="__codelineno-22-13" name="__codelineno-22-13" href="#__codelineno-22-13"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">guests</span> <span class="o">=</span> <span class="n">guests</span>
-<a id="__codelineno-22-14" name="__codelineno-22-14" href="#__codelineno-22-14"></a>
-<a id="__codelineno-22-15" name="__codelineno-22-15" href="#__codelineno-22-15"></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<a id="__codelineno-22-16" name="__codelineno-22-16" href="#__codelineno-22-16"></a>        <span class="k">return</span> <span class="sa">f</span><span class="s2">"Order(№</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="si">:</span><span class="s2">%Y-%m-%d %H:%M</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">bill</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> грн)"</span>
-<a id="__codelineno-22-17" name="__codelineno-22-17" href="#__codelineno-22-17"></a>
-<a id="__codelineno-22-18" name="__codelineno-22-18" href="#__codelineno-22-18"></a>    <span class="nd">@classmethod</span>
-<a id="__codelineno-22-19" name="__codelineno-22-19" href="#__codelineno-22-19"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">from_line</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">line</span><span class="p">,</span> <span class="n">order_id</span><span class="p">):</span>
-<a id="__codelineno-22-20" name="__codelineno-22-20" href="#__codelineno-22-20"></a><span class="w">        </span><span class="sd">"""Рядок каси "2024-07-19 18:30;540.00;50;2" → Order."""</span>
-<a id="__codelineno-22-21" name="__codelineno-22-21" href="#__codelineno-22-21"></a>        <span class="n">fields</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">";"</span><span class="p">)</span>
-<a id="__codelineno-22-22" name="__codelineno-22-22" href="#__codelineno-22-22"></a>        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">fields</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">4</span><span class="p">:</span>
-<a id="__codelineno-22-23" name="__codelineno-22-23" href="#__codelineno-22-23"></a>            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"очікували 4 поля, а маємо </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">fields</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-<a id="__codelineno-22-24" name="__codelineno-22-24" href="#__codelineno-22-24"></a>        <span class="n">time_text</span><span class="p">,</span> <span class="n">bill</span><span class="p">,</span> <span class="n">tip</span><span class="p">,</span> <span class="n">guests</span> <span class="o">=</span> <span class="n">fields</span>
-<a id="__codelineno-22-25" name="__codelineno-22-25" href="#__codelineno-22-25"></a>        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">order_id</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">time_text</span><span class="p">,</span> <span class="s2">"%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M"</span><span class="p">),</span>
-<a id="__codelineno-22-26" name="__codelineno-22-26" href="#__codelineno-22-26"></a>                   <span class="nb">float</span><span class="p">(</span><span class="n">bill</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">tip</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">guests</span><span class="p">))</span>
-<a id="__codelineno-22-27" name="__codelineno-22-27" href="#__codelineno-22-27"></a>
-<a id="__codelineno-22-28" name="__codelineno-22-28" href="#__codelineno-22-28"></a>    <span class="nd">@staticmethod</span>
-<a id="__codelineno-22-29" name="__codelineno-22-29" href="#__codelineno-22-29"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">meal_type</span><span class="p">(</span><span class="n">hour</span><span class="p">):</span>
-<a id="__codelineno-22-30" name="__codelineno-22-30" href="#__codelineno-22-30"></a>        <span class="k">if</span> <span class="mi">11</span> <span class="o">&lt;=</span> <span class="n">hour</span> <span class="o">&lt;=</span> <span class="mi">15</span><span class="p">:</span>
-<a id="__codelineno-22-31" name="__codelineno-22-31" href="#__codelineno-22-31"></a>            <span class="k">return</span> <span class="s2">"обід"</span>
-<a id="__codelineno-22-32" name="__codelineno-22-32" href="#__codelineno-22-32"></a>        <span class="k">if</span> <span class="mi">17</span> <span class="o">&lt;=</span> <span class="n">hour</span> <span class="o">&lt;=</span> <span class="mi">23</span><span class="p">:</span>
-<a id="__codelineno-22-33" name="__codelineno-22-33" href="#__codelineno-22-33"></a>            <span class="k">return</span> <span class="s2">"вечеря"</span>
-<a id="__codelineno-22-34" name="__codelineno-22-34" href="#__codelineno-22-34"></a>        <span class="k">return</span> <span class="s2">"інше"</span>
-<a id="__codelineno-22-35" name="__codelineno-22-35" href="#__codelineno-22-35"></a>
-<a id="__codelineno-22-36" name="__codelineno-22-36" href="#__codelineno-22-36"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">meal</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<a id="__codelineno-22-37" name="__codelineno-22-37" href="#__codelineno-22-37"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">meal_type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="o">.</span><span class="n">hour</span><span class="p">)</span>
-<a id="__codelineno-22-38" name="__codelineno-22-38" href="#__codelineno-22-38"></a>
-<a id="__codelineno-22-39" name="__codelineno-22-39" href="#__codelineno-22-39"></a>
-<a id="__codelineno-22-40" name="__codelineno-22-40" href="#__codelineno-22-40"></a><span class="n">order</span> <span class="o">=</span> <span class="n">Order</span><span class="o">.</span><span class="n">from_line</span><span class="p">(</span><span class="s2">"2024-07-21 21:30;1200.00;150;6"</span><span class="p">,</span> <span class="mi">7</span><span class="p">)</span>
-<a id="__codelineno-22-41" name="__codelineno-22-41" href="#__codelineno-22-41"></a><span class="nb">print</span><span class="p">(</span><span class="n">order</span><span class="p">,</span> <span class="n">order</span><span class="o">.</span><span class="n">meal</span><span class="p">())</span>
-<a id="__codelineno-22-42" name="__codelineno-22-42" href="#__codelineno-22-42"></a><span class="nb">print</span><span class="p">(</span><span class="n">Order</span><span class="o">.</span><span class="n">meal_type</span><span class="p">(</span><span class="mi">12</span><span class="p">))</span>
+<p>Новий канал — нова функція, <code>dispatch</code> не змінюється. А в тестах замість справжнього SMS можна передати <code>sent.append</code> і перевірити, що саме пішло б клієнтові:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="n">sent</span> <span class="o">=</span> <span class="p">[]</span>
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="n">dispatch</span><span class="p">(</span><span class="n">deliveries</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">sent</span><span class="o">.</span><span class="n">append</span><span class="p">)</span>
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="nb">print</span><span class="p">(</span><span class="n">sent</span><span class="p">)</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>Order(№7, 2024-07-21 21:30, 1200.00 грн) вечеря
-<a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a>обід
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>['Замовлення №3: водій D-3 виїхав, 270 грн']
 </code></pre></div>
-<table>
-<thead>
-<tr>
-<th>Вид методу</th>
-<th>Перший параметр</th>
-<th>Коли</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>звичайний</td>
-<td><code>self</code> — екземпляр</td>
-<td>працює з даними конкретного об'єкта: <code>order.meal()</code></td>
-</tr>
-<tr>
-<td><code>@classmethod</code></td>
-<td><code>cls</code> — клас</td>
-<td>створює об'єкти іншим способом: <code>Order.from_line(...)</code></td>
-</tr>
-<tr>
-<td><code>@staticmethod</code></td>
-<td>немає</td>
-<td>правило, що стосується теми класу, але не потребує його даних</td>
-</tr>
-</tbody>
-</table>
-<p>Перевірки з уроку 13 тепер живуть у <code>__init__</code>: неправильне замовлення <strong>неможливо створити</strong>, хоч би звідки воно прийшло — з каси, з CLI чи з тесту.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="k">try</span><span class="p">:</span>
-<a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a>    <span class="n">Order</span><span class="o">.</span><span class="n">from_line</span><span class="p">(</span><span class="s2">"2024-07-21 14:20;610.00;60;0"</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
-<a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a><span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
-<a id="__codelineno-24-4" name="__codelineno-24-4" href="#__codelineno-24-4"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+<p><code>sent.append</code> — теж функція: метод конкретного списку. Передаємо його без дужок, і <code>dispatch</code> викликає його як будь-який інший <code>notify</code>.</p>
+<h2 id="_4">Функція, що створює функції<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
+<p>Промокоди. Наївно — функція на кожен:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">apply_summer10</span><span class="p">(</span><span class="n">bill</span><span class="p">):</span>
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>    <span class="k">return</span> <span class="n">bill</span> <span class="o">*</span> <span class="mf">0.9</span>
+<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>
+<a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a>
+<a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a><span class="k">def</span><span class="w"> </span><span class="nf">apply_student15</span><span class="p">(</span><span class="n">bill</span><span class="p">):</span>
+<a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a>    <span class="k">return</span> <span class="n">bill</span> <span class="o">*</span> <span class="mf">0.85</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a>гостей має бути хоча б один, а маємо 0
+<p>Функції-близнюки відрізняються одним числом. Можна додати параметр — <code>apply_discount(bill, percent)</code>, — але тоді кожне місце виклику має знати відсоток, а реєстр «код → знижка» знову стає ланцюжком <code>if</code>. Краще <strong>функція, яка створює</strong> функцію-знижку з потрібним відсотком:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">make_discount</span><span class="p">(</span><span class="n">percent</span><span class="p">):</span>
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a><span class="w">    </span><span class="sd">"""Фабрика: повертає функцію, що знижує чек на percent відсотків."""</span>
+<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">apply</span><span class="p">(</span><span class="n">bill</span><span class="p">):</span>
+<a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a>        <span class="k">return</span> <span class="nb">round</span><span class="p">(</span><span class="n">bill</span> <span class="o">*</span> <span class="p">(</span><span class="mi">100</span> <span class="o">-</span> <span class="n">percent</span><span class="p">)</span> <span class="o">/</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a>    <span class="k">return</span> <span class="n">apply</span>
+<a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a>
+<a id="__codelineno-17-7" name="__codelineno-17-7" href="#__codelineno-17-7"></a>
+<a id="__codelineno-17-8" name="__codelineno-17-8" href="#__codelineno-17-8"></a><span class="n">summer10</span> <span class="o">=</span> <span class="n">make_discount</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+<a id="__codelineno-17-9" name="__codelineno-17-9" href="#__codelineno-17-9"></a><span class="n">student15</span> <span class="o">=</span> <span class="n">make_discount</span><span class="p">(</span><span class="mi">15</span><span class="p">)</span>
+<a id="__codelineno-17-10" name="__codelineno-17-10" href="#__codelineno-17-10"></a><span class="nb">print</span><span class="p">(</span><span class="n">summer10</span><span class="p">(</span><span class="mf">540.0</span><span class="p">),</span> <span class="n">student15</span><span class="p">(</span><span class="mf">540.0</span><span class="p">))</span>
+<a id="__codelineno-17-11" name="__codelineno-17-11" href="#__codelineno-17-11"></a><span class="nb">print</span><span class="p">(</span><span class="n">summer10</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
 </code></pre></div>
-<h2 id="isinstance-type">isinstance і type<a class="headerlink" href="#isinstance-type" title="Permanent link">&para;</a></h2>
-<p><code>type(obj)</code> повертає <strong>точний</strong> клас, <code>isinstance(obj, клас)</code> питає, чи є об'єкт екземпляром цього класу <strong>або його нащадка</strong> (урок 20):</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a><span class="nb">print</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">order</span><span class="p">)</span> <span class="ow">is</span> <span class="n">Order</span><span class="p">,</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">order</span><span class="p">,</span> <span class="n">Order</span><span class="p">))</span>
-<a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a><span class="nb">print</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span> <span class="nb">type</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">int</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>486.0 459.0
+<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>apply
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a>True True
-<a id="__codelineno-27-2" name="__codelineno-27-2" href="#__codelineno-27-2"></a>True False
+<p><code>make_discount</code> — <strong>фабрика функцій</strong>: кожен виклик створює нову функцію <code>apply</code>. І кожна <code>apply</code> <strong>пам'ятає</strong> свій <code>percent</code>, хоча <code>make_discount</code> давно завершилась. Функцію разом із запам'ятованими змінними зовнішньої функції називають <strong>замиканням</strong> (closure).</p>
+<p>Тепер реєстр промокодів — словник, як таблиця команд:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="n">PROMO</span> <span class="o">=</span> <span class="p">{</span>
+<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>    <span class="s2">"SUMMER10"</span><span class="p">:</span> <span class="n">make_discount</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span>
+<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a>    <span class="s2">"STUDENT15"</span><span class="p">:</span> <span class="n">make_discount</span><span class="p">(</span><span class="mi">15</span><span class="p">),</span>
+<a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a>    <span class="s2">"NIGHT5"</span><span class="p">:</span> <span class="n">make_discount</span><span class="p">(</span><span class="mi">5</span><span class="p">),</span>
+<a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a><span class="p">}</span>
+<a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a>
+<a id="__codelineno-19-7" name="__codelineno-19-7" href="#__codelineno-19-7"></a><span class="nb">print</span><span class="p">(</span><span class="n">PROMO</span><span class="p">[</span><span class="s2">"NIGHT5"</span><span class="p">](</span><span class="mf">980.0</span><span class="p">))</span>
 </code></pre></div>
-<p><code>bool</code> — нащадок <code>int</code>, тож <code>True</code> — теж ціле число. Для перевірок у коді зазвичай беруть <code>isinstance</code>: він не зламається, коли з'являться класи-нащадки.</p>
-<h2 id="architecture">Архітектура: де живе стан сервісу<a class="headerlink" href="#architecture" title="Permanent link">&para;</a></h2>
-<p>Сервіс доставки можна організувати щонайменше трьома способами. Усі три правильні — різниться ціна змін і захищеність правил.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>931.0
+</code></pre></div>
+<h3 id="legb">Де функція шукає змінні: LEGB<a class="headerlink" href="#legb" title="Permanent link">&para;</a></h3>
+<p>Коли <code>apply</code> бачить <code>percent</code>, Python шукає ім'я в чотирьох місцях по черзі — правило <strong>LEGB</strong>:</p>
 <pre class="mermaid"><code>flowchart TD
     classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
     classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
@@ -4003,241 +3907,327 @@
     classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
     classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
 
-    Q{"де живе стан:&lt;br&gt;замовлення, доставки, лічильник?"}
-    Q --&gt; A["А. Функції над даними&lt;br&gt;orders — список, функції приймають його"]
-    Q --&gt; B["Б. Замикання&lt;br&gt;стан у змінних фабрики"]
-    Q --&gt; C["В. Клас&lt;br&gt;стан в атрибутах, дії — методи"]
-    A --&gt; A1["просто й прозоро&lt;br&gt;але правила можна оминути"]
-    B --&gt; B1["стан схований&lt;br&gt;але важко розширювати й перевіряти"]
-    C --&gt; C1["стан і правила разом&lt;br&gt;ціна — більше коду"]
+    L["L — Local&lt;br&gt;змінні самої apply: bill"] --&gt; E["E — Enclosing&lt;br&gt;змінні make_discount: percent"]
+    E --&gt; G["G — Global&lt;br&gt;імена модуля: PROMO"]
+    G --&gt; B["B — Built-in&lt;br&gt;round, len, print"]
+    B --&gt; X["не знайшли&lt;br&gt;NameError"]
 
-    class Q decision
+    class L,E,G,B step
+    class X error</code></pre>
+<p><code>percent</code> знайшовся на рівні <strong>E</strong> — у функції, що оточує <code>apply</code>. Саме тому <code>apply</code> бачить його й після того, як <code>make_discount</code> повернула результат.</p>
+<h3 id="nonlocal">nonlocal: змінити захоплену змінну<a class="headerlink" href="#nonlocal" title="Permanent link">&para;</a></h3>
+<p>Читати змінну з оточення можна вільно. А <strong>змінити</strong>? Лічильник номерів замовлень:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">make_counter_broken</span><span class="p">():</span>
+<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a>    <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+<a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a>
+<a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">next_id</span><span class="p">():</span>
+<a id="__codelineno-21-5" name="__codelineno-21-5" href="#__codelineno-21-5"></a>        <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+<a id="__codelineno-21-6" name="__codelineno-21-6" href="#__codelineno-21-6"></a>        <span class="k">return</span> <span class="n">count</span>
+<a id="__codelineno-21-7" name="__codelineno-21-7" href="#__codelineno-21-7"></a>
+<a id="__codelineno-21-8" name="__codelineno-21-8" href="#__codelineno-21-8"></a>    <span class="k">return</span> <span class="n">next_id</span>
+<a id="__codelineno-21-9" name="__codelineno-21-9" href="#__codelineno-21-9"></a>
+<a id="__codelineno-21-10" name="__codelineno-21-10" href="#__codelineno-21-10"></a>
+<a id="__codelineno-21-11" name="__codelineno-21-11" href="#__codelineno-21-11"></a><span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-21-12" name="__codelineno-21-12" href="#__codelineno-21-12"></a>    <span class="n">make_counter_broken</span><span class="p">()()</span>
+<a id="__codelineno-21-13" name="__codelineno-21-13" href="#__codelineno-21-13"></a><span class="k">except</span> <span class="ne">UnboundLocalError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+<a id="__codelineno-21-14" name="__codelineno-21-14" href="#__codelineno-21-14"></a>    <span class="nb">print</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">error</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>UnboundLocalError
+</code></pre></div>
+<p>Присвоєння <code>count += 1</code> робить <code>count</code> <strong>локальною</strong> змінною <code>next_id</code>, і Python не шукає її в оточенні. А локальна <code>count</code> ще не має значення. <code>nonlocal</code> каже: це змінна з оточуючої функції, змінюй її там:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">make_counter</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a>    <span class="n">count</span> <span class="o">=</span> <span class="n">start</span>
+<a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a>
+<a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">next_id</span><span class="p">():</span>
+<a id="__codelineno-23-5" name="__codelineno-23-5" href="#__codelineno-23-5"></a>        <span class="k">nonlocal</span> <span class="n">count</span>
+<a id="__codelineno-23-6" name="__codelineno-23-6" href="#__codelineno-23-6"></a>        <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+<a id="__codelineno-23-7" name="__codelineno-23-7" href="#__codelineno-23-7"></a>        <span class="k">return</span> <span class="n">count</span>
+<a id="__codelineno-23-8" name="__codelineno-23-8" href="#__codelineno-23-8"></a>
+<a id="__codelineno-23-9" name="__codelineno-23-9" href="#__codelineno-23-9"></a>    <span class="k">return</span> <span class="n">next_id</span>
+<a id="__codelineno-23-10" name="__codelineno-23-10" href="#__codelineno-23-10"></a>
+<a id="__codelineno-23-11" name="__codelineno-23-11" href="#__codelineno-23-11"></a>
+<a id="__codelineno-23-12" name="__codelineno-23-12" href="#__codelineno-23-12"></a><span class="n">new_order_id</span> <span class="o">=</span> <span class="n">make_counter</span><span class="p">()</span>
+<a id="__codelineno-23-13" name="__codelineno-23-13" href="#__codelineno-23-13"></a><span class="nb">print</span><span class="p">(</span><span class="n">new_order_id</span><span class="p">(),</span> <span class="n">new_order_id</span><span class="p">(),</span> <span class="n">new_order_id</span><span class="p">())</span>
+<a id="__codelineno-23-14" name="__codelineno-23-14" href="#__codelineno-23-14"></a>
+<a id="__codelineno-23-15" name="__codelineno-23-15" href="#__codelineno-23-15"></a><span class="n">other</span> <span class="o">=</span> <span class="n">make_counter</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
+<a id="__codelineno-23-16" name="__codelineno-23-16" href="#__codelineno-23-16"></a><span class="nb">print</span><span class="p">(</span><span class="n">other</span><span class="p">(),</span> <span class="n">new_order_id</span><span class="p">())</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>1 2 3
+<a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a>101 4
+</code></pre></div>
+<p>Кожен виклик <code>make_counter</code> створює <strong>свій</strong> лічильник: <code>other</code> і <code>new_order_id</code> не заважають один одному. Функція, що носить із собою власний стан, — це вже майже об'єкт. Саме туди приведе урок 20 про класи.</p>
+<div class="admonition warning">
+<p class="admonition-title">Пастка: функції в циклі</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a><span class="n">fees</span> <span class="o">=</span> <span class="p">[</span><span class="k">lambda</span> <span class="n">bill</span><span class="p">:</span> <span class="n">bill</span> <span class="o">+</span> <span class="n">fee</span> <span class="k">for</span> <span class="n">fee</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">60</span><span class="p">,</span> <span class="mi">80</span><span class="p">,</span> <span class="mi">100</span><span class="p">)]</span>
+<a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a><span class="nb">print</span><span class="p">([</span><span class="n">f</span><span class="p">(</span><span class="mi">500</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fees</span><span class="p">])</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a>[600, 600, 600]
+</code></pre></div>
+<p>Усі три функції бачать <strong>ту саму</strong> змінну <code>fee</code> — і вона вже дорівнює 100, коли функції викликають. Замикання пам'ятає змінну, а не її значення в момент створення. Рішення — фабрика: <code>[make_fee(fee) for fee in (60, 80, 100)]</code>, де кожен виклик <code>make_fee</code> має свій <code>fee</code>.</p>
+</div>
+<h2 id="lambda-map-filter">lambda, map і filter<a class="headerlink" href="#lambda-map-filter" title="Permanent link">&para;</a></h2>
+<p>Для короткої функції, яка потрібна один раз — зазвичай як <code>key</code> — є <strong>lambda</strong>: анонімна функція з одного виразу.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a><span class="nb">print</span><span class="p">([</span><span class="n">d</span><span class="o">.</span><span class="n">order_id</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">deliveries</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">d</span><span class="p">:</span> <span class="n">d</span><span class="o">.</span><span class="n">fare</span><span class="p">)])</span>
+<a id="__codelineno-27-2" name="__codelineno-27-2" href="#__codelineno-27-2"></a><span class="nb">print</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">deliveries</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">d</span><span class="p">:</span> <span class="n">d</span><span class="o">.</span><span class="n">fare</span><span class="p">)</span><span class="o">.</span><span class="n">driver</span><span class="p">)</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a>[4, 2, 1, 3]
+<a id="__codelineno-28-2" name="__codelineno-28-2" href="#__codelineno-28-2"></a>D-3
+</code></pre></div>
+<p><code>lambda d: d.fare</code> — те саме, що <code>by_fare</code>, тільки без імені й без <code>return</code>: результат виразу повертається автоматично. Якщо функції потрібне ім'я, докстрінг чи більше одного рядка — пиши звичайний <code>def</code>.</p>
+<p><code>map(функція, дані)</code> застосовує функцію до кожного елемента, <code>filter(функція, дані)</code> лишає елементи, для яких вона повернула <code>True</code>. Обидві <strong>ліниві</strong>, як генератори з уроку 11:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a><span class="n">fares</span> <span class="o">=</span> <span class="p">[</span><span class="mi">230</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="mi">270</span><span class="p">,</span> <span class="mi">150</span><span class="p">]</span>
+<a id="__codelineno-29-2" name="__codelineno-29-2" href="#__codelineno-29-2"></a><span class="n">with_fee</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">fare</span><span class="p">:</span> <span class="n">fare</span> <span class="o">+</span> <span class="mi">20</span><span class="p">,</span> <span class="n">fares</span><span class="p">)</span>
+<a id="__codelineno-29-3" name="__codelineno-29-3" href="#__codelineno-29-3"></a><span class="nb">print</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">with_fee</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+<a id="__codelineno-29-4" name="__codelineno-29-4" href="#__codelineno-29-4"></a><span class="nb">print</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">with_fee</span><span class="p">))</span>
+<a id="__codelineno-29-5" name="__codelineno-29-5" href="#__codelineno-29-5"></a><span class="nb">print</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">fare</span><span class="p">:</span> <span class="n">fare</span> <span class="o">&gt;=</span> <span class="mi">200</span><span class="p">,</span> <span class="n">fares</span><span class="p">)))</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a>map
+<a id="__codelineno-30-2" name="__codelineno-30-2" href="#__codelineno-30-2"></a>[250, 200, 290, 170]
+<a id="__codelineno-30-3" name="__codelineno-30-3" href="#__codelineno-30-3"></a>[230, 270]
+</code></pre></div>
+<p>Те саме через comprehension з уроку 6 — зазвичай читається легше:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a><span class="nb">print</span><span class="p">([</span><span class="n">fare</span> <span class="o">+</span> <span class="mi">20</span> <span class="k">for</span> <span class="n">fare</span> <span class="ow">in</span> <span class="n">fares</span><span class="p">])</span>
+<a id="__codelineno-31-2" name="__codelineno-31-2" href="#__codelineno-31-2"></a><span class="nb">print</span><span class="p">([</span><span class="n">fare</span> <span class="k">for</span> <span class="n">fare</span> <span class="ow">in</span> <span class="n">fares</span> <span class="k">if</span> <span class="n">fare</span> <span class="o">&gt;=</span> <span class="mi">200</span><span class="p">])</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a>[250, 200, 290, 170]
+<a id="__codelineno-32-2" name="__codelineno-32-2" href="#__codelineno-32-2"></a>[230, 270]
+</code></pre></div>
+<div class="admonition tip">
+<p class="admonition-title">Коли що</p>
+<p>Comprehension — коли пишеш вираз прямо тут. <code>map</code> / <code>filter</code> — коли функція <strong>вже є</strong> й має ім'я: <code>list(map(str.upper, districts))</code>, <code>list(filter(str.isdigit, codes))</code>. <code>lambda</code> — для коротких <code>key=</code>.</p>
+</div>
+<h2 id="_5">Конвеєр з функцій<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
+<p>Ціна замовлення проходить кілька кроків: знижка за промокодом, вартість доставки за районом, округлення до гривні. Кожен крок — функція «число → число». А раз функції — дані, <strong>список кроків</strong> — теж дані:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">add_fee</span><span class="p">(</span><span class="n">bill</span><span class="p">):</span>
+<a id="__codelineno-33-2" name="__codelineno-33-2" href="#__codelineno-33-2"></a>    <span class="k">return</span> <span class="n">bill</span> <span class="o">+</span> <span class="mi">80</span>
+<a id="__codelineno-33-3" name="__codelineno-33-3" href="#__codelineno-33-3"></a>
+<a id="__codelineno-33-4" name="__codelineno-33-4" href="#__codelineno-33-4"></a>
+<a id="__codelineno-33-5" name="__codelineno-33-5" href="#__codelineno-33-5"></a><span class="k">def</span><span class="w"> </span><span class="nf">to_uah</span><span class="p">(</span><span class="n">bill</span><span class="p">):</span>
+<a id="__codelineno-33-6" name="__codelineno-33-6" href="#__codelineno-33-6"></a>    <span class="k">return</span> <span class="nb">round</span><span class="p">(</span><span class="n">bill</span><span class="p">)</span>
+<a id="__codelineno-33-7" name="__codelineno-33-7" href="#__codelineno-33-7"></a>
+<a id="__codelineno-33-8" name="__codelineno-33-8" href="#__codelineno-33-8"></a>
+<a id="__codelineno-33-9" name="__codelineno-33-9" href="#__codelineno-33-9"></a><span class="k">def</span><span class="w"> </span><span class="nf">run_pipeline</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">steps</span><span class="p">):</span>
+<a id="__codelineno-33-10" name="__codelineno-33-10" href="#__codelineno-33-10"></a>    <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="n">steps</span><span class="p">:</span>
+<a id="__codelineno-33-11" name="__codelineno-33-11" href="#__codelineno-33-11"></a>        <span class="n">value</span> <span class="o">=</span> <span class="n">step</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+<a id="__codelineno-33-12" name="__codelineno-33-12" href="#__codelineno-33-12"></a>    <span class="k">return</span> <span class="n">value</span>
+<a id="__codelineno-33-13" name="__codelineno-33-13" href="#__codelineno-33-13"></a>
+<a id="__codelineno-33-14" name="__codelineno-33-14" href="#__codelineno-33-14"></a>
+<a id="__codelineno-33-15" name="__codelineno-33-15" href="#__codelineno-33-15"></a><span class="n">checkout</span> <span class="o">=</span> <span class="p">[</span><span class="n">PROMO</span><span class="p">[</span><span class="s2">"SUMMER10"</span><span class="p">],</span> <span class="n">add_fee</span><span class="p">,</span> <span class="n">to_uah</span><span class="p">]</span>
+<a id="__codelineno-33-16" name="__codelineno-33-16" href="#__codelineno-33-16"></a><span class="nb">print</span><span class="p">(</span><span class="n">run_pipeline</span><span class="p">(</span><span class="mf">540.0</span><span class="p">,</span> <span class="n">checkout</span><span class="p">))</span>
+<a id="__codelineno-33-17" name="__codelineno-33-17" href="#__codelineno-33-17"></a><span class="nb">print</span><span class="p">(</span><span class="n">run_pipeline</span><span class="p">(</span><span class="mf">540.0</span><span class="p">,</span> <span class="p">[</span><span class="n">add_fee</span><span class="p">,</span> <span class="n">PROMO</span><span class="p">[</span><span class="s2">"SUMMER10"</span><span class="p">],</span> <span class="n">to_uah</span><span class="p">]))</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a>566
+<a id="__codelineno-34-2" name="__codelineno-34-2" href="#__codelineno-34-2"></a>558
+</code></pre></div>
+<p>Той самий чек, ті самі кроки — різний результат. У другому варіанті знижку отримала й доставка. <strong>Порядок кроків — це бізнес-правило</strong>, і тепер воно записане в одному місці: у списку <code>checkout</code>, а не розмазане по коду.</p>
+<pre class="mermaid"><code>flowchart TD
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+
+    A["540.0&lt;br&gt;чек кафе"] --&gt; B["SUMMER10&lt;br&gt;486.0"]
+    B --&gt; C["add_fee&lt;br&gt;566.0"]
+    C --&gt; D["to_uah&lt;br&gt;566"]
+
     class A,B,C step
-    class A1,B1 warning
-    class C1 success</code></pre>
-<table>
-<thead>
-<tr>
-<th></th>
-<th>А. Функції над даними (модуль 1)</th>
-<th>Б. Замикання (урок 18)</th>
-<th>В. Клас (сьогодні)</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Де стан</td>
-<td>списки, які передають у функції</td>
-<td>змінні фабрики</td>
-<td>атрибути об'єкта</td>
-</tr>
-<tr>
-<td>Хто стежить за правилами</td>
-<td>кожен, хто викликає, має сам пам'ятати</td>
-<td>функції фабрики</td>
-<td>методи класу</td>
-</tr>
-<tr>
-<td>Кілька незалежних сервісів</td>
-<td>окремі списки</td>
-<td>окремі виклики фабрики</td>
-<td>окремі екземпляри</td>
-</tr>
-<tr>
-<td>Додати нову дію</td>
-<td>нова функція з тими самими параметрами</td>
-<td>змінити фабрику, повернути ще одну функцію</td>
-<td>новий метод</td>
-</tr>
-<tr>
-<td>Коли доречно</td>
-<td>скрипт, аналіз даних, одна людина</td>
-<td>маленький стан + 1–2 дії: лічильник, промокод</td>
-<td>стан + багато дій + правила, які не можна порушити</td>
-</tr>
-</tbody>
-</table>
-<p>Варіант А — не «неправильний». Для звіту за один файл каси функції над списком — найпростіше рішення, і модуль 1 недарма ним користувався. Клас окупається, коли з'являються <strong>правила стану</strong>: номери видає лише сервіс, доставка лише до існуючого замовлення, одна доставка на замовлення.</p>
-<h3 id="_6">Схема класів<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h3>
-<p>Архітектуру зі класів малюють <strong>діаграмою класів</strong>: у кожному блоці — назва, атрибути, методи; стрілки — зв'язки.</p>
-<pre class="mermaid"><code>classDiagram
-    class DeliveryService {
-        orders: dict
-        deliveries: dict
-        next_id: int
-        add_order(line) Order
-        add_delivery(order_id, district, driver) Delivery
-        find(order_id) Order
-        report() str
-    }
-    class Order {
-        id: int
-        time: datetime
-        bill: float
-        tip: float
-        guests: int
-        from_line(line, order_id)$ Order
-        meal() str
-    }
-    class Delivery {
-        FEES: dict$
-        order_id: int
-        district: str
-        driver: str
-        fare() int
-    }
-    DeliveryService "1" o-- "*" Order : зберігає
-    DeliveryService "1" o-- "*" Delivery : зберігає
-    Delivery ..&gt; Order : order_id</code></pre>
-<ul>
-<li><code>$</code> після члена — атрибут чи метод <strong>класу</strong>, а не екземпляра;</li>
-<li><code>o--</code> — <strong>агрегація</strong>: сервіс зберігає багато (<code>*</code>) замовлень і доставок;</li>
-<li>пунктир <code>..&gt;</code> — <strong>залежність</strong>: доставка посилається на замовлення за номером.</li>
-</ul>
-<p>А так виглядає вся система шарами — від людини до файлу:</p>
-<pre class="mermaid"><code>flowchart TD
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
-
-    UI["інтерфейс&lt;br&gt;app.py: sys.argv, print, «Помилка: …»"] --&gt; SVC["сервіс&lt;br&gt;DeliveryService: правила, звіти"]
-    SVC --&gt; MOD["моделі&lt;br&gt;Order, Delivery: дані й перевірки"]
-    SVC --&gt; ST["сховище&lt;br&gt;data.json"]
-
-    class UI warning
-    class SVC success
-    class MOD,ST step</code></pre>
-<p>Стрілки йдуть <strong>в один бік</strong>: інтерфейс знає про сервіс, сервіс — про моделі й сховище, але моделі нічого не знають ні про <code>print</code>, ні про <code>sys.argv</code>. Тому ті самі класи можна підключити до веб-сайту чи Telegram-бота, не змінивши в них жодного рядка. До цієї думки — <strong>залежності спрямовані від зовнішнього до внутрішнього</strong> — ми повертатимемося весь модуль 2.</p>
+    class D success</code></pre>
+<h3 id="_6">Кроки мають бути чистими<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h3>
+<p>Конвеєр працює, лише якщо кожен крок <strong>чистий</strong> (урок 8): отримує значення, повертає нове й нічого не змінює навколо. Крок, який змінює вхідний список, ламає все, що йде після нього — і все, що використовує той самий список:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">add_packaging_bad</span><span class="p">(</span><span class="n">items</span><span class="p">):</span>
+<a id="__codelineno-35-2" name="__codelineno-35-2" href="#__codelineno-35-2"></a>    <span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"пакет"</span><span class="p">)</span>
+<a id="__codelineno-35-3" name="__codelineno-35-3" href="#__codelineno-35-3"></a>    <span class="k">return</span> <span class="n">items</span>
+<a id="__codelineno-35-4" name="__codelineno-35-4" href="#__codelineno-35-4"></a>
+<a id="__codelineno-35-5" name="__codelineno-35-5" href="#__codelineno-35-5"></a>
+<a id="__codelineno-35-6" name="__codelineno-35-6" href="#__codelineno-35-6"></a><span class="k">def</span><span class="w"> </span><span class="nf">add_packaging</span><span class="p">(</span><span class="n">items</span><span class="p">):</span>
+<a id="__codelineno-35-7" name="__codelineno-35-7" href="#__codelineno-35-7"></a>    <span class="k">return</span> <span class="n">items</span> <span class="o">+</span> <span class="p">[</span><span class="s2">"пакет"</span><span class="p">]</span>
+<a id="__codelineno-35-8" name="__codelineno-35-8" href="#__codelineno-35-8"></a>
+<a id="__codelineno-35-9" name="__codelineno-35-9" href="#__codelineno-35-9"></a>
+<a id="__codelineno-35-10" name="__codelineno-35-10" href="#__codelineno-35-10"></a><span class="n">cart</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"борщ"</span><span class="p">,</span> <span class="s2">"вареники"</span><span class="p">]</span>
+<a id="__codelineno-35-11" name="__codelineno-35-11" href="#__codelineno-35-11"></a><span class="nb">print</span><span class="p">(</span><span class="n">add_packaging</span><span class="p">(</span><span class="n">cart</span><span class="p">),</span> <span class="n">cart</span><span class="p">)</span>
+<a id="__codelineno-35-12" name="__codelineno-35-12" href="#__codelineno-35-12"></a><span class="nb">print</span><span class="p">(</span><span class="n">add_packaging_bad</span><span class="p">(</span><span class="n">cart</span><span class="p">),</span> <span class="n">cart</span><span class="p">)</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-36-1" name="__codelineno-36-1" href="#__codelineno-36-1"></a>['борщ', 'вареники', 'пакет'] ['борщ', 'вареники']
+<a id="__codelineno-36-2" name="__codelineno-36-2" href="#__codelineno-36-2"></a>['борщ', 'вареники', 'пакет'] ['борщ', 'вареники', 'пакет']
+</code></pre></div>
+<p>Чиста версія повернула новий список і не зачепила <code>cart</code>. Нечиста змінила кошик клієнта: після другого виклику «пакет» опиниться там двічі.</p>
+<h3 id="_7">Декоратор — це теж фабрика<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h3>
+<p>Декоратор з уроку 10 тепер розкладається на знайомі частини: функція, яка <strong>приймає</strong> функцію (вищого порядку), <strong>створює</strong> нову (фабрика) і <strong>пам'ятає</strong> оригінал (замикання):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-37-1" name="__codelineno-37-1" href="#__codelineno-37-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">wraps</span>
+<a id="__codelineno-37-2" name="__codelineno-37-2" href="#__codelineno-37-2"></a>
+<a id="__codelineno-37-3" name="__codelineno-37-3" href="#__codelineno-37-3"></a>
+<a id="__codelineno-37-4" name="__codelineno-37-4" href="#__codelineno-37-4"></a><span class="k">def</span><span class="w"> </span><span class="nf">log_calls</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+<a id="__codelineno-37-5" name="__codelineno-37-5" href="#__codelineno-37-5"></a>    <span class="nd">@wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+<a id="__codelineno-37-6" name="__codelineno-37-6" href="#__codelineno-37-6"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+<a id="__codelineno-37-7" name="__codelineno-37-7" href="#__codelineno-37-7"></a>        <span class="n">result</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+<a id="__codelineno-37-8" name="__codelineno-37-8" href="#__codelineno-37-8"></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">func</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}{</span><span class="n">args</span><span class="si">}</span><span class="s2"> -&gt; </span><span class="si">{</span><span class="n">result</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<a id="__codelineno-37-9" name="__codelineno-37-9" href="#__codelineno-37-9"></a>        <span class="k">return</span> <span class="n">result</span>
+<a id="__codelineno-37-10" name="__codelineno-37-10" href="#__codelineno-37-10"></a>    <span class="k">return</span> <span class="n">wrapper</span>
+<a id="__codelineno-37-11" name="__codelineno-37-11" href="#__codelineno-37-11"></a>
+<a id="__codelineno-37-12" name="__codelineno-37-12" href="#__codelineno-37-12"></a>
+<a id="__codelineno-37-13" name="__codelineno-37-13" href="#__codelineno-37-13"></a><span class="nd">@log_calls</span>
+<a id="__codelineno-37-14" name="__codelineno-37-14" href="#__codelineno-37-14"></a><span class="k">def</span><span class="w"> </span><span class="nf">add_fee_logged</span><span class="p">(</span><span class="n">bill</span><span class="p">):</span>
+<a id="__codelineno-37-15" name="__codelineno-37-15" href="#__codelineno-37-15"></a>    <span class="k">return</span> <span class="n">bill</span> <span class="o">+</span> <span class="mi">80</span>
+<a id="__codelineno-37-16" name="__codelineno-37-16" href="#__codelineno-37-16"></a>
+<a id="__codelineno-37-17" name="__codelineno-37-17" href="#__codelineno-37-17"></a>
+<a id="__codelineno-37-18" name="__codelineno-37-18" href="#__codelineno-37-18"></a><span class="n">add_fee_logged</span><span class="p">(</span><span class="mf">486.0</span><span class="p">)</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-38-1" name="__codelineno-38-1" href="#__codelineno-38-1"></a>add_fee_logged(486.0,) -&gt; 566.0
+</code></pre></div>
 <h2 id="practice">Практика<a class="headerlink" href="#practice" title="Permanent link">&para;</a></h2>
-<h3 id="deliveryservice">Розібраний приклад: DeliveryService<a class="headerlink" href="#deliveryservice" title="Permanent link">&para;</a></h3>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-28-1"> 1</a></span>
-<span class="normal"><a href="#__codelineno-28-2"> 2</a></span>
-<span class="normal"><a href="#__codelineno-28-3"> 3</a></span>
-<span class="normal"><a href="#__codelineno-28-4"> 4</a></span>
-<span class="normal"><a href="#__codelineno-28-5"> 5</a></span>
-<span class="normal"><a href="#__codelineno-28-6"> 6</a></span>
-<span class="normal"><a href="#__codelineno-28-7"> 7</a></span>
-<span class="normal"><a href="#__codelineno-28-8"> 8</a></span>
-<span class="normal"><a href="#__codelineno-28-9"> 9</a></span>
-<span class="normal"><a href="#__codelineno-28-10">10</a></span>
-<span class="normal"><a href="#__codelineno-28-11">11</a></span>
-<span class="normal"><a href="#__codelineno-28-12">12</a></span>
-<span class="normal"><a href="#__codelineno-28-13">13</a></span>
-<span class="normal"><a href="#__codelineno-28-14">14</a></span>
-<span class="normal"><a href="#__codelineno-28-15">15</a></span>
-<span class="normal"><a href="#__codelineno-28-16">16</a></span>
-<span class="normal"><a href="#__codelineno-28-17">17</a></span>
-<span class="normal"><a href="#__codelineno-28-18">18</a></span>
-<span class="normal"><a href="#__codelineno-28-19">19</a></span>
-<span class="normal"><a href="#__codelineno-28-20">20</a></span>
-<span class="normal"><a href="#__codelineno-28-21">21</a></span>
-<span class="normal"><a href="#__codelineno-28-22">22</a></span>
-<span class="normal"><a href="#__codelineno-28-23">23</a></span>
-<span class="normal"><a href="#__codelineno-28-24">24</a></span>
-<span class="normal"><a href="#__codelineno-28-25">25</a></span>
-<span class="normal"><a href="#__codelineno-28-26">26</a></span>
-<span class="normal"><a href="#__codelineno-28-27">27</a></span>
-<span class="normal"><a href="#__codelineno-28-28">28</a></span>
-<span class="normal"><a href="#__codelineno-28-29">29</a></span>
-<span class="normal"><a href="#__codelineno-28-30">30</a></span>
-<span class="normal"><a href="#__codelineno-28-31">31</a></span>
-<span class="normal"><a href="#__codelineno-28-32">32</a></span>
-<span class="normal"><a href="#__codelineno-28-33">33</a></span>
-<span class="normal"><a href="#__codelineno-28-34">34</a></span>
-<span class="normal"><a href="#__codelineno-28-35">35</a></span>
-<span class="normal"><a href="#__codelineno-28-36">36</a></span>
-<span class="normal"><a href="#__codelineno-28-37">37</a></span>
-<span class="normal"><a href="#__codelineno-28-38">38</a></span>
-<span class="normal"><a href="#__codelineno-28-39">39</a></span>
-<span class="normal"><a href="#__codelineno-28-40">40</a></span>
-<span class="normal"><a href="#__codelineno-28-41">41</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-28-1" name="__codelineno-28-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">DeliveryService</span><span class="p">:</span>
-<a id="__codelineno-28-2" name="__codelineno-28-2"></a><span class="hll">    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span><a id="__codelineno-28-3" name="__codelineno-28-3"></a><span class="hll">        <span class="bp">self</span><span class="o">.</span><span class="n">orders</span> <span class="o">=</span> <span class="p">{}</span>
-</span><a id="__codelineno-28-4" name="__codelineno-28-4"></a><span class="hll">        <span class="bp">self</span><span class="o">.</span><span class="n">deliveries</span> <span class="o">=</span> <span class="p">{}</span>
-</span><a id="__codelineno-28-5" name="__codelineno-28-5"></a><span class="hll">        <span class="bp">self</span><span class="o">.</span><span class="n">next_id</span> <span class="o">=</span> <span class="mi">1</span>
-</span><a id="__codelineno-28-6" name="__codelineno-28-6"></a>
-<a id="__codelineno-28-7" name="__codelineno-28-7"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">add_order</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line</span><span class="p">):</span>
-<a id="__codelineno-28-8" name="__codelineno-28-8"></a><span class="hll">        <span class="n">order</span> <span class="o">=</span> <span class="n">Order</span><span class="o">.</span><span class="n">from_line</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">next_id</span><span class="p">)</span>
-</span><a id="__codelineno-28-9" name="__codelineno-28-9"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">orders</span><span class="p">[</span><span class="n">order</span><span class="o">.</span><span class="n">id</span><span class="p">]</span> <span class="o">=</span> <span class="n">order</span>
-<a id="__codelineno-28-10" name="__codelineno-28-10"></a><span class="hll">        <span class="bp">self</span><span class="o">.</span><span class="n">next_id</span> <span class="o">+=</span> <span class="mi">1</span>
-</span><a id="__codelineno-28-11" name="__codelineno-28-11"></a><span class="hll">        <span class="k">return</span> <span class="n">order</span>
-</span><a id="__codelineno-28-12" name="__codelineno-28-12"></a>
-<a id="__codelineno-28-13" name="__codelineno-28-13"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">add_delivery</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">order_id</span><span class="p">,</span> <span class="n">district</span><span class="p">,</span> <span class="n">driver</span><span class="p">):</span>
-<a id="__codelineno-28-14" name="__codelineno-28-14"></a><span class="hll">        <span class="k">if</span> <span class="n">order_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">orders</span><span class="p">:</span>
-</span><a id="__codelineno-28-15" name="__codelineno-28-15"></a>            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"замовлення №</span><span class="si">{</span><span class="n">order_id</span><span class="si">}</span><span class="s2"> немає"</span><span class="p">)</span>
-<a id="__codelineno-28-16" name="__codelineno-28-16"></a><span class="hll">        <span class="k">if</span> <span class="n">order_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">deliveries</span><span class="p">:</span>
-</span><a id="__codelineno-28-17" name="__codelineno-28-17"></a>            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"замовлення №</span><span class="si">{</span><span class="n">order_id</span><span class="si">}</span><span class="s2"> вже має доставку"</span><span class="p">)</span>
-<a id="__codelineno-28-18" name="__codelineno-28-18"></a><span class="hll">        <span class="n">delivery</span> <span class="o">=</span> <span class="n">Delivery</span><span class="p">(</span><span class="n">order_id</span><span class="p">,</span> <span class="n">district</span><span class="p">,</span> <span class="n">driver</span><span class="p">)</span>
-</span><a id="__codelineno-28-19" name="__codelineno-28-19"></a><span class="hll">        <span class="bp">self</span><span class="o">.</span><span class="n">deliveries</span><span class="p">[</span><span class="n">order_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">delivery</span>
-</span><a id="__codelineno-28-20" name="__codelineno-28-20"></a>        <span class="k">return</span> <span class="n">delivery</span>
-<a id="__codelineno-28-21" name="__codelineno-28-21"></a>
-<a id="__codelineno-28-22" name="__codelineno-28-22"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">report</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<a id="__codelineno-28-23" name="__codelineno-28-23"></a>        <span class="n">cafe</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">order</span><span class="o">.</span><span class="n">bill</span> <span class="k">for</span> <span class="n">order</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">orders</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
-<a id="__codelineno-28-24" name="__codelineno-28-24"></a><span class="hll">        <span class="n">taxi</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">delivery</span><span class="o">.</span><span class="n">fare</span><span class="p">()</span> <span class="k">for</span> <span class="n">delivery</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">deliveries</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
-</span><a id="__codelineno-28-25" name="__codelineno-28-25"></a>        <span class="k">return</span> <span class="p">(</span><span class="sa">f</span><span class="s2">"Замовлень: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">orders</span><span class="p">)</span><span class="si">}</span><span class="s2">, з доставкою: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">deliveries</span><span class="p">)</span><span class="si">}</span><span class="s2">; "</span>
-<a id="__codelineno-28-26" name="__codelineno-28-26"></a>                <span class="sa">f</span><span class="s2">"кафе </span><span class="si">{</span><span class="n">cafe</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> грн, таксі </span><span class="si">{</span><span class="n">taxi</span><span class="si">}</span><span class="s2"> грн"</span><span class="p">)</span>
-<a id="__codelineno-28-27" name="__codelineno-28-27"></a>
-<a id="__codelineno-28-28" name="__codelineno-28-28"></a>
-<a id="__codelineno-28-29" name="__codelineno-28-29"></a><span class="n">smachno</span> <span class="o">=</span> <span class="n">DeliveryService</span><span class="p">()</span>
-<a id="__codelineno-28-30" name="__codelineno-28-30"></a><span class="n">smachno</span><span class="o">.</span><span class="n">add_order</span><span class="p">(</span><span class="s2">"2024-07-19 18:30;540.00;50;2"</span><span class="p">)</span>
-<a id="__codelineno-28-31" name="__codelineno-28-31"></a><span class="n">smachno</span><span class="o">.</span><span class="n">add_order</span><span class="p">(</span><span class="s2">"2024-07-20 20:15;980.00;120;4"</span><span class="p">)</span>
-<a id="__codelineno-28-32" name="__codelineno-28-32"></a><span class="n">smachno</span><span class="o">.</span><span class="n">add_delivery</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">"Оболонь"</span><span class="p">,</span> <span class="s2">"D-3"</span><span class="p">)</span>
-<a id="__codelineno-28-33" name="__codelineno-28-33"></a>
-<a id="__codelineno-28-34" name="__codelineno-28-34"></a><span class="k">for</span> <span class="n">attempt</span> <span class="ow">in</span> <span class="p">[(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">"Поділ"</span><span class="p">,</span> <span class="s2">"D-1"</span><span class="p">),</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="s2">"Поділ"</span><span class="p">,</span> <span class="s2">"D-1"</span><span class="p">)]:</span>
-<a id="__codelineno-28-35" name="__codelineno-28-35"></a>    <span class="k">try</span><span class="p">:</span>
-<a id="__codelineno-28-36" name="__codelineno-28-36"></a>        <span class="n">smachno</span><span class="o">.</span><span class="n">add_delivery</span><span class="p">(</span><span class="o">*</span><span class="n">attempt</span><span class="p">)</span>
-<a id="__codelineno-28-37" name="__codelineno-28-37"></a>    <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
-<a id="__codelineno-28-38" name="__codelineno-28-38"></a>        <span class="nb">print</span><span class="p">(</span><span class="s2">"Помилка:"</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span>
-<a id="__codelineno-28-39" name="__codelineno-28-39"></a>
-<a id="__codelineno-28-40" name="__codelineno-28-40"></a><span class="nb">print</span><span class="p">(</span><span class="n">smachno</span><span class="o">.</span><span class="n">orders</span><span class="p">)</span>
-<a id="__codelineno-28-41" name="__codelineno-28-41"></a><span class="nb">print</span><span class="p">(</span><span class="n">smachno</span><span class="o">.</span><span class="n">report</span><span class="p">())</span>
+<h3 id="_8">Розібраний приклад: оформлення замовлення<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h3>
+<p>Зберемо все разом: реєстр промокодів, вартість доставки за районом, конвеєр і команди.</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-39-1"> 1</a></span>
+<span class="normal"><a href="#__codelineno-39-2"> 2</a></span>
+<span class="normal"><a href="#__codelineno-39-3"> 3</a></span>
+<span class="normal"><a href="#__codelineno-39-4"> 4</a></span>
+<span class="normal"><a href="#__codelineno-39-5"> 5</a></span>
+<span class="normal"><a href="#__codelineno-39-6"> 6</a></span>
+<span class="normal"><a href="#__codelineno-39-7"> 7</a></span>
+<span class="normal"><a href="#__codelineno-39-8"> 8</a></span>
+<span class="normal"><a href="#__codelineno-39-9"> 9</a></span>
+<span class="normal"><a href="#__codelineno-39-10">10</a></span>
+<span class="normal"><a href="#__codelineno-39-11">11</a></span>
+<span class="normal"><a href="#__codelineno-39-12">12</a></span>
+<span class="normal"><a href="#__codelineno-39-13">13</a></span>
+<span class="normal"><a href="#__codelineno-39-14">14</a></span>
+<span class="normal"><a href="#__codelineno-39-15">15</a></span>
+<span class="normal"><a href="#__codelineno-39-16">16</a></span>
+<span class="normal"><a href="#__codelineno-39-17">17</a></span>
+<span class="normal"><a href="#__codelineno-39-18">18</a></span>
+<span class="normal"><a href="#__codelineno-39-19">19</a></span>
+<span class="normal"><a href="#__codelineno-39-20">20</a></span>
+<span class="normal"><a href="#__codelineno-39-21">21</a></span>
+<span class="normal"><a href="#__codelineno-39-22">22</a></span>
+<span class="normal"><a href="#__codelineno-39-23">23</a></span>
+<span class="normal"><a href="#__codelineno-39-24">24</a></span>
+<span class="normal"><a href="#__codelineno-39-25">25</a></span>
+<span class="normal"><a href="#__codelineno-39-26">26</a></span>
+<span class="normal"><a href="#__codelineno-39-27">27</a></span>
+<span class="normal"><a href="#__codelineno-39-28">28</a></span>
+<span class="normal"><a href="#__codelineno-39-29">29</a></span>
+<span class="normal"><a href="#__codelineno-39-30">30</a></span>
+<span class="normal"><a href="#__codelineno-39-31">31</a></span>
+<span class="normal"><a href="#__codelineno-39-32">32</a></span>
+<span class="normal"><a href="#__codelineno-39-33">33</a></span>
+<span class="normal"><a href="#__codelineno-39-34">34</a></span>
+<span class="normal"><a href="#__codelineno-39-35">35</a></span>
+<span class="normal"><a href="#__codelineno-39-36">36</a></span>
+<span class="normal"><a href="#__codelineno-39-37">37</a></span>
+<span class="normal"><a href="#__codelineno-39-38">38</a></span>
+<span class="normal"><a href="#__codelineno-39-39">39</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-39-1" name="__codelineno-39-1"></a><span class="n">FEES</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"Поділ"</span><span class="p">:</span> <span class="mi">60</span><span class="p">,</span> <span class="s2">"Оболонь"</span><span class="p">:</span> <span class="mi">80</span><span class="p">,</span> <span class="s2">"Печерськ"</span><span class="p">:</span> <span class="mi">90</span><span class="p">}</span>
+<a id="__codelineno-39-2" name="__codelineno-39-2"></a><span class="hll">
+</span><a id="__codelineno-39-3" name="__codelineno-39-3"></a>
+<a id="__codelineno-39-4" name="__codelineno-39-4"></a><span class="k">def</span><span class="w"> </span><span class="nf">make_fee</span><span class="p">(</span><span class="n">district</span><span class="p">):</span>
+<a id="__codelineno-39-5" name="__codelineno-39-5"></a><span class="w">    </span><span class="sd">"""Фабрика: крок конвеєра, що додає вартість доставки в район."""</span>
+<a id="__codelineno-39-6" name="__codelineno-39-6"></a><span class="hll">    <span class="k">if</span> <span class="n">district</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">FEES</span><span class="p">:</span>
+</span><a id="__codelineno-39-7" name="__codelineno-39-7"></a><span class="hll">        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"не доставляємо в район </span><span class="si">{</span><span class="n">district</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span><a id="__codelineno-39-8" name="__codelineno-39-8"></a><span class="hll">    <span class="n">fee</span> <span class="o">=</span> <span class="n">FEES</span><span class="p">[</span><span class="n">district</span><span class="p">]</span>
+</span><a id="__codelineno-39-9" name="__codelineno-39-9"></a>
+<a id="__codelineno-39-10" name="__codelineno-39-10"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">add</span><span class="p">(</span><span class="n">bill</span><span class="p">):</span>
+<a id="__codelineno-39-11" name="__codelineno-39-11"></a>        <span class="k">return</span> <span class="n">bill</span> <span class="o">+</span> <span class="n">fee</span>
+<a id="__codelineno-39-12" name="__codelineno-39-12"></a><span class="hll">    <span class="k">return</span> <span class="n">add</span>
+</span><a id="__codelineno-39-13" name="__codelineno-39-13"></a><span class="hll">
+</span><a id="__codelineno-39-14" name="__codelineno-39-14"></a>
+<a id="__codelineno-39-15" name="__codelineno-39-15"></a><span class="k">def</span><span class="w"> </span><span class="nf">checkout_steps</span><span class="p">(</span><span class="n">promo_code</span><span class="p">,</span> <span class="n">district</span><span class="p">):</span>
+<a id="__codelineno-39-16" name="__codelineno-39-16"></a><span class="w">    </span><span class="sd">"""Кроки для замовлення: знижка (якщо є промокод) → доставка → гривні."""</span>
+<a id="__codelineno-39-17" name="__codelineno-39-17"></a>    <span class="n">steps</span> <span class="o">=</span> <span class="p">[]</span>
+<a id="__codelineno-39-18" name="__codelineno-39-18"></a>    <span class="k">if</span> <span class="n">promo_code</span><span class="p">:</span>
+<a id="__codelineno-39-19" name="__codelineno-39-19"></a>        <span class="k">if</span> <span class="n">promo_code</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">PROMO</span><span class="p">:</span>
+<a id="__codelineno-39-20" name="__codelineno-39-20"></a>            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"промокод </span><span class="si">{</span><span class="n">promo_code</span><span class="si">}</span><span class="s2"> не дійсний"</span><span class="p">)</span>
+<a id="__codelineno-39-21" name="__codelineno-39-21"></a>        <span class="n">steps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">PROMO</span><span class="p">[</span><span class="n">promo_code</span><span class="p">])</span>
+<a id="__codelineno-39-22" name="__codelineno-39-22"></a><span class="hll">    <span class="n">steps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">make_fee</span><span class="p">(</span><span class="n">district</span><span class="p">))</span>
+</span><a id="__codelineno-39-23" name="__codelineno-39-23"></a>    <span class="n">steps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">to_uah</span><span class="p">)</span>
+<a id="__codelineno-39-24" name="__codelineno-39-24"></a>    <span class="k">return</span> <span class="n">steps</span>
+<a id="__codelineno-39-25" name="__codelineno-39-25"></a><span class="hll">
+</span><a id="__codelineno-39-26" name="__codelineno-39-26"></a>
+<a id="__codelineno-39-27" name="__codelineno-39-27"></a><span class="k">def</span><span class="w"> </span><span class="nf">checkout</span><span class="p">(</span><span class="n">bill</span><span class="p">,</span> <span class="n">promo_code</span><span class="p">,</span> <span class="n">district</span><span class="p">):</span>
+<a id="__codelineno-39-28" name="__codelineno-39-28"></a>    <span class="k">return</span> <span class="n">run_pipeline</span><span class="p">(</span><span class="n">bill</span><span class="p">,</span> <span class="n">checkout_steps</span><span class="p">(</span><span class="n">promo_code</span><span class="p">,</span> <span class="n">district</span><span class="p">))</span>
+<a id="__codelineno-39-29" name="__codelineno-39-29"></a>
+<a id="__codelineno-39-30" name="__codelineno-39-30"></a>
+<a id="__codelineno-39-31" name="__codelineno-39-31"></a><span class="hll"><span class="n">CHECKOUT_CASES</span> <span class="o">=</span> <span class="p">[(</span><span class="mf">540.0</span><span class="p">,</span> <span class="s2">"SUMMER10"</span><span class="p">,</span> <span class="s2">"Оболонь"</span><span class="p">),</span> <span class="p">(</span><span class="mf">320.0</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">"Поділ"</span><span class="p">),</span>
+</span><a id="__codelineno-39-32" name="__codelineno-39-32"></a><span class="hll">                  <span class="p">(</span><span class="mf">980.0</span><span class="p">,</span> <span class="s2">"STUDENT15"</span><span class="p">,</span> <span class="s2">"Печерськ"</span><span class="p">),</span> <span class="p">(</span><span class="mf">540.0</span><span class="p">,</span> <span class="s2">"FREE100"</span><span class="p">,</span> <span class="s2">"Поділ"</span><span class="p">),</span>
+</span><a id="__codelineno-39-33" name="__codelineno-39-33"></a><span class="hll">                  <span class="p">(</span><span class="mf">540.0</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">"Троєщина"</span><span class="p">)]</span>
+</span><a id="__codelineno-39-34" name="__codelineno-39-34"></a>
+<a id="__codelineno-39-35" name="__codelineno-39-35"></a><span class="k">for</span> <span class="n">bill</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="n">district</span> <span class="ow">in</span> <span class="n">CHECKOUT_CASES</span><span class="p">:</span>
+<a id="__codelineno-39-36" name="__codelineno-39-36"></a>    <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-39-37" name="__codelineno-39-37"></a>        <span class="nb">print</span><span class="p">(</span><span class="n">bill</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="n">district</span><span class="p">,</span> <span class="s2">"-&gt;"</span><span class="p">,</span> <span class="n">checkout</span><span class="p">(</span><span class="n">bill</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="n">district</span><span class="p">))</span>
+<a id="__codelineno-39-38" name="__codelineno-39-38"></a>    <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+<a id="__codelineno-39-39" name="__codelineno-39-39"></a>        <span class="nb">print</span><span class="p">(</span><span class="n">bill</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="n">district</span><span class="p">,</span> <span class="s2">"-&gt; помилка:"</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a>Помилка: замовлення №1 вже має доставку
-<a id="__codelineno-29-2" name="__codelineno-29-2" href="#__codelineno-29-2"></a>Помилка: замовлення №5 немає
-<a id="__codelineno-29-3" name="__codelineno-29-3" href="#__codelineno-29-3"></a>{1: Order(№1, 2024-07-19 18:30, 540.00 грн), 2: Order(№2, 2024-07-20 20:15, 980.00 грн)}
-<a id="__codelineno-29-4" name="__codelineno-29-4" href="#__codelineno-29-4"></a>Замовлень: 2, з доставкою: 1; кафе 1520.00 грн, таксі 80 грн
+<div class="highlight"><pre><span></span><code><a id="__codelineno-40-1" name="__codelineno-40-1" href="#__codelineno-40-1"></a>540.0 SUMMER10 Оболонь -&gt; 566
+<a id="__codelineno-40-2" name="__codelineno-40-2" href="#__codelineno-40-2"></a>320.0 None Поділ -&gt; 380
+<a id="__codelineno-40-3" name="__codelineno-40-3" href="#__codelineno-40-3"></a>980.0 STUDENT15 Печерськ -&gt; 923
+<a id="__codelineno-40-4" name="__codelineno-40-4" href="#__codelineno-40-4"></a>540.0 FREE100 Поділ -&gt; помилка: промокод FREE100 не дійсний
+<a id="__codelineno-40-5" name="__codelineno-40-5" href="#__codelineno-40-5"></a>540.0 None Троєщина -&gt; помилка: не доставляємо в район Троєщина
 </code></pre></div>
 <p>Що відбувається в ключових рядках:</p>
 <ul>
-<li><strong>рядки 2–5</strong> — стан сервісу: словники замовлень і доставок за номером (швидкий пошук, урок 16) і лічильник номерів. Кожен сервіс має свій стан;</li>
-<li><strong>рядки 8, 10</strong> — номер видає сам сервіс: <code>next_id</code> більше ніхто не рахує;</li>
-<li><strong>рядок 11</strong> — метод повертає створений об'єкт, а не друкує: друкує лише той, хто викликав, як і в модулі 1;</li>
-<li><strong>рядки 14–19</strong> — правила «замовлення існує» і «одна доставка на замовлення» живуть у <strong>єдиному</strong> місці, через яке проходить кожна доставка;</li>
-<li><strong>рядок 24</strong> — <code>fare()</code> доставки бере ціну з атрибута класу <code>Delivery.FEES</code>.</li>
+<li><strong>рядок 2</strong> — вартість доставки — дані, а не <code>if</code> для кожного району;</li>
+<li><strong>рядки 6–8, 12–13</strong> — фабрика <code>make_fee</code> перевіряє район один раз, а функція <code>add</code> пам'ятає <code>fee</code> через замикання;</li>
+<li><strong>рядки 22, 25</strong> — список кроків збирається з функцій: промокод береться з реєстру <code>PROMO</code>, доставка — з фабрики, округлення — готова <code>to_uah</code>;</li>
+<li><strong>рядки 31–33</strong> — <code>checkout</code> не знає, які саме кроки виконує. Новий крок — рядок у <code>checkout_steps</code>, а не переписаний <code>checkout</code>;</li>
+<li>помилки — <code>ValueError</code> з поясненням, як у модулі 1: промокод і район перевіряються <strong>до</strong> обчислень.</li>
 </ul>
-<h3 id="_7">Зміни приклад: звіт водіїв<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h3>
-<p>Додай у <code>DeliveryService</code> метод <code>drivers()</code>, який повертає словник «водій → виторг» від більшого до меншого. Для двох доставок D-3 на Оболонь і однієї D-1 на Поділ:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a>{'D-3': 160, 'D-1': 60}
+<h3 id="drivers">Зміни приклад: команда drivers<a class="headerlink" href="#drivers" title="Permanent link">&para;</a></h3>
+<p>Додай у таблицю <code>COMMANDS</code> з розділу про словник команд нову команду <code>drivers</code>. Вона отримує список доставок і повертає рядок з водіями за виторгом, від більшого до меншого:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-41-1" name="__codelineno-41-1" href="#__codelineno-41-1"></a>D-3 500, D-1 180, D-2 150
 </code></pre></div>
 <p><strong>Критерії перевірки:</strong></p>
 <ul>
-<li>метод нічого не друкує, лише повертає словник;</li>
-<li><code>DeliveryService()</code> без доставок повертає <code>{}</code>;</li>
-<li><code>add_delivery</code> і <code>report</code> не змінюються.</li>
+<li><code>run</code> не змінюється — лише нова функція і рядок у <code>COMMANDS</code>;</li>
+<li>виторг рахується за один прохід (<code>Counter</code> або словник з <code>get</code>);</li>
+<li>сортування — <code>sorted(..., key=…, reverse=True)</code> з <code>lambda</code> або <code>dict.get</code> як ключем;</li>
+<li><code>run("fly", deliveries)</code> у підказці показує й нову команду.</li>
 </ul>
 <details class="tip">
 <summary>Підказка</summary>
-<p><code>Counter</code> з уроку 12: <code>totals[delivery.driver] += delivery.fare()</code> для кожної доставки з <code>self.deliveries.values()</code>, потім <code>dict(totals.most_common())</code>.</p>
+<p><code>Counter</code> уміє додавати: <code>totals[d.driver] += d.fare</code>. Потім <code>sorted(totals, key=totals.get, reverse=True)</code> дає водіїв у потрібному порядку, а <code>", ".join(f"{name} {totals[name]}" for name in …)</code> — рядок.</p>
 </details>
-<h3 id="_8">Спробуй самостійно: промокод як клас<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h3>
-<p>В уроці 18 обмежений промокод був замиканням <code>make_limited_discount(percent, uses)</code>. Перепиши його класом <code>Promo</code>:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a>lucky = Promo("LUCKY20", percent=20, uses=3)
-<a id="__codelineno-31-2" name="__codelineno-31-2" href="#__codelineno-31-2"></a>lucky.apply(500.0)  →  400.0
-<a id="__codelineno-31-3" name="__codelineno-31-3" href="#__codelineno-31-3"></a>lucky.left          →  2
-<a id="__codelineno-31-4" name="__codelineno-31-4" href="#__codelineno-31-4"></a>lucky               →  Promo(LUCKY20, 20%, лишилось 2)
-<a id="__codelineno-31-5" name="__codelineno-31-5" href="#__codelineno-31-5"></a>після трьох apply   →  ValueError: промокод LUCKY20 вичерпано
+<h3 id="_9">Спробуй самостійно: промокод з обмеженням<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h3>
+<p>Маркетинг роздає <strong>обмежені</strong> промокоди: <code>LUCKY20</code> діє лише для перших трьох замовлень. Напиши фабрику <code>make_limited_discount(percent, uses)</code>:</p>
+<ul>
+<li>повертає функцію <code>apply(bill)</code> зі знижкою <code>percent</code>, як <code>make_discount</code>;</li>
+<li>кожен виклик зменшує кількість використань, що лишилися;</li>
+<li>коли використань не лишилося — <code>apply</code> піднімає <code>ValueError("промокод вичерпано")</code>.</li>
+</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-42-1" name="__codelineno-42-1" href="#__codelineno-42-1"></a>lucky = make_limited_discount(20, 3)
+<a id="__codelineno-42-2" name="__codelineno-42-2" href="#__codelineno-42-2"></a>lucky(500.0)  →  400.0
+<a id="__codelineno-42-3" name="__codelineno-42-3" href="#__codelineno-42-3"></a>lucky(500.0)  →  400.0
+<a id="__codelineno-42-4" name="__codelineno-42-4" href="#__codelineno-42-4"></a>lucky(250.0)  →  200.0
+<a id="__codelineno-42-5" name="__codelineno-42-5" href="#__codelineno-42-5"></a>lucky(500.0)  →  ValueError: промокод вичерпано
 </code></pre></div>
 <p><strong>Правила:</strong></p>
 <ul>
-<li><code>code</code>, <code>percent</code>, <code>left</code> — атрибути екземпляра; <code>__repr__</code> — як у прикладі;</li>
-<li><code>Promo.from_text("SUMMER10:10:100")</code> — <code>@classmethod</code>, що створює промокод з рядка «код:відсоток:використань»;</li>
-<li><code>percent</code> поза межами 1–100 → <code>ValueError</code> уже в <code>__init__</code>;</li>
-<li>два промокоди мають незалежні лічильники.</li>
+<li>лічильник живе в замиканні, <code>nonlocal</code> — без глобальних змінних;</li>
+<li>два промокоди, створені окремими викликами фабрики, мають незалежні лічильники;</li>
+<li><code>apply</code> можна покласти в <code>PROMO</code> і використати в <code>checkout</code> без змін.</li>
 </ul>
-<p>Порівняй з версією-замиканням: що стало простішим, а що — довшим? Яку версію легше перевірити тестом і чому?</p>
-<h2 id="_9">Підсумок<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h2>
+<h3 id="_10">Знайди помилку<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h3>
+<p>Кожен фрагмент — справжня помилка початківця. Що піде не так?</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-43-1" name="__codelineno-43-1" href="#__codelineno-43-1"></a><span class="c1"># 1</span>
+<a id="__codelineno-43-2" name="__codelineno-43-2" href="#__codelineno-43-2"></a><span class="nb">sum</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="mf">540.0</span><span class="p">,</span> <span class="mf">320.0</span><span class="p">])</span>
+<a id="__codelineno-43-3" name="__codelineno-43-3" href="#__codelineno-43-3"></a><span class="n">total_fares</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="mi">230</span><span class="p">,</span> <span class="mi">180</span><span class="p">])</span>
+<a id="__codelineno-43-4" name="__codelineno-43-4" href="#__codelineno-43-4"></a>
+<a id="__codelineno-43-5" name="__codelineno-43-5" href="#__codelineno-43-5"></a><span class="c1"># 2</span>
+<a id="__codelineno-43-6" name="__codelineno-43-6" href="#__codelineno-43-6"></a><span class="n">code</span> <span class="o">=</span> <span class="s2">"summer10"</span>
+<a id="__codelineno-43-7" name="__codelineno-43-7" href="#__codelineno-43-7"></a><span class="k">if</span> <span class="n">code</span><span class="o">.</span><span class="n">isupper</span><span class="p">:</span>
+<a id="__codelineno-43-8" name="__codelineno-43-8" href="#__codelineno-43-8"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"код у верхньому регістрі"</span><span class="p">)</span>
+<a id="__codelineno-43-9" name="__codelineno-43-9" href="#__codelineno-43-9"></a>
+<a id="__codelineno-43-10" name="__codelineno-43-10" href="#__codelineno-43-10"></a><span class="c1"># 3</span>
+<a id="__codelineno-43-11" name="__codelineno-43-11" href="#__codelineno-43-11"></a><span class="n">districts</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"Оболонь"</span><span class="p">,</span> <span class="s2">"Поділ"</span><span class="p">,</span> <span class="s2">"Печерськ"</span><span class="p">]</span>
+<a id="__codelineno-43-12" name="__codelineno-43-12" href="#__codelineno-43-12"></a><span class="nb">print</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">districts</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">districts</span><span class="p">)))</span>
+</code></pre></div>
+<details class="success">
+<summary>Відповіді</summary>
+<ol>
+<li>Перший рядок <strong>перезаписав</strong> вбудовану функцію <code>sum</code> числом <code>860.0</code>. Другий рядок пробує викликати число: <code>TypeError: 'float' object is not callable</code>. Не називай змінні іменами вбудованих функцій: <code>total_bills = sum(...)</code>.</li>
+<li><code>code.isupper</code> без дужок — сама функція, а функція завжди істинна. Умова виконається для будь-якого рядка. Потрібен виклик: <code>code.isupper()</code>.</li>
+<li><code>len(districts)</code> — це <code>3</code>, число, а не функція. <code>sorted</code> спробує викликати <code>3(...)</code> і впаде з <code>TypeError</code>. Треба передати саму функцію: <code>key=len</code>.</li>
+</ol>
+</details>
+<h2 id="_11">Підсумок<a class="headerlink" href="#_11" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
@@ -4247,74 +4237,74 @@
 </thead>
 <tbody>
 <tr>
-<td>Клас і екземпляр</td>
-<td>клас — креслення й тип; <code>Order(...)</code> створює екземпляр і викликає <code>__init__</code></td>
+<td>Функція — об'єкт</td>
+<td><code>f</code> — функція, <code>f()</code> — її результат; можна в змінну, список, словник</td>
 </tr>
 <tr>
-<td><code>self</code></td>
-<td>об'єкт, у якого викликали метод: <code>order.total()</code> = <code>Order.total(order)</code></td>
+<td>Словник команд</td>
+<td><code>COMMANDS[name](...)</code> замість ланцюжка <code>if</code>; нова команда — рядок</td>
 </tr>
 <tr>
-<td>Атрибут екземпляра / класу</td>
-<td><code>self.bill</code> — у кожного свій; <code>Delivery.FEES</code> — один на всіх</td>
+<td>Функція вищого порядку</td>
+<td>приймає чи повертає функцію: <code>sorted(key=…)</code>, <code>max(key=…)</code>, декоратори</td>
 </tr>
 <tr>
-<td>Пошук атрибута</td>
-<td>спершу екземпляр, потім клас; присвоєння через <code>self</code> пише в екземпляр</td>
+<td>Callback</td>
+<td>функція-аргумент, яку викликають у потрібний момент</td>
 </tr>
 <tr>
-<td>Простір імен класу</td>
-<td>не входить у LEGB методів — до атрибутів класу лише через <code>self.</code> / <code>Клас.</code></td>
+<td>Фабрика й замикання</td>
+<td>функція створює функцію, а та пам'ятає змінні оточення</td>
 </tr>
 <tr>
-<td><code>__repr__</code></td>
-<td>як об'єкт показується в <code>print</code> і списках</td>
+<td>LEGB, <code>nonlocal</code></td>
+<td>порядок пошуку імен; <code>nonlocal</code>, щоб змінити змінну оточення</td>
 </tr>
 <tr>
-<td><code>@classmethod</code>, <code>@staticmethod</code></td>
-<td>альтернативний конструктор з <code>cls</code>; правило без <code>self</code> і <code>cls</code></td>
+<td><code>lambda</code>, <code>map</code>, <code>filter</code></td>
+<td>коротка анонімна функція; ліниві <code>map</code> / <code>filter</code> чи comprehension</td>
 </tr>
 <tr>
-<td>Архітектура</td>
-<td>функції над даними, замикання чи клас — за тим, чи є правила стану</td>
+<td>Конвеєр</td>
+<td>список функцій-кроків; порядок — правило; кроки — чисті</td>
 </tr>
 </tbody>
 </table>
-<h3 id="_10">Самоперевірка<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h3>
+<h3 id="_12">Самоперевірка<a class="headerlink" href="#_12" title="Permanent link">&para;</a></h3>
 <ol>
-<li>Що відбувається, коли пишеш <code>Order(1, …)</code>? Навіщо <code>__init__</code>?</li>
-<li>Що таке <code>self</code> і чому <code>order.total()</code> і <code>Order.total(order)</code> — одне й те саме?</li>
-<li>Чому <code>courier.trips</code> після двох <code>deliver()</code> дорівнює 2, а <code>Courier.trips</code> — 0?</li>
-<li>Чому кошик Тараса отримав борщ Оксани? Як виправити?</li>
-<li>Чому метод не бачить <code>VAT</code>, оголошений у класі, без <code>self.</code>?</li>
-<li>Коли потрібен <code>@classmethod</code>, а коли <code>@staticmethod</code>?</li>
-<li>Сервіс доставки для одного разового звіту з файлу — клас чи функції? А для системи, в яку додають дані роками?</li>
+<li>Чим <code>fee_for</code> відрізняється від <code>fee_for("Поділ")</code>?</li>
+<li>Що дає словник команд порівняно з ланцюжком <code>if</code>?</li>
+<li>Навіщо <code>dispatch</code> приймає <code>notify</code> аргументом, а не викликає SMS сама?</li>
+<li>Чому <code>summer10</code> пам'ятає <code>percent = 10</code>, хоча <code>make_discount</code> вже завершилась?</li>
+<li>Чому без <code>nonlocal</code> лічильник падає з <code>UnboundLocalError</code>?</li>
+<li>Чому всі функції з <code>[lambda bill: bill + fee for fee in (60, 80, 100)]</code> додають 100?</li>
+<li>Чому порядок кроків у конвеєрі змінює ціну? Що буде, якщо крок змінює вхідний список?</li>
 </ol>
 <details class="success">
 <summary>Відповіді</summary>
 <ol>
-<li>Python створює порожній об'єкт і викликає <code>__init__</code>, щоб записати в нього атрибути. Там же зручно перевіряти дані: неправильний об'єкт не з'явиться.</li>
-<li><code>self</code> — сам екземпляр. Запис <code>order.total()</code> Python перетворює на виклик функції з класу, передаючи <code>order</code> першим аргументом.</li>
-<li>Присвоєння <code>self.trips = self.trips + 1</code> створило атрибут в екземплярі, який затінив класовий. Атрибут класу лишився 0.</li>
-<li><code>items = []</code> в класі — один список на всіх, а <code>append</code> змінює його, а не створює новий. Список треба створювати в <code>__init__</code>: <code>self.items = []</code>.</li>
-<li>Методи шукають імена за LEGB, а простір імен класу не є оточенням для методів. Потрібно <code>self.VAT</code> або <code>Menu.VAT</code>.</li>
-<li><code>@classmethod</code> — коли метод створює об'єкт класу чи працює з класом (<code>cls</code>). <code>@staticmethod</code> — правило на тему класу, якому не потрібні ні екземпляр, ні клас.</li>
-<li>Для разового звіту — функції над списком: простіше. Для системи, що живе роками, — клас: правила стану зібрані в одному місці, їх не оминути.</li>
+<li><code>fee_for</code> — сама функція, об'єкт. <code>fee_for("Поділ")</code> — результат виклику, число <code>60</code>.</li>
+<li>Нова команда — функція й один рядок у словнику, <code>run</code> не змінюється; перелік команд для підказки береться з того самого словника.</li>
+<li>Щоб спосіб повідомлення обирав той, хто викликає: SMS, Telegram, журнал чи список у тесті. <code>dispatch</code> від цього не змінюється.</li>
+<li><code>apply</code> — замикання: разом із функцією зберігаються змінні оточуючої функції, які вона використовує.</li>
+<li>Присвоєння <code>count += 1</code> робить <code>count</code> локальною змінною <code>next_id</code>, а локальна ще не має значення. <code>nonlocal</code> каже шукати й змінювати її в оточуючій функції.</li>
+<li>Замикання пам'ятає <strong>змінну</strong> <code>fee</code>, а не її значення в момент створення. Коли функції викликають, цикл уже завершився, і <code>fee</code> дорівнює 100.</li>
+<li>Кожен крок працює з результатом попереднього: знижка до доставки і після — різні суми. Крок, що змінює вхідний список, змінює дані для всіх наступних кроків і для всього коду, який тримає той самий список.</li>
 </ol>
 </details>
-<h3 id="_11">Що далі<a class="headerlink" href="#_11" title="Permanent link">&para;</a></h3>
+<h3 id="_13">Що далі<a class="headerlink" href="#_13" title="Permanent link">&para;</a></h3>
 <ul>
-<li>Ноутбук заняття: <a class="md-button md-button--primary" href="https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_19_classes_namespace/note_lesson_19_classes_student.ipynb">Відкрити вправи в Colab</a> <a class="solutions-link" href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_19_classes_namespace/note_lesson_19_classes.ipynb">Переглянути розв’язки</a> — сервіс доставки: прогнози, вправи з перевірками, баги з атрибутами класу.</li>
-<li>Практикум на реальних даних: <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_19_classes_namespace/lab_lesson_19_titanic_oop.ipynb"><code>lab_lesson_19_titanic_oop.ipynb</code></a> <a href="https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_19_classes_namespace/lab_lesson_19_titanic_oop.ipynb"><img alt="Open In Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></a> — клас <code>Passenger</code> для пасажирів «Титаніка», <code>@classmethod</code> з рядка таблиці, аналіз виживання; 5 завдань.</li>
-<li>Довідник-схема: <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_19_classes_namespace/classes_mental_model.md">ментальна модель класів</a>.</li>
-<li>Наступне заняття — урок 20 «Наслідування, поліморфізм»: доставка таксі, кур'єром-пішоходом і самовивіз — різні класи з однаковим методом <code>fare()</code>.</li>
+<li>Ноутбук заняття: <a class="md-button md-button--primary" href="https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_19_functions_first_class/note_lesson_19_functions_first_class_student.ipynb">Відкрити вправи в Colab</a> <a class="solutions-link" href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_19_functions_first_class/note_lesson_19_functions_first_class.ipynb">Переглянути розв’язки</a> — сервіс доставки: прогнози, вправи з перевірками, три баги і міні-проєкт — конвеєр для промокодів.</li>
+<li>Поглиблення — п'ять патернів покроково, «від проблеми до рішення»: <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_19_functions_first_class/pattern_01_callback.md">Callback</a>, <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_19_functions_first_class/pattern_02_factory.md">Function Factory</a>, <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_19_functions_first_class/pattern_03_decorator.md">Decorator</a>, <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_19_functions_first_class/pattern_04_pipeline.md">Pipeline</a>, <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_19_functions_first_class/pattern_05_pure_functions.md">Pure Functions</a>.</li>
+<li>Наступне заняття — урок 20 «Класи, простір імен». Лічильник <code>make_counter</code> — це дані й функція разом. Клас зробить це явно: дані — атрибути, функції — методи.</li>
 </ul>
-<h2 id="_12">Документація і джерела<a class="headerlink" href="#_12" title="Permanent link">&para;</a></h2>
+<h2 id="_14">Документація і джерела<a class="headerlink" href="#_14" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Туторіал Python: <a href="https://docs.python.org/3/tutorial/classes.html">Classes</a> — простори імен, класи й екземпляри, атрибути класу, «Random Remarks» про <code>self</code></li>
-<li><a href="https://docs.python.org/3/library/functions.html#classmethod"><code>@classmethod</code></a>, <a href="https://docs.python.org/3/library/functions.html#staticmethod"><code>@staticmethod</code></a>, <a href="https://docs.python.org/3/reference/datamodel.html#object.__repr__"><code>object.__repr__</code></a>, <a href="https://docs.python.org/3/library/functions.html#isinstance"><code>isinstance</code></a></li>
-<li><a href="https://mermaid.js.org/syntax/classDiagram.html">Mermaid: Class diagrams</a> — нотація діаграм класів</li>
-<li>Для охочих: MIT 6.0001, <a href="https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/resources/lecture-8-object-oriented-programming/">лекція 8 «Object Oriented Programming»</a>; CS50P, <a href="https://cs50.harvard.edu/python/weeks/8/">тиждень 8 «Object-Oriented Programming»</a>.</li>
+<li><a href="https://docs.python.org/3/howto/functional.html">Functional Programming HOWTO</a> — функції вищого порядку, <code>map</code>, <code>filter</code>, <code>lambda</code></li>
+<li><a href="https://docs.python.org/3/howto/sorting.html#key-functions">Sorting Techniques: Key Functions</a></li>
+<li>Туторіал: <a href="https://docs.python.org/3/tutorial/controlflow.html#lambda-expressions">Lambda Expressions</a>; довідник: <a href="https://docs.python.org/3/reference/simple_stmts.html#the-nonlocal-statement"><code>nonlocal</code></a>, <a href="https://docs.python.org/3/reference/executionmodel.html#resolution-of-names">правила пошуку імен</a></li>
+<li><a href="https://docs.python.org/3/library/functions.html#map"><code>map</code></a>, <a href="https://docs.python.org/3/library/functions.html#filter"><code>filter</code></a>, <a href="https://docs.python.org/3/library/functools.html#functools.wraps"><code>functools.wraps</code></a></li>
+<li>Для охочих: MIT 6.0001, <a href="https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/resources/lecture-4-decomposition-abstraction-and-functions/">лекція 4 «Decomposition, Abstraction, Functions»</a> — функції, специфікації, область видимості, функції як аргументи.</li>
 </ul>
 
 
@@ -4345,7 +4335,7 @@
       <nav class="md-footer__inner md-grid" aria-label="Футер" >
         
           
-          <a href="../lesson_18/" class="md-footer__link md-footer__link--prev" aria-label="Назад: 18. Функції як об&#39;єкти першого класу">
+          <a href="../../m2_python_advanced/" class="md-footer__link md-footer__link--prev" aria-label="Назад: Огляд модуля">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -4355,20 +4345,20 @@
                 Назад
               </span>
               <div class="md-ellipsis">
-                18. Функції як об'єкти першого класу
+                Огляд модуля
               </div>
             </div>
           </a>
         
         
           
-          <a href="../lesson_20/" class="md-footer__link md-footer__link--next" aria-label="Вперед: 20. Наслідування, поліморфізм">
+          <a href="../lesson_20/" class="md-footer__link md-footer__link--next" aria-label="Вперед: 20. Класи, простір імен">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Вперед
               </span>
               <div class="md-ellipsis">
-                20. Наслідування, поліморфізм
+                20. Класи, простір імен
               </div>
             </div>
             <div class="md-footer__button md-icon">

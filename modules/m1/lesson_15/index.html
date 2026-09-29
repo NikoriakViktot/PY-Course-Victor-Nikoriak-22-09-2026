@@ -27,7 +27,7 @@
     
     
       
-        <title>15. Git & GitHub: система - PY Course — Viktor Nikoriak</title>
+        <title>15. Файли I/O, JSON - PY Course — Viktor Nikoriak</title>
       
     
     
@@ -80,7 +80,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#15-git-github" class="md-skip">
+        <a href="#15-json" class="md-skip">
           Перейти до змісту
         </a>
       
@@ -114,7 +114,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              15. Git & GitHub: система
+              15. Файли I/O, JSON
             
           </span>
         </div>
@@ -814,34 +814,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../lesson_07/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    7. Функції
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../lesson_08/" class="md-nav__link">
         
   
@@ -849,7 +821,7 @@
   <span class="md-ellipsis">
     
   
-    8. П1. Big O + базові задачі
+    8. Функції
   
 
     
@@ -877,7 +849,7 @@
   <span class="md-ellipsis">
     
   
-    9. Декоратори
+    9. П1. Big O + базові задачі
   
 
     
@@ -905,7 +877,7 @@
   <span class="md-ellipsis">
     
   
-    10. Ітератори й генератори
+    10. Декоратори
   
 
     
@@ -933,7 +905,7 @@
   <span class="md-ellipsis">
     
   
-    11. П2. Пошук
+    11. Ітератори й генератори
   
 
     
@@ -961,7 +933,7 @@
   <span class="md-ellipsis">
     
   
-    12. Модулі та стандартна бібліотека
+    12. П2. Пошук
   
 
     
@@ -989,7 +961,7 @@
   <span class="md-ellipsis">
     
   
-    13. Винятки та обробка помилок
+    13. Модулі та стандартна бібліотека
   
 
     
@@ -1017,7 +989,7 @@
   <span class="md-ellipsis">
     
   
-    14. Файли I/O, JSON
+    14. Винятки та обробка помилок
   
 
     
@@ -1054,7 +1026,7 @@
   <span class="md-ellipsis">
     
   
-    15. Git & GitHub: система
+    15. Файли I/O, JSON
   
 
     
@@ -1072,7 +1044,7 @@
   <span class="md-ellipsis">
     
   
-    15. Git & GitHub: система
+    15. Файли I/O, JSON
   
 
     
@@ -1112,7 +1084,7 @@
   <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Проєкт: шість задач, які залежать одна від одної
+        Пам'ять і диск
       
     </span>
   </a>
@@ -1123,19 +1095,19 @@
   <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Три місця, де живуть файли
+        Читаємо файл каси
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Три місця, де живуть файли">
+    <nav class="md-nav" aria-label="Читаємо файл каси">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
   <a href="#_4" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Добре повідомлення коміту
+        Рядок за рядком
       
     </span>
   </a>
@@ -1143,10 +1115,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#gitignore" class="md-nav__link">
+  <a href="#with" class="md-nav__link">
     <span class="md-ellipsis">
       
-        .gitignore: що не потрапляє в репозиторій
+        Навіщо with
       
     </span>
   </a>
@@ -1162,10 +1134,88 @@
   <a href="#_5" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Гілка — рухомий вказівник
+        Розбираємо і записуємо
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Розбираємо і записуємо">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#w" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Режим w: файл для касира
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#a" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Режим a: журнал запусків
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#filenotfounderror" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Шляхи і FileNotFoundError
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#json" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        JSON: звіт, який прочитає інша програма
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="JSON: звіт, який прочитає інша програма">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#json_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Що JSON вміє, а що ні
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#json_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Зіпсований JSON
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1173,7 +1223,7 @@
   <a href="#_6" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Контракт: як працювати, не чекаючи інших
+        Налаштування у файлі
       
     </span>
   </a>
@@ -1181,32 +1231,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#pull-request" class="md-nav__link">
+  <a href="#csv" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Pull Request і злиття
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_7" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Конфлікт злиття
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_8" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Злиття без конфлікту, але проєкт зламано
+        CSV: таблиця в тексті
       
     </span>
   </a>
@@ -1226,10 +1254,32 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Розібраний приклад: місячний звіт кафе
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Зміни приклад: найкращий день і чайові
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#_9" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Розібраний приклад: двоє в одному репозиторії
+        Спробуй самостійно: картка постійного гостя
       
     </span>
   </a>
@@ -1238,28 +1288,6 @@
         
           <li class="md-nav__item">
   <a href="#_10" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Зміни приклад: файл, який не мав потрапити в коміт
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#_11" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Командна задача: звіт каси кафе
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#_12" class="md-nav__link">
     <span class="md-ellipsis">
       
         Знайди помилку
@@ -1275,7 +1303,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_13" class="md-nav__link">
+  <a href="#_11" class="md-nav__link">
     <span class="md-ellipsis">
       
         Підсумок
@@ -1287,7 +1315,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#_14" class="md-nav__link">
+  <a href="#_12" class="md-nav__link">
     <span class="md-ellipsis">
       
         Самоперевірка
@@ -1298,7 +1326,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_15" class="md-nav__link">
+  <a href="#_13" class="md-nav__link">
     <span class="md-ellipsis">
       
         Що далі
@@ -1314,7 +1342,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_16" class="md-nav__link">
+  <a href="#_14" class="md-nav__link">
     <span class="md-ellipsis">
       
         Документація і джерела
@@ -1347,7 +1375,7 @@
   <span class="md-ellipsis">
     
   
-    16. П3. Хеш-структури
+    16. Git & GitHub: система
   
 
     
@@ -1375,7 +1403,35 @@
   <span class="md-ellipsis">
     
   
-    17. Узагальнення + фінальний проєкт
+    17. П3. Хеш-структури
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lesson_18/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    18. Узагальнення + фінальний проєкт
   
 
     
@@ -1515,34 +1571,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../m2/lesson_18/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    18. Функції як об'єкти першого класу
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../m2/lesson_19/" class="md-nav__link">
         
   
@@ -1550,7 +1578,7 @@
   <span class="md-ellipsis">
     
   
-    19. Класи, простір імен
+    19. Функції як об'єкти першого класу
   
 
     
@@ -1578,7 +1606,7 @@
   <span class="md-ellipsis">
     
   
-    20. Наслідування, поліморфізм
+    20. Класи, простір імен
   
 
     
@@ -1606,7 +1634,7 @@
   <span class="md-ellipsis">
     
   
-    21. Інкапсуляція, область видимості
+    21. Наслідування, поліморфізм
   
 
     
@@ -1634,7 +1662,7 @@
   <span class="md-ellipsis">
     
   
-    22. П4. Рекурсія, divide & conquer, backtracking
+    22. Інкапсуляція, область видимості
   
 
     
@@ -1662,7 +1690,7 @@
   <span class="md-ellipsis">
     
   
-    23. @property, декоратори класів, dunder
+    23. П4. Рекурсія, divide & conquer, backtracking
   
 
     
@@ -1690,7 +1718,7 @@
   <span class="md-ellipsis">
     
   
-    24. Ітератори advanced
+    24. @property, декоратори класів, dunder
   
 
     
@@ -1718,7 +1746,7 @@
   <span class="md-ellipsis">
     
   
-    25. Тестування з pytest (+ валідація AI-коду)
+    25. Ітератори advanced
   
 
     
@@ -1746,7 +1774,7 @@
   <span class="md-ellipsis">
     
   
-    26. П5. Динамічне програмування + greedy (вступ)
+    26. Тестування з pytest (+ валідація AI-коду)
   
 
     
@@ -1774,7 +1802,7 @@
   <span class="md-ellipsis">
     
   
-    27. Потоки, multiprocessing, asyncio: вступ
+    27. П5. Динамічне програмування + greedy (вступ)
   
 
     
@@ -1802,7 +1830,35 @@
   <span class="md-ellipsis">
     
   
-    28. П6. Stack, Queue, Heap, Trie + LRU → ООП-пакет
+    28. Потоки, multiprocessing, asyncio: вступ
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../m2/lesson_29/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    29. П6. Stack, Queue, Heap, Trie + LRU → ООП-пакет
   
 
     
@@ -1988,14 +2044,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../m3/lesson_29/" class="md-nav__link">
+      <a href="../../m3/lesson_30/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    29. Основи SQL (PostgreSQL)
+    30. Основи SQL (PostgreSQL)
   
 
     
@@ -2016,14 +2072,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../m3/lesson_30/" class="md-nav__link">
+      <a href="../../m3/lesson_31/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    30. Redis overview
+    31. Redis overview
   
 
     
@@ -2175,34 +2231,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../m4/lesson_31/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    31. HTTP: requests, httpx, aiohttp
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../m4/lesson_32/" class="md-nav__link">
         
   
@@ -2210,7 +2238,7 @@
   <span class="md-ellipsis">
     
   
-    32. REST: принципи дизайну API
+    32. HTTP: requests, httpx, aiohttp
   
 
     
@@ -2238,7 +2266,7 @@
   <span class="md-ellipsis">
     
   
-    33. Django intro: MVT, ORM, admin
+    33. REST: принципи дизайну API
   
 
     
@@ -2266,7 +2294,7 @@
   <span class="md-ellipsis">
     
   
-    34. Django: forms, HTML practice
+    34. Django intro: MVT, ORM, admin
   
 
     
@@ -2294,7 +2322,7 @@
   <span class="md-ellipsis">
     
   
-    35. DRF overview + Django vs FastAPI
+    35. Django: forms, HTML practice
   
 
     
@@ -2322,7 +2350,35 @@
   <span class="md-ellipsis">
     
   
-    36. Typing + Pydantic
+    36. DRF overview + Django vs FastAPI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../m4/lesson_37/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    37. Typing + Pydantic
   
 
     
@@ -2369,14 +2425,14 @@
   
   
   
-    <a href="../../m4/lesson_37/" class="md-nav__link">
+    <a href="../../m4/lesson_38/" class="md-nav__link">
       
   
   
   <span class="md-ellipsis">
     
   
-    37. FastAPI basics + Postman + OpenAPI
+    38. FastAPI basics + Postman + OpenAPI
   
 
     
@@ -2403,34 +2459,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../m4/lesson_38/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    38. FastAPI + SQLAlchemy: повний CRUD
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../m4/lesson_39/" class="md-nav__link">
         
   
@@ -2438,7 +2466,7 @@
   <span class="md-ellipsis">
     
   
-    39. Middlewares і кешування (Redis на практиці)
+    39. FastAPI + SQLAlchemy: повний CRUD
   
 
     
@@ -2466,7 +2494,7 @@
   <span class="md-ellipsis">
     
   
-    40. Автентифікація та security basics (JWT, hashing, OWASP)
+    40. Middlewares і кешування (Redis на практиці)
   
 
     
@@ -2494,7 +2522,35 @@
   <span class="md-ellipsis">
     
   
-    41. Тестування API (pytest + httpx)
+    41. Автентифікація та security basics (JWT, hashing, OWASP)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../m4/lesson_42/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    42. Тестування API (pytest + httpx)
   
 
     
@@ -2541,14 +2597,14 @@
   
   
   
-    <a href="../../m4/lesson_42/" class="md-nav__link">
+    <a href="../../m4/lesson_43/" class="md-nav__link">
       
   
   
   <span class="md-ellipsis">
     
   
-    42. AI-інструменти розробника + ризики й валідація
+    43. AI-інструменти розробника + ризики й валідація
   
 
     
@@ -2575,34 +2631,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../m4/lesson_43/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    43. Інтеграція LLM API (Gemini / Anthropic)
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../m4/lesson_44/" class="md-nav__link">
         
   
@@ -2610,7 +2638,7 @@
   <span class="md-ellipsis">
     
   
-    44. Архітектура застосунків і патерни
+    44. Інтеграція LLM API (Gemini / Anthropic)
   
 
     
@@ -2638,7 +2666,7 @@
   <span class="md-ellipsis">
     
   
-    45. WebSockets + практика: чат
+    45. Архітектура застосунків і патерни
   
 
     
@@ -2666,7 +2694,7 @@
   <span class="md-ellipsis">
     
   
-    46. Security advanced
+    46. WebSockets + практика: чат
   
 
     
@@ -2694,7 +2722,35 @@
   <span class="md-ellipsis">
     
   
-    47. Telegram Bot API
+    47. Security advanced
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../m4/lesson_48/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    48. Telegram Bot API
   
 
     
@@ -2880,34 +2936,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../m5/lesson_48/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    48. Docker
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../m5/lesson_49/" class="md-nav__link">
         
   
@@ -2915,7 +2943,7 @@
   <span class="md-ellipsis">
     
   
-    49. Docker Compose + деплой
+    49. Docker
   
 
     
@@ -2943,7 +2971,35 @@
   <span class="md-ellipsis">
     
   
-    50. CI/CD (GitHub Actions)
+    50. Docker Compose + деплой
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../m5/lesson_51/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    51. CI/CD (GitHub Actions)
   
 
     
@@ -3067,14 +3123,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../m6/lesson_51/" class="md-nav__link">
+      <a href="../../m6/lesson_52/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    51. Робота над фінальним проєктом
+    52. Робота над фінальним проєктом
   
 
     
@@ -3095,14 +3151,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../m6/lesson_52/" class="md-nav__link">
+      <a href="../../m6/lesson_53/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    52. Випускний: питч фінального проєкту
+    53. Випускний: питч фінального проєкту
   
 
     
@@ -3323,7 +3379,7 @@
   <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Проєкт: шість задач, які залежать одна від одної
+        Пам'ять і диск
       
     </span>
   </a>
@@ -3334,19 +3390,19 @@
   <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Три місця, де живуть файли
+        Читаємо файл каси
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Три місця, де живуть файли">
+    <nav class="md-nav" aria-label="Читаємо файл каси">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
   <a href="#_4" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Добре повідомлення коміту
+        Рядок за рядком
       
     </span>
   </a>
@@ -3354,10 +3410,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#gitignore" class="md-nav__link">
+  <a href="#with" class="md-nav__link">
     <span class="md-ellipsis">
       
-        .gitignore: що не потрапляє в репозиторій
+        Навіщо with
       
     </span>
   </a>
@@ -3373,10 +3429,88 @@
   <a href="#_5" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Гілка — рухомий вказівник
+        Розбираємо і записуємо
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Розбираємо і записуємо">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#w" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Режим w: файл для касира
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#a" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Режим a: журнал запусків
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#filenotfounderror" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Шляхи і FileNotFoundError
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#json" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        JSON: звіт, який прочитає інша програма
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="JSON: звіт, який прочитає інша програма">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#json_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Що JSON вміє, а що ні
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#json_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Зіпсований JSON
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -3384,7 +3518,7 @@
   <a href="#_6" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Контракт: як працювати, не чекаючи інших
+        Налаштування у файлі
       
     </span>
   </a>
@@ -3392,32 +3526,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#pull-request" class="md-nav__link">
+  <a href="#csv" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Pull Request і злиття
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_7" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Конфлікт злиття
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_8" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Злиття без конфлікту, але проєкт зламано
+        CSV: таблиця в тексті
       
     </span>
   </a>
@@ -3437,10 +3549,32 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Розібраний приклад: місячний звіт кафе
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Зміни приклад: найкращий день і чайові
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#_9" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Розібраний приклад: двоє в одному репозиторії
+        Спробуй самостійно: картка постійного гостя
       
     </span>
   </a>
@@ -3449,28 +3583,6 @@
         
           <li class="md-nav__item">
   <a href="#_10" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Зміни приклад: файл, який не мав потрапити в коміт
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#_11" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Командна задача: звіт каси кафе
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#_12" class="md-nav__link">
     <span class="md-ellipsis">
       
         Знайди помилку
@@ -3486,7 +3598,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_13" class="md-nav__link">
+  <a href="#_11" class="md-nav__link">
     <span class="md-ellipsis">
       
         Підсумок
@@ -3498,7 +3610,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#_14" class="md-nav__link">
+  <a href="#_12" class="md-nav__link">
     <span class="md-ellipsis">
       
         Самоперевірка
@@ -3509,7 +3621,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_15" class="md-nav__link">
+  <a href="#_13" class="md-nav__link">
     <span class="md-ellipsis">
       
         Що далі
@@ -3525,7 +3637,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_16" class="md-nav__link">
+  <a href="#_14" class="md-nav__link">
     <span class="md-ellipsis">
       
         Документація і джерела
@@ -3621,38 +3733,37 @@
   
 
 
-<h1 id="15-git-github">Урок 15. Git + GitHub: командний проєкт<a class="headerlink" href="#15-git-github" title="Permanent link">&para;</a></h1>
-<p>За уроки 12–14 кожен з вас сам зібрав звіт каси кафе: правила, розбір рядків, читання файлу, підрахунки, JSON. Тепер кафе хоче той самий звіт, але робитиме його <strong>команда</strong>. Шість людей, шість частин, один проєкт, який після злиття всіх частин має запрацювати одразу, без «у мене працювало».</p>
-<p>Як зробити, щоб шість людей не затирали файли одне одного? Щоб кожен міг працювати, не чекаючи інших? І щоб після злиття не з'ясувалося, що один повертає <code>"orders"</code>, а другий читає <code>"count"</code>? Відповідь складається з двох частин: <strong>Git і GitHub</strong> — для історії, гілок і злиття, і <strong>контракти з тестами</strong> — щоб частини пасували одна до одної.</p>
-<p>Це не перше знайомство з Git: з уроку 1 ти здаєш домашні через <code>commit → push → Pull Request</code>. Сьогодні розберемо, що насправді відбувається за цими командами, і вперше попрацюємо <strong>разом в одному репозиторії</strong>.</p>
-<p><strong>Що потрібно з попередніх уроків:</strong> функції й докстрінги (урок 7), модулі та <code>import</code> (урок 12), винятки (урок 13), файли й JSON (урок 14), Git-процес здачі домашніх (<a href="../../../00_getting_started/homework_workflow/">інструкція</a>).</p>
+<h1 id="15-json">Урок 15. Файли, менеджери контексту та JSON<a class="headerlink" href="#15-json" title="Permanent link">&para;</a></h1>
+<p>В уроці 14 програма навчилася розбирати рядки каси: чотири правильні чеки приймає, п'ять зіпсованих пропускає й пояснює чому. Але рядки були вписані прямо в код, а результат жив лише доти, доки працювала програма. Закрив ноутбук — звіту немає.</p>
+<p>Наприкінці липня каса вивантажила місячний файл <code>kasa_2024_07.txt</code>. Власниця хоче, щоб програма сама його прочитала, склала звіт і <strong>зберегла</strong> його у файл, який відкриє сайт кафе чи бухгалтер. Касирові — окремий файл з переліком зіпсованих рядків, щоб їх виправити. А щоб знати, коли звіт запускали, — журнал запусків.</p>
+<p><strong>Що потрібно з попередніх уроків:</strong> рядки й f-strings (урок 3), словники (урок 6), функції (урок 8), ітератори й <code>for</code> (урок 11), <code>datetime</code> і <code>Counter</code> (урок 13), <code>try</code> / <code>except</code>, <code>parse_line</code> і <code>load_orders</code> (урок 14).</p>
 <p><strong>Після уроку ти зможеш:</strong></p>
 <ul>
-<li>пояснювати, де живуть файли: робоча тека, staging area, репозиторій — і що переносить кожна команда;</li>
-<li>писати зрозумілі коміти й не пускати в репозиторій згенеровані файли через <code>.gitignore</code>;</li>
-<li>працювати в окремій гілці на задачу й відкривати Pull Request у командний репозиторій;</li>
-<li>розв'язувати конфлікт злиття й пояснювати, чому код різних людей не конфліктує, коли кожен працює у своєму файлі;</li>
-<li>писати функцію за контрактом так, щоб проєкт працював після злиття всіх частин.</li>
+<li>читати текстовий файл цілком і рядок за рядком через <code>with open(...)</code>;</li>
+<li>пояснювати, чому <code>with</code> закриває файл навіть тоді, коли всередині стався виняток;</li>
+<li>обирати режим відкриття: <code>r</code> — читати, <code>w</code> — перезаписати, <code>a</code> — дописати в кінець;</li>
+<li>розбиратися з відносними шляхами й <code>FileNotFoundError</code>, користуватися <code>pathlib.Path</code>;</li>
+<li>зберігати словники у JSON і читати їх назад, знати, які типи JSON не підтримує;</li>
+<li>тримати налаштування програми в JSON-файлі, а не в коді; читати CSV модулем <code>csv</code>.</li>
 </ul>
-<p><strong>Задача розділу.</strong> Командою з 4–6 людей зібрати проєкт <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_1/lessons/lesson_15_git_github_system/team_project"><code>team_project/</code></a> — шість взаємозалежних задач — так, щоб у <code>main</code> пройшло <code>python check.py all</code>. Інструкція — у розділі <a href="#practice">«Практика»</a>.</p>
-<p><strong>Ноутбук заняття:</strong> <a class="md-button md-button--primary" href="https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_15_git_github_system/note_lesson_15_git_github_system_student.ipynb">Відкрити вправи в Colab</a> <a class="solutions-link" href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_15_git_github_system/note_lesson_15_git_github_system.ipynb">Переглянути розв’язки</a></p>
+<p><strong>Задача розділу.</strong> Прочитати <code>kasa_2024_07.txt</code>, зберегти звіт у <code>report_2024_07.json</code>, зіпсовані рядки — в <code>errors_2024_07.txt</code>, а запуск — у журнал <code>runs.log</code>. Повний код — у розділі <a href="#practice">«Практика»</a>.</p>
+<p><strong>Ноутбук заняття:</strong> <a class="md-button md-button--primary" href="https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_15_file_io_json/note_lesson_15_file_io_json_student.ipynb">Відкрити вправи в Colab</a> <a class="solutions-link" href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_15_file_io_json/note_lesson_15_file_io_json.ipynb">Переглянути розв’язки</a></p>
 <h2 id="_1">Пригадай<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
-<p>Дай відповідь подумки:</p>
+<p>Дай відповідь подумки, нічого не запускаючи:</p>
 <ol>
-<li>Які команди ти виконуєш між «код домашньої написано» і «PR відкрито»?</li>
-<li>Що показує <code>git status</code>?</li>
-<li>Чим <code>origin</code> відрізняється від <code>upstream</code> у твоєму fork курсу?</li>
+<li>Що повертає <code>load_orders(lines)</code> з уроку 14?</li>
+<li>У програмі є словник <code>report</code>. Програма завершилась. Де тепер <code>report</code>?</li>
+<li>Що надрукує цикл <code>for x in iterator:</code>, якщо ітератор уже вичерпали раніше?</li>
 </ol>
 <details class="success">
 <summary>Відповіді</summary>
 <ol>
-<li><code>git switch -c homework-NN</code> (або <code>checkout -b</code>), <code>git add</code>, <code>git commit -m "..."</code>, <code>git push origin homework-NN</code>, далі кнопка <strong>Compare &amp; pull request</strong> на GitHub.</li>
-<li>Які файли змінено, які вже підготовлено до коміту, які Git ще не відстежує, і в якій ти гілці.</li>
-<li><code>origin</code> — твій fork на GitHub, куди ти робиш <code>push</code>. <code>upstream</code> — репозиторій викладача, звідки ти отримуєш нові уроки. Обидва — лише імена для адрес.</li>
+<li>Пару: список прийнятих чеків <code>RawOrder</code> і список пояснень до пропущених рядків, наприклад <code>"рядок 3: could not convert string to float: '540,00'"</code>.</li>
+<li>Ніде. Змінні живуть в оперативній пам'яті процесу, а після завершення програми цю пам'ять віддають системі.</li>
+<li>Нічого: вичерпаний ітератор більше нічого не дає (урок 11). Відкритий файл поводиться так само.</li>
 </ol>
 </details>
-<h2 id="_2">Проєкт: шість задач, які залежать одна від одної<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
-<p>Команда збирає той самий конвеєр, що в уроках 12–14, але кожну ланку пише інша людина:</p>
+<h2 id="_2">Пам'ять і диск<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
 <pre class="mermaid"><code>flowchart TD
     classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
     classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
@@ -3660,465 +3771,641 @@
     classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
     classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
 
-    M["models.py&lt;br&gt;RawOrder, DAYS"] --&gt; T2["2. parsing.py&lt;br&gt;parse_line"]
-    T2 --&gt; T3["3. loading.py&lt;br&gt;read_lines, load_orders"]
-    T1["1. rules.py&lt;br&gt;meal_type, day_name"] --&gt; T4["4. stats.py&lt;br&gt;виторг, найкращий день"]
-    T4 --&gt; T5["5. report.py&lt;br&gt;build_report"]
-    T5 -. формат словника .-&gt; T6["6. output.py&lt;br&gt;save_json, format_report"]
-    T3 --&gt; MAIN["main.py&lt;br&gt;з'єднує всі задачі"]
-    T5 --&gt; MAIN
-    T6 --&gt; MAIN
+    K["kasa_2024_07.txt&lt;br&gt;файл каси"] --&gt; R["читання&lt;br&gt;with open(..., 'r')"]
+    R --&gt; P["load_orders&lt;br&gt;урок 14"]
+    P --&gt; B["звіт — словник&lt;br&gt;у пам'яті"]
+    B --&gt; J["report_2024_07.json&lt;br&gt;для сайту й бухгалтера"]
+    P --&gt; E["errors_2024_07.txt&lt;br&gt;для касира"]
+    B --&gt; L["runs.log&lt;br&gt;журнал запусків"]
 
-    class M,MAIN warning
-    class T1,T2,T3,T4,T5,T6 step</code></pre>
-<table>
-<thead>
-<tr>
-<th>№</th>
-<th>Файл</th>
-<th>Що зробити</th>
-<th>Використовує</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>1</td>
-<td><code>rules.py</code></td>
-<td><code>meal_type(hour)</code>, <code>day_name(timestamp)</code></td>
-<td>—</td>
-</tr>
-<tr>
-<td>2</td>
-<td><code>parsing.py</code></td>
-<td><code>parse_line(line)</code></td>
-<td><code>models.py</code></td>
-</tr>
-<tr>
-<td>3</td>
-<td><code>loading.py</code></td>
-<td><code>read_lines(path)</code>, <code>load_orders(lines)</code></td>
-<td>задача 2</td>
-</tr>
-<tr>
-<td>4</td>
-<td><code>stats.py</code></td>
-<td><code>revenue_by_day</code>, <code>best_day</code>, <code>count_by_meal</code></td>
-<td>задача 1</td>
-</tr>
-<tr>
-<td>5</td>
-<td><code>report.py</code></td>
-<td><code>build_report(orders, errors)</code></td>
-<td>задача 4</td>
-</tr>
-<tr>
-<td>6</td>
-<td><code>output.py</code></td>
-<td><code>save_json</code>, <code>format_report</code></td>
-<td>формат звіту задачі 5</td>
-</tr>
-</tbody>
-</table>
-<p>Викладач дає готові <code>models.py</code>, <code>main.py</code>, файл каси, тести й перевірку <code>check.py</code>. Коли всі шість задач злито, програма працює:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>python<span class="w"> </span>main.py<span class="w"> </span>kasa_2024_07.txt
+    class K,J,E,L success
+    class R,P,B step</code></pre>
+<p>Зелені блоки — файли на диску: вони переживають завершення програми. Сірі — робота в пам'яті: змінні, списки, словники. Програма читає файл у пам'ять, працює з даними і записує результат назад на диск.</p>
+<p>Python не працює з диском сам. <code>open()</code> просить операційну систему відкрити файл і отримує <strong>файловий об'єкт</strong> — «ручку», через яку читають і пишуть. Коли роботу закінчено, ручку треба повернути: <strong>закрити</strong> файл.</p>
+<h2 id="_3">Читаємо файл каси<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<p>Ось що вивантажила каса. Це ті самі рядки, що в уроці 14, тепер у файлі:</p>
+<div class="highlight"><span class="filename">kasa_2024_07.txt</span><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>2024-07-19 18:30;540.00;50;2
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>2024-07-19 12:10;320.00;30;1
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>2024-07-19 19:05;540,00;40;3
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>2024-07-20 20:15;980.00;120;4
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>2024-07-20 13:40;760.00
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>2024-02-30 19:00;450.00;0;5
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>2024-07-21 18:00;-120.00;0;2
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>2024-07-21 14:20;610.00;60;0
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>2024-07-21 21:30;1200.00;150;6
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>Чеків: 4, пропущено рядків: 5
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>Виторг: 3040.00 грн, середній чек: 760.00 грн
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>Найкращий день: нд
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>За днями: пт 860.00, сб 980.00, нд 1200.00
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>За прийомом їжі: вечеря 3, обід 1
+<p>Файл лежить у тій самій теці, що й програма. Прочитаємо його цілком:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">"kasa_2024_07.txt"</span><span class="p">,</span> <span class="s2">"r"</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>    <span class="n">text</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="nb">print</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">text</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">))</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="nb">print</span><span class="p">(</span><span class="n">text</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
 </code></pre></div>
-<p>Задача 4 викликає функції задачі 1, задача 5 — задачі 4. Як тоді Тарасові писати задачу 4, якщо Оксана ще не дописала задачу 1? Про це — розділ «Контракт». Спершу — як Git тримає код команди.</p>
-<h2 id="_3">Три місця, де живуть файли<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
-<pre class="mermaid"><code>flowchart TD
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
-
-    W["робоча тека&lt;br&gt;файли, які ти редагуєш"] -- "git add" --&gt; S["staging area&lt;br&gt;що піде в наступний коміт"]
-    S -- "git commit" --&gt; R["репозиторій .git&lt;br&gt;історія комітів"]
-    R -- "git push" --&gt; G["GitHub&lt;br&gt;копія для команди"]
-    G -- "git pull" --&gt; W
-
-    class W,S,R step
-    class G success</code></pre>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>&lt;class 'str'&gt; 258
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>2024-07-19 18:30;540.00;50;2
+</code></pre></div>
 <ul>
-<li><strong>Робоча тека</strong> (working tree) — звичайні файли, які ти відкриваєш у редакторі.</li>
-<li><strong>Staging area</strong> (індекс) — «кошик» наступного коміту. <code>git add rules.py</code> кладе туди поточний стан файлу.</li>
-<li><strong>Репозиторій</strong> — тека <code>.git</code>: усі коміти, гілки, історія. <code>git commit</code> робить знімок того, що лежить у staging.</li>
+<li><strong><code>open(шлях, режим, encoding=...)</code></strong> відкриває файл. Режим <code>"r"</code> (read) — читання, він стоїть за замовчуванням;</li>
+<li><strong><code>encoding="utf-8"</code></strong> — як перетворювати байти на букви. Без нього Python візьме кодування системи, і на Windows кирилиця може перетворитися на <code>РЇ</code> чи впасти з <code>UnicodeDecodeError</code>. Для текстових файлів курсу завжди пишемо <code>utf-8</code>;</li>
+<li><strong><code>file.read()</code></strong> повертає весь вміст одним рядком <code>str</code>. Для файлу каси на 258 символів це нормально, для файлу на гігабайт — ні.</li>
 </ul>
-<p>Навіщо проміжний крок? Щоб у коміт потрапило лише те, що стосується однієї зміни. Оксана виправила <code>rules.py</code> і водночас щось пробувала в <code>main.py</code>. Вона додає лише <code>rules.py</code>, а експерименти лишаються в робочій теці.</p>
-<p>Ірина, лідерка команди, створює репозиторій проєкту. Вивід — справжній, git 2.43:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>git<span class="w"> </span>init<span class="w"> </span>-b<span class="w"> </span>main
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>git<span class="w"> </span>status<span class="w"> </span>--short
+<h3 id="_4">Рядок за рядком<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
+<p>Відкритий файл — <strong>ітератор</strong> рядків, як генератор з уроку 11. Цикл <code>for</code> читає по одному рядку і не тримає в пам'яті весь файл:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">"kasa_2024_07.txt"</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    <span class="k">for</span> <span class="n">number</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>        <span class="k">if</span> <span class="n">number</span> <span class="o">&lt;=</span> <span class="mi">2</span><span class="p">:</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>            <span class="nb">print</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">line</span><span class="p">))</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>?? .gitignore
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>?? README.md
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>?? TEAM.md
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>?? check.py
-<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>?? kasa_2024_07.txt
-<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>?? loading.py
-<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>?? main.py
-<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>?? models.py
-<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>...
-<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>?? tests/
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>'2024-07-19 18:30;540.00;50;2\n'
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>'2024-07-19 12:10;320.00;30;1\n'
 </code></pre></div>
-<p><code>??</code> — файл є в робочій теці, але Git його ще не відстежує. Додаємо все й робимо перший коміт:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>git<span class="w"> </span>add<span class="w"> </span>.
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">"Шаблон проєкту: контракти, тести, заглушки"</span>
+<p>Кожен рядок закінчується символом переходу на новий рядок <code>\n</code>. Якщо його не прибрати, останнє поле буде <code>"2\n"</code>. <code>int("2\n")</code> таке пробачить, а порівняння рядків чи ключ словника — ні. Тому рядок з файлу спершу чистять: <code>line.rstrip("\n")</code> або просто <code>line.strip()</code>.</p>
+<p>Загорнемо читання у функцію. Порожні рядки (наприклад, зайвий <code>Enter</code> у кінці файлу) пропускаємо: це не зіпсовані чеки, їх просто немає.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">read_kasa</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">    </span><span class="sd">"""Непорожні рядки файлу каси без символу нового рядка."""</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>    <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">file</span><span class="p">:</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>            <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>            <span class="k">if</span> <span class="n">line</span><span class="p">:</span>
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>                <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>    <span class="k">return</span> <span class="n">lines</span>
+<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>
+<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>
+<a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a><span class="n">lines</span> <span class="o">=</span> <span class="n">read_kasa</span><span class="p">(</span><span class="s2">"kasa_2024_07.txt"</span><span class="p">)</span>
+<a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a><span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">),</span> <span class="n">lines</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>[main (root-commit) f423465] Шаблон проєкту: контракти, тести, заглушки
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a> 22 files changed, 609 insertions(+)
-<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a> create mode 100644 .gitignore
-<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a> create mode 100644 README.md
-<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a> ...
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>9 2024-07-21 21:30;1200.00;150;6
 </code></pre></div>
-<p><strong>Коміт</strong> — знімок усіх відстежуваних файлів плюс автор, час, повідомлення і посилання на попередній коміт («батька»). <code>f423465</code> — початок його <strong>хешу</strong>, унікального ідентифікатора. У тебе хеш буде інший: він залежить від автора, часу і вмісту.</p>
-<h3 id="_4">Добре повідомлення коміту<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
-<p>Повідомлення читатимуть інші люди, коли шукатимуть, звідки взялася зміна. Добре повідомлення каже, <strong>що</strong> і <strong>навіщо</strong> змінено:</p>
-<table>
-<thead>
-<tr>
-<th>Погано</th>
-<th>Добре</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>fix</code></td>
-<td><code>Задача 3: пропускати порожні рядки файлу каси</code></td>
-</tr>
-<tr>
-<td><code>update</code></td>
-<td><code>Задача 1: 16:00 — не обід, як у контракті</code></td>
-</tr>
-<tr>
-<td><code>asdf</code>, <code>зміни</code>, <code>ще раз</code></td>
-<td><code>Задача 6: кирилиця в report.json без \u-кодів</code></td>
-</tr>
-</tbody>
-</table>
-<p>Один коміт — одна логічна зміна. Якщо в повідомленні хочеться написати «і ще», це два коміти.</p>
-<h3 id="gitignore">.gitignore: що не потрапляє в репозиторій<a class="headerlink" href="#gitignore" title="Permanent link">&para;</a></h3>
-<p>Після запуску програми в теці з'являються <code>__pycache__/</code> (кеш Python, урок 12), <code>report.json</code> і <code>errors.txt</code> (результати <code>main.py</code>, урок 14). Їх генерує програма, у кожного вони свої, а в спільному репозиторії вони лише створюють конфлікти. Файл <code>.gitignore</code> проєкту каже Git їх не помічати:</p>
-<div class="highlight"><span class="filename">.gitignore</span><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a># Python
-<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>__pycache__/
-<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>*.pyc
-<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>.venv/
-<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>.env
-<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>
-<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a># Результати запуску main.py — генеруються, не зберігаємо
-<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>report.json
-<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>errors.txt
+<h3 id="with">Навіщо with<a class="headerlink" href="#with" title="Permanent link">&para;</a></h3>
+<p><code>with open(...) as file:</code> відкриває файл, а коли блок з відступом закінчується, <strong>сам його закриває</strong>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">"kasa_2024_07.txt"</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>    <span class="n">first</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="nb">print</span><span class="p">(</span><span class="n">file</span><span class="o">.</span><span class="n">closed</span><span class="p">)</span>
 </code></pre></div>
-<p>Після запусків тек і файлів побільшало, а <code>git status --short</code> мовчить: ігноровані файли він не показує. Чому саме файл ігнорується, пояснить <code>git check-ignore -v</code>:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>git<span class="w"> </span>check-ignore<span class="w"> </span>-v<span class="w"> </span>__pycache__/rules.cpython-312.pyc<span class="w"> </span>report.json
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>True
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>.gitignore:2:__pycache__/   __pycache__/rules.cpython-312.pyc
-<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>.gitignore:8:report.json    report.json
+<p>Без <code>with</code> файл закривають вручну, <code>file.close()</code>. Але якщо між <code>open</code> і <code>close</code> станеться виняток, до <code>close</code> черга не дійде, і файл лишиться відкритим. <code>with</code> закриває файл <strong>за будь-якого виходу</strong> з блоку, так само як <code>finally</code> з уроку 14:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">"kasa_2024_07.txt"</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>        <span class="n">first</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>        <span class="n">average</span> <span class="o">=</span> <span class="mf">860.0</span> <span class="o">/</span> <span class="mi">0</span>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="k">except</span> <span class="ne">ZeroDivisionError</span><span class="p">:</span>
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"виняток усередині with"</span><span class="p">)</span>
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="nb">print</span><span class="p">(</span><span class="n">file</span><span class="o">.</span><span class="n">closed</span><span class="p">)</span>
 </code></pre></div>
-<div class="admonition warning">
-<p class="admonition-title"><code>.env</code> — ніколи в репозиторій</p>
-<p>Паролі, токени, ключі API тримають у файлі <code>.env</code>, і він завжди в <code>.gitignore</code>. Файл, який потрапив на GitHub хоч на хвилину, вважай скомпрометованим: історія комітів зберігає його навіть після видалення.</p>
-</div>
-<h2 id="_5">Гілка — рухомий вказівник<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
-<p>Гілка не копіює файли. Це <strong>ім'я, яке вказує на коміт</strong>. Коли ти комітиш у гілці, вказівник пересувається на новий коміт. <code>HEAD</code> показує, в якій гілці ти зараз.</p>
-<p>Оксана бере задачу 1:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>git<span class="w"> </span>switch<span class="w"> </span>-c<span class="w"> </span>task-1-rules
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>виняток усередині with
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>True
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>Switched to a new branch 'task-1-rules'
+<p>Незакриті файли — це <strong>витік ресурсів</strong>: операційна система дає програмі обмежену кількість відкритих файлів. Найнеприємніше з записом: дані, які не встигли записатися до закриття, можуть не потрапити на диск. <code>with</code> називають <strong>менеджером контексту</strong> (context manager): він сам виконує дію на вході в блок і дію на виході з нього.</p>
+<h2 id="_5">Розбираємо і записуємо<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
+<p><code>parse_line</code> і <code>load_orders</code> беремо з уроку 14 без змін:</p>
+<details class="note">
+<summary>Код з уроку 14: <code>RawOrder</code>, <code>parse_line</code>, <code>load_orders</code></summary>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">NamedTuple</span>
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="k">class</span><span class="w"> </span><span class="nc">RawOrder</span><span class="p">(</span><span class="n">NamedTuple</span><span class="p">):</span>
+<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>    <span class="n">total_bill</span><span class="p">:</span> <span class="nb">float</span>
+<a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a>    <span class="n">tip</span><span class="p">:</span> <span class="nb">float</span>
+<a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a>    <span class="n">size</span><span class="p">:</span> <span class="nb">int</span>
+<a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a>    <span class="n">timestamp</span><span class="p">:</span> <span class="n">datetime</span>
+<a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a>
+<a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a>
+<a id="__codelineno-11-12" name="__codelineno-11-12" href="#__codelineno-11-12"></a><span class="k">def</span><span class="w"> </span><span class="nf">parse_line</span><span class="p">(</span><span class="n">line</span><span class="p">):</span>
+<a id="__codelineno-11-13" name="__codelineno-11-13" href="#__codelineno-11-13"></a><span class="w">    </span><span class="sd">"""Рядок каси -&gt; RawOrder. Зіпсований рядок -&gt; ValueError з поясненням."""</span>
+<a id="__codelineno-11-14" name="__codelineno-11-14" href="#__codelineno-11-14"></a>    <span class="n">fields</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">";"</span><span class="p">)</span>
+<a id="__codelineno-11-15" name="__codelineno-11-15" href="#__codelineno-11-15"></a>    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">fields</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">4</span><span class="p">:</span>
+<a id="__codelineno-11-16" name="__codelineno-11-16" href="#__codelineno-11-16"></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"очікували 4 поля, а маємо </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">fields</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<a id="__codelineno-11-17" name="__codelineno-11-17" href="#__codelineno-11-17"></a>    <span class="n">time_text</span><span class="p">,</span> <span class="n">bill_text</span><span class="p">,</span> <span class="n">tip_text</span><span class="p">,</span> <span class="n">size_text</span> <span class="o">=</span> <span class="n">fields</span>
+<a id="__codelineno-11-18" name="__codelineno-11-18" href="#__codelineno-11-18"></a>    <span class="n">timestamp</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">time_text</span><span class="p">,</span> <span class="s2">"%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M"</span><span class="p">)</span>
+<a id="__codelineno-11-19" name="__codelineno-11-19" href="#__codelineno-11-19"></a>    <span class="n">bill</span><span class="p">,</span> <span class="n">tip</span><span class="p">,</span> <span class="n">size</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">bill_text</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">tip_text</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">size_text</span><span class="p">)</span>
+<a id="__codelineno-11-20" name="__codelineno-11-20" href="#__codelineno-11-20"></a>    <span class="k">if</span> <span class="n">bill</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+<a id="__codelineno-11-21" name="__codelineno-11-21" href="#__codelineno-11-21"></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"сума чека має бути більшою за 0, а маємо </span><span class="si">{</span><span class="n">bill</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<a id="__codelineno-11-22" name="__codelineno-11-22" href="#__codelineno-11-22"></a>    <span class="k">if</span> <span class="n">tip</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+<a id="__codelineno-11-23" name="__codelineno-11-23" href="#__codelineno-11-23"></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"чайові не можуть бути від'ємними: </span><span class="si">{</span><span class="n">tip</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<a id="__codelineno-11-24" name="__codelineno-11-24" href="#__codelineno-11-24"></a>    <span class="k">if</span> <span class="n">size</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+<a id="__codelineno-11-25" name="__codelineno-11-25" href="#__codelineno-11-25"></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"гостей має бути хоча б один, а маємо </span><span class="si">{</span><span class="n">size</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<a id="__codelineno-11-26" name="__codelineno-11-26" href="#__codelineno-11-26"></a>    <span class="k">return</span> <span class="n">RawOrder</span><span class="p">(</span><span class="n">bill</span><span class="p">,</span> <span class="n">tip</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">)</span>
+<a id="__codelineno-11-27" name="__codelineno-11-27" href="#__codelineno-11-27"></a>
+<a id="__codelineno-11-28" name="__codelineno-11-28" href="#__codelineno-11-28"></a>
+<a id="__codelineno-11-29" name="__codelineno-11-29" href="#__codelineno-11-29"></a><span class="k">def</span><span class="w"> </span><span class="nf">load_orders</span><span class="p">(</span><span class="n">lines</span><span class="p">):</span>
+<a id="__codelineno-11-30" name="__codelineno-11-30" href="#__codelineno-11-30"></a><span class="w">    </span><span class="sd">"""Правильні чеки і список пояснень до пропущених рядків."""</span>
+<a id="__codelineno-11-31" name="__codelineno-11-31" href="#__codelineno-11-31"></a>    <span class="n">orders</span> <span class="o">=</span> <span class="p">[]</span>
+<a id="__codelineno-11-32" name="__codelineno-11-32" href="#__codelineno-11-32"></a>    <span class="n">errors</span> <span class="o">=</span> <span class="p">[]</span>
+<a id="__codelineno-11-33" name="__codelineno-11-33" href="#__codelineno-11-33"></a>    <span class="k">for</span> <span class="n">number</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<a id="__codelineno-11-34" name="__codelineno-11-34" href="#__codelineno-11-34"></a>        <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-11-35" name="__codelineno-11-35" href="#__codelineno-11-35"></a>            <span class="n">orders</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">parse_line</span><span class="p">(</span><span class="n">line</span><span class="p">))</span>
+<a id="__codelineno-11-36" name="__codelineno-11-36" href="#__codelineno-11-36"></a>        <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+<a id="__codelineno-11-37" name="__codelineno-11-37" href="#__codelineno-11-37"></a>            <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"рядок </span><span class="si">{</span><span class="n">number</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">error</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<a id="__codelineno-11-38" name="__codelineno-11-38" href="#__codelineno-11-38"></a>    <span class="k">return</span> <span class="n">orders</span><span class="p">,</span> <span class="n">errors</span>
 </code></pre></div>
-<p>Вона пише <code>meal_type</code> і <code>day_name</code> у <code>rules.py</code>, перевіряє свою задачу і дописує себе в <code>TEAM.md</code>:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>python<span class="w"> </span>check.py<span class="w"> </span><span class="m">1</span>
+</details>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="n">orders</span><span class="p">,</span> <span class="n">errors</span> <span class="o">=</span> <span class="n">load_orders</span><span class="p">(</span><span class="n">read_kasa</span><span class="p">(</span><span class="s2">"kasa_2024_07.txt"</span><span class="p">))</span>
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">orders</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">errors</span><span class="p">))</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>Задача 1: rules.py — день тижня і прийом їжі
-<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>  test_meal_type_borders: OK
-<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>  test_day_name: OK
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>4 5
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>git<span class="w"> </span>add<span class="w"> </span>rules.py<span class="w"> </span>TEAM.md
-<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>git<span class="w"> </span>status<span class="w"> </span>--short
-<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">"Задача 1: meal_type і day_name"</span>
+<h3 id="w">Режим w: файл для касира<a class="headerlink" href="#w" title="Permanent link">&para;</a></h3>
+<p>Режим <code>"w"</code> (write) створює файл, а якщо він уже є — <strong>стирає</strong> його вміст і пише з нуля. Для переліку помилок за місяць це саме те, що треба: кожен запуск дає свіжий перелік.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">"errors_2024_07.txt"</span><span class="p">,</span> <span class="s2">"w"</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>    <span class="k">for</span> <span class="n">message</span> <span class="ow">in</span> <span class="n">errors</span><span class="p">:</span>
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">message</span> <span class="o">+</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>
+<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">"errors_2024_07.txt"</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+<a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">file</span><span class="o">.</span><span class="n">read</span><span class="p">(),</span> <span class="n">end</span><span class="o">=</span><span class="s2">""</span><span class="p">)</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>M  TEAM.md
-<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>M  rules.py
-<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>[task-1-rules 0dcd132] Задача 1: meal_type і day_name
-<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a> 2 files changed, 7 insertions(+), 2 deletions(-)
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>рядок 3: could not convert string to float: '540,00'
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>рядок 5: очікували 4 поля, а маємо 2
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>рядок 6: day is out of range for month
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>рядок 7: сума чека має бути більшою за 0, а маємо -120.0
+<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a>рядок 8: гостей має бути хоча б один, а маємо 0
 </code></pre></div>
-<p><code>M</code> у першій колонці — файл змінено й додано в staging. Якби <code>M</code> стояло в другій колонці, файл було б змінено, але ще не додано.</p>
-<p>У той самий час Тарас від <code>main</code> створює свою гілку <code>task-4-stats</code>, пише <code>stats.py</code>, дописує себе в <code>TEAM.md</code> і комітить. Тепер історія розгалужена:</p>
-<pre class="mermaid"><code>flowchart TD
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
-
-    C0["f423465&lt;br&gt;Шаблон проєкту"] --&gt; C1["0dcd132&lt;br&gt;Задача 1"]
-    C0 --&gt; C4["36d1cdd&lt;br&gt;Задача 4"]
-    MAIN(["main"]) -.-&gt; C0
-    B1(["task-1-rules"]) -.-&gt; C1
-    B4(["task-4-stats"]) -.-&gt; C4
-
-    class C0,C1,C4 step
-    class MAIN,B1,B4 decision</code></pre>
-<p>Прямокутники — коміти, овали — гілки-вказівники. <code>main</code> досі на шаблоні: Оксана й Тарас нічого в ньому не змінили.</p>
-<h2 id="_6">Контракт: як працювати, не чекаючи інших<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
-<p>Тарасова <code>revenue_by_day</code> викликає Оксанину <code>day_name</code>. Якщо Тарас чекатиме, поки Оксана закінчить, команда працюватиме по черзі, а не разом. Щоб працювати паралельно, в кожної функції є <strong>контракт</strong> — докстрінг, який точно описує вхід, вихід і межові випадки. Ось заглушка, яку Тарас отримав у шаблоні:</p>
-<div class="highlight"><span class="filename">stats.py — заглушка з шаблону</span><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">rules</span><span class="w"> </span><span class="kn">import</span> <span class="n">day_name</span><span class="p">,</span> <span class="n">meal_type</span>
-<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>
-<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>
-<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a><span class="k">def</span><span class="w"> </span><span class="nf">revenue_by_day</span><span class="p">(</span><span class="n">orders</span><span class="p">):</span>
-<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a><span class="w">    </span><span class="sd">"""Виторг за днями тижня: {"пт": 860.0, ...}. Лише дні, у які були чеки."""</span>
-<a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a>    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">"задача 4: напиши revenue_by_day()"</span><span class="p">)</span>
-<a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a>
-<a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a>
-<a id="__codelineno-15-9" name="__codelineno-15-9" href="#__codelineno-15-9"></a><span class="k">def</span><span class="w"> </span><span class="nf">best_day</span><span class="p">(</span><span class="n">revenue</span><span class="p">):</span>
-<a id="__codelineno-15-10" name="__codelineno-15-10" href="#__codelineno-15-10"></a><span class="w">    </span><span class="sd">"""День з найбільшим виторгом; для порожнього словника — None."""</span>
-<a id="__codelineno-15-11" name="__codelineno-15-11" href="#__codelineno-15-11"></a>    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">"задача 4: напиши best_day()"</span><span class="p">)</span>
-</code></pre></div>
-<p>Тарас знає, <strong>що</strong> повертає <code>day_name</code> (з її контракту), і пише свою функцію, спираючись лише на це. А тести задачі 4 підставляють замість Оксаниної функції <strong>заглушку</strong> — крихітну функцію, яка знає відповіді лише для тестових дат:</p>
-<div class="highlight"><span class="filename">tests/test_task4.py — фрагмент</span><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">fake_day_name</span><span class="p">(</span><span class="n">timestamp</span><span class="p">):</span>
-<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="w">    </span><span class="sd">"""Заглушка задачі 1: знає лише 19 і 20 липня."""</span>
-<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>    <span class="k">return</span> <span class="p">{</span><span class="mi">19</span><span class="p">:</span> <span class="s2">"пт"</span><span class="p">,</span> <span class="mi">20</span><span class="p">:</span> <span class="s2">"сб"</span><span class="p">}[</span><span class="n">timestamp</span><span class="o">.</span><span class="n">day</span><span class="p">]</span>
+<p>Дві особливості <code>write</code>:</p>
+<ul>
+<li>він <strong>не додає</strong> <code>\n</code> сам, на відміну від <code>print</code>. Забудеш — усі повідомлення зліпляться в один рядок;</li>
+<li>він приймає лише рядки: <code>file.write(5)</code> дасть <code>TypeError</code>. Число спершу перетворюють: <code>file.write(str(5))</code> або f-string.</li>
+</ul>
+<p>Замість <code>write</code> можна писати звичним <code>print</code> з параметром <code>file</code>: <code>print(message, file=file)</code>. Він сам додасть <code>\n</code> і перетворить числа на текст.</p>
+<h3 id="a">Режим a: журнал запусків<a class="headerlink" href="#a" title="Permanent link">&para;</a></h3>
+<p>Журнал має <strong>накопичуватися</strong>: кожен запуск додає рядок у кінець і не стирає попередні. Для цього режим <code>"a"</code> (append):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>
+<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a><span class="n">Path</span><span class="p">(</span><span class="s2">"runs.log"</span><span class="p">)</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="n">missing_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>   <span class="c1"># починаємо з чистого журналу</span>
 <a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a>
 <a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a>
-<a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a><span class="k">def</span><span class="w"> </span><span class="nf">test_revenue_by_day</span><span class="p">():</span>
-<a id="__codelineno-16-7" name="__codelineno-16-7" href="#__codelineno-16-7"></a>    <span class="k">with</span> <span class="n">replaced</span><span class="p">(</span><span class="n">stats</span><span class="p">,</span> <span class="n">day_name</span><span class="o">=</span><span class="n">fake_day_name</span><span class="p">):</span>
-<a id="__codelineno-16-8" name="__codelineno-16-8" href="#__codelineno-16-8"></a>        <span class="k">assert</span> <span class="n">revenue_by_day</span><span class="p">(</span><span class="n">ORDERS</span><span class="p">)</span> <span class="o">==</span> <span class="p">{</span><span class="s2">"пт"</span><span class="p">:</span> <span class="mf">860.0</span><span class="p">,</span> <span class="s2">"сб"</span><span class="p">:</span> <span class="mf">980.0</span><span class="p">},</span> <span class="n">revenue_by_day</span><span class="p">(</span><span class="n">ORDERS</span><span class="p">)</span>
-<a id="__codelineno-16-9" name="__codelineno-16-9" href="#__codelineno-16-9"></a>        <span class="k">assert</span> <span class="n">revenue_by_day</span><span class="p">([])</span> <span class="o">==</span> <span class="p">{}</span>
+<a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a><span class="k">def</span><span class="w"> </span><span class="nf">log_run</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s2">"runs.log"</span><span class="p">):</span>
+<a id="__codelineno-16-7" name="__codelineno-16-7" href="#__codelineno-16-7"></a>    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">"a"</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+<a id="__codelineno-16-8" name="__codelineno-16-8" href="#__codelineno-16-8"></a>        <span class="nb">print</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file</span><span class="p">)</span>
+<a id="__codelineno-16-9" name="__codelineno-16-9" href="#__codelineno-16-9"></a>
+<a id="__codelineno-16-10" name="__codelineno-16-10" href="#__codelineno-16-10"></a>
+<a id="__codelineno-16-11" name="__codelineno-16-11" href="#__codelineno-16-11"></a><span class="n">log_run</span><span class="p">(</span><span class="s2">"2024-07: прийнято 4, пропущено 5"</span><span class="p">)</span>
+<a id="__codelineno-16-12" name="__codelineno-16-12" href="#__codelineno-16-12"></a><span class="n">log_run</span><span class="p">(</span><span class="s2">"2024-07: прийнято 4, пропущено 5"</span><span class="p">)</span>
+<a id="__codelineno-16-13" name="__codelineno-16-13" href="#__codelineno-16-13"></a>
+<a id="__codelineno-16-14" name="__codelineno-16-14" href="#__codelineno-16-14"></a><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">"runs.log"</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+<a id="__codelineno-16-15" name="__codelineno-16-15" href="#__codelineno-16-15"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">file</span><span class="o">.</span><span class="n">read</span><span class="p">(),</span> <span class="n">end</span><span class="o">=</span><span class="s2">""</span><span class="p">)</span>
 </code></pre></div>
-<p><code>replaced</code> — допоміжний менеджер контексту з <code>tests/helpers.py</code>: на час блоку <code>with</code> модуль <code>stats</code> бачить заглушку замість справжньої <code>day_name</code>, а потім усе повертається. Тому <code>python check.py 4</code> проходить, навіть коли <code>rules.py</code> ще заглушка. Так само влаштовані тести задач 3 і 5.</p>
-<p>Стан усієї команди показує <code>check.py</code> без аргументів:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>python<span class="w"> </span>check.py
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>2024-07: прийнято 4, пропущено 5
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>2024-07: прийнято 4, пропущено 5
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>✅ 1. rules.py — день тижня і прийом їжі: 2/2
-<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>⏳ 2. parsing.py — розбір рядка каси: 0/3
-<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>⏳ 3. loading.py — читання файлу і всіх рядків: 0/3
-<a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a>✅ 4. stats.py — підрахунки за днями і прийомами їжі: 3/3
-<a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a>⏳ 5. report.py — словник звіту: 0/2
-<a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a>⏳ 6. output.py — JSON і текст звіту: 0/3
-</code></pre></div>
-<p><code>⏳</code> — задачу ще не почато (заглушка піднімає <code>NotImplementedError</code>), <code>✅</code> — усі тести задачі пройдено, <code>❌</code> — задачу написано, але тести падають.</p>
-<div class="admonition tip">
-<p class="admonition-title">Контракт — це домовленість, а тест — її перевірка</p>
-<p>Докстрінг каже, що має бути. Тест перевіряє, що так і є. Поки обидві сторони дотримуються контракту, їм не треба бачити код одне одного.</p>
+<p>Два запуски — два рядки. З режимом <code>"w"</code> лишився б один: кожен запуск стирав би журнал.</p>
+<table>
+<thead>
+<tr>
+<th>Режим</th>
+<th>Файл є</th>
+<th>Файлу немає</th>
+<th>Для чого в кафе</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>"r"</code></td>
+<td>читає з початку</td>
+<td><code>FileNotFoundError</code></td>
+<td>файл каси, налаштування</td>
+</tr>
+<tr>
+<td><code>"w"</code></td>
+<td><strong>стирає</strong> і пише з нуля</td>
+<td>створює</td>
+<td>звіт і помилки за місяць</td>
+</tr>
+<tr>
+<td><code>"a"</code></td>
+<td>дописує в кінець</td>
+<td>створює</td>
+<td>журнал запусків</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="admonition-title"><code>w</code> не питає</p>
+<p><code>open("kasa_2024_07.txt", "w")</code> миттєво стирає файл каси, навіть якщо ти нічого не записав. Перш ніж відкривати файл на запис, перевір ім'я: вхідні дані й результати краще називати по-різному.</p>
 </div>
-<h2 id="pull-request">Pull Request і злиття<a class="headerlink" href="#pull-request" title="Permanent link">&para;</a></h2>
-<p>У командному репозиторії ніхто не комітить у <code>main</code> напряму. Кожна задача проходить однаковий шлях:</p>
-<pre class="mermaid"><code>flowchart TD
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
-
-    A["git switch main&lt;br&gt;git pull"] --&gt; B["git switch -c task-N-..."]
-    B --&gt; C["код + python check.py N"]
-    C --&gt; D["git add, git commit"]
-    D --&gt; E["git push -u origin task-N-..."]
-    E --&gt; F["Pull Request на GitHub"]
-    F --&gt; G{"рев'ю:&lt;br&gt;усе гаразд?"}
-    G -- ні --&gt; C
-    G -- так --&gt; H["Merge у main"]
-    H --&gt; A
-
-    class A,B,C,D,E,F step
-    class G decision
-    class H success</code></pre>
-<p><code>git push -u origin task-1-rules</code> відправляє гілку на GitHub. <code>-u</code> запам'ятовує зв'язок, далі досить <code>git push</code>. На GitHub з'являється кнопка <strong>Compare &amp; pull request</strong>, як у домашніх. Різниця одна: PR іде в <code>main</code> <strong>командного</strong> репозиторію, а не в репозиторій викладача. Хтось із команди переглядає код і натискає <strong>Merge pull request</strong>.</p>
-<p>Натискання Merge робить на GitHub те саме, що локальна команда:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>git<span class="w"> </span>switch<span class="w"> </span>main
-<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>git<span class="w"> </span>merge<span class="w"> </span>--no-ff<span class="w"> </span>task-1-rules<span class="w"> </span>-m<span class="w"> </span><span class="s2">"Merge pull request #1 from task-1-rules"</span>
-</code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>Merge made by the 'ort' strategy.
-<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a> TEAM.md  | 1 +
-<a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a> rules.py | 8 ++++++--
-<a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a> 2 files changed, 7 insertions(+), 2 deletions(-)
-</code></pre></div>
-<p>Git створив <strong>коміт злиття</strong> з двома батьками: попереднім <code>main</code> і останнім комітом гілки. Якби в <code>main</code> за цей час нічого не змінилося, Git міг би просто пересунути вказівник <code>main</code> вперед (<strong>fast-forward</strong>). Кнопка GitHub за замовчуванням завжди створює коміт злиття, щоб в історії було видно кожен PR.</p>
-<p><code>git pull</code> — це <code>git fetch</code> (забрати нові коміти з GitHub) плюс <code>git merge</code> (злити їх у поточну гілку). Тому після кожного злиття всі в команді роблять <code>git switch main</code> і <code>git pull</code>.</p>
-<h2 id="_7">Конфлікт злиття<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h2>
-<p>Задача 1 уже в <code>main</code>. Тарас хоче, щоб його PR злився чисто, тож спершу підтягує <code>main</code> у свою гілку:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>git<span class="w"> </span>switch<span class="w"> </span>task-4-stats
-<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a>git<span class="w"> </span>merge<span class="w"> </span>main
-</code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>Auto-merging TEAM.md
-<a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a>CONFLICT (content): Merge conflict in TEAM.md
-<a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a>Automatic merge failed; fix conflicts and then commit the result.
-</code></pre></div>
-<p>Оксана й Тарас обоє дописали рядок <strong>в одне й те саме місце</strong> <code>TEAM.md</code> — у кінець таблиці. Git не знає, чий рядок має бути першим, і питає людину. <code>rules.py</code> і <code>stats.py</code> злилися самі: кожен змінював <strong>свій</strong> файл.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>git<span class="w"> </span>status<span class="w"> </span>--short
-<a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a>cat<span class="w"> </span>TEAM.md
-</code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>UU TEAM.md
-<a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a>M  rules.py
-</code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a>| Задача | Файл | Хто |
-<a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a>|---|---|---|
-<a id="__codelineno-25-3" name="__codelineno-25-3" href="#__codelineno-25-3"></a>&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
-<a id="__codelineno-25-4" name="__codelineno-25-4" href="#__codelineno-25-4"></a>| 4 | stats.py | Тарас |
-<a id="__codelineno-25-5" name="__codelineno-25-5" href="#__codelineno-25-5"></a>=======
-<a id="__codelineno-25-6" name="__codelineno-25-6" href="#__codelineno-25-6"></a>| 1 | rules.py | Оксана |
-<a id="__codelineno-25-7" name="__codelineno-25-7" href="#__codelineno-25-7"></a>&gt;&gt;&gt;&gt;&gt;&gt;&gt; main
-</code></pre></div>
-<p><code>UU</code> — файл з конфліктом. Між маркерами — дві версії:</p>
+<h2 id="filenotfounderror">Шляхи і FileNotFoundError<a class="headerlink" href="#filenotfounderror" title="Permanent link">&para;</a></h2>
+<p><code>"kasa_2024_07.txt"</code> — <strong>відносний шлях</strong>: Python шукає файл у <strong>поточній теці</strong> (current working directory). Це тека, з якої запустили програму, а не обов'язково та, де лежить <code>.py</code>-файл:</p>
 <ul>
-<li>від <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD</code> до <code>=======</code> — твоя версія, з поточної гілки <code>task-4-stats</code>;</li>
-<li>від <code>=======</code> до <code>&gt;&gt;&gt;&gt;&gt;&gt;&gt; main</code> — версія, яку ти зливаєш.</li>
+<li><code>python report.py</code> з теки проєкту — поточна тека проєкту;</li>
+<li><code>python cafe/report.py</code> з теки вище — поточна тека вище, і <code>open("kasa_2024_07.txt")</code> шукатиме файл там;</li>
+<li>у Jupyter — тека ноутбука, у Colab — <code>/content</code>, куди потрапляють файли з панелі 📁.</li>
 </ul>
-<p><strong>Чотири кроки розв'язання:</strong></p>
-<ol>
-<li>Відкрити файл і вирішити, яким він має бути. Тут потрібні обидва рядки: спершу задача 1, потім 4.</li>
-<li>Видалити <strong>всі три</strong> маркери: <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code>, <code>=======</code>, <code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;</code>.</li>
-<li><code>git add TEAM.md</code> — позначити конфлікт розв'язаним.</li>
-<li><code>git commit</code> — завершити злиття.</li>
-</ol>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a>| Задача | Файл | Хто |
-<a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a>|---|---|---|
-<a id="__codelineno-26-3" name="__codelineno-26-3" href="#__codelineno-26-3"></a>| 1 | rules.py | Оксана |
-<a id="__codelineno-26-4" name="__codelineno-26-4" href="#__codelineno-26-4"></a>| 4 | stats.py | Тарас |
+<p>Коли файлу немає, <code>open</code> у режимі <code>"r"</code> піднімає <code>FileNotFoundError</code>. Як і в уроці 14, ловимо його там, де знаємо, що відповісти людині:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">"kasa_2024_08.txt"</span><span class="p">)</span>
+<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a><span class="nb">print</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">())</span>
+<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>
+<a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a><span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a>    <span class="n">read_kasa</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+<a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a><span class="k">except</span> <span class="ne">FileNotFoundError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+<a id="__codelineno-18-7" name="__codelineno-18-7" href="#__codelineno-18-7"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"Каса ще не вивантажила файл:"</span><span class="p">,</span> <span class="n">error</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a>git<span class="w"> </span>add<span class="w"> </span>TEAM.md
-<a id="__codelineno-27-2" name="__codelineno-27-2" href="#__codelineno-27-2"></a>git<span class="w"> </span>commit<span class="w"> </span>--no-edit
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>False
+<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>Каса ще не вивантажила файл: kasa_2024_08.txt
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a>[task-4-stats b6d8e2c] Merge branch 'main' into task-4-stats
+<p><code>FileNotFoundError</code> — різновид <code>OSError</code>, як і <code>PermissionError</code> («немає прав на файл»). <code>Path.cwd()</code> покаже поточну теку, якщо не зрозуміло, де Python шукає файли.</p>
+<p><strong><code>pathlib.Path</code></strong> — шлях як об'єкт, а не рядок. Частини шляху з'єднують оператором <code>/</code>, і Python сам поставить правильний роздільник для системи:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="n">folder</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">"kasa"</span><span class="p">)</span>
+<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a><span class="n">path</span> <span class="o">=</span> <span class="n">folder</span> <span class="o">/</span> <span class="s2">"kasa_2024_07.txt"</span>
+<a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a><span class="nb">print</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">path</span><span class="o">.</span><span class="n">stem</span><span class="p">,</span> <span class="n">path</span><span class="o">.</span><span class="n">suffix</span><span class="p">)</span>
+<a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a><span class="nb">print</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 </code></pre></div>
-<p>Тепер PR Тараса зливається в <code>main</code> без конфлікту. Якщо розв'язувати конфлікт зараз не хочеться, <code>git merge --abort</code> повертає все, як було до <code>git merge</code>.</p>
-<p>Історія після двох PR:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a>git<span class="w"> </span>log<span class="w"> </span>--oneline<span class="w"> </span>--graph
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>kasa_2024_07.txt kasa_2024_07 .txt
+<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a>kasa
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a>*   b209e80 Merge pull request #2 from task-4-stats
-<a id="__codelineno-30-2" name="__codelineno-30-2" href="#__codelineno-30-2"></a>|\
-<a id="__codelineno-30-3" name="__codelineno-30-3" href="#__codelineno-30-3"></a>| *   b6d8e2c Merge branch 'main' into task-4-stats
-<a id="__codelineno-30-4" name="__codelineno-30-4" href="#__codelineno-30-4"></a>| |\
-<a id="__codelineno-30-5" name="__codelineno-30-5" href="#__codelineno-30-5"></a>| |/
-<a id="__codelineno-30-6" name="__codelineno-30-6" href="#__codelineno-30-6"></a>|/|
-<a id="__codelineno-30-7" name="__codelineno-30-7" href="#__codelineno-30-7"></a>* |   a3740d5 Merge pull request #1 from task-1-rules
-<a id="__codelineno-30-8" name="__codelineno-30-8" href="#__codelineno-30-8"></a>|\ \
-<a id="__codelineno-30-9" name="__codelineno-30-9" href="#__codelineno-30-9"></a>| * | 0dcd132 Задача 1: meal_type і day_name
-<a id="__codelineno-30-10" name="__codelineno-30-10" href="#__codelineno-30-10"></a>|/ /
-<a id="__codelineno-30-11" name="__codelineno-30-11" href="#__codelineno-30-11"></a>| * 36d1cdd Задача 4: виторг за днями, найкращий день, прийоми їжі
-<a id="__codelineno-30-12" name="__codelineno-30-12" href="#__codelineno-30-12"></a>|/
-<a id="__codelineno-30-13" name="__codelineno-30-13" href="#__codelineno-30-13"></a>* f423465 Шаблон проєкту: контракти, тести, заглушки
+<p><code>open</code> приймає і рядок, і <code>Path</code>. <code>Path</code> має й зручні методи: <code>path.exists()</code>, <code>path.read_text(encoding="utf-8")</code>, <code>path.write_text(text, encoding="utf-8")</code>.</p>
+<h2 id="json">JSON: звіт, який прочитає інша програма<a class="headerlink" href="#json" title="Permanent link">&para;</a></h2>
+<p>Звіт — це словник. Чому б не записати його через <code>str()</code>?</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a><span class="n">report</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"cafe"</span><span class="p">:</span> <span class="s2">"Смачно"</span><span class="p">,</span> <span class="s2">"orders"</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="s2">"revenue"</span><span class="p">:</span> <span class="mf">3040.0</span><span class="p">,</span> <span class="s2">"open"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">"note"</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span>
+<a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a>
+<a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">"report.txt"</span><span class="p">,</span> <span class="s2">"w"</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+<a id="__codelineno-22-4" name="__codelineno-22-4" href="#__codelineno-22-4"></a>    <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">report</span><span class="p">))</span>
+<a id="__codelineno-22-5" name="__codelineno-22-5" href="#__codelineno-22-5"></a>
+<a id="__codelineno-22-6" name="__codelineno-22-6" href="#__codelineno-22-6"></a><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">"report.txt"</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+<a id="__codelineno-22-7" name="__codelineno-22-7" href="#__codelineno-22-7"></a>    <span class="n">back</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+<a id="__codelineno-22-8" name="__codelineno-22-8" href="#__codelineno-22-8"></a>
+<a id="__codelineno-22-9" name="__codelineno-22-9" href="#__codelineno-22-9"></a><span class="nb">print</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">back</span><span class="p">))</span>
+<a id="__codelineno-22-10" name="__codelineno-22-10" href="#__codelineno-22-10"></a><span class="nb">print</span><span class="p">(</span><span class="n">back</span><span class="p">[:</span><span class="mi">12</span><span class="p">])</span>
 </code></pre></div>
-<div class="admonition note">
-<p class="admonition-title">Чому код не конфліктує</p>
-<p>Конфлікт виникає, лише коли дві гілки змінили <strong>ті самі рядки</strong> одного файлу. У проєкті кожна задача — окремий файл, тож код шести людей зливається автоматично. Конфлікт у <code>TEAM.md</code> закладено навмисно: безпечне місце, щоб уперше зустріти конфлікт і не боятися його.</p>
-</div>
-<h2 id="_8">Злиття без конфлікту, але проєкт зламано<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h2>
-<p>Відсутність конфлікту ще не означає, що проєкт працює. Git порівнює рядки тексту, а не сенс коду.</p>
-<p>Уяви: автор задачі 6 не прочитав контракт задачі 5 і в <code>format_report</code> написав <code>report['count']</code> замість <code>report['orders']</code>. Свої тести він не запустив, і PR злили. Git не бачить жодної проблеми: це інший файл. Але <code>check.py</code> бачить:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a>python<span class="w"> </span>check.py<span class="w"> </span>all
+<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>&lt;class 'str'&gt;
+<a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a>{'cafe': 'См
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a>...
-<a id="__codelineno-32-2" name="__codelineno-32-2" href="#__codelineno-32-2"></a>Задача 6: output.py — JSON і текст звіту
-<a id="__codelineno-32-3" name="__codelineno-32-3" href="#__codelineno-32-3"></a>  test_save_json: OK
-<a id="__codelineno-32-4" name="__codelineno-32-4" href="#__codelineno-32-4"></a>  test_format_report: ПОМИЛКА KeyError: 'count' (output.py, рядок 25)
-<a id="__codelineno-32-5" name="__codelineno-32-5" href="#__codelineno-32-5"></a>  test_format_empty_report: ПОМИЛКА KeyError: 'count' (output.py, рядок 25)
-<a id="__codelineno-32-6" name="__codelineno-32-6" href="#__codelineno-32-6"></a>Інтеграційний тест: увесь проєкт разом
-<a id="__codelineno-32-7" name="__codelineno-32-7" href="#__codelineno-32-7"></a>  test_full_report: ПОМИЛКА KeyError: 'count' (output.py, рядок 25)
-<a id="__codelineno-32-8" name="__codelineno-32-8" href="#__codelineno-32-8"></a>  test_missing_file: OK
-<a id="__codelineno-32-9" name="__codelineno-32-9" href="#__codelineno-32-9"></a>❌ Проєкт ще не працює — дивись рядки вище
+<p>Назад повертається <strong>рядок</strong>, а не словник: <code>back["orders"]</code> не спрацює. А сайт кафе, написаний не на Python, взагалі не знає, що таке <code>True</code> і <code>None</code>. Потрібен формат, який розуміють усі мови й з якого словник збирається назад.</p>
+<p><strong>JSON</strong> (JavaScript Object Notation) — текстовий формат, схожий на словники й списки Python. Його розуміє практично кожна мова програмування, і саме ним обмінюються сайти й сервери. Модуль <a href="https://docs.python.org/3/library/json.html"><code>json</code></a> зі стандартної бібліотеки перетворює Python ↔ JSON:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a>
+<a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a><span class="n">text</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">report</span><span class="p">,</span> <span class="n">ensure_ascii</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<a id="__codelineno-24-4" name="__codelineno-24-4" href="#__codelineno-24-4"></a><span class="nb">print</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+<a id="__codelineno-24-5" name="__codelineno-24-5" href="#__codelineno-24-5"></a><span class="nb">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">text</span><span class="p">)</span> <span class="o">==</span> <span class="n">report</span><span class="p">)</span>
 </code></pre></div>
-<p>Тести задачі 6 побудовані на тому самому словнику, що описаний у контракті задачі 5. Тому помилку знайшли б ще до PR, якби автор виконав <code>python check.py 6</code>. Звідси два правила команди:</p>
-<ul>
-<li><strong>перед push</strong> — <code>python check.py N</code> для своєї задачі;</li>
-<li><strong>після кожного злиття</strong> — <code>python check.py all</code> у <code>main</code>. Інтеграційний тест запускає весь <code>main.py</code> на справжньому файлі каси.</li>
-</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a>{"cafe": "Смачно", "orders": 4, "revenue": 3040.0, "open": true, "note": null}
+<a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a>True
+</code></pre></div>
+<p>Лапки в JSON лише подвійні, <code>True</code> став <code>true</code>, <code>None</code> — <code>null</code>. <code>json.loads</code> зібрав з тексту <strong>той самий</strong> словник.</p>
+<table>
+<thead>
+<tr>
+<th>Функція</th>
+<th>Що робить</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>json.dumps(obj)</code></td>
+<td>об'єкт → рядок JSON (s — string)</td>
+</tr>
+<tr>
+<td><code>json.loads(text)</code></td>
+<td>рядок JSON → об'єкт</td>
+</tr>
+<tr>
+<td><code>json.dump(obj, file)</code></td>
+<td>об'єкт → у відкритий файл</td>
+</tr>
+<tr>
+<td><code>json.load(file)</code></td>
+<td>з відкритого файлу → об'єкт</td>
+</tr>
+</tbody>
+</table>
+<p>Два параметри для людей: <code>ensure_ascii=False</code> залишає кирилицю кирилицею, а <code>indent=2</code> розбиває JSON на рядки з відступами. Без <code>ensure_ascii=False</code> українські літери стануть кодами:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a><span class="nb">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">({</span><span class="s2">"cafe"</span><span class="p">:</span> <span class="s2">"Смачно"</span><span class="p">}))</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a>{"cafe": "\u0421\u043c\u0430\u0447\u043d\u043e"}
+</code></pre></div>
+<p>Це теж правильний JSON, і <code>json.loads</code> поверне «Смачно», але людина такий файл не прочитає.</p>
+<h3 id="json_1">Що JSON вміє, а що ні<a class="headerlink" href="#json_1" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Python</th>
+<th>JSON</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>dict</code></td>
+<td>об'єкт <code>{...}</code>, ключі — лише рядки</td>
+</tr>
+<tr>
+<td><code>list</code>, <code>tuple</code></td>
+<td>масив <code>[...]</code></td>
+</tr>
+<tr>
+<td><code>str</code></td>
+<td>рядок у подвійних лапках</td>
+</tr>
+<tr>
+<td><code>int</code>, <code>float</code></td>
+<td>число</td>
+</tr>
+<tr>
+<td><code>True</code>, <code>False</code>, <code>None</code></td>
+<td><code>true</code>, <code>false</code>, <code>null</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Прогноз:</strong> що повернеться після запису й читання?</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">Counter</span>
+<a id="__codelineno-28-2" name="__codelineno-28-2" href="#__codelineno-28-2"></a>
+<a id="__codelineno-28-3" name="__codelineno-28-3" href="#__codelineno-28-3"></a><span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"best_day"</span><span class="p">:</span> <span class="p">(</span><span class="s2">"сб"</span><span class="p">,</span> <span class="mf">980.0</span><span class="p">),</span> <span class="mi">7</span><span class="p">:</span> <span class="s2">"липень"</span><span class="p">,</span> <span class="s2">"by_time"</span><span class="p">:</span> <span class="n">Counter</span><span class="p">({</span><span class="s2">"вечеря"</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">"обід"</span><span class="p">:</span> <span class="mi">1</span><span class="p">})}</span>
+<a id="__codelineno-28-4" name="__codelineno-28-4" href="#__codelineno-28-4"></a><span class="n">back</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">ensure_ascii</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+<a id="__codelineno-28-5" name="__codelineno-28-5" href="#__codelineno-28-5"></a><span class="nb">print</span><span class="p">(</span><span class="n">back</span><span class="p">)</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a>{'best_day': ['сб', 980.0], '7': 'липень', 'by_time': {'вечеря': 3, 'обід': 1}}
+</code></pre></div>
+<p>Три тихі зміни: кортеж повернувся <strong>списком</strong>, ключ <code>7</code> — <strong>рядком</strong> <code>'7'</code>, а <code>Counter</code> — звичайним словником. Помилки немає, але <code>back[7]</code> дасть <code>KeyError</code>. Для звіту кафе це не страшно, якщо про це пам'ятати.</p>
+<p>А <code>datetime</code> JSON не знає зовсім:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">({</span><span class="s2">"first_order"</span><span class="p">:</span> <span class="n">datetime</span><span class="p">(</span><span class="mi">2024</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">19</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">10</span><span class="p">)})</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a>TypeError: Object of type datetime is not JSON serializable
+</code></pre></div>
+<p>Дату записують рядком у стандартному форматі ISO 8601 і відновлюють з нього:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a><span class="n">stamp</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">(</span><span class="mi">2024</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">19</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span>
+<a id="__codelineno-32-2" name="__codelineno-32-2" href="#__codelineno-32-2"></a><span class="nb">print</span><span class="p">(</span><span class="n">stamp</span><span class="p">)</span>
+<a id="__codelineno-32-3" name="__codelineno-32-3" href="#__codelineno-32-3"></a><span class="nb">print</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromisoformat</span><span class="p">(</span><span class="n">stamp</span><span class="p">))</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a>2024-07-19T12:10:00
+<a id="__codelineno-33-2" name="__codelineno-33-2" href="#__codelineno-33-2"></a>2024-07-19 12:10:00
+</code></pre></div>
+<h3 id="json_2">Зіпсований JSON<a class="headerlink" href="#json_2" title="Permanent link">&para;</a></h3>
+<p>Якщо в JSON-файлі помилка (одинарні лапки, зайва кома, файл записали через <code>str()</code>), <code>json.loads</code> / <code>json.load</code> піднімає <code>json.JSONDecodeError</code>. Це різновид <code>ValueError</code>, тож обробляється так само, як в уроці 14:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a><span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-34-2" name="__codelineno-34-2" href="#__codelineno-34-2"></a>    <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="s2">"{'orders': 4}"</span><span class="p">)</span>
+<a id="__codelineno-34-3" name="__codelineno-34-3" href="#__codelineno-34-3"></a><span class="k">except</span> <span class="n">json</span><span class="o">.</span><span class="n">JSONDecodeError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+<a id="__codelineno-34-4" name="__codelineno-34-4" href="#__codelineno-34-4"></a>    <span class="nb">print</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">error</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">))</span>
+<a id="__codelineno-34-5" name="__codelineno-34-5" href="#__codelineno-34-5"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a>True
+<a id="__codelineno-35-2" name="__codelineno-35-2" href="#__codelineno-35-2"></a>Expecting property name enclosed in double quotes: line 1 column 2 (char 1)
+</code></pre></div>
+<p>Повідомлення вказує рядок і позицію: у колонці 2 чекали <code>"</code>, а стоїть <code>'</code>.</p>
+<h2 id="_6">Налаштування у файлі<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
+<p>У коді звіту досі вшиті назва кафе й імена файлів. Щоб перейменувати файл каси, доведеться лізти в код. Налаштування краще тримати окремо, у JSON:</p>
+<div class="highlight"><span class="filename">cafe_config.json</span><pre><span></span><code><a id="__codelineno-36-1" name="__codelineno-36-1" href="#__codelineno-36-1"></a><span class="p">{</span>
+<a id="__codelineno-36-2" name="__codelineno-36-2" href="#__codelineno-36-2"></a><span class="w">  </span><span class="nt">"cafe"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Кафе «Смачно»"</span><span class="p">,</span>
+<a id="__codelineno-36-3" name="__codelineno-36-3" href="#__codelineno-36-3"></a><span class="w">  </span><span class="nt">"currency"</span><span class="p">:</span><span class="w"> </span><span class="s2">"грн"</span><span class="p">,</span>
+<a id="__codelineno-36-4" name="__codelineno-36-4" href="#__codelineno-36-4"></a><span class="w">  </span><span class="nt">"kasa_file"</span><span class="p">:</span><span class="w"> </span><span class="s2">"kasa_{year}_{month:02d}.txt"</span><span class="p">,</span>
+<a id="__codelineno-36-5" name="__codelineno-36-5" href="#__codelineno-36-5"></a><span class="w">  </span><span class="nt">"report_file"</span><span class="p">:</span><span class="w"> </span><span class="s2">"report_{year}_{month:02d}.json"</span><span class="p">,</span>
+<a id="__codelineno-36-6" name="__codelineno-36-6" href="#__codelineno-36-6"></a><span class="w">  </span><span class="nt">"errors_file"</span><span class="p">:</span><span class="w"> </span><span class="s2">"errors_{year}_{month:02d}.txt"</span><span class="p">,</span>
+<a id="__codelineno-36-7" name="__codelineno-36-7" href="#__codelineno-36-7"></a><span class="w">  </span><span class="nt">"log_file"</span><span class="p">:</span><span class="w"> </span><span class="s2">"runs.log"</span>
+<a id="__codelineno-36-8" name="__codelineno-36-8" href="#__codelineno-36-8"></a><span class="p">}</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-37-1" name="__codelineno-37-1" href="#__codelineno-37-1"></a><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">"cafe_config.json"</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+<a id="__codelineno-37-2" name="__codelineno-37-2" href="#__codelineno-37-2"></a>    <span class="n">config</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+<a id="__codelineno-37-3" name="__codelineno-37-3" href="#__codelineno-37-3"></a>
+<a id="__codelineno-37-4" name="__codelineno-37-4" href="#__codelineno-37-4"></a><span class="nb">print</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s2">"cafe"</span><span class="p">])</span>
+<a id="__codelineno-37-5" name="__codelineno-37-5" href="#__codelineno-37-5"></a><span class="nb">print</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s2">"kasa_file"</span><span class="p">]</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">year</span><span class="o">=</span><span class="mi">2024</span><span class="p">,</span> <span class="n">month</span><span class="o">=</span><span class="mi">7</span><span class="p">))</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-38-1" name="__codelineno-38-1" href="#__codelineno-38-1"></a>Кафе «Смачно»
+<a id="__codelineno-38-2" name="__codelineno-38-2" href="#__codelineno-38-2"></a>kasa_2024_07.txt
+</code></pre></div>
+<p><code>"kasa_{year}_{month:02d}.txt"</code> — <strong>шаблон</strong>: <code>str.format</code> підставляє значення в <code>{}</code> за тими самими правилами, що f-string (<code>:02d</code> — два знаки з нулем попереду). f-string тут не підійде: його значення обчислюються одразу в коді, а шаблон приходить з файлу як звичайний рядок.</p>
+<p>Тепер касир може змінити назву файлу, а бухгалтер — валюту, не відкриваючи Python.</p>
+<h2 id="csv">CSV: таблиця в тексті<a class="headerlink" href="#csv" title="Permanent link">&para;</a></h2>
+<p>Сайт замовлень кафе вивантажує дані в інший формат — <strong>CSV</strong> (comma-separated values): перший рядок — назви колонок, далі по рядку на запис, значення через кому:</p>
+<div class="highlight"><span class="filename">orders.csv (перші рядки)</span><pre><span></span><code><a id="__codelineno-39-1" name="__codelineno-39-1" href="#__codelineno-39-1"></a>order_id,customer_name,dish,price,order_date,city
+<a id="__codelineno-39-2" name="__codelineno-39-2" href="#__codelineno-39-2"></a>1,Anna,Pizza,320,2026-03-10 12:30,Kyiv
+<a id="__codelineno-39-3" name="__codelineno-39-3" href="#__codelineno-39-3"></a>2,Oleh,Burger,210,2026-03-10 13:10,Lviv
+</code></pre></div>
+<p>Розбирати такий файл через <code>split(",")</code> ризиковано: кома може трапитися всередині значення, у лапках. Модуль <a href="https://docs.python.org/3/library/csv.html"><code>csv</code></a> робить це правильно. <code>csv.DictReader</code> віддає кожен рядок словником з ключами-назвами колонок:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-40-1" name="__codelineno-40-1" href="#__codelineno-40-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">csv</span>
+<a id="__codelineno-40-2" name="__codelineno-40-2" href="#__codelineno-40-2"></a>
+<a id="__codelineno-40-3" name="__codelineno-40-3" href="#__codelineno-40-3"></a><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">"orders.csv"</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="s2">""</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+<a id="__codelineno-40-4" name="__codelineno-40-4" href="#__codelineno-40-4"></a>    <span class="n">rows</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">csv</span><span class="o">.</span><span class="n">DictReader</span><span class="p">(</span><span class="n">file</span><span class="p">))</span>
+<a id="__codelineno-40-5" name="__codelineno-40-5" href="#__codelineno-40-5"></a>
+<a id="__codelineno-40-6" name="__codelineno-40-6" href="#__codelineno-40-6"></a><span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">rows</span><span class="p">))</span>
+<a id="__codelineno-40-7" name="__codelineno-40-7" href="#__codelineno-40-7"></a><span class="nb">print</span><span class="p">(</span><span class="n">rows</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">"dish"</span><span class="p">],</span> <span class="nb">repr</span><span class="p">(</span><span class="n">rows</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">"price"</span><span class="p">]))</span>
+<a id="__codelineno-40-8" name="__codelineno-40-8" href="#__codelineno-40-8"></a><span class="nb">print</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">"price"</span><span class="p">])</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">))</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-41-1" name="__codelineno-41-1" href="#__codelineno-41-1"></a>12
+<a id="__codelineno-41-2" name="__codelineno-41-2" href="#__codelineno-41-2"></a>Pizza '320'
+<a id="__codelineno-41-3" name="__codelineno-41-3" href="#__codelineno-41-3"></a>2900.0
+</code></pre></div>
+<p>Усі значення з CSV — <strong>рядки</strong>, навіть <code>'320'</code>: перетворювати їх на числа й дати — наша робота, з тими самими <code>ValueError</code>, що в уроці 14. <code>newline=""</code> радить документація модуля <code>csv</code>: так він сам правильно обробляє переходи на новий рядок.</p>
+<p>Для великих таблиць зазвичай беруть бібліотеку pandas: <code>pd.read_csv("orders.csv")</code>. Приклад — у ноутбуці заняття викладача <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_15_file_io_json/file_json_example.ipynb"><code>file_json_example.ipynb</code></a> <a href="https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_15_file_io_json/file_json_example.ipynb"><img alt="Open In Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></a>.</p>
 <h2 id="practice">Практика<a class="headerlink" href="#practice" title="Permanent link">&para;</a></h2>
-<h3 id="_9">Розібраний приклад: двоє в одному репозиторії<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h3>
-<p>Увесь шлях з цього розділу — від <code>git init</code> до двох злитих PR — можна пройти самому в ноутбуці заняття: він створює тимчасовий репозиторій, і ти по черзі граєш Оксану й Тараса. Git у Colab уже встановлено.</p>
-<p>Коротко послідовність:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a><span class="c1"># Ірина (лідерка): шаблон проєкту</span>
-<a id="__codelineno-33-2" name="__codelineno-33-2" href="#__codelineno-33-2"></a>git<span class="w"> </span>init<span class="w"> </span>-b<span class="w"> </span>main
-<a id="__codelineno-33-3" name="__codelineno-33-3" href="#__codelineno-33-3"></a>git<span class="w"> </span>add<span class="w"> </span>.
-<a id="__codelineno-33-4" name="__codelineno-33-4" href="#__codelineno-33-4"></a>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">"Шаблон проєкту: контракти, тести, заглушки"</span>
-<a id="__codelineno-33-5" name="__codelineno-33-5" href="#__codelineno-33-5"></a>
-<a id="__codelineno-33-6" name="__codelineno-33-6" href="#__codelineno-33-6"></a><span class="c1"># Оксана: задача 1</span>
-<a id="__codelineno-33-7" name="__codelineno-33-7" href="#__codelineno-33-7"></a>git<span class="w"> </span>switch<span class="w"> </span>-c<span class="w"> </span>task-1-rules
-<a id="__codelineno-33-8" name="__codelineno-33-8" href="#__codelineno-33-8"></a>python<span class="w"> </span>check.py<span class="w"> </span><span class="m">1</span>
-<a id="__codelineno-33-9" name="__codelineno-33-9" href="#__codelineno-33-9"></a>git<span class="w"> </span>add<span class="w"> </span>rules.py<span class="w"> </span>TEAM.md
-<a id="__codelineno-33-10" name="__codelineno-33-10" href="#__codelineno-33-10"></a>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">"Задача 1: meal_type і day_name"</span>
-<a id="__codelineno-33-11" name="__codelineno-33-11" href="#__codelineno-33-11"></a>
-<a id="__codelineno-33-12" name="__codelineno-33-12" href="#__codelineno-33-12"></a><span class="c1"># Тарас: задача 4, від main</span>
-<a id="__codelineno-33-13" name="__codelineno-33-13" href="#__codelineno-33-13"></a>git<span class="w"> </span>switch<span class="w"> </span>main
-<a id="__codelineno-33-14" name="__codelineno-33-14" href="#__codelineno-33-14"></a>git<span class="w"> </span>switch<span class="w"> </span>-c<span class="w"> </span>task-4-stats
-<a id="__codelineno-33-15" name="__codelineno-33-15" href="#__codelineno-33-15"></a>python<span class="w"> </span>check.py<span class="w"> </span><span class="m">4</span>
-<a id="__codelineno-33-16" name="__codelineno-33-16" href="#__codelineno-33-16"></a>git<span class="w"> </span>add<span class="w"> </span>stats.py<span class="w"> </span>TEAM.md
-<a id="__codelineno-33-17" name="__codelineno-33-17" href="#__codelineno-33-17"></a>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">"Задача 4: виторг за днями, найкращий день, прийоми їжі"</span>
-<a id="__codelineno-33-18" name="__codelineno-33-18" href="#__codelineno-33-18"></a>
-<a id="__codelineno-33-19" name="__codelineno-33-19" href="#__codelineno-33-19"></a><span class="c1"># PR #1 злито</span>
-<a id="__codelineno-33-20" name="__codelineno-33-20" href="#__codelineno-33-20"></a>git<span class="w"> </span>switch<span class="w"> </span>main
-<a id="__codelineno-33-21" name="__codelineno-33-21" href="#__codelineno-33-21"></a>git<span class="w"> </span>merge<span class="w"> </span>--no-ff<span class="w"> </span>task-1-rules
-<a id="__codelineno-33-22" name="__codelineno-33-22" href="#__codelineno-33-22"></a>
-<a id="__codelineno-33-23" name="__codelineno-33-23" href="#__codelineno-33-23"></a><span class="c1"># Тарас підтягує main, розв'язує конфлікт у TEAM.md</span>
-<a id="__codelineno-33-24" name="__codelineno-33-24" href="#__codelineno-33-24"></a>git<span class="w"> </span>switch<span class="w"> </span>task-4-stats
-<a id="__codelineno-33-25" name="__codelineno-33-25" href="#__codelineno-33-25"></a>git<span class="w"> </span>merge<span class="w"> </span>main
-<a id="__codelineno-33-26" name="__codelineno-33-26" href="#__codelineno-33-26"></a>git<span class="w"> </span>add<span class="w"> </span>TEAM.md
-<a id="__codelineno-33-27" name="__codelineno-33-27" href="#__codelineno-33-27"></a>git<span class="w"> </span>commit<span class="w"> </span>--no-edit
-<a id="__codelineno-33-28" name="__codelineno-33-28" href="#__codelineno-33-28"></a>
-<a id="__codelineno-33-29" name="__codelineno-33-29" href="#__codelineno-33-29"></a><span class="c1"># PR #2 злито</span>
-<a id="__codelineno-33-30" name="__codelineno-33-30" href="#__codelineno-33-30"></a>git<span class="w"> </span>switch<span class="w"> </span>main
-<a id="__codelineno-33-31" name="__codelineno-33-31" href="#__codelineno-33-31"></a>git<span class="w"> </span>merge<span class="w"> </span>--no-ff<span class="w"> </span>task-4-stats
+<h3 id="_7">Розібраний приклад: місячний звіт кафе<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h3>
+<p>Зберемо все разом. Правила з уроку 13 (день тижня і прийом їжі) — у згорнутому блоці:</p>
+<details class="note">
+<summary>Правила з уроку 13: <code>DAYS</code>, <code>meal_type_from_hour</code></summary>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-42-1" name="__codelineno-42-1" href="#__codelineno-42-1"></a><span class="n">DAYS</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"пн"</span><span class="p">,</span> <span class="s2">"вт"</span><span class="p">,</span> <span class="s2">"ср"</span><span class="p">,</span> <span class="s2">"чт"</span><span class="p">,</span> <span class="s2">"пт"</span><span class="p">,</span> <span class="s2">"сб"</span><span class="p">,</span> <span class="s2">"нд"</span><span class="p">)</span>
+<a id="__codelineno-42-2" name="__codelineno-42-2" href="#__codelineno-42-2"></a>
+<a id="__codelineno-42-3" name="__codelineno-42-3" href="#__codelineno-42-3"></a>
+<a id="__codelineno-42-4" name="__codelineno-42-4" href="#__codelineno-42-4"></a><span class="k">def</span><span class="w"> </span><span class="nf">meal_type_from_hour</span><span class="p">(</span><span class="n">hour</span><span class="p">):</span>
+<a id="__codelineno-42-5" name="__codelineno-42-5" href="#__codelineno-42-5"></a>    <span class="k">if</span> <span class="mi">11</span> <span class="o">&lt;=</span> <span class="n">hour</span> <span class="o">&lt;=</span> <span class="mi">15</span><span class="p">:</span>
+<a id="__codelineno-42-6" name="__codelineno-42-6" href="#__codelineno-42-6"></a>        <span class="k">return</span> <span class="s2">"обід"</span>
+<a id="__codelineno-42-7" name="__codelineno-42-7" href="#__codelineno-42-7"></a>    <span class="k">if</span> <span class="mi">17</span> <span class="o">&lt;=</span> <span class="n">hour</span> <span class="o">&lt;=</span> <span class="mi">23</span><span class="p">:</span>
+<a id="__codelineno-42-8" name="__codelineno-42-8" href="#__codelineno-42-8"></a>        <span class="k">return</span> <span class="s2">"вечеря"</span>
+<a id="__codelineno-42-9" name="__codelineno-42-9" href="#__codelineno-42-9"></a>    <span class="k">return</span> <span class="s2">"інше"</span>
 </code></pre></div>
-<h3 id="_10">Зміни приклад: файл, який не мав потрапити в коміт<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h3>
-<p>Хтось із команди запустив <code>main.py</code>, а потім зробив <code>git add .</code>, коли <code>.gitignore</code> ще не мав рядка <code>report.json</code>. Тепер <code>report.json</code> у репозиторії, і кожен запуск програми «змінює» відстежуваний файл.</p>
-<p>Виправ у своїй гілці:</p>
-<ol>
-<li>Переконайся, що в <code>.gitignore</code> є <code>report.json</code>.</li>
-<li>Прибери файл з репозиторію, але не з диска: <code>git rm --cached report.json</code>.</li>
-<li>Закоміть: <code>git commit -m "Не зберігати report.json: його генерує main.py"</code>.</li>
-</ol>
+</details>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-43-1"> 1</a></span>
+<span class="normal"><a href="#__codelineno-43-2"> 2</a></span>
+<span class="normal"><a href="#__codelineno-43-3"> 3</a></span>
+<span class="normal"><a href="#__codelineno-43-4"> 4</a></span>
+<span class="normal"><a href="#__codelineno-43-5"> 5</a></span>
+<span class="normal"><a href="#__codelineno-43-6"> 6</a></span>
+<span class="normal"><a href="#__codelineno-43-7"> 7</a></span>
+<span class="normal"><a href="#__codelineno-43-8"> 8</a></span>
+<span class="normal"><a href="#__codelineno-43-9"> 9</a></span>
+<span class="normal"><a href="#__codelineno-43-10">10</a></span>
+<span class="normal"><a href="#__codelineno-43-11">11</a></span>
+<span class="normal"><a href="#__codelineno-43-12">12</a></span>
+<span class="normal"><a href="#__codelineno-43-13">13</a></span>
+<span class="normal"><a href="#__codelineno-43-14">14</a></span>
+<span class="normal"><a href="#__codelineno-43-15">15</a></span>
+<span class="normal"><a href="#__codelineno-43-16">16</a></span>
+<span class="normal"><a href="#__codelineno-43-17">17</a></span>
+<span class="normal"><a href="#__codelineno-43-18">18</a></span>
+<span class="normal"><a href="#__codelineno-43-19">19</a></span>
+<span class="normal"><a href="#__codelineno-43-20">20</a></span>
+<span class="normal"><a href="#__codelineno-43-21">21</a></span>
+<span class="normal"><a href="#__codelineno-43-22">22</a></span>
+<span class="normal"><a href="#__codelineno-43-23">23</a></span>
+<span class="normal"><a href="#__codelineno-43-24">24</a></span>
+<span class="normal"><a href="#__codelineno-43-25">25</a></span>
+<span class="normal"><a href="#__codelineno-43-26">26</a></span>
+<span class="normal"><a href="#__codelineno-43-27">27</a></span>
+<span class="normal"><a href="#__codelineno-43-28">28</a></span>
+<span class="normal"><a href="#__codelineno-43-29">29</a></span>
+<span class="normal"><a href="#__codelineno-43-30">30</a></span>
+<span class="normal"><a href="#__codelineno-43-31">31</a></span>
+<span class="normal"><a href="#__codelineno-43-32">32</a></span>
+<span class="normal"><a href="#__codelineno-43-33">33</a></span>
+<span class="normal"><a href="#__codelineno-43-34">34</a></span>
+<span class="normal"><a href="#__codelineno-43-35">35</a></span>
+<span class="normal"><a href="#__codelineno-43-36">36</a></span>
+<span class="normal"><a href="#__codelineno-43-37">37</a></span>
+<span class="normal"><a href="#__codelineno-43-38">38</a></span>
+<span class="normal"><a href="#__codelineno-43-39">39</a></span>
+<span class="normal"><a href="#__codelineno-43-40">40</a></span>
+<span class="normal"><a href="#__codelineno-43-41">41</a></span>
+<span class="normal"><a href="#__codelineno-43-42">42</a></span>
+<span class="normal"><a href="#__codelineno-43-43">43</a></span>
+<span class="normal"><a href="#__codelineno-43-44">44</a></span>
+<span class="normal"><a href="#__codelineno-43-45">45</a></span>
+<span class="normal"><a href="#__codelineno-43-46">46</a></span>
+<span class="normal"><a href="#__codelineno-43-47">47</a></span>
+<span class="normal"><a href="#__codelineno-43-48">48</a></span>
+<span class="normal"><a href="#__codelineno-43-49">49</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-43-1" name="__codelineno-43-1"></a><span class="hll"><span class="k">def</span><span class="w"> </span><span class="nf">build_report</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">period</span><span class="p">,</span> <span class="n">orders</span><span class="p">,</span> <span class="n">errors</span><span class="p">):</span>
+</span><a id="__codelineno-43-2" name="__codelineno-43-2"></a><span class="w">    </span><span class="sd">"""Звіт за місяць — лише типи, які розуміє JSON."""</span>
+<a id="__codelineno-43-3" name="__codelineno-43-3"></a>    <span class="n">revenue</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">order</span><span class="o">.</span><span class="n">total_bill</span> <span class="k">for</span> <span class="n">order</span> <span class="ow">in</span> <span class="n">orders</span><span class="p">)</span>
+<a id="__codelineno-43-4" name="__codelineno-43-4"></a>    <span class="n">average</span> <span class="o">=</span> <span class="n">revenue</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">orders</span><span class="p">)</span> <span class="k">if</span> <span class="n">orders</span> <span class="k">else</span> <span class="mf">0.0</span>
+<a id="__codelineno-43-5" name="__codelineno-43-5"></a>    <span class="n">by_time</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">(</span><span class="n">meal_type_from_hour</span><span class="p">(</span><span class="n">order</span><span class="o">.</span><span class="n">timestamp</span><span class="o">.</span><span class="n">hour</span><span class="p">)</span> <span class="k">for</span> <span class="n">order</span> <span class="ow">in</span> <span class="n">orders</span><span class="p">)</span>
+<a id="__codelineno-43-6" name="__codelineno-43-6"></a><span class="hll">    <span class="n">first</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">order</span><span class="o">.</span><span class="n">timestamp</span> <span class="k">for</span> <span class="n">order</span> <span class="ow">in</span> <span class="n">orders</span><span class="p">)</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span> <span class="k">if</span> <span class="n">orders</span> <span class="k">else</span> <span class="kc">None</span>
+</span><a id="__codelineno-43-7" name="__codelineno-43-7"></a><span class="hll">    <span class="k">return</span> <span class="p">{</span>
+</span><a id="__codelineno-43-8" name="__codelineno-43-8"></a>        <span class="s2">"cafe"</span><span class="p">:</span> <span class="n">config</span><span class="p">[</span><span class="s2">"cafe"</span><span class="p">],</span>
+<a id="__codelineno-43-9" name="__codelineno-43-9"></a>        <span class="s2">"currency"</span><span class="p">:</span> <span class="n">config</span><span class="p">[</span><span class="s2">"currency"</span><span class="p">],</span>
+<a id="__codelineno-43-10" name="__codelineno-43-10"></a>        <span class="s2">"period"</span><span class="p">:</span> <span class="n">period</span><span class="p">,</span>
+<a id="__codelineno-43-11" name="__codelineno-43-11"></a>        <span class="s2">"orders"</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">orders</span><span class="p">),</span>
+<a id="__codelineno-43-12" name="__codelineno-43-12"></a>        <span class="s2">"skipped"</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">errors</span><span class="p">),</span>
+<a id="__codelineno-43-13" name="__codelineno-43-13"></a>        <span class="s2">"revenue"</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">revenue</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+<a id="__codelineno-43-14" name="__codelineno-43-14"></a><span class="hll">        <span class="s2">"average"</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">average</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+</span><a id="__codelineno-43-15" name="__codelineno-43-15"></a>        <span class="s2">"by_time"</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span><span class="n">by_time</span><span class="o">.</span><span class="n">most_common</span><span class="p">()),</span>
+<a id="__codelineno-43-16" name="__codelineno-43-16"></a>        <span class="s2">"first_order"</span><span class="p">:</span> <span class="n">first</span><span class="p">,</span>
+<a id="__codelineno-43-17" name="__codelineno-43-17"></a>    <span class="p">}</span>
+<a id="__codelineno-43-18" name="__codelineno-43-18"></a>
+<a id="__codelineno-43-19" name="__codelineno-43-19"></a>
+<a id="__codelineno-43-20" name="__codelineno-43-20"></a><span class="hll"><span class="k">def</span><span class="w"> </span><span class="nf">month_report</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">year</span><span class="p">,</span> <span class="n">month</span><span class="p">):</span>
+</span><a id="__codelineno-43-21" name="__codelineno-43-21"></a><span class="hll">    <span class="n">names</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">config</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">year</span><span class="o">=</span><span class="n">year</span><span class="p">,</span> <span class="n">month</span><span class="o">=</span><span class="n">month</span><span class="p">)</span>
+</span><a id="__codelineno-43-22" name="__codelineno-43-22"></a><span class="hll">             <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"kasa_file"</span><span class="p">,</span> <span class="s2">"report_file"</span><span class="p">,</span> <span class="s2">"errors_file"</span><span class="p">)}</span>
+</span><a id="__codelineno-43-23" name="__codelineno-43-23"></a>    <span class="n">orders</span><span class="p">,</span> <span class="n">errors</span> <span class="o">=</span> <span class="n">load_orders</span><span class="p">(</span><span class="n">read_kasa</span><span class="p">(</span><span class="n">names</span><span class="p">[</span><span class="s2">"kasa_file"</span><span class="p">]))</span>
+<a id="__codelineno-43-24" name="__codelineno-43-24"></a>    <span class="n">report</span> <span class="o">=</span> <span class="n">build_report</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">year</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">month</span><span class="si">:</span><span class="s2">02d</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">orders</span><span class="p">,</span> <span class="n">errors</span><span class="p">)</span>
+<a id="__codelineno-43-25" name="__codelineno-43-25"></a><span class="hll">
+</span><a id="__codelineno-43-26" name="__codelineno-43-26"></a><span class="hll">    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">names</span><span class="p">[</span><span class="s2">"report_file"</span><span class="p">],</span> <span class="s2">"w"</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+</span><a id="__codelineno-43-27" name="__codelineno-43-27"></a>        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">report</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">ensure_ascii</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<a id="__codelineno-43-28" name="__codelineno-43-28"></a>    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">names</span><span class="p">[</span><span class="s2">"errors_file"</span><span class="p">],</span> <span class="s2">"w"</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+<a id="__codelineno-43-29" name="__codelineno-43-29"></a><span class="hll">        <span class="k">for</span> <span class="n">message</span> <span class="ow">in</span> <span class="n">errors</span><span class="p">:</span>
+</span><a id="__codelineno-43-30" name="__codelineno-43-30"></a><span class="hll">            <span class="nb">print</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file</span><span class="p">)</span>
+</span><a id="__codelineno-43-31" name="__codelineno-43-31"></a>    <span class="n">log_run</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">report</span><span class="p">[</span><span class="s1">'period'</span><span class="p">]</span><span class="si">}</span><span class="s2">: прийнято </span><span class="si">{</span><span class="n">report</span><span class="p">[</span><span class="s1">'orders'</span><span class="p">]</span><span class="si">}</span><span class="s2">, пропущено </span><span class="si">{</span><span class="n">report</span><span class="p">[</span><span class="s1">'skipped'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+<a id="__codelineno-43-32" name="__codelineno-43-32"></a><span class="hll">            <span class="n">config</span><span class="p">[</span><span class="s2">"log_file"</span><span class="p">])</span>
+</span><a id="__codelineno-43-33" name="__codelineno-43-33"></a><span class="hll">    <span class="k">return</span> <span class="n">names</span><span class="p">[</span><span class="s2">"report_file"</span><span class="p">]</span>
+</span><a id="__codelineno-43-34" name="__codelineno-43-34"></a>
+<a id="__codelineno-43-35" name="__codelineno-43-35"></a>
+<a id="__codelineno-43-36" name="__codelineno-43-36"></a><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="n">year</span><span class="p">,</span> <span class="n">month</span><span class="p">):</span>
+<a id="__codelineno-43-37" name="__codelineno-43-37"></a>    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">"cafe_config.json"</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+<a id="__codelineno-43-38" name="__codelineno-43-38"></a>        <span class="n">config</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+<a id="__codelineno-43-39" name="__codelineno-43-39"></a>    <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-43-40" name="__codelineno-43-40"></a>        <span class="n">report_file</span> <span class="o">=</span> <span class="n">month_report</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">year</span><span class="p">,</span> <span class="n">month</span><span class="p">)</span>
+<a id="__codelineno-43-41" name="__codelineno-43-41"></a>    <span class="k">except</span> <span class="ne">FileNotFoundError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+<a id="__codelineno-43-42" name="__codelineno-43-42"></a>        <span class="nb">print</span><span class="p">(</span><span class="s2">"Немає файлу каси:"</span><span class="p">,</span> <span class="n">error</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+<a id="__codelineno-43-43" name="__codelineno-43-43"></a>        <span class="k">return</span> <span class="mi">1</span>
+<a id="__codelineno-43-44" name="__codelineno-43-44"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"Звіт збережено:"</span><span class="p">,</span> <span class="n">report_file</span><span class="p">)</span>
+<a id="__codelineno-43-45" name="__codelineno-43-45"></a>    <span class="k">return</span> <span class="mi">0</span>
+<a id="__codelineno-43-46" name="__codelineno-43-46"></a>
+<a id="__codelineno-43-47" name="__codelineno-43-47"></a>
+<a id="__codelineno-43-48" name="__codelineno-43-48"></a><span class="n">main</span><span class="p">(</span><span class="mi">2024</span><span class="p">,</span> <span class="mi">7</span><span class="p">)</span>
+<a id="__codelineno-43-49" name="__codelineno-43-49"></a><span class="n">main</span><span class="p">(</span><span class="mi">2024</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-44-1" name="__codelineno-44-1" href="#__codelineno-44-1"></a>Звіт збережено: report_2024_07.json
+<a id="__codelineno-44-2" name="__codelineno-44-2" href="#__codelineno-44-2"></a>Немає файлу каси: kasa_2024_08.txt
+</code></pre></div>
+<p>Що вийшло у файлі звіту — його побачить сайт кафе:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-45-1" name="__codelineno-45-1" href="#__codelineno-45-1"></a><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">"report_2024_07.json"</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+<a id="__codelineno-45-2" name="__codelineno-45-2" href="#__codelineno-45-2"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">file</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-46-1" name="__codelineno-46-1" href="#__codelineno-46-1"></a>{
+<a id="__codelineno-46-2" name="__codelineno-46-2" href="#__codelineno-46-2"></a>  "cafe": "Кафе «Смачно»",
+<a id="__codelineno-46-3" name="__codelineno-46-3" href="#__codelineno-46-3"></a>  "currency": "грн",
+<a id="__codelineno-46-4" name="__codelineno-46-4" href="#__codelineno-46-4"></a>  "period": "2024-07",
+<a id="__codelineno-46-5" name="__codelineno-46-5" href="#__codelineno-46-5"></a>  "orders": 4,
+<a id="__codelineno-46-6" name="__codelineno-46-6" href="#__codelineno-46-6"></a>  "skipped": 5,
+<a id="__codelineno-46-7" name="__codelineno-46-7" href="#__codelineno-46-7"></a>  "revenue": 3040.0,
+<a id="__codelineno-46-8" name="__codelineno-46-8" href="#__codelineno-46-8"></a>  "average": 760.0,
+<a id="__codelineno-46-9" name="__codelineno-46-9" href="#__codelineno-46-9"></a>  "by_time": {
+<a id="__codelineno-46-10" name="__codelineno-46-10" href="#__codelineno-46-10"></a>    "вечеря": 3,
+<a id="__codelineno-46-11" name="__codelineno-46-11" href="#__codelineno-46-11"></a>    "обід": 1
+<a id="__codelineno-46-12" name="__codelineno-46-12" href="#__codelineno-46-12"></a>  },
+<a id="__codelineno-46-13" name="__codelineno-46-13" href="#__codelineno-46-13"></a>  "first_order": "2024-07-19T12:10:00"
+<a id="__codelineno-46-14" name="__codelineno-46-14" href="#__codelineno-46-14"></a>}
+</code></pre></div>
+<p>Що відбувається в ключових рядках:</p>
+<ul>
+<li><strong>рядок 1</strong> — <code>build_report</code> лише рахує і повертає словник, файлів не торкається. Її легко перевірити на кількох чеках;</li>
+<li><strong>рядки 6 і 14</strong> — усе, що JSON не знає, перетворюється заздалегідь: <code>datetime</code> → рядок ISO, <code>Counter</code> → <code>dict</code>. <code>if orders else</code> захищає від порожнього місяця: <code>min()</code> порожнього списку підняв би <code>ValueError</code>;</li>
+<li><strong>рядки 20–22</strong> — імена файлів з шаблонів конфігу, жодного вшитого імені;</li>
+<li><strong>рядки 25–26</strong> — <code>json.dump</code> пише просто у відкритий файл, <code>ensure_ascii=False</code> і <code>indent=2</code> — для людей;</li>
+<li><strong>рядки 29–30</strong> — перелік помилок перезаписується (<code>"w"</code>), журнал дописується (<code>"a"</code>, всередині <code>log_run</code>);</li>
+<li><strong>рядки 32–33</strong> — <code>main</code> ловить <code>FileNotFoundError</code> і відповідає людською мовою, як <code>main</code> в уроці 14. <code>month_report</code> про людей нічого не знає.</li>
+</ul>
+<p>А тепер програма, якою бухгалтер відкриє звіт, — теж Python, хоча могла б бути будь-якою мовою:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-47-1" name="__codelineno-47-1" href="#__codelineno-47-1"></a><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">"report_2024_07.json"</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+<a id="__codelineno-47-2" name="__codelineno-47-2" href="#__codelineno-47-2"></a>    <span class="n">saved</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+<a id="__codelineno-47-3" name="__codelineno-47-3" href="#__codelineno-47-3"></a>
+<a id="__codelineno-47-4" name="__codelineno-47-4" href="#__codelineno-47-4"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">saved</span><span class="p">[</span><span class="s1">'cafe'</span><span class="p">]</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">saved</span><span class="p">[</span><span class="s1">'period'</span><span class="p">]</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">saved</span><span class="p">[</span><span class="s1">'revenue'</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">saved</span><span class="p">[</span><span class="s1">'currency'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<a id="__codelineno-47-5" name="__codelineno-47-5" href="#__codelineno-47-5"></a><span class="nb">print</span><span class="p">(</span><span class="s2">"Вечері:"</span><span class="p">,</span> <span class="n">saved</span><span class="p">[</span><span class="s2">"by_time"</span><span class="p">][</span><span class="s2">"вечеря"</span><span class="p">])</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-48-1" name="__codelineno-48-1" href="#__codelineno-48-1"></a>Кафе «Смачно», 2024-07: 3040.00 грн
+<a id="__codelineno-48-2" name="__codelineno-48-2" href="#__codelineno-48-2"></a>Вечері: 3
+</code></pre></div>
+<h3 id="_8">Зміни приклад: найкращий день і чайові<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h3>
+<p>Додай до <code>build_report</code> два ключі:</p>
+<ul>
+<li><code>"best_day"</code> — день тижня (<code>"пн"</code>…<code>"нд"</code>) з найбільшим виторгом;</li>
+<li><code>"tips_percent"</code> — чайові як відсоток від виторгу, округлені до одного знака.</li>
+</ul>
+<p>І перший рядок у файлі помилок: <code>Пропущено рядків: 5</code>.</p>
+<p>Очікувані значення для липня:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-49-1" name="__codelineno-49-1" href="#__codelineno-49-1"></a>best_day: нд
+<a id="__codelineno-49-2" name="__codelineno-49-2" href="#__codelineno-49-2"></a>tips_percent: 11.5
+</code></pre></div>
 <p><strong>Критерії перевірки:</strong></p>
 <ul>
-<li><code>git status --short</code> після запуску <code>main.py</code> порожній;</li>
-<li><code>git ls-files</code> не показує <code>report.json</code>;</li>
-<li>файл <code>report.json</code> на диску лишився.</li>
+<li><code>report_2024_07.json</code> після запуску містить обидва нові ключі;</li>
+<li>для місяця без жодного правильного чека <code>build_report</code> не падає: <code>"best_day"</code> — <code>null</code>, <code>"tips_percent"</code> — <code>0.0</code>;</li>
+<li><code>errors_2024_07.txt</code> після двох запусків поспіль містить заголовок <strong>один</strong> раз.</li>
 </ul>
 <details class="tip">
 <summary>Підказка</summary>
-<p><code>.gitignore</code> діє лише на файли, які Git <strong>ще не відстежує</strong>. Файл, що вже є в коміті, спершу треба прибрати з індексу — саме це робить <code>git rm --cached</code>.</p>
+<p>Виторг за днями — словник, як <code>revenue_by_day</code> в уроці 8, тільки ключ — <code>DAYS[order.timestamp.weekday()]</code>. Найкращий день — <code>max(revenue_by_day, key=revenue_by_day.get)</code>, але лише якщо словник непорожній. Заголовок пиши першим <code>print</code> у тому самому <code>with open(..., "w")</code>.</p>
 </details>
-<h3 id="_11">Командна задача: звіт каси кафе<a class="headerlink" href="#_11" title="Permanent link">&para;</a></h3>
-<p>Команда з 4–6 людей. У маленькій команді хтось бере дві задачі.</p>
-<ol>
-<li><strong>Лідер</strong> створює новий публічний репозиторій на GitHub (<a href="../../../00_getting_started/github/create_repository/">інструкція</a>, сценарій B), копіює туди <strong>вміст</strong> теки <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_1/lessons/lesson_15_git_github_system/team_project"><code>team_project/</code></a> <strong>без</strong> теки <code>solution/</code> і робить перший коміт.</li>
-<li>Лідер додає команду: <strong>Settings → Collaborators → Add people</strong> (<a href="https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/repository-access-and-collaboration/inviting-collaborators-to-a-personal-repository">документація GitHub</a>). Кожен приймає запрошення й клонує репозиторій.</li>
-<li>Команда розподіляє задачі 1–6. Кожен:<ul>
-<li><code>git switch main</code> і <code>git pull</code>, потім <code>git switch -c task-N-назва</code>;</li>
-<li>читає контракт у докстрінгах свого файлу, пише код;</li>
-<li><code>python check.py N</code> — поки всі тести не <code>OK</code>;</li>
-<li>дописує свій рядок у <code>TEAM.md</code>;</li>
-<li><code>git add</code> лише свої файли, <code>git commit</code> з добрим повідомленням, <code>git push -u origin task-N-назва</code>;</li>
-<li>відкриває PR у <code>main</code> свого командного репозиторію.</li>
-</ul>
-</li>
-<li>Кожен PR переглядає інша людина: чи дотримано контракту, чи зрозумілий код, чи немає зайвих файлів. Merge — лише після схвалення.</li>
-<li>Конфлікт у <code>TEAM.md</code> розв'язує автор PR: <code>git merge main</code> у своїй гілці, чотири кроки, <code>git push</code>.</li>
-<li><strong>Готово</strong>, коли в <code>main</code> після <code>git pull</code>:</li>
-</ol>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a>✅ Проєкт працює!
+<h3 id="_9">Спробуй самостійно: картка постійного гостя<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h3>
+<p>Кафе запускає картки лояльності: за кожен візит гість отримує бал. Бали мають зберігатися між запусками програми в <code>loyalty.json</code>, наприклад:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-50-1" name="__codelineno-50-1" href="#__codelineno-50-1"></a><span class="p">{</span><span class="nt">"Оксана"</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="nt">"Тарас"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">}</span>
 </code></pre></div>
-<p>— останній рядок <code>python check.py all</code>, а <code>python main.py kasa_2024_07.txt</code> друкує звіт, як на початку уроку.</p>
-<p><strong>Що надіслати викладачеві:</strong> посилання на командний репозиторій. Там має бути видно шість PR, кожен від своєї людини, з рев'ю.</p>
-<h3 id="_12">Знайди помилку<a class="headerlink" href="#_12" title="Permanent link">&para;</a></h3>
-<p>Що піде не так у кожній ситуації?</p>
-<ol>
-<li>Тарас виконав <code>git add .</code> одразу після <code>python main.py kasa_2024_07.txt</code>, а в <code>.gitignore</code> немає <code>report.json</code>.</li>
-<li>Оксана відкрила проєкт, одразу написала код і закомітила в <code>main</code>.</li>
-<li>Ірина тиждень не робила <code>git pull</code>, створила гілку для виправлення і відкрила PR.</li>
-</ol>
+<p>Напиши три функції:</p>
+<ul>
+<li><code>load_loyalty(path)</code> — словник з файлу; якщо файлу ще немає (перший запуск) — порожній словник <code>{}</code>;</li>
+<li><code>add_visit(cards, name)</code> — додає гостеві бал, новому гостю створює картку з балом 1;</li>
+<li><code>save_loyalty(cards, path)</code> — записує словник у файл, кирилицею і з відступами.</li>
+</ul>
+<p>Перевірка — «запуск програми двічі»:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-51-1" name="__codelineno-51-1" href="#__codelineno-51-1"></a>перший запуск:  {}  →  після двох візитів Оксани і одного Тараса  →  {'Оксана': 2, 'Тарас': 1}
+<a id="__codelineno-51-2" name="__codelineno-51-2" href="#__codelineno-51-2"></a>другий запуск:  {'Оксана': 2, 'Тарас': 1}  →  ще візит Оксани  →  {'Оксана': 3, 'Тарас': 1}
+</code></pre></div>
+<p><strong>Правила:</strong></p>
+<ul>
+<li>відсутній файл — через <code>try</code> / <code>except FileNotFoundError</code>, а не <code>Path.exists()</code> (EAFP з уроку 14);</li>
+<li>файл читається й пишеться лише через <code>with</code>;</li>
+<li><code>add_visit</code> не торкається файлів.</li>
+</ul>
+<h3 id="_10">Знайди помилку<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h3>
+<p>У кожному фрагменті одна помилка. Що піде не так?</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-52-1" name="__codelineno-52-1" href="#__codelineno-52-1"></a><span class="c1"># 1 — журнал</span>
+<a id="__codelineno-52-2" name="__codelineno-52-2" href="#__codelineno-52-2"></a><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">"runs.log"</span><span class="p">,</span> <span class="s2">"w"</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+<a id="__codelineno-52-3" name="__codelineno-52-3" href="#__codelineno-52-3"></a>    <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">"2024-07: прийнято 4, пропущено 5"</span><span class="p">)</span>
+<a id="__codelineno-52-4" name="__codelineno-52-4" href="#__codelineno-52-4"></a>
+<a id="__codelineno-52-5" name="__codelineno-52-5" href="#__codelineno-52-5"></a><span class="c1"># 2 — перелік помилок</span>
+<a id="__codelineno-52-6" name="__codelineno-52-6" href="#__codelineno-52-6"></a><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">"errors_2024_07.txt"</span><span class="p">,</span> <span class="s2">"w"</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+<a id="__codelineno-52-7" name="__codelineno-52-7" href="#__codelineno-52-7"></a>    <span class="k">for</span> <span class="n">message</span> <span class="ow">in</span> <span class="n">errors</span><span class="p">:</span>
+<a id="__codelineno-52-8" name="__codelineno-52-8" href="#__codelineno-52-8"></a>        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+<a id="__codelineno-52-9" name="__codelineno-52-9" href="#__codelineno-52-9"></a>
+<a id="__codelineno-52-10" name="__codelineno-52-10" href="#__codelineno-52-10"></a><span class="c1"># 3 — звіт</span>
+<a id="__codelineno-52-11" name="__codelineno-52-11" href="#__codelineno-52-11"></a><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">"report_2024_07.json"</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+<a id="__codelineno-52-12" name="__codelineno-52-12" href="#__codelineno-52-12"></a>    <span class="n">saved</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+</code></pre></div>
 <details class="success">
 <summary>Відповіді</summary>
 <ol>
-<li><code>report.json</code> потрапить у репозиторій. У кожного він різний, тож кожен PR змінюватиме цей файл і конфліктуватиме з іншими. Спершу <code>.gitignore</code>, потім <code>git add</code> конкретних файлів.</li>
-<li>Коміт у <code>main</code> оминає PR і рев'ю, і всі інші при <code>git pull</code> отримають неперевірений код. Спершу <code>git switch -c task-...</code>.</li>
-<li>Гілка створена від застарілого <code>main</code>: у ній немає тижня чужих змін. PR, найімовірніше, матиме конфлікти, а тести можуть падати через уже виправлені речі. Перед новою гілкою — <code>git switch main</code> і <code>git pull</code>.</li>
+<li>Режим <code>"w"</code> стирає журнал при кожному запуску: лишиться лише останній рядок. Для журналу потрібен <code>"a"</code>, а ще <code>\n</code> в кінці рядка.</li>
+<li><code>write</code> не додає <code>\n</code>: п'ять повідомлень зліпляться в один рядок. Треба <code>file.write(message + "\n")</code> або <code>print(message, file=file)</code>.</li>
+<li><code>json.loads</code> чекає <strong>рядок</strong>, а отримує файловий об'єкт: <code>TypeError</code>. Для файлу — <code>json.load(file)</code> без <code>s</code>.</li>
 </ol>
 </details>
-<h2 id="_13">Підсумок<a class="headerlink" href="#_13" title="Permanent link">&para;</a></h2>
+<h2 id="_11">Підсумок<a class="headerlink" href="#_11" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
@@ -4128,69 +4415,75 @@
 </thead>
 <tbody>
 <tr>
-<td>Три місця</td>
-<td>робоча тека → <code>git add</code> → staging → <code>git commit</code> → репозиторій → <code>git push</code> → GitHub</td>
+<td><code>with open(path, mode, encoding="utf-8")</code></td>
+<td>файл закриється сам, навіть після винятку</td>
 </tr>
 <tr>
-<td>Коміт</td>
-<td>знімок + автор + повідомлення + батько; один коміт — одна зміна</td>
+<td><code>read()</code> і <code>for line in file</code></td>
+<td>весь текст одним рядком або рядок за рядком; <code>strip()</code> прибирає <code>\n</code></td>
 </tr>
 <tr>
-<td><code>.gitignore</code></td>
-<td>згенеровані файли й секрети не потрапляють у репозиторій</td>
+<td><code>"r"</code>, <code>"w"</code>, <code>"a"</code></td>
+<td>читати; стерти й записати; дописати в кінець</td>
 </tr>
 <tr>
-<td>Гілка</td>
-<td>вказівник на коміт; одна задача — одна гілка</td>
+<td>Відносний шлях</td>
+<td>шукається від поточної теки; немає файлу — <code>FileNotFoundError</code></td>
 </tr>
 <tr>
-<td>PR</td>
-<td>запит злити гілку в <code>main</code> з рев'ю; <code>pull</code> = <code>fetch</code> + <code>merge</code></td>
+<td>JSON</td>
+<td><code>dump</code>/<code>load</code> — файл, <code>dumps</code>/<code>loads</code> — рядок; кортеж → список, ключі → рядки</td>
 </tr>
 <tr>
-<td>Конфлікт</td>
-<td>ті самі рядки в обох гілках; прибрати маркери → <code>add</code> → <code>commit</code></td>
+<td><code>datetime</code> у JSON</td>
+<td><code>isoformat()</code> і <code>datetime.fromisoformat()</code></td>
 </tr>
 <tr>
-<td>Контракт</td>
-<td>докстрінг + тести; дає працювати паралельно і злити без сюрпризів</td>
+<td>CSV</td>
+<td><code>csv.DictReader</code>; усі значення — рядки</td>
 </tr>
 </tbody>
 </table>
-<h3 id="_14">Самоперевірка<a class="headerlink" href="#_14" title="Permanent link">&para;</a></h3>
+<h3 id="_12">Самоперевірка<a class="headerlink" href="#_12" title="Permanent link">&para;</a></h3>
 <ol>
-<li>Що робить <code>git add</code> і навіщо він окремо від <code>git commit</code>?</li>
-<li>Що таке гілка технічно? Чи копіює <code>git switch -c</code> файли?</li>
-<li>Чому <code>rules.py</code> і <code>stats.py</code> злилися автоматично, а <code>TEAM.md</code> — ні?</li>
-<li>Що означають маркери <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code>, <code>=======</code>, <code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;</code>? Що з ними робити?</li>
-<li>Git злив усі PR без конфліктів. Чи означає це, що проєкт працює?</li>
-<li>Як Тарас перевіряє задачу 4, якщо задача 1 ще не готова?</li>
-<li>Чому <code>report.json</code> у <code>.gitignore</code>, а <code>kasa_2024_07.txt</code> — ні?</li>
+<li>Чим <code>with open(...) as file:</code> кращий за <code>file = open(...)</code> і <code>file.close()</code>?</li>
+<li>Файл відкрили в режимі <code>"w"</code>, але нічого не записали. Що сталося з його вмістом?</li>
+<li>Чому <code>file.read()</code> вдруге поспіль повертає порожній рядок?</li>
+<li>Програма <code>cafe/report.py</code> відкриває <code>"kasa_2024_07.txt"</code>, файл лежить поруч з нею, а виходить <code>FileNotFoundError</code>. Чому?</li>
+<li>Чому звіт зберігають у JSON, а не через <code>str(report)</code>?</li>
+<li>У звіті був ключ <code>7</code>. Як дістати значення після <code>json.load</code>?</li>
+<li>Чим <code>json.load</code> відрізняється від <code>json.loads</code>?</li>
 </ol>
 <details class="success">
 <summary>Відповіді</summary>
 <ol>
-<li>Кладе поточний стан файлу в staging area — набір того, що піде в наступний коміт. Окремий крок дозволяє закомітити лише частину змін.</li>
-<li>Іменований вказівник на коміт. Файли не копіюються; змінюється лише те, на що вказує <code>HEAD</code>.</li>
-<li>Кожен файл змінювала лише одна гілка. У <code>TEAM.md</code> обидві гілки дописали рядок в одне місце.</li>
-<li>Межі двох версій: від <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code> до <code>=======</code> — поточна гілка, від <code>=======</code> до <code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;</code> — та, що зливається. Залишити правильний варіант, прибрати всі маркери, <code>git add</code>, <code>git commit</code>.</li>
-<li>Ні. Git порівнює текст, а не сенс. Перевіряє <code>python check.py all</code> з інтеграційним тестом.</li>
-<li>Тести задачі 4 підставляють заглушку <code>fake_day_name</code>, яка знає відповіді для тестових дат. Задача 4 спирається лише на контракт <code>day_name</code>.</li>
-<li><code>report.json</code> генерує програма, у кожного свій. <code>kasa_2024_07.txt</code> — вхідні дані, однакові для всієї команди, без них проєкт не запуститься.</li>
+<li><code>with</code> закриває файл за будь-якого виходу з блоку, зокрема після винятку. Ручний <code>close()</code> після винятку не виконається.</li>
+<li>Вміст стерто: <code>"w"</code> очищає файл одразу під час відкриття.</li>
+<li>Файл — ітератор з курсором. Перший <code>read()</code> дочитав до кінця, і курсор лишився там. Потрібно відкрити файл знову (або <code>file.seek(0)</code>).</li>
+<li>Відносний шлях шукається від поточної теки, з якої запустили програму, а не від теки файлу <code>.py</code>. Запусти програму з теки <code>cafe</code> або побудуй шлях від <code>Path(__file__).parent</code>.</li>
+<li><code>str()</code> дає текст, з якого словник назад не збирається, і його не прочитає програма іншою мовою. JSON відновлюється через <code>json.load</code> у той самий словник і зрозумілий будь-якій мові.</li>
+<li><code>saved["7"]</code>: ключі в JSON — лише рядки.</li>
+<li><code>json.load(file)</code> читає з відкритого файлу, <code>json.loads(text)</code> — з рядка.</li>
 </ol>
 </details>
-<h3 id="_15">Що далі<a class="headerlink" href="#_15" title="Permanent link">&para;</a></h3>
+<h3 id="_13">Що далі<a class="headerlink" href="#_13" title="Permanent link">&para;</a></h3>
 <ul>
-<li>Ноутбук заняття: <a class="md-button md-button--primary" href="https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_15_git_github_system/note_lesson_15_git_github_system_student.ipynb">Відкрити вправи в Colab</a> <a class="solutions-link" href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_15_git_github_system/note_lesson_15_git_github_system.ipynb">Переглянути розв’язки</a> — двоє в одному репозиторії: гілки, злиття, конфлікт, <code>.gitignore</code>, з перевірками.</li>
-<li>Інструкції: <a href="../../../00_getting_started/github/create_repository/">Як створити свій репозиторій</a>, <a href="../../../00_getting_started/github/pull_request/">Pull Request</a>, <a href="../../../git-cheatsheet/">Git шпаргалка</a>.</li>
-<li>Наступне заняття: <a href="../lesson_16/">Урок 16. Практикум 3. Хеш-структури</a>. А капстоун-проєкт <a href="../lesson_17/">уроку 17</a> ти так само вестимеш у власному репозиторії з гілками й комітами.</li>
+<li>Ноутбук заняття: <a class="md-button md-button--primary" href="https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_15_file_io_json/note_lesson_15_file_io_json_student.ipynb">Відкрити вправи в Colab</a> <a class="solutions-link" href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_15_file_io_json/note_lesson_15_file_io_json.ipynb">Переглянути розв’язки</a> — той самий місяць каси: ноутбук сам створює файл каси й конфіг, далі прогнози, вправи й перевірки.</li>
+<li>Довідник: <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_15_file_io_json/notes_file_io_json.ipynb"><code>notes_file_io_json.ipynb</code></a> <a href="https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_15_file_io_json/notes_file_io_json.ipynb"><img alt="Open In Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></a> — курсор файлу (<code>tell</code>, <code>seek</code>), типи JSON докладно, форматування таблиць, телефонна книга. Стислий повтор — <a href="../../../reference/python_core/file_io_json/">File I/O та JSON</a>.</li>
+<li>Наступне заняття: <a href="../lesson_16/">Урок 16. Git + GitHub</a>. Файли проєкту кафе вже є — час зберігати їхню історію і показувати код іншим.</li>
 </ul>
-<h2 id="_16">Документація і джерела<a class="headerlink" href="#_16" title="Permanent link">&para;</a></h2>
+<h2 id="_14">Документація і джерела<a class="headerlink" href="#_14" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Pro Git українською: <a href="https://git-scm.com/book/uk/v2">книга</a> — розділи 2 (основи: коміти, <code>.gitignore</code>) і 3 (гілки та злиття)</li>
-<li>Довідка Git: <a href="https://git-scm.com/docs/gitignore"><code>gitignore</code></a>, <a href="https://git-scm.com/docs/git-merge"><code>git merge</code></a>, <a href="https://git-scm.com/docs/git-switch"><code>git switch</code></a></li>
-<li>GitHub Docs: <a href="https://docs.github.com/en/pull-requests/collaborating-with-pull-requests">Pull requests</a>, <a href="https://docs.github.com/en/pull-requests/how-tos/merge-and-close-pull-requests/resolving-a-merge-conflict-on-github">Resolving a merge conflict on GitHub</a></li>
-<li>Для охочих: MIT, <em>The Missing Semester of Your CS Education</em>, <a href="https://missing.csail.mit.edu/2020/version-control/">«Version Control (Git)»</a> — модель даних Git знизу вгору: знімки, коміти, вказівники.</li>
+<li>Туторіал Python: <a href="https://docs.python.org/3/tutorial/inputoutput.html#reading-and-writing-files">Reading and Writing Files</a>, <a href="https://docs.python.org/3/tutorial/inputoutput.html#saving-structured-data-with-json">Saving structured data with json</a></li>
+<li><a href="https://docs.python.org/3/library/functions.html#open"><code>open()</code></a> — режими й параметри; <a href="https://docs.python.org/3/library/pathlib.html"><code>pathlib</code></a></li>
+<li><a href="https://docs.python.org/3/library/json.html"><code>json</code></a>, <a href="https://docs.python.org/3/library/csv.html"><code>csv</code></a>, <a href="https://docs.python.org/3/library/datetime.html#datetime.datetime.isoformat"><code>datetime.isoformat</code></a></li>
+<li>Глосарій: <a href="https://docs.python.org/3/glossary.html#term-context-manager">context manager</a>; оператор <a href="https://docs.python.org/3/reference/compound_stmts.html#the-with-statement"><code>with</code></a></li>
+<li>Специфікація JSON: <a href="https://www.json.org/json-uk.html">json.org</a> (українською)</li>
+<li>Для охочих:<ul>
+<li>Harvard CS50P, <a href="https://cs50.harvard.edu/python/weeks/6/">лекція 6 «File I/O»</a> — <code>open</code>, <code>with</code>, CSV, <code>csv.DictReader</code>;</li>
+<li>Princeton, <em>Introduction to Programming in Python</em>, <a href="https://introcs.cs.princeton.edu/python/15inout/">розділ 1.5 «Input and Output»</a> — стандартний ввід/вивід, перенаправлення у файли.</li>
+</ul>
+</li>
 </ul>
 
 
@@ -4221,7 +4514,7 @@
       <nav class="md-footer__inner md-grid" aria-label="Футер" >
         
           
-          <a href="../lesson_14/" class="md-footer__link md-footer__link--prev" aria-label="Назад: 14. Файли I/O, JSON">
+          <a href="../lesson_14/" class="md-footer__link md-footer__link--prev" aria-label="Назад: 14. Винятки та обробка помилок">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -4231,20 +4524,20 @@
                 Назад
               </span>
               <div class="md-ellipsis">
-                14. Файли I/O, JSON
+                14. Винятки та обробка помилок
               </div>
             </div>
           </a>
         
         
           
-          <a href="../lesson_16/" class="md-footer__link md-footer__link--next" aria-label="Вперед: 16. П3. Хеш-структури">
+          <a href="../lesson_16/" class="md-footer__link md-footer__link--next" aria-label="Вперед: 16. Git &amp; GitHub: система">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Вперед
               </span>
               <div class="md-ellipsis">
-                16. П3. Хеш-структури
+                16. Git & GitHub: система
               </div>
             </div>
             <div class="md-footer__button md-icon">
