@@ -12,7 +12,8 @@ For every notebook under module_*/ (course materials only, not assignments/):
       module_N/lessons/lesson_NN_<slug>/...  -> v5.0 lesson NN of module N
       module_N/bonus/<slug>/...              -> bonus lesson of module N (no number;
                                                 title from "bonus" in lessons_v5.json)
-      module_N/docs/...                      -> reference notebook of module N
+      module_N/docs/... or module_N/bonus/<file>.ipynb (no slug subfolder)
+                                              -> reference notebook of module N
   * relative links in markdown cells -> absolute URLs (they don't resolve in Colab)
 
 For docs/**/*.md:
@@ -57,7 +58,7 @@ BADGE_MD = "[![Open In Colab](" + BADGE_IMG + ")]({url})"
 BADGE_CELL_ID = "view-in-github"
 
 LESSON_DIR_RE = re.compile(r"^module_(\d+)/lessons/lesson_(\d+)_([a-z0-9_]+)/")
-MODULE_DOCS_RE = re.compile(r"^module_(\d+)/docs/")
+MODULE_DOCS_RE = re.compile(r"^module_(\d+)/(?:docs|bonus)/")
 BONUS_DIR_RE = re.compile(r"^module_(\d+)/bonus/([a-z0-9_]+)/")
 MD_LINK_RE = re.compile(r"(!?)\[([^\]]*)\]\(([^)\s]+)\)")
 HTML_LINK_RE = re.compile(r'((?:href|src)=")([^"]+)(")')

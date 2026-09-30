@@ -1,39 +1,261 @@
-# Урок 14. Файли, менеджери контексту та JSON
+# Урок 14. Винятки
 
-В уроці 13 програма навчилася розбирати рядки каси: чотири правильні чеки приймає, п'ять зіпсованих пропускає й пояснює чому. Але рядки були вписані прямо в код, а результат жив лише доти, доки працювала програма. Закрив ноутбук — звіту немає.
+В уроці 13 звіт кафе переїхав у модулі, і адміністратор запускає його сам: `python main.py 2024 7`. Першого ж дня він надрукував місяць словом, `python main.py 2024 липень`, і замість звіту побачив кілька рядків англійською з `Traceback` і `ValueError`. Що з цим робити, він не зрозумів.
 
-Наприкінці липня каса вивантажила місячний файл `kasa_2024_07.txt`. Власниця хоче, щоб програма сама його прочитала, склала звіт і **зберегла** його у файл, який відкриє сайт кафе чи бухгалтер. Касирові — окремий файл з переліком зіпсованих рядків, щоб їх виправити. А щоб знати, коли звіт запускали, — журнал запусків.
+А тут ще каса. Чеки тепер приходять з неї **рядками тексту**, `"2024-07-19 18:30;540.00;50;2"`, і не всі рядки цілі: десь кома замість крапки, десь рядок обрізаний, десь 30 лютого. Програма падає на першому ж зіпсованому рядку, і звіт не отримує ніхто, навіть за правильні чеки.
 
-**Що потрібно з попередніх уроків:** рядки й f-strings (урок 3), словники (урок 6), функції (урок 7), ітератори й `for` (урок 10), `datetime` і `Counter` (урок 12), `try` / `except`, `parse_line` і `load_orders` (урок 13).
+**Виняток** (exception) — це спосіб, яким Python повідомляє: «цю дію виконати не можу». У цьому уроці навчимося читати ці повідомлення, перехоплювати винятки там, де знаємо, що відповісти людині, і піднімати власні, коли дані порушують правила кафе. Мета — програма, яка не падає від чужої помилки, але й **не мовчить** про неї.
+
+**Що потрібно з попередніх уроків:** рядки й `split` (урок 3), `if` і `while` (урок 4), словники (урок 6), функції й `return` (урок 8), модулі, `datetime` і `sys.argv` (урок 13).
 
 **Після уроку ти зможеш:**
 
-- читати текстовий файл цілком і рядок за рядком через `with open(...)`;
-- пояснювати, чому `with` закриває файл навіть тоді, коли всередині стався виняток;
-- обирати режим відкриття: `r` — читати, `w` — перезаписати, `a` — дописати в кінець;
-- розбиратися з відносними шляхами й `FileNotFoundError`, користуватися `pathlib.Path`;
-- зберігати словники у JSON і читати їх назад, знати, які типи JSON не підтримує;
-- тримати налаштування програми в JSON-файлі, а не в коді; читати CSV модулем `csv`.
+- читати трасування (traceback) знизу вгору і знаходити рядок, де сталася помилка;
+- розрізняти `SyntaxError` і винятки під час виконання, впізнавати `ValueError`, `TypeError`, `KeyError`, `IndexError`, `ZeroDivisionError`;
+- перехоплювати винятки через `try` / `except` / `else` / `finally` і обирати, де саме їх ловити;
+- піднімати власні винятки через `raise`, коли дані порушують правила програми;
+- пояснювати, чому голий `except:` небезпечний і чим EAFP відрізняється від LBYL.
 
-**Задача розділу.** Прочитати `kasa_2024_07.txt`, зберегти звіт у `report_2024_07.json`, зіпсовані рядки — в `errors_2024_07.txt`, а запуск — у журнал `runs.log`. Повний код — у розділі [«Практика»](#practice).
+**Задача розділу.** Каса віддає дев'ять рядків, п'ять із них зіпсовані. Програма має прийняти чотири правильні чеки й для кожного пропущеного рядка пояснити, що з ним не так. Повний код — у розділі [«Практика»](#practice).
 
-**Ноутбук заняття:** [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_14_file_io_json/note_lesson_14_file_io_json_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_14_file_io_json/note_lesson_14_file_io_json.ipynb){ .solutions-link }
+**Ноутбук заняття:** [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_14_exceptions/note_lesson_14_exceptions_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_14_exceptions/note_lesson_14_exceptions.ipynb){ .solutions-link }
 
 ## Пригадай
 
 Дай відповідь подумки, нічого не запускаючи:
 
-1. Що повертає `load_orders(lines)` з уроку 13?
-2. У програмі є словник `report`. Програма завершилась. Де тепер `report`?
-3. Що надрукує цикл `for x in iterator:`, якщо ітератор уже вичерпали раніше?
+1. Що станеться при `menu["піца"]`, якщо такого ключа в словнику немає? А при `menu.get("піца")`?
+2. Що поверне `"2024-07-19 18:30;540.00;50;2".split(";")`?
+3. `sys.argv` для `python main.py 2024 липень` — який тип у `sys.argv[2]`?
 
 ??? success "Відповіді"
 
-    1. Пару: список прийнятих чеків `RawOrder` і список пояснень до пропущених рядків, наприклад `"рядок 3: could not convert string to float: '540,00'"`.
-    2. Ніде. Змінні живуть в оперативній пам'яті процесу, а після завершення програми цю пам'ять віддають системі.
-    3. Нічого: вичерпаний ітератор більше нічого не дає (урок 10). Відкритий файл поводиться так само.
+    1. `menu["піца"]` зупинить програму з `KeyError`. `menu.get("піца")` поверне `None`.
+    2. Список з чотирьох рядків: `['2024-07-19 18:30', '540.00', '50', '2']`.
+    3. `str`: усі аргументи командного рядка — рядки. Тому `main.py` викликає `int(args[2])`, і саме тут `"липень"` зламав програму.
 
-## Пам'ять і диск
+## Звіт упав: читаємо трасування
+
+Ось що побачив адміністратор (шляхи до файлів скорочено):
+
+```bash
+python main.py 2024 липень
+```
+
+```text
+Traceback (most recent call last):
+  File "main.py", line 23, in <module>
+    main(sys.argv)
+  File "main.py", line 14, in main
+    year, month = int(args[1]), int(args[2])
+                                ^^^^^^^^^^^^
+ValueError: invalid literal for int() with base 10: 'липень'
+```
+
+**Трасування** (traceback) — це шлях, яким програма дійшла до помилки. Читати його треба **знизу вгору**:
+
+1. **Останній рядок** — тип винятку і повідомлення: `ValueError` — «неприпустиме значення», `int()` не може перетворити `'липень'` на число.
+2. **Над ним** — рядок коду, що впав, і файл з номером рядка: `main.py`, рядок 14, функція `main`. Стрілки `^^^^` показують, яка саме частина рядка.
+3. **Ще вище** — хто викликав цю функцію: рядок 23, `main(sys.argv)` на верхньому рівні файлу (`<module>`).
+
+Найчастіше відповідь — в останніх двох рядках. Решта показує, як програма туди потрапила.
+
+### Два види помилок
+
+**`SyntaxError`** — Python не може навіть прочитати код. Програма не запускається зовсім, і не виконується жоден рядок, навіть той, що стоїть вище помилки:
+
+```python
+print("Звіт кафе")
+print("Середній чек:", 860.0 / 2
+```
+
+```text
+SyntaxError: '(' was never closed
+```
+
+Перший `print` правильний, але нічого не надрукувалося: Python спершу читає весь файл і лише потім виконує.
+
+**Виняток під час виконання** — код написаний правильно, програма стартує, і рядки виконуються, доки один з них не натрапить на неможливу дію:
+
+```python
+print("Звіт кафе")
+print("Середній чек:", 860.0 / 0)
+print("Кінець звіту")
+```
+
+```text
+Звіт кафе
+ZeroDivisionError: float division by zero
+```
+
+Перший рядок виконався, другий зупинив програму, до третього черга не дійшла. Далі йдеться саме про такі помилки: їх можна передбачити й обробити.
+
+!!! note "Вивід на цій сторінці"
+    Коли код падає, у блоці виводу показано лише останній рядок трасування — тип винятку і повідомлення.
+
+## Каса віддає рядки
+
+Чек з каси — це рядок з чотирма полями через `;`: час, сума, чайові, кількість гостей. Сьогодні каса віддала дев'ять рядків:
+
+```python
+from datetime import datetime
+from typing import NamedTuple
+
+
+class RawOrder(NamedTuple):
+    total_bill: float
+    tip: float
+    size: int
+    timestamp: datetime
+
+
+KASA_LINES = [
+    "2024-07-19 18:30;540.00;50;2",
+    "2024-07-19 12:10;320.00;30;1",
+    "2024-07-19 19:05;540,00;40;3",
+    "2024-07-20 20:15;980.00;120;4",
+    "2024-07-20 13:40;760.00",
+    "2024-02-30 19:00;450.00;0;5",
+    "2024-07-21 18:00;-120.00;0;2",
+    "2024-07-21 14:20;610.00;60;0",
+    "2024-07-21 21:30;1200.00;150;6",
+]
+```
+
+`RawOrder` — той самий чек, що в уроці 13. Перша версія розбору — «все буде добре»:
+
+```python
+def parse_line(line):
+    """Рядок каси -> RawOrder."""
+    time_text, bill_text, tip_text, size_text = line.split(";")
+    timestamp = datetime.strptime(time_text, "%Y-%m-%d %H:%M")
+    return RawOrder(float(bill_text), float(tip_text), int(size_text), timestamp)
+
+
+def load_orders(lines):
+    orders = []
+    for line in lines:
+        orders.append(parse_line(line))
+    return orders
+
+
+print(parse_line(KASA_LINES[0]))
+```
+
+```text
+RawOrder(total_bill=540.0, tip=50.0, size=2, timestamp=datetime.datetime(2024, 7, 19, 18, 30))
+```
+
+Перший рядок розібрано. **Прогноз:** що буде з усіма дев'ятьма?
+
+```python
+orders = load_orders(KASA_LINES)
+```
+
+```text
+ValueError: could not convert string to float: '540,00'
+```
+
+Третій рядок — `540,00` з комою — зупинив усю програму. Два правильні чеки перед ним і чотири після нього втрачені разом з ним.
+
+## Часті винятки
+
+Кожен зіпсований рядок каси ламає програму по-своєму. Ось винятки, які трапляються найчастіше:
+
+| Виняток | Приклад з кафе | Що каже Python |
+|---|---|---|
+| `ValueError` | `float("540,00")` | could not convert string to float: '540,00' |
+| `ValueError` | `datetime.strptime("2024-02-30 19:00", ...)` | day is out of range for month |
+| `ValueError` | `a, b, c, d = "2024-07-20 13:40;760.00".split(";")` | not enough values to unpack (expected 4, got 2) |
+| `TypeError` | `"Чек: " + 540.0` | can only concatenate str (not "float") to str |
+| `ZeroDivisionError` | `610.0 / 0` — середній чек на 0 гостей | float division by zero |
+| `IndexError` | `sys.argv[2]`, коли аргумент один | list index out of range |
+| `KeyError` | `menu["піца"]` | 'піца' |
+
+`ValueError` — «тип правильний, значення ні»: `float` приймає рядок, але не такий. `TypeError` — «тип не той»: рядок з числом не складаються. Ще один виняток, `FileNotFoundError`, з'явиться в [уроці 15](lesson_15.md), коли каса віддаватиме чеки файлом.
+
+## try / except: перехопити виняток
+
+Заборонити касі помилятися ми не можемо. Але можемо сказати програмі: «спробуй; якщо вийде `ValueError` — зроби інше».
+
+```python
+def parse_bill(text):
+    try:
+        return float(text)
+    except ValueError:
+        print("Не число:", text)
+        return None
+
+
+print(parse_bill("540.00"))
+print(parse_bill("540,00"))
+```
+
+```text
+540.0
+Не число: 540,00
+None
+```
+
+- **`try`** — код, який може впасти;
+- **`except ValueError`** — що робити, якщо в `try` виник саме `ValueError`. Виконання переходить сюди **одразу**, решта `try` пропускається;
+- якщо винятку не було, `except` не виконується зовсім.
+
+Повідомлення Python часто корисне. Щоб його отримати, додай `as` та ім'я змінної:
+
+```python
+try:
+    float("540,00")
+except ValueError as error:
+    print("Каса надіслала не число:", error)
+```
+
+```text
+Каса надіслала не число: could not convert string to float: '540,00'
+```
+
+### else і finally
+
+Повна форма має ще дві гілки:
+
+- **`else`** — виконується, лише якщо в `try` **не** було винятку: «чек прийнято»;
+- **`finally`** — виконується **завжди**, був виняток чи ні.
+
+**Прогноз:** що надрукує функція для правильного рядка і для рядка з комою?
+
+```python
+def check_line(line):
+    print("try: розбираю", line[:16])
+    try:
+        order = parse_line(line)
+        print("try: розібрано")
+    except ValueError as error:
+        print("except:", error)
+    else:
+        print("else: чек на", order.total_bill)
+    finally:
+        print("finally: рядок перевірено")
+
+
+check_line(KASA_LINES[0])
+print("---")
+check_line(KASA_LINES[2])
+```
+
+```text
+try: розбираю 2024-07-19 18:30
+try: розібрано
+else: чек на 540.0
+finally: рядок перевірено
+---
+try: розбираю 2024-07-19 19:05
+except: could not convert string to float: '540,00'
+finally: рядок перевірено
+```
+
+У другому виклику `print("try: розібрано")` не виконався: виняток перервав `try` на рядку `parse_line(line)`. `else` пропущено, бо виняток був. `finally` спрацював обидва рази.
+
+Обидва виклики поруч:
 
 ```mermaid
 flowchart TD
@@ -43,201 +265,197 @@ flowchart TD
     classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
     classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
 
-    K["kasa_2024_07.txt<br>файл каси"] --> R["читання<br>with open(..., 'r')"]
-    R --> P["load_orders<br>урок 13"]
-    P --> B["звіт — словник<br>у пам'яті"]
-    B --> J["report_2024_07.json<br>для сайту й бухгалтера"]
-    P --> E["errors_2024_07.txt<br>для касира"]
-    B --> L["runs.log<br>журнал запусків"]
+    subgraph OK["check_line(KASA_LINES[0]) — правильний рядок"]
+        direction LR
+        T1["try<br>parse_line — ок"] --> E1["else<br>чек на 540.0"] --> F1["finally<br>рядок перевірено"]
+    end
+    subgraph BAD["check_line(KASA_LINES[2]) — «540,00»"]
+        direction LR
+        T2["try<br>parse_line — ValueError"] --> X2["except<br>could not convert…"] --> F2["finally<br>рядок перевірено"]
+    end
+    OK ~~~ BAD
 
-    class K,J,E,L success
-    class R,P,B step
+    class T1,E1 success
+    class T2 warning
+    class X2 error
+    class F1,F2 step
 ```
 
-Зелені блоки — файли на диску: вони переживають завершення програми. Сірі — робота в пам'яті: змінні, списки, словники. Програма читає файл у пам'ять, працює з даними і записує результат назад на диск.
+`try` і `finally` є в обох шляхах; між ними — або `else`, або `except`, але ніколи обидва разом.
 
-Python не працює з диском сам. `open()` просить операційну систему відкрити файл і отримує **файловий об'єкт** — «ручку», через яку читають і пишуть. Коли роботу закінчено, ручку треба повернути: **закрити** файл.
+Навіщо `else`, якщо той самий код можна дописати в кінець `try`? Щоб у `try` лишався лише рядок, який ми **очікуємо** побачити впалим. Помилка в коді з `else` не буде випадково перехоплена чужим `except`. `finally` зазвичай закриває те, що відкрили: файл, з'єднання, зміну каси. У [уроці 15](lesson_15.md) цю роботу візьме на себе `with`.
 
-## Читаємо файл каси
+## Кілька except і ієрархія винятків
 
-Ось що вивантажила каса. Це ті самі рядки, що в уроці 13, тепер у файлі:
+Винятки утворюють **дерево**: загальні типи вгорі, конкретні внизу. `except` ловить свій тип **і всіх його нащадків**:
 
-```text title="kasa_2024_07.txt"
-2024-07-19 18:30;540.00;50;2
-2024-07-19 12:10;320.00;30;1
-2024-07-19 19:05;540,00;40;3
-2024-07-20 20:15;980.00;120;4
-2024-07-20 13:40;760.00
-2024-02-30 19:00;450.00;0;5
-2024-07-21 18:00;-120.00;0;2
-2024-07-21 14:20;610.00;60;0
-2024-07-21 21:30;1200.00;150;6
+```mermaid
+flowchart TD
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+
+    E["Exception<br>майже всі винятки"] --> V["ValueError"]
+    E --> T["TypeError"]
+    E --> A["ArithmeticError"]
+    E --> L["LookupError<br>пошук за ключем чи індексом"]
+    V --> C["calendar.IllegalMonthError<br>місяць 13"]
+    A --> Z["ZeroDivisionError"]
+    L --> K["KeyError"]
+    L --> I["IndexError"]
+
+    class E warning
+    class V,T,A,L decision
+    class C,Z,K,I step
 ```
 
-Файл лежить у тій самій теці, що й програма. Прочитаємо його цілком:
+Тому `except ValueError` ловить і помилку з уроку 13, `python main.py 2024 13`: `IllegalMonthError` — різновид `ValueError`.
 
 ```python
-with open("kasa_2024_07.txt", "r", encoding="utf-8") as file:
-    text = file.read()
+import calendar
 
-print(type(text), len(text))
-print(text.splitlines()[0])
-```
-
-```text
-<class 'str'> 258
-2024-07-19 18:30;540.00;50;2
-```
-
-- **`open(шлях, режим, encoding=...)`** відкриває файл. Режим `"r"` (read) — читання, він стоїть за замовчуванням;
-- **`encoding="utf-8"`** — як перетворювати байти на букви. Без нього Python візьме кодування системи, і на Windows кирилиця може перетворитися на `РЇ` чи впасти з `UnicodeDecodeError`. Для текстових файлів курсу завжди пишемо `utf-8`;
-- **`file.read()`** повертає весь вміст одним рядком `str`. Для файлу каси на 258 символів це нормально, для файлу на гігабайт — ні.
-
-### Рядок за рядком
-
-Відкритий файл — **ітератор** рядків, як генератор з уроку 10. Цикл `for` читає по одному рядку і не тримає в пам'яті весь файл:
-
-```python
-with open("kasa_2024_07.txt", encoding="utf-8") as file:
-    for number, line in enumerate(file, start=1):
-        if number <= 2:
-            print(repr(line))
-```
-
-```text
-'2024-07-19 18:30;540.00;50;2\n'
-'2024-07-19 12:10;320.00;30;1\n'
-```
-
-Кожен рядок закінчується символом переходу на новий рядок `\n`. Якщо його не прибрати, останнє поле буде `"2\n"`. `int("2\n")` таке пробачить, а порівняння рядків чи ключ словника — ні. Тому рядок з файлу спершу чистять: `line.rstrip("\n")` або просто `line.strip()`.
-
-Загорнемо читання у функцію. Порожні рядки (наприклад, зайвий `Enter` у кінці файлу) пропускаємо: це не зіпсовані чеки, їх просто немає.
-
-```python
-def read_kasa(path):
-    """Непорожні рядки файлу каси без символу нового рядка."""
-    lines = []
-    with open(path, encoding="utf-8") as file:
-        for line in file:
-            line = line.strip()
-            if line:
-                lines.append(line)
-    return lines
-
-
-lines = read_kasa("kasa_2024_07.txt")
-print(len(lines), lines[-1])
-```
-
-```text
-9 2024-07-21 21:30;1200.00;150;6
-```
-
-### Навіщо with
-
-`with open(...) as file:` відкриває файл, а коли блок з відступом закінчується, **сам його закриває**:
-
-```python
-with open("kasa_2024_07.txt", encoding="utf-8") as file:
-    first = file.readline()
-
-print(file.closed)
-```
-
-```text
-True
-```
-
-Без `with` файл закривають вручну, `file.close()`. Але якщо між `open` і `close` станеться виняток, до `close` черга не дійде, і файл лишиться відкритим. `with` закриває файл **за будь-якого виходу** з блоку, так само як `finally` з уроку 13:
-
-```python
 try:
-    with open("kasa_2024_07.txt", encoding="utf-8") as file:
-        first = file.readline()
-        average = 860.0 / 0
-except ZeroDivisionError:
-    print("виняток усередині with")
-
-print(file.closed)
+    calendar.monthrange(2024, 13)
+except ValueError as error:
+    print("Не той місяць:", error)
 ```
 
 ```text
-виняток усередині with
-True
+Не той місяць: bad month number 13; must be 1-12
 ```
 
-Незакриті файли — це **витік ресурсів**: операційна система дає програмі обмежену кількість відкритих файлів. Найнеприємніше з записом: дані, які не встигли записатися до закриття, можуть не потрапити на диск. `with` називають **менеджером контексту** (context manager): він сам виконує дію на вході в блок і дію на виході з нього.
-
-## Розбираємо і записуємо
-
-`parse_line` і `load_orders` беремо з уроку 13 без змін:
-
-??? note "Код з уроку 13: `RawOrder`, `parse_line`, `load_orders`"
-
-    ```python
-    from datetime import datetime
-    from typing import NamedTuple
-
-
-    class RawOrder(NamedTuple):
-        total_bill: float
-        tip: float
-        size: int
-        timestamp: datetime
-
-
-    def parse_line(line):
-        """Рядок каси -> RawOrder. Зіпсований рядок -> ValueError з поясненням."""
-        fields = line.split(";")
-        if len(fields) != 4:
-            raise ValueError(f"очікували 4 поля, а маємо {len(fields)}")
-        time_text, bill_text, tip_text, size_text = fields
-        timestamp = datetime.strptime(time_text, "%Y-%m-%d %H:%M")
-        bill, tip, size = float(bill_text), float(tip_text), int(size_text)
-        if bill <= 0:
-            raise ValueError(f"сума чека має бути більшою за 0, а маємо {bill}")
-        if tip < 0:
-            raise ValueError(f"чайові не можуть бути від'ємними: {tip}")
-        if size < 1:
-            raise ValueError(f"гостей має бути хоча б один, а маємо {size}")
-        return RawOrder(bill, tip, size, timestamp)
-
-
-    def load_orders(lines):
-        """Правильні чеки і список пояснень до пропущених рядків."""
-        orders = []
-        errors = []
-        for number, line in enumerate(lines, start=1):
-            try:
-                orders.append(parse_line(line))
-            except ValueError as error:
-                errors.append(f"рядок {number}: {error}")
-        return orders, errors
-    ```
+Якщо різні винятки треба обробити по-різному, пишуть кілька `except`. Python перевіряє їх **згори вниз** і виконує **перший**, що підійшов:
 
 ```python
-orders, errors = load_orders(read_kasa("kasa_2024_07.txt"))
-print(len(orders), len(errors))
+menu = {"борщ": 95, "вареники": 80, "вода": 0}
+
+
+def price_per_guest(dish, guests):
+    try:
+        return menu[dish] / guests
+    except KeyError:
+        return f"страви {dish} немає в меню"
+    except ZeroDivisionError:
+        return "гостей має бути хоча б один"
+
+
+print(price_per_guest("борщ", 2))
+print(price_per_guest("піца", 2))
+print(price_per_guest("борщ", 0))
 ```
 
 ```text
-4 5
+47.5
+страви піца немає в меню
+гостей має бути хоча б один
 ```
 
-### Режим w: файл для касира
+Якщо обробка однакова, типи записують кортежем: `except (KeyError, ZeroDivisionError):`.
 
-Режим `"w"` (write) створює файл, а якщо він уже є — **стирає** його вміст і пише з нуля. Для переліку помилок за місяць це саме те, що треба: кожен запуск дає свіжий перелік.
+!!! warning "Від вузького до широкого"
+    `except Exception:`, поставлений першим, забере **всі** винятки, і гілки під ним не виконаються ніколи. Конкретні типи пишуть вище, загальні — нижче або не пишуть зовсім.
+
+## raise: правила кафе
+
+Шостий рядок каси, `-120.00`, Python розбере без жодної помилки: це цілком нормальне число. Сьомий, `0` гостей, — теж. Але для кафе це неможливі чеки. Python про правила кафе нічого не знає, тож перевіряти їх мусимо ми, і повідомляти так само, як Python: **винятком**.
+
+`raise` піднімає виняток власноруч:
 
 ```python
-with open("errors_2024_07.txt", "w", encoding="utf-8") as file:
-    for message in errors:
-        file.write(message + "\n")
+def parse_line(line):
+    """Рядок каси -> RawOrder. Зіпсований рядок -> ValueError з поясненням."""
+    fields = line.split(";")
+    if len(fields) != 4:
+        raise ValueError(f"очікували 4 поля, а маємо {len(fields)}")
+    time_text, bill_text, tip_text, size_text = fields
+    timestamp = datetime.strptime(time_text, "%Y-%m-%d %H:%M")
+    bill, tip, size = float(bill_text), float(tip_text), int(size_text)
+    if bill <= 0:
+        raise ValueError(f"сума чека має бути більшою за 0, а маємо {bill}")
+    if tip < 0:
+        raise ValueError(f"чайові не можуть бути від'ємними: {tip}")
+    if size < 1:
+        raise ValueError(f"гостей має бути хоча б один, а маємо {size}")
+    return RawOrder(bill, tip, size, timestamp)
 
-with open("errors_2024_07.txt", encoding="utf-8") as file:
-    print(file.read(), end="")
+
+print(parse_line("2024-07-21 21:30;1200.00;150;6").size)
+parse_line("2024-07-21 18:00;-120.00;0;2")
 ```
 
 ```text
+6
+ValueError: сума чека має бути більшою за 0, а маємо -120.0
+```
+
+`raise` працює як `return`, тільки для поганого випадку: функція одразу завершується, а виняток летить до того, хто її викликав. Чому `ValueError`, а не `print` і `return None`?
+
+- `None` легко не помітити: він потрапить у список чеків і зламає звіт десь пізніше, далеко від справжньої причини;
+- виняток неможливо не помітити: або його обробить той, хто знає, що робити, або програма зупиниться з точним повідомленням;
+- для того, хто викликає `parse_line`, усі проблеми рядка — і кома, і 30 лютого, і наші правила — тепер однакові: `ValueError`.
+
+## Виняток спливає по стеку
+
+Функція `parse_line` не ловить винятки сама. Куди вони дінуться? Згадай трасування наївної версії (скорочено):
+
+```text
+Traceback (most recent call last):
+  File "kasa.py", ..., in <module>
+    orders = load_orders(KASA_LINES)
+  File "kasa.py", ..., in load_orders
+    orders.append(parse_line(line))
+  File "kasa.py", ..., in parse_line
+    return RawOrder(float(bill_text), float(tip_text), int(size_text), timestamp)
+ValueError: could not convert string to float: '540,00'
+```
+
+Виняток народився у `float()` всередині `parse_line`. Там його ніхто не ловив, і він **спливає** до того, хто викликав: у `load_orders`. Там теж не ловили — далі на верхній рівень програми. Не зловив ніхто — програма зупинилася і надрукувала весь шлях.
+
+```mermaid
+flowchart TD
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+
+    F["float('540,00')<br>ValueError"] --> P{"parse_line<br>має except?"}
+    P -- ні --> L{"load_orders<br>має except?"}
+    L -- так --> OK["рядок 3 пропущено<br>розбір іде далі"]
+    L -- ні --> M{"верхній рівень<br>має except?"}
+    M -- ні --> X["програма зупинилась<br>трасування"]
+
+    class F error
+    class P,L,M decision
+    class OK success
+    class X error
+```
+
+**Де ловити?** Там, де знаєш, **що відповісти**. `parse_line` бачить лише один рядок і не знає, пропустити його чи зупинити все. `load_orders` знає номер рядка і що робити: пропустити й записати причину. Отже, `try` — у `load_orders`:
+
+```python
+def load_orders(lines):
+    """Правильні чеки і список пояснень до пропущених рядків."""
+    orders = []
+    errors = []
+    for number, line in enumerate(lines, start=1):
+        try:
+            orders.append(parse_line(line))
+        except ValueError as error:
+            errors.append(f"рядок {number}: {error}")
+    return orders, errors
+
+
+orders, errors = load_orders(KASA_LINES)
+print("Прийнято чеків:", len(orders))
+for message in errors:
+    print(message)
+```
+
+```text
+Прийнято чеків: 4
 рядок 3: could not convert string to float: '540,00'
 рядок 5: очікували 4 поля, а маємо 2
 рядок 6: day is out of range for month
@@ -245,534 +463,294 @@ with open("errors_2024_07.txt", encoding="utf-8") as file:
 рядок 8: гостей має бути хоча б один, а маємо 0
 ```
 
-Дві особливості `write`:
+Чотири правильні чеки прийнято, п'ять рядків пропущено, і про кожен сказано, що з ним не так. Жоден `try` не знадобився ні в `parse_line`, ні в `float`, ні в `strptime`: одного обробника в правильному місці досить.
 
-- він **не додає** `\n` сам, на відміну від `print`. Забудеш — усі повідомлення зліпляться в один рядок;
-- він приймає лише рядки: `file.write(5)` дасть `TypeError`. Число спершу перетворюють: `file.write(str(5))` або f-string.
+!!! tip "Errors should never pass silently"
+    «Помилки ніколи не мають минати тихо» — рядок з [Дзену Python](https://peps.python.org/pep-0020/). `load_orders` не ховає зіпсовані рядки, а повертає їх разом з поясненнями. Власниця кафе може віддати список касирові й виправити дані.
 
-Замість `write` можна писати звичним `print` з параметром `file`: `print(message, file=file)`. Він сам додасть `\n` і перетворить числа на текст.
+## Антипатерн «підгузок»
 
-### Режим a: журнал запусків
-
-Журнал має **накопичуватися**: кожен запуск додає рядок у кінець і не стирає попередні. Для цього режим `"a"` (append):
+Найпростіший спосіб «прибрати» помилки — `except` без типу. Він ловить **усе**. Тому його й називають «підгузком»:
 
 ```python
-from pathlib import Path
-
-Path("runs.log").unlink(missing_ok=True)   # починаємо з чистого журналу
-
-
-def log_run(message, path="runs.log"):
-    with open(path, "a", encoding="utf-8") as file:
-        print(message, file=file)
-
-
-log_run("2024-07: прийнято 4, пропущено 5")
-log_run("2024-07: прийнято 4, пропущено 5")
-
-with open("runs.log", encoding="utf-8") as file:
-    print(file.read(), end="")
-```
-
-```text
-2024-07: прийнято 4, пропущено 5
-2024-07: прийнято 4, пропущено 5
-```
-
-Два запуски — два рядки. З режимом `"w"` лишився б один: кожен запуск стирав би журнал.
-
-| Режим | Файл є | Файлу немає | Для чого в кафе |
-|---|---|---|---|
-| `"r"` | читає з початку | `FileNotFoundError` | файл каси, налаштування |
-| `"w"` | **стирає** і пише з нуля | створює | звіт і помилки за місяць |
-| `"a"` | дописує в кінець | створює | журнал запусків |
-
-!!! warning "`w` не питає"
-    `open("kasa_2024_07.txt", "w")` миттєво стирає файл каси, навіть якщо ти нічого не записав. Перш ніж відкривати файл на запис, перевір ім'я: вхідні дані й результати краще називати по-різному.
-
-## Шляхи і FileNotFoundError
-
-`"kasa_2024_07.txt"` — **відносний шлях**: Python шукає файл у **поточній теці** (current working directory). Це тека, з якої запустили програму, а не обов'язково та, де лежить `.py`-файл:
-
-- `python report.py` з теки проєкту — поточна тека проєкту;
-- `python cafe/report.py` з теки вище — поточна тека вище, і `open("kasa_2024_07.txt")` шукатиме файл там;
-- у Jupyter — тека ноутбука, у Colab — `/content`, куди потрапляють файли з панелі 📁.
-
-Коли файлу немає, `open` у режимі `"r"` піднімає `FileNotFoundError`. Як і в уроці 13, ловимо його там, де знаємо, що відповісти людині:
-
-```python
-path = Path("kasa_2024_08.txt")
-print(path.exists())
-
+accepted = []
 try:
-    read_kasa(path)
-except FileNotFoundError as error:
-    print("Каса ще не вивантажила файл:", error.filename)
+    order = parse_line(KASA_LINES[0])
+    accepted.apend(order)
+except:
+    print("Зіпсований рядок каси")
 ```
 
 ```text
+Зіпсований рядок каси
+```
+
+Рядок каси правильний. Впав `accepted.apend` — друкарська помилка в імені методу (`AttributeError`). Але повідомлення звинувачує касу, і програміст годину шукатиме проблему не там. Голий `except:` ховає **твої власні** помилки так само старанно, як і чужі.
+
+З конкретним типом друкарська помилка одразу себе показує:
+
+```python
+try:
+    order = parse_line(KASA_LINES[0])
+    accepted.apend(order)
+except ValueError:
+    print("Зіпсований рядок каси")
+```
+
+```text
+AttributeError: 'list' object has no attribute 'apend'
+```
+
+!!! warning "Лови лише те, що вмієш обробити"
+    Пиши `except` з конкретним типом і лише навколо рядків, які справді можуть так впасти. `except Exception:` трохи кращий за голий `except:`, але ховає ті самі друкарські помилки.
+
+## EAFP чи LBYL
+
+Є два підходи до ризикованих дій:
+
+- **LBYL** (Look Before You Leap, «подивись, перш ніж стрибати») — спершу перевірити умову через `if`, потім діяти;
+- **EAFP** (Easier to Ask Forgiveness than Permission, «легше попросити вибачення, ніж дозволу») — діяти одразу, а на помилку відповісти в `except`.
+
+Здається, перевірити аргумент можна й через `if text.isdigit():`. Але перевірка і сама дія розуміють «число» по-різному:
+
+```python
+for text in ["7", " 7", "-5", "07"]:
+    print(repr(text), text.isdigit(), end=" ")
+    try:
+        print(int(text))
+    except ValueError:
+        print("ValueError")
+```
+
+```text
+'7' True 7
+' 7' False 7
+'-5' False -5
+'07' True 7
+```
+
+`isdigit()` відкидає `" 7"` і `"-5"`, які `int()` чудово перетворює. Тобто перевірка каже одне, а дія робить інше. `try: int(text)` питає саму операцію: вийде чи ні. Тому в Python для перетворень і розбору зазвичай обирають **EAFP**.
+
+LBYL доречний, коли перевірка проста і відсутність — нормальна ситуація, а не помилка:
+
+```python
+print(menu.get("піца", "немає в меню"))
+print("піца" in menu)
+```
+
+```text
+немає в меню
 False
-Каса ще не вивантажила файл: kasa_2024_08.txt
 ```
 
-`FileNotFoundError` — різновид `OSError`, як і `PermissionError` («немає прав на файл»). `Path.cwd()` покаже поточну теку, якщо не зрозуміло, де Python шукає файли.
-
-**`pathlib.Path`** — шлях як об'єкт, а не рядок. Частини шляху з'єднують оператором `/`, і Python сам поставить правильний роздільник для системи:
-
-```python
-folder = Path("kasa")
-path = folder / "kasa_2024_07.txt"
-print(path.name, path.stem, path.suffix)
-print(path.parent.name)
-```
-
-```text
-kasa_2024_07.txt kasa_2024_07 .txt
-kasa
-```
-
-`open` приймає і рядок, і `Path`. `Path` має й зручні методи: `path.exists()`, `path.read_text(encoding="utf-8")`, `path.write_text(text, encoding="utf-8")`.
-
-## JSON: звіт, який прочитає інша програма
-
-Звіт — це словник. Чому б не записати його через `str()`?
-
-```python
-report = {"cafe": "Смачно", "orders": 4, "revenue": 3040.0, "open": True, "note": None}
-
-with open("report.txt", "w", encoding="utf-8") as file:
-    file.write(str(report))
-
-with open("report.txt", encoding="utf-8") as file:
-    back = file.read()
-
-print(type(back))
-print(back[:12])
-```
-
-```text
-<class 'str'>
-{'cafe': 'См
-```
-
-Назад повертається **рядок**, а не словник: `back["orders"]` не спрацює. А сайт кафе, написаний не на Python, взагалі не знає, що таке `True` і `None`. Потрібен формат, який розуміють усі мови й з якого словник збирається назад.
-
-**JSON** (JavaScript Object Notation) — текстовий формат, схожий на словники й списки Python. Його розуміє практично кожна мова програмування, і саме ним обмінюються сайти й сервери. Модуль [`json`](https://docs.python.org/3/library/json.html) зі стандартної бібліотеки перетворює Python ↔ JSON:
-
-```python
-import json
-
-text = json.dumps(report, ensure_ascii=False)
-print(text)
-print(json.loads(text) == report)
-```
-
-```text
-{"cafe": "Смачно", "orders": 4, "revenue": 3040.0, "open": true, "note": null}
-True
-```
-
-Лапки в JSON лише подвійні, `True` став `true`, `None` — `null`. `json.loads` зібрав з тексту **той самий** словник.
-
-| Функція | Що робить |
-|---|---|
-| `json.dumps(obj)` | об'єкт → рядок JSON (s — string) |
-| `json.loads(text)` | рядок JSON → об'єкт |
-| `json.dump(obj, file)` | об'єкт → у відкритий файл |
-| `json.load(file)` | з відкритого файлу → об'єкт |
-
-Два параметри для людей: `ensure_ascii=False` залишає кирилицю кирилицею, а `indent=2` розбиває JSON на рядки з відступами. Без `ensure_ascii=False` українські літери стануть кодами:
-
-```python
-print(json.dumps({"cafe": "Смачно"}))
-```
-
-```text
-{"cafe": "\u0421\u043c\u0430\u0447\u043d\u043e"}
-```
-
-Це теж правильний JSON, і `json.loads` поверне «Смачно», але людина такий файл не прочитає.
-
-### Що JSON вміє, а що ні
-
-| Python | JSON |
-|---|---|
-| `dict` | об'єкт `{...}`, ключі — лише рядки |
-| `list`, `tuple` | масив `[...]` |
-| `str` | рядок у подвійних лапках |
-| `int`, `float` | число |
-| `True`, `False`, `None` | `true`, `false`, `null` |
-
-**Прогноз:** що повернеться після запису й читання?
-
-```python
-from collections import Counter
-
-data = {"best_day": ("сб", 980.0), 7: "липень", "by_time": Counter({"вечеря": 3, "обід": 1})}
-back = json.loads(json.dumps(data, ensure_ascii=False))
-print(back)
-```
-
-```text
-{'best_day': ['сб', 980.0], '7': 'липень', 'by_time': {'вечеря': 3, 'обід': 1}}
-```
-
-Три тихі зміни: кортеж повернувся **списком**, ключ `7` — **рядком** `'7'`, а `Counter` — звичайним словником. Помилки немає, але `back[7]` дасть `KeyError`. Для звіту кафе це не страшно, якщо про це пам'ятати.
-
-А `datetime` JSON не знає зовсім:
-
-```python
-json.dumps({"first_order": datetime(2024, 7, 19, 12, 10)})
-```
-
-```text
-TypeError: Object of type datetime is not JSON serializable
-```
-
-Дату записують рядком у стандартному форматі ISO 8601 і відновлюють з нього:
-
-```python
-stamp = datetime(2024, 7, 19, 12, 10).isoformat()
-print(stamp)
-print(datetime.fromisoformat(stamp))
-```
-
-```text
-2024-07-19T12:10:00
-2024-07-19 12:10:00
-```
-
-### Зіпсований JSON
-
-Якщо в JSON-файлі помилка (одинарні лапки, зайва кома, файл записали через `str()`), `json.loads` / `json.load` піднімає `json.JSONDecodeError`. Це різновид `ValueError`, тож обробляється так само, як в уроці 13:
-
-```python
-try:
-    json.loads("{'orders': 4}")
-except json.JSONDecodeError as error:
-    print(isinstance(error, ValueError))
-    print(error)
-```
-
-```text
-True
-Expecting property name enclosed in double quotes: line 1 column 2 (char 1)
-```
-
-Повідомлення вказує рядок і позицію: у колонці 2 чекали `"`, а стоїть `'`.
-
-## Налаштування у файлі
-
-У коді звіту досі вшиті назва кафе й імена файлів. Щоб перейменувати файл каси, доведеться лізти в код. Налаштування краще тримати окремо, у JSON:
-
-```json title="cafe_config.json"
-{
-  "cafe": "Кафе «Смачно»",
-  "currency": "грн",
-  "kasa_file": "kasa_{year}_{month:02d}.txt",
-  "report_file": "report_{year}_{month:02d}.json",
-  "errors_file": "errors_{year}_{month:02d}.txt",
-  "log_file": "runs.log"
-}
-```
-
-```python
-with open("cafe_config.json", encoding="utf-8") as file:
-    config = json.load(file)
-
-print(config["cafe"])
-print(config["kasa_file"].format(year=2024, month=7))
-```
-
-```text
-Кафе «Смачно»
-kasa_2024_07.txt
-```
-
-`"kasa_{year}_{month:02d}.txt"` — **шаблон**: `str.format` підставляє значення в `{}` за тими самими правилами, що f-string (`:02d` — два знаки з нулем попереду). f-string тут не підійде: його значення обчислюються одразу в коді, а шаблон приходить з файлу як звичайний рядок.
-
-Тепер касир може змінити назву файлу, а бухгалтер — валюту, не відкриваючи Python.
-
-## CSV: таблиця в тексті
-
-Сайт замовлень кафе вивантажує дані в інший формат — **CSV** (comma-separated values): перший рядок — назви колонок, далі по рядку на запис, значення через кому:
-
-```text title="orders.csv (перші рядки)"
-order_id,customer_name,dish,price,order_date,city
-1,Anna,Pizza,320,2026-03-10 12:30,Kyiv
-2,Oleh,Burger,210,2026-03-10 13:10,Lviv
-```
-
-Розбирати такий файл через `split(",")` ризиковано: кома може трапитися всередині значення, у лапках. Модуль [`csv`](https://docs.python.org/3/library/csv.html) робить це правильно. `csv.DictReader` віддає кожен рядок словником з ключами-назвами колонок:
-
-```python
-import csv
-
-with open("orders.csv", encoding="utf-8", newline="") as file:
-    rows = list(csv.DictReader(file))
-
-print(len(rows))
-print(rows[0]["dish"], repr(rows[0]["price"]))
-print(sum(float(row["price"]) for row in rows))
-```
-
-```text
-12
-Pizza '320'
-2900.0
-```
-
-Усі значення з CSV — **рядки**, навіть `'320'`: перетворювати їх на числа й дати — наша робота, з тими самими `ValueError`, що в уроці 13. `newline=""` радить документація модуля `csv`: так він сам правильно обробляє переходи на новий рядок.
-
-Для великих таблиць зазвичай беруть бібліотеку pandas: `pd.read_csv("orders.csv")`. Приклад — у ноутбуці заняття викладача [`file_json_example.ipynb`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_14_file_io_json/file_json_example.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_14_file_io_json/file_json_example.ipynb).
+Обидва підходи описано в [глосарії Python](https://docs.python.org/3/glossary.html#term-EAFP).
 
 ## Практика { #practice }
 
-### Розібраний приклад: місячний звіт кафе
+### Розібраний приклад: зрозумілі помилки для адміністратора
 
-Зберемо все разом. Правила з уроку 12 (день тижня і прийом їжі) — у згорнутому блоці:
+Повернемося до `main.py` з уроку 13. Адміністратор має бачити не трасування, а пояснення і підказку. Розділимо роботу так само, як з касою:
 
-??? note "Правила з уроку 12: `DAYS`, `meal_type_from_hour`"
+- `parse_period(args)` перевіряє аргументи й піднімає `ValueError` з поясненням людською мовою;
+- `main(args)` ловить `ValueError` і друкує пояснення та підказку.
 
-    ```python
-    DAYS = ("пн", "вт", "ср", "чт", "пт", "сб", "нд")
-
-
-    def meal_type_from_hour(hour):
-        if 11 <= hour <= 15:
-            return "обід"
-        if 17 <= hour <= 23:
-            return "вечеря"
-        return "інше"
-    ```
-
-```python linenums="1" hl_lines="1 6 7 14 20 21 22 25 26 29 30 32 33"
-def build_report(config, period, orders, errors):
-    """Звіт за місяць — лише типи, які розуміє JSON."""
-    revenue = sum(order.total_bill for order in orders)
-    average = revenue / len(orders) if orders else 0.0
-    by_time = Counter(meal_type_from_hour(order.timestamp.hour) for order in orders)
-    first = min(order.timestamp for order in orders).isoformat() if orders else None
-    return {
-        "cafe": config["cafe"],
-        "currency": config["currency"],
-        "period": period,
-        "orders": len(orders),
-        "skipped": len(errors),
-        "revenue": round(revenue, 2),
-        "average": round(average, 2),
-        "by_time": dict(by_time.most_common()),
-        "first_order": first,
-    }
-
-
-def month_report(config, year, month):
-    names = {key: config[key].format(year=year, month=month)
-             for key in ("kasa_file", "report_file", "errors_file")}
-    orders, errors = load_orders(read_kasa(names["kasa_file"]))
-    report = build_report(config, f"{year}-{month:02d}", orders, errors)
-
-    with open(names["report_file"], "w", encoding="utf-8") as file:
-        json.dump(report, file, ensure_ascii=False, indent=2)
-    with open(names["errors_file"], "w", encoding="utf-8") as file:
-        for message in errors:
-            print(message, file=file)
-    log_run(f"{report['period']}: прийнято {report['orders']}, пропущено {report['skipped']}",
-            config["log_file"])
-    return names["report_file"]
-
-
-def main(year, month):
-    with open("cafe_config.json", encoding="utf-8") as file:
-        config = json.load(file)
+```python linenums="1" hl_lines="3 4 6 7 8 9 10 11 16 17 18 19 20"
+def parse_period(args):
+    """['main.py', '2024', '7'] -> (2024, 7). Некоректні аргументи -> ValueError."""
+    if len(args) != 3:
+        raise ValueError("потрібно два аргументи: рік і місяць")
     try:
-        report_file = month_report(config, year, month)
-    except FileNotFoundError as error:
-        print("Немає файлу каси:", error.filename)
+        year, month = int(args[1]), int(args[2])
+    except ValueError:
+        raise ValueError(f"рік і місяць мають бути числами, а маємо {args[1]} і {args[2]}")
+    if not 1 <= month <= 12:
+        raise ValueError(f"місяць має бути від 1 до 12, а маємо {month}")
+    return year, month
+
+
+def main(args):
+    try:
+        year, month = parse_period(args)
+    except ValueError as error:
+        print("Помилка:", error)
+        print("Використання: python main.py РІК МІСЯЦЬ, наприклад: python main.py 2024 7")
         return 1
-    print("Звіт збережено:", report_file)
+    print(f"Звіт кафе за {month:02d}.{year}")
     return 0
 
 
-main(2024, 7)
-main(2024, 8)
+main(["main.py", "2024", "липень"])
+main(["main.py", "2024", "13"])
+main(["main.py", "2024"])
+main(["main.py", "2024", "7"])
 ```
 
 ```text
-Звіт збережено: report_2024_07.json
-Немає файлу каси: kasa_2024_08.txt
-```
-
-Що вийшло у файлі звіту — його побачить сайт кафе:
-
-```python
-with open("report_2024_07.json", encoding="utf-8") as file:
-    print(file.read())
-```
-
-```text
-{
-  "cafe": "Кафе «Смачно»",
-  "currency": "грн",
-  "period": "2024-07",
-  "orders": 4,
-  "skipped": 5,
-  "revenue": 3040.0,
-  "average": 760.0,
-  "by_time": {
-    "вечеря": 3,
-    "обід": 1
-  },
-  "first_order": "2024-07-19T12:10:00"
-}
+Помилка: рік і місяць мають бути числами, а маємо 2024 і липень
+Використання: python main.py РІК МІСЯЦЬ, наприклад: python main.py 2024 7
+Помилка: місяць має бути від 1 до 12, а маємо 13
+Використання: python main.py РІК МІСЯЦЬ, наприклад: python main.py 2024 7
+Помилка: потрібно два аргументи: рік і місяць
+Використання: python main.py РІК МІСЯЦЬ, наприклад: python main.py 2024 7
+Звіт кафе за 07.2024
 ```
 
 Що відбувається в ключових рядках:
 
-- **рядок 1** — `build_report` лише рахує і повертає словник, файлів не торкається. Її легко перевірити на кількох чеках;
-- **рядки 6 і 14** — усе, що JSON не знає, перетворюється заздалегідь: `datetime` → рядок ISO, `Counter` → `dict`. `if orders else` захищає від порожнього місяця: `min()` порожнього списку підняв би `ValueError`;
-- **рядки 20–22** — імена файлів з шаблонів конфігу, жодного вшитого імені;
-- **рядки 25–26** — `json.dump` пише просто у відкритий файл, `ensure_ascii=False` і `indent=2` — для людей;
-- **рядки 29–30** — перелік помилок перезаписується (`"w"`), журнал дописується (`"a"`, всередині `log_run`);
-- **рядки 32–33** — `main` ловить `FileNotFoundError` і відповідає людською мовою, як `main` в уроці 13. `month_report` про людей нічого не знає.
+- **рядки 3–4** — перевірка кількості аргументів **до** звернення до `args[2]`. Без неї `python main.py 2024` впав би з `IndexError`;
+- **рядки 6–8** — `raise` всередині `except`: технічне повідомлення `int()` замінюємо зрозумілим. `ValueError` з `int()` для адміністратора нічого не означає, а «рік і місяць мають бути числами» — означає;
+- **рядки 9–10** — правило, якого Python не знає: місяць від 1 до 12. Тепер місяць 13 не доходить до `calendar`, і помилка звучить однаково з іншими;
+- **рядки 16–20** — `main` єдина, хто розмовляє з людиною: друкує пояснення і повертає `1`. Код повернення `0` означає «успіх», інше число — «помилка». Так програми в терміналі повідомляють про результат одна одній;
+- **`parse_period`** нічого не друкує: вона лише повертає результат або піднімає виняток. Тому її легко перевірити окремо.
 
-А тепер програма, якою бухгалтер відкриє звіт, — теж Python, хоча могла б бути будь-якою мовою:
+У справжньому `main.py` останній рядок буде `sys.exit(main(sys.argv))`: [`sys.exit`](https://docs.python.org/3/library/sys.html#sys.exit) передає код повернення терміналу.
+
+### Зміни приклад: питати, доки не введуть правильно
+
+У ноутбуці немає командного рядка, тож місяць краще **спитати**. Напиши `ask_month(ask)`, яка:
+
+- викликає `ask("Місяць (1–12): ")` і перетворює відповідь на ціле число;
+- якщо відповідь не число або не від 1 до 12 — друкує `Помилка: …` і питає знову;
+- повертає перший правильний місяць.
+
+`ask` — функція, яка отримує підказку і повертає рядок. У справжній програмі це `input`, а для перевірки — підробка з готовими відповідями:
 
 ```python
-with open("report_2024_07.json", encoding="utf-8") as file:
-    saved = json.load(file)
+def fake_input(answers):
+    """Функція, що замість клавіатури повертає відповіді зі списку по черзі."""
+    it = iter(answers)
 
-print(f"{saved['cafe']}, {saved['period']}: {saved['revenue']:.2f} {saved['currency']}")
-print("Вечері:", saved["by_time"]["вечеря"])
+    def ask(prompt):
+        answer = next(it)
+        print(prompt + answer)
+        return answer
+
+    return ask
 ```
 
-```text
-Кафе «Смачно», 2024-07: 3040.00 грн
-Вечері: 3
-```
-
-### Зміни приклад: найкращий день і чайові
-
-Додай до `build_report` два ключі:
-
-- `"best_day"` — день тижня (`"пн"`…`"нд"`) з найбільшим виторгом;
-- `"tips_percent"` — чайові як відсоток від виторгу, округлені до одного знака.
-
-І перший рядок у файлі помилок: `Пропущено рядків: 5`.
-
-Очікувані значення для липня:
+Очікуваний вивід для `ask_month(fake_input(["липень", "13", " 7 "]))`:
 
 ```text
-best_day: нд
-tips_percent: 11.5
+Місяць (1–12): липень
+Помилка: потрібне число, а маємо липень
+Місяць (1–12): 13
+Помилка: місяць має бути від 1 до 12
+Місяць (1–12):  7 
+7
 ```
 
 **Критерії перевірки:**
 
-- `report_2024_07.json` після запуску містить обидва нові ключі;
-- для місяця без жодного правильного чека `build_report` не падає: `"best_day"` — `null`, `"tips_percent"` — `0.0`;
-- `errors_2024_07.txt` після двох запусків поспіль містить заголовок **один** раз.
+- цикл — `while True`, вихід — `return` правильного місяця;
+- `try` охоплює лише `int(...)`, а перевірка 1–12 — звичайний `if` після нього;
+- `ask_month(fake_input(["12"]))` повертає `12` з першої спроби;
+- `ask_month(input)` працює з клавіатурою без змін у коді.
 
 ??? tip "Підказка"
-    Виторг за днями — словник, як `revenue_by_day` в уроці 7, тільки ключ — `DAYS[order.timestamp.weekday()]`. Найкращий день — `max(revenue_by_day, key=revenue_by_day.get)`, але лише якщо словник непорожній. Заголовок пиши першим `print` у тому самому `with open(..., "w")`.
+    Всередині `while True`: `text = ask(...)`, потім `try: month = int(text)` / `except ValueError: print(...)` і `continue`. Далі `if 1 <= month <= 12: return month`, інакше — друк помилки, і цикл піде на нове коло.
 
-### Спробуй самостійно: картка постійного гостя
+### Спробуй самостійно: меню і бюджет
 
-Кафе запускає картки лояльності: за кожен візит гість отримує бал. Бали мають зберігатися між запусками програми в `loyalty.json`, наприклад:
+Гість питає: «Скільки порцій борщу я можу взяти на 300 грн?» Напиши `portions_for_budget(dish, budget, menu)`:
 
-```json
-{"Оксана": 3, "Тарас": 1}
+```python
+menu = {"борщ": 95, "вареники": 80, "узвар": 35, "вода": 0}
 ```
 
-Напиши три функції:
-
-- `load_loyalty(path)` — словник з файлу; якщо файлу ще немає (перший запуск) — порожній словник `{}`;
-- `add_visit(cards, name)` — додає гостеві бал, новому гостю створює картку з балом 1;
-- `save_loyalty(cards, path)` — записує словник у файл, кирилицею і з відступами.
-
-Перевірка — «запуск програми двічі»:
-
-```text
-перший запуск:  {}  →  після двох візитів Оксани і одного Тараса  →  {'Оксана': 2, 'Тарас': 1}
-другий запуск:  {'Оксана': 2, 'Тарас': 1}  →  ще візит Оксани  →  {'Оксана': 3, 'Тарас': 1}
-```
+| Виклик | Результат |
+|---|---|
+| `portions_for_budget("борщ", 300, menu)` | `3` |
+| `portions_for_budget("узвар", 100, menu)` | `2` |
+| `portions_for_budget("вода", 100, menu)` | `None` — безкоштовно, порцій скільки завгодно |
+| `portions_for_budget("піца", 300, menu)` | `ValueError: страви піца немає в меню` |
+| `portions_for_budget("борщ", -50, menu)` | `ValueError: бюджет не може бути від'ємним` |
 
 **Правила:**
 
-- відсутній файл — через `try` / `except FileNotFoundError`, а не `Path.exists()` (EAFP з уроку 13);
-- файл читається й пишеться лише через `with`;
-- `add_visit` не торкається файлів.
+- кількість порцій — `budget // menu[dish]`;
+- відсутню страву не перевіряй через `in`: зловити `KeyError` і підняти замість нього `ValueError` з поясненням;
+- безкоштовну страву теж не перевіряй через `if`: зловити `ZeroDivisionError`;
+- від'ємний бюджет — власний `raise`, **до** будь-яких обчислень;
+- жодного голого `except:`.
 
 ### Знайди помилку
 
-У кожному фрагменті одна помилка. Що піде не так?
+Три фрагменти з кафе, у кожному обробка винятків зроблена неправильно. Що піде не так і як виправити?
 
 ```python
-# 1 — журнал
-with open("runs.log", "w", encoding="utf-8") as file:
-    file.write("2024-07: прийнято 4, пропущено 5")
+# 1
+try:
+    orders.apend(parse_line(line))
+except:
+    print("Зіпсований рядок")
 
-# 2 — перелік помилок
-with open("errors_2024_07.txt", "w", encoding="utf-8") as file:
-    for message in errors:
-        file.write(message)
+# 2
+try:
+    price = menu[dish]
+except IndexError:
+    price = None
 
-# 3 — звіт
-with open("report_2024_07.json", encoding="utf-8") as file:
-    saved = json.loads(file)
+# 3
+try:
+    year = int(text)
+except Exception:
+    print("Щось пішло не так")
+except ValueError:
+    print("Рік має бути числом")
 ```
 
 ??? success "Відповіді"
 
-    1. Режим `"w"` стирає журнал при кожному запуску: лишиться лише останній рядок. Для журналу потрібен `"a"`, а ще `\n` в кінці рядка.
-    2. `write` не додає `\n`: п'ять повідомлень зліпляться в один рядок. Треба `file.write(message + "\n")` або `print(message, file=file)`.
-    3. `json.loads` чекає **рядок**, а отримує файловий об'єкт: `TypeError`. Для файлу — `json.load(file)` без `s`.
+    1. Голий `except:` ховає друкарську помилку `apend` (`AttributeError`): кожен рядок, навіть правильний, буде «зіпсованим». Треба `except ValueError:` і `append`.
+    2. Словник піднімає `KeyError`, а не `IndexError`, тож `except` не спрацює і програма впаде. Треба `except KeyError:`, а ще простіше — `price = menu.get(dish)`.
+    3. `Exception` стоїть першим і забирає і `ValueError`: друге повідомлення не з'явиться ніколи. Поміняти місця або прибрати `except Exception`.
 
 ## Підсумок
 
 | Поняття | Що запам'ятати |
 |---|---|
-| `with open(path, mode, encoding="utf-8")` | файл закриється сам, навіть після винятку |
-| `read()` і `for line in file` | весь текст одним рядком або рядок за рядком; `strip()` прибирає `\n` |
-| `"r"`, `"w"`, `"a"` | читати; стерти й записати; дописати в кінець |
-| Відносний шлях | шукається від поточної теки; немає файлу — `FileNotFoundError` |
-| JSON | `dump`/`load` — файл, `dumps`/`loads` — рядок; кортеж → список, ключі → рядки |
-| `datetime` у JSON | `isoformat()` і `datetime.fromisoformat()` |
-| CSV | `csv.DictReader`; усі значення — рядки |
+| Трасування | читати знизу вгору: тип і повідомлення → рядок → хто викликав |
+| `try` / `except` | лови конкретний тип і лише навколо рядків, що можуть так впасти |
+| `else` / `finally` | `else` — лише якщо винятку не було, `finally` — завжди |
+| Ієрархія | `except ValueError` ловить і нащадків; вузькі типи вище за широкі |
+| `raise` | правило програми порушено → виняток з поясненням, а не `print` і `None` |
+| Де ловити | там, де знаєш, що відповісти людині |
+| EAFP | для перетворень — `try: int(text)`, а не `isdigit()` |
 
 ### Самоперевірка
 
-1. Чим `with open(...) as file:` кращий за `file = open(...)` і `file.close()`?
-2. Файл відкрили в режимі `"w"`, але нічого не записали. Що сталося з його вмістом?
-3. Чому `file.read()` вдруге поспіль повертає порожній рядок?
-4. Програма `cafe/report.py` відкриває `"kasa_2024_07.txt"`, файл лежить поруч з нею, а виходить `FileNotFoundError`. Чому?
-5. Чому звіт зберігають у JSON, а не через `str(report)`?
-6. У звіті був ключ `7`. Як дістати значення після `json.load`?
-7. Чим `json.load` відрізняється від `json.loads`?
+1. Що виконається з програми, у третьому рядку якої `SyntaxError`? А якщо там `ZeroDivisionError`?
+2. Трасування має п'ять рядків `File ...`. У якому з них шукати рядок, що впав?
+3. У `try` три рядки, виняток виник у першому. Чи виконаються другий і третій?
+4. Чим відрізняються `else` і `finally`?
+5. `except ValueError:` стоїть навколо `calendar.monthrange(2024, 13)`. Чи спрацює він? Чому?
+6. Чому `parse_line` піднімає `ValueError`, а не друкує повідомлення і повертає `None`?
+7. Чому `try` стоїть у `load_orders`, а не в `parse_line`?
+8. `if text.isdigit(): month = int(text)`. Які правильні відповіді користувача цей код відкине?
 
 ??? success "Відповіді"
 
-    1. `with` закриває файл за будь-якого виходу з блоку, зокрема після винятку. Ручний `close()` після винятку не виконається.
-    2. Вміст стерто: `"w"` очищає файл одразу під час відкриття.
-    3. Файл — ітератор з курсором. Перший `read()` дочитав до кінця, і курсор лишився там. Потрібно відкрити файл знову (або `file.seek(0)`).
-    4. Відносний шлях шукається від поточної теки, з якої запустили програму, а не від теки файлу `.py`. Запусти програму з теки `cafe` або побудуй шлях від `Path(__file__).parent`.
-    5. `str()` дає текст, з якого словник назад не збирається, і його не прочитає програма іншою мовою. JSON відновлюється через `json.load` у той самий словник і зрозумілий будь-якій мові.
-    6. `saved["7"]`: ключі в JSON — лише рядки.
-    7. `json.load(file)` читає з відкритого файлу, `json.loads(text)` — з рядка.
+    1. Із `SyntaxError` — нічого: Python не запустить програму, яку не може прочитати. Із `ZeroDivisionError` — перші два рядки виконаються, третій зупинить програму.
+    2. В останньому, найближчому до повідомлення про виняток. Рядки вище показують, хто викликав цю функцію.
+    3. Ні: виконання одразу переходить до відповідного `except`.
+    4. `else` виконується, лише якщо в `try` не було винятку. `finally` виконується завжди.
+    5. Так: `IllegalMonthError` — нащадок `ValueError`, а `except` ловить свій тип і всіх нащадків.
+    6. `None` легко не помітити, і він зламає програму пізніше, далеко від причини. Виняток або обробить той, хто знає, що робити, або програма зупиниться з точним повідомленням.
+    7. `load_orders` знає номер рядка і що робити зі зіпсованим рядком: пропустити й записати причину. `parse_line` бачить лише один рядок.
+    8. `" 7"` з пробілом і від'ємні числа: `isdigit()` поверне `False`, хоча `int()` їх перетворює. `try: int(text)` питає саму операцію.
 
 ### Що далі
 
-- Ноутбук заняття: [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_14_file_io_json/note_lesson_14_file_io_json_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_14_file_io_json/note_lesson_14_file_io_json.ipynb){ .solutions-link } — той самий місяць каси: ноутбук сам створює файл каси й конфіг, далі прогнози, вправи й перевірки.
-- Довідник: [`notes_file_io_json.ipynb`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_14_file_io_json/notes_file_io_json.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_14_file_io_json/notes_file_io_json.ipynb) — курсор файлу (`tell`, `seek`), типи JSON докладно, форматування таблиць, телефонна книга. Стислий повтор — [File I/O та JSON](../../reference/python_core/file_io_json.md).
-- Наступне заняття: [Урок 15. Git + GitHub](lesson_15.md). Файли проєкту кафе вже є — час зберігати їхню історію і показувати код іншим.
+- Ноутбук заняття: [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_14_exceptions/note_lesson_14_exceptions_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_14_exceptions/note_lesson_14_exceptions.ipynb){ .solutions-link } — той самий день каси: прогнози, `parse_line` і `load_orders`, вправи з перевірками.
+- Довідник: [`notes_exceptions.ipynb`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_14_exceptions/notes_exceptions.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_14_exceptions/notes_exceptions.ipynb) і сторінка [Exceptions & Error Handling](../../reference/python_core/exceptions.md) — стислий повтор усієї теми.
+- Наступне заняття: [Урок 15. Файли, менеджери контексту та JSON](lesson_15.md). Рядки каси прийдуть з файлу: з'являться `FileNotFoundError` і `with`, який закриває файл навіть тоді, коли всередині стався виняток.
 
 ## Документація і джерела
 
-- Туторіал Python: [Reading and Writing Files](https://docs.python.org/3/tutorial/inputoutput.html#reading-and-writing-files), [Saving structured data with json](https://docs.python.org/3/tutorial/inputoutput.html#saving-structured-data-with-json)
-- [`open()`](https://docs.python.org/3/library/functions.html#open) — режими й параметри; [`pathlib`](https://docs.python.org/3/library/pathlib.html)
-- [`json`](https://docs.python.org/3/library/json.html), [`csv`](https://docs.python.org/3/library/csv.html), [`datetime.isoformat`](https://docs.python.org/3/library/datetime.html#datetime.datetime.isoformat)
-- Глосарій: [context manager](https://docs.python.org/3/glossary.html#term-context-manager); оператор [`with`](https://docs.python.org/3/reference/compound_stmts.html#the-with-statement)
-- Специфікація JSON: [json.org](https://www.json.org/json-uk.html) (українською)
+- Туторіал Python: [Errors and Exceptions](https://docs.python.org/3/tutorial/errors.html) — `try`, `except`, `else`, `finally`, `raise`
+- [Built-in Exceptions](https://docs.python.org/3/library/exceptions.html) — усі вбудовані винятки і [їхня ієрархія](https://docs.python.org/3/library/exceptions.html#exception-hierarchy)
+- Глосарій: [EAFP](https://docs.python.org/3/glossary.html#term-EAFP), [LBYL](https://docs.python.org/3/glossary.html#term-LBYL)
+- [PEP 20 — The Zen of Python](https://peps.python.org/pep-0020/): «Errors should never pass silently»
 - Для охочих:
-    - Harvard CS50P, [лекція 6 «File I/O»](https://cs50.harvard.edu/python/weeks/6/) — `open`, `with`, CSV, `csv.DictReader`;
-    - Princeton, *Introduction to Programming in Python*, [розділ 1.5 «Input and Output»](https://introcs.cs.princeton.edu/python/15inout/) — стандартний ввід/вивід, перенаправлення у файли.
+    - Harvard CS50P, [лекція 3 «Exceptions»](https://cs50.harvard.edu/python/weeks/3/) — `ValueError`, `try`/`except`/`else`, цикл вводу до правильної відповіді;
+    - MIT 6.0001, [лекція 7 «Testing, Debugging, Exceptions, and Assertions»](https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/resources/lecture-7-testing-debugging-exceptions-and-assertions/).

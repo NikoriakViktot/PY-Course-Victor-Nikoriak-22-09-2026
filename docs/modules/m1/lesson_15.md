@@ -1,42 +1,39 @@
-# Урок 15. Git + GitHub: командний проєкт
+# Урок 15. Файли, менеджери контексту та JSON
 
-За уроки 12–14 кожен з вас сам зібрав звіт каси кафе: правила, розбір рядків, читання файлу, підрахунки, JSON. Тепер кафе хоче той самий звіт, але робитиме його **команда**. Шість людей, шість частин, один проєкт, який після злиття всіх частин має запрацювати одразу, без «у мене працювало».
+В уроці 14 програма навчилася розбирати рядки каси: чотири правильні чеки приймає, п'ять зіпсованих пропускає й пояснює чому. Але рядки були вписані прямо в код, а результат жив лише доти, доки працювала програма. Закрив ноутбук — звіту немає.
 
-Як зробити, щоб шість людей не затирали файли одне одного? Щоб кожен міг працювати, не чекаючи інших? І щоб після злиття не з'ясувалося, що один повертає `"orders"`, а другий читає `"count"`? Відповідь складається з двох частин: **Git і GitHub** — для історії, гілок і злиття, і **контракти з тестами** — щоб частини пасували одна до одної.
+Наприкінці липня каса вивантажила місячний файл `kasa_2024_07.txt`. Власниця хоче, щоб програма сама його прочитала, склала звіт і **зберегла** його у файл, який відкриє сайт кафе чи бухгалтер. Касирові — окремий файл з переліком зіпсованих рядків, щоб їх виправити. А щоб знати, коли звіт запускали, — журнал запусків.
 
-Це не перше знайомство з Git: з уроку 1 ти здаєш домашні через `commit → push → Pull Request`. Сьогодні розберемо, що насправді відбувається за цими командами, і вперше попрацюємо **разом в одному репозиторії**.
-
-**Що потрібно з попередніх уроків:** функції й докстрінги (урок 7), модулі та `import` (урок 12), винятки (урок 13), файли й JSON (урок 14), Git-процес здачі домашніх ([інструкція](../../00_getting_started/homework_workflow.md)).
+**Що потрібно з попередніх уроків:** рядки й f-strings (урок 3), словники (урок 6), функції (урок 8), ітератори й `for` (урок 11), `datetime` і `Counter` (урок 13), `try` / `except`, `parse_line` і `load_orders` (урок 14).
 
 **Після уроку ти зможеш:**
 
-- пояснювати, де живуть файли: робоча тека, staging area, репозиторій — і що переносить кожна команда;
-- писати зрозумілі коміти й не пускати в репозиторій згенеровані файли через `.gitignore`;
-- працювати в окремій гілці на задачу й відкривати Pull Request у командний репозиторій;
-- розв'язувати конфлікт злиття й пояснювати, чому код різних людей не конфліктує, коли кожен працює у своєму файлі;
-- писати функцію за контрактом так, щоб проєкт працював після злиття всіх частин.
+- читати текстовий файл цілком і рядок за рядком через `with open(...)`;
+- пояснювати, чому `with` закриває файл навіть тоді, коли всередині стався виняток;
+- обирати режим відкриття: `r` — читати, `w` — перезаписати, `a` — дописати в кінець;
+- розбиратися з відносними шляхами й `FileNotFoundError`, користуватися `pathlib.Path`;
+- зберігати словники у JSON і читати їх назад, знати, які типи JSON не підтримує;
+- тримати налаштування програми в JSON-файлі, а не в коді; читати CSV модулем `csv`.
 
-**Задача розділу.** Командою з 4–6 людей зібрати проєкт [`team_project/`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_1/lessons/lesson_15_git_github_system/team_project) — шість взаємозалежних задач — так, щоб у `main` пройшло `python check.py all`. Інструкція — у розділі [«Практика»](#practice).
+**Задача розділу.** Прочитати `kasa_2024_07.txt`, зберегти звіт у `report_2024_07.json`, зіпсовані рядки — в `errors_2024_07.txt`, а запуск — у журнал `runs.log`. Повний код — у розділі [«Практика»](#practice).
 
-**Ноутбук заняття:** [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_15_git_github_system/note_lesson_15_git_github_system_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_15_git_github_system/note_lesson_15_git_github_system.ipynb){ .solutions-link }
+**Ноутбук заняття:** [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_15_file_io_json/note_lesson_15_file_io_json_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_15_file_io_json/note_lesson_15_file_io_json.ipynb){ .solutions-link }
 
 ## Пригадай
 
-Дай відповідь подумки:
+Дай відповідь подумки, нічого не запускаючи:
 
-1. Які команди ти виконуєш між «код домашньої написано» і «PR відкрито»?
-2. Що показує `git status`?
-3. Чим `origin` відрізняється від `upstream` у твоєму fork курсу?
+1. Що повертає `load_orders(lines)` з уроку 14?
+2. У програмі є словник `report`. Програма завершилась. Де тепер `report`?
+3. Що надрукує цикл `for x in iterator:`, якщо ітератор уже вичерпали раніше?
 
 ??? success "Відповіді"
 
-    1. `git switch -c homework-NN` (або `checkout -b`), `git add`, `git commit -m "..."`, `git push origin homework-NN`, далі кнопка **Compare & pull request** на GitHub.
-    2. Які файли змінено, які вже підготовлено до коміту, які Git ще не відстежує, і в якій ти гілці.
-    3. `origin` — твій fork на GitHub, куди ти робиш `push`. `upstream` — репозиторій викладача, звідки ти отримуєш нові уроки. Обидва — лише імена для адрес.
+    1. Пару: список прийнятих чеків `RawOrder` і список пояснень до пропущених рядків, наприклад `"рядок 3: could not convert string to float: '540,00'"`.
+    2. Ніде. Змінні живуть в оперативній пам'яті процесу, а після завершення програми цю пам'ять віддають системі.
+    3. Нічого: вичерпаний ітератор більше нічого не дає (урок 11). Відкритий файл поводиться так само.
 
-## Проєкт: шість задач, які залежать одна від одної
-
-Команда збирає той самий конвеєр, що в уроках 12–14, але кожну ланку пише інша людина:
+## Пам'ять і диск
 
 ```mermaid
 flowchart TD
@@ -46,572 +43,736 @@ flowchart TD
     classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
     classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
 
-    M["models.py<br>RawOrder, DAYS"] --> T2["2. parsing.py<br>parse_line"]
-    T2 --> T3["3. loading.py<br>read_lines, load_orders"]
-    T1["1. rules.py<br>meal_type, day_name"] --> T4["4. stats.py<br>виторг, найкращий день"]
-    T4 --> T5["5. report.py<br>build_report"]
-    T5 -. формат словника .-> T6["6. output.py<br>save_json, format_report"]
-    T3 --> MAIN["main.py<br>з'єднує всі задачі"]
-    T5 --> MAIN
-    T6 --> MAIN
+    K["kasa_2024_07.txt<br>файл каси"] --> R["читання<br>with open(..., 'r')"]
+    R --> P["load_orders<br>урок 14"]
+    P --> B["звіт — словник<br>у пам'яті"]
+    B --> J["report_2024_07.json<br>для сайту й бухгалтера"]
+    P --> E["errors_2024_07.txt<br>для касира"]
+    B --> L["runs.log<br>журнал запусків"]
 
-    class M,MAIN warning
-    class T1,T2,T3,T4,T5,T6 step
+    class K,J,E,L success
+    class R,P,B step
 ```
 
-| № | Файл | Що зробити | Використовує |
+Зелені блоки — файли на диску: вони переживають завершення програми. Сірі — робота в пам'яті: змінні, списки, словники. Програма читає файл у пам'ять, працює з даними і записує результат назад на диск.
+
+Python не працює з диском сам. `open()` просить операційну систему відкрити файл і отримує **файловий об'єкт** — «ручку», через яку читають і пишуть. Коли роботу закінчено, ручку треба повернути: **закрити** файл.
+
+## Читаємо файл каси
+
+Ось що вивантажила каса. Це ті самі рядки, що в уроці 14, тепер у файлі:
+
+```text title="kasa_2024_07.txt"
+2024-07-19 18:30;540.00;50;2
+2024-07-19 12:10;320.00;30;1
+2024-07-19 19:05;540,00;40;3
+2024-07-20 20:15;980.00;120;4
+2024-07-20 13:40;760.00
+2024-02-30 19:00;450.00;0;5
+2024-07-21 18:00;-120.00;0;2
+2024-07-21 14:20;610.00;60;0
+2024-07-21 21:30;1200.00;150;6
+```
+
+Файл лежить у тій самій теці, що й програма. Прочитаємо його цілком:
+
+```python
+with open("kasa_2024_07.txt", "r", encoding="utf-8") as file:
+    text = file.read()
+
+print(type(text), len(text))
+print(text.splitlines()[0])
+```
+
+```text
+<class 'str'> 258
+2024-07-19 18:30;540.00;50;2
+```
+
+- **`open(шлях, режим, encoding=...)`** відкриває файл. Режим `"r"` (read) — читання, він стоїть за замовчуванням;
+- **`encoding="utf-8"`** — як перетворювати байти на букви. Без нього Python візьме кодування системи, і на Windows кирилиця може перетворитися на `РЇ` чи впасти з `UnicodeDecodeError`. Для текстових файлів курсу завжди пишемо `utf-8`;
+- **`file.read()`** повертає весь вміст одним рядком `str`. Для файлу каси на 258 символів це нормально, для файлу на гігабайт — ні.
+
+### Рядок за рядком
+
+Відкритий файл — **ітератор** рядків, як генератор з уроку 11. Цикл `for` читає по одному рядку і не тримає в пам'яті весь файл:
+
+```python
+with open("kasa_2024_07.txt", encoding="utf-8") as file:
+    for number, line in enumerate(file, start=1):
+        if number <= 2:
+            print(repr(line))
+```
+
+```text
+'2024-07-19 18:30;540.00;50;2\n'
+'2024-07-19 12:10;320.00;30;1\n'
+```
+
+Кожен рядок закінчується символом переходу на новий рядок `\n`. Якщо його не прибрати, останнє поле буде `"2\n"`. `int("2\n")` таке пробачить, а порівняння рядків чи ключ словника — ні. Тому рядок з файлу спершу чистять: `line.rstrip("\n")` або просто `line.strip()`.
+
+Загорнемо читання у функцію. Порожні рядки (наприклад, зайвий `Enter` у кінці файлу) пропускаємо: це не зіпсовані чеки, їх просто немає.
+
+```python
+def read_kasa(path):
+    """Непорожні рядки файлу каси без символу нового рядка."""
+    lines = []
+    with open(path, encoding="utf-8") as file:
+        for line in file:
+            line = line.strip()
+            if line:
+                lines.append(line)
+    return lines
+
+
+lines = read_kasa("kasa_2024_07.txt")
+print(len(lines), lines[-1])
+```
+
+```text
+9 2024-07-21 21:30;1200.00;150;6
+```
+
+### Навіщо with
+
+`with open(...) as file:` відкриває файл, а коли блок з відступом закінчується, **сам його закриває**:
+
+```python
+with open("kasa_2024_07.txt", encoding="utf-8") as file:
+    first = file.readline()
+
+print(file.closed)
+```
+
+```text
+True
+```
+
+Без `with` файл закривають вручну, `file.close()`. Але якщо між `open` і `close` станеться виняток, до `close` черга не дійде, і файл лишиться відкритим. `with` закриває файл **за будь-якого виходу** з блоку, так само як `finally` з уроку 14:
+
+```python
+try:
+    with open("kasa_2024_07.txt", encoding="utf-8") as file:
+        first = file.readline()
+        average = 860.0 / 0
+except ZeroDivisionError:
+    print("виняток усередині with")
+
+print(file.closed)
+```
+
+```text
+виняток усередині with
+True
+```
+
+Незакриті файли — це **витік ресурсів**: операційна система дає програмі обмежену кількість відкритих файлів. Найнеприємніше з записом: дані, які не встигли записатися до закриття, можуть не потрапити на диск. `with` називають **менеджером контексту** (context manager): він сам виконує дію на вході в блок і дію на виході з нього.
+
+## Розбираємо і записуємо
+
+`parse_line` і `load_orders` беремо з уроку 14 без змін:
+
+??? note "Код з уроку 14: `RawOrder`, `parse_line`, `load_orders`"
+
+    ```python
+    from datetime import datetime
+    from typing import NamedTuple
+
+
+    class RawOrder(NamedTuple):
+        total_bill: float
+        tip: float
+        size: int
+        timestamp: datetime
+
+
+    def parse_line(line):
+        """Рядок каси -> RawOrder. Зіпсований рядок -> ValueError з поясненням."""
+        fields = line.split(";")
+        if len(fields) != 4:
+            raise ValueError(f"очікували 4 поля, а маємо {len(fields)}")
+        time_text, bill_text, tip_text, size_text = fields
+        timestamp = datetime.strptime(time_text, "%Y-%m-%d %H:%M")
+        bill, tip, size = float(bill_text), float(tip_text), int(size_text)
+        if bill <= 0:
+            raise ValueError(f"сума чека має бути більшою за 0, а маємо {bill}")
+        if tip < 0:
+            raise ValueError(f"чайові не можуть бути від'ємними: {tip}")
+        if size < 1:
+            raise ValueError(f"гостей має бути хоча б один, а маємо {size}")
+        return RawOrder(bill, tip, size, timestamp)
+
+
+    def load_orders(lines):
+        """Правильні чеки і список пояснень до пропущених рядків."""
+        orders = []
+        errors = []
+        for number, line in enumerate(lines, start=1):
+            try:
+                orders.append(parse_line(line))
+            except ValueError as error:
+                errors.append(f"рядок {number}: {error}")
+        return orders, errors
+    ```
+
+```python
+orders, errors = load_orders(read_kasa("kasa_2024_07.txt"))
+print(len(orders), len(errors))
+```
+
+```text
+4 5
+```
+
+### Режим w: файл для касира
+
+Режим `"w"` (write) створює файл, а якщо він уже є — **стирає** його вміст і пише з нуля. Для переліку помилок за місяць це саме те, що треба: кожен запуск дає свіжий перелік.
+
+```python
+with open("errors_2024_07.txt", "w", encoding="utf-8") as file:
+    for message in errors:
+        file.write(message + "\n")
+
+with open("errors_2024_07.txt", encoding="utf-8") as file:
+    print(file.read(), end="")
+```
+
+```text
+рядок 3: could not convert string to float: '540,00'
+рядок 5: очікували 4 поля, а маємо 2
+рядок 6: day is out of range for month
+рядок 7: сума чека має бути більшою за 0, а маємо -120.0
+рядок 8: гостей має бути хоча б один, а маємо 0
+```
+
+Дві особливості `write`:
+
+- він **не додає** `\n` сам, на відміну від `print`. Забудеш — усі повідомлення зліпляться в один рядок;
+- він приймає лише рядки: `file.write(5)` дасть `TypeError`. Число спершу перетворюють: `file.write(str(5))` або f-string.
+
+Замість `write` можна писати звичним `print` з параметром `file`: `print(message, file=file)`. Він сам додасть `\n` і перетворить числа на текст.
+
+### Режим a: журнал запусків
+
+Журнал має **накопичуватися**: кожен запуск додає рядок у кінець і не стирає попередні. Для цього режим `"a"` (append):
+
+```python
+from pathlib import Path
+
+Path("runs.log").unlink(missing_ok=True)   # починаємо з чистого журналу
+
+
+def log_run(message, path="runs.log"):
+    with open(path, "a", encoding="utf-8") as file:
+        print(message, file=file)
+
+
+log_run("2024-07: прийнято 4, пропущено 5")
+log_run("2024-07: прийнято 4, пропущено 5")
+
+with open("runs.log", encoding="utf-8") as file:
+    print(file.read(), end="")
+```
+
+```text
+2024-07: прийнято 4, пропущено 5
+2024-07: прийнято 4, пропущено 5
+```
+
+Два запуски — два рядки. З режимом `"w"` лишився б один: кожен запуск стирав би журнал.
+
+| Режим | Файл є | Файлу немає | Для чого в кафе |
 |---|---|---|---|
-| 1 | `rules.py` | `meal_type(hour)`, `day_name(timestamp)` | — |
-| 2 | `parsing.py` | `parse_line(line)` | `models.py` |
-| 3 | `loading.py` | `read_lines(path)`, `load_orders(lines)` | задача 2 |
-| 4 | `stats.py` | `revenue_by_day`, `best_day`, `count_by_meal` | задача 1 |
-| 5 | `report.py` | `build_report(orders, errors)` | задача 4 |
-| 6 | `output.py` | `save_json`, `format_report` | формат звіту задачі 5 |
+| `"r"` | читає з початку | `FileNotFoundError` | файл каси, налаштування |
+| `"w"` | **стирає** і пише з нуля | створює | звіт і помилки за місяць |
+| `"a"` | дописує в кінець | створює | журнал запусків |
 
-Викладач дає готові `models.py`, `main.py`, файл каси, тести й перевірку `check.py`. Коли всі шість задач злито, програма працює:
+!!! warning "`w` не питає"
+    `open("kasa_2024_07.txt", "w")` миттєво стирає файл каси, навіть якщо ти нічого не записав. Перш ніж відкривати файл на запис, перевір ім'я: вхідні дані й результати краще називати по-різному.
 
-```bash
-python main.py kasa_2024_07.txt
+## Шляхи і FileNotFoundError
+
+`"kasa_2024_07.txt"` — **відносний шлях**: Python шукає файл у **поточній теці** (current working directory). Це тека, з якої запустили програму, а не обов'язково та, де лежить `.py`-файл:
+
+- `python report.py` з теки проєкту — поточна тека проєкту;
+- `python cafe/report.py` з теки вище — поточна тека вище, і `open("kasa_2024_07.txt")` шукатиме файл там;
+- у Jupyter — тека ноутбука, у Colab — `/content`, куди потрапляють файли з панелі 📁.
+
+Коли файлу немає, `open` у режимі `"r"` піднімає `FileNotFoundError`. Як і в уроці 14, ловимо його там, де знаємо, що відповісти людині:
+
+```python
+path = Path("kasa_2024_08.txt")
+print(path.exists())
+
+try:
+    read_kasa(path)
+except FileNotFoundError as error:
+    print("Каса ще не вивантажила файл:", error.filename)
 ```
 
 ```text
-Чеків: 4, пропущено рядків: 5
-Виторг: 3040.00 грн, середній чек: 760.00 грн
-Найкращий день: нд
-За днями: пт 860.00, сб 980.00, нд 1200.00
-За прийомом їжі: вечеря 3, обід 1
+False
+Каса ще не вивантажила файл: kasa_2024_08.txt
 ```
 
-Задача 4 викликає функції задачі 1, задача 5 — задачі 4. Як тоді Тарасові писати задачу 4, якщо Оксана ще не дописала задачу 1? Про це — розділ «Контракт». Спершу — як Git тримає код команди.
+`FileNotFoundError` — різновид `OSError`, як і `PermissionError` («немає прав на файл»). `Path.cwd()` покаже поточну теку, якщо не зрозуміло, де Python шукає файли.
 
-## Три місця, де живуть файли
+**`pathlib.Path`** — шлях як об'єкт, а не рядок. Частини шляху з'єднують оператором `/`, і Python сам поставить правильний роздільник для системи:
 
-```mermaid
-flowchart TD
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
-
-    W["робоча тека<br>файли, які ти редагуєш"] -- "git add" --> S["staging area<br>що піде в наступний коміт"]
-    S -- "git commit" --> R["репозиторій .git<br>історія комітів"]
-    R -- "git push" --> G["GitHub<br>копія для команди"]
-    G -- "git pull" --> W
-
-    class W,S,R step
-    class G success
-```
-
-- **Робоча тека** (working tree) — звичайні файли, які ти відкриваєш у редакторі.
-- **Staging area** (індекс) — «кошик» наступного коміту. `git add rules.py` кладе туди поточний стан файлу.
-- **Репозиторій** — тека `.git`: усі коміти, гілки, історія. `git commit` робить знімок того, що лежить у staging.
-
-Навіщо проміжний крок? Щоб у коміт потрапило лише те, що стосується однієї зміни. Оксана виправила `rules.py` і водночас щось пробувала в `main.py`. Вона додає лише `rules.py`, а експерименти лишаються в робочій теці.
-
-Ірина, лідерка команди, створює репозиторій проєкту. Вивід — справжній, git 2.43:
-
-```bash
-git init -b main
-git status --short
+```python
+folder = Path("kasa")
+path = folder / "kasa_2024_07.txt"
+print(path.name, path.stem, path.suffix)
+print(path.parent.name)
 ```
 
 ```text
-?? .gitignore
-?? README.md
-?? TEAM.md
-?? check.py
-?? kasa_2024_07.txt
-?? loading.py
-?? main.py
-?? models.py
-...
-?? tests/
+kasa_2024_07.txt kasa_2024_07 .txt
+kasa
 ```
 
-`??` — файл є в робочій теці, але Git його ще не відстежує. Додаємо все й робимо перший коміт:
+`open` приймає і рядок, і `Path`. `Path` має й зручні методи: `path.exists()`, `path.read_text(encoding="utf-8")`, `path.write_text(text, encoding="utf-8")`.
 
-```bash
-git add .
-git commit -m "Шаблон проєкту: контракти, тести, заглушки"
+## JSON: звіт, який прочитає інша програма
+
+Звіт — це словник. Чому б не записати його через `str()`?
+
+```python
+report = {"cafe": "Смачно", "orders": 4, "revenue": 3040.0, "open": True, "note": None}
+
+with open("report.txt", "w", encoding="utf-8") as file:
+    file.write(str(report))
+
+with open("report.txt", encoding="utf-8") as file:
+    back = file.read()
+
+print(type(back))
+print(back[:12])
 ```
 
 ```text
-[main (root-commit) f423465] Шаблон проєкту: контракти, тести, заглушки
- 22 files changed, 609 insertions(+)
- create mode 100644 .gitignore
- create mode 100644 README.md
- ...
+<class 'str'>
+{'cafe': 'См
 ```
 
-**Коміт** — знімок усіх відстежуваних файлів плюс автор, час, повідомлення і посилання на попередній коміт («батька»). `f423465` — початок його **хешу**, унікального ідентифікатора. У тебе хеш буде інший: він залежить від автора, часу і вмісту.
+Назад повертається **рядок**, а не словник: `back["orders"]` не спрацює. А сайт кафе, написаний не на Python, взагалі не знає, що таке `True` і `None`. Потрібен формат, який розуміють усі мови й з якого словник збирається назад.
 
-### Добре повідомлення коміту
+**JSON** (JavaScript Object Notation) — текстовий формат, схожий на словники й списки Python. Його розуміє практично кожна мова програмування, і саме ним обмінюються сайти й сервери. Модуль [`json`](https://docs.python.org/3/library/json.html) зі стандартної бібліотеки перетворює Python ↔ JSON:
 
-Повідомлення читатимуть інші люди, коли шукатимуть, звідки взялася зміна. Добре повідомлення каже, **що** і **навіщо** змінено:
+```python
+import json
 
-| Погано | Добре |
+text = json.dumps(report, ensure_ascii=False)
+print(text)
+print(json.loads(text) == report)
+```
+
+```text
+{"cafe": "Смачно", "orders": 4, "revenue": 3040.0, "open": true, "note": null}
+True
+```
+
+Лапки в JSON лише подвійні, `True` став `true`, `None` — `null`. `json.loads` зібрав з тексту **той самий** словник.
+
+| Функція | Що робить |
 |---|---|
-| `fix` | `Задача 3: пропускати порожні рядки файлу каси` |
-| `update` | `Задача 1: 16:00 — не обід, як у контракті` |
-| `asdf`, `зміни`, `ще раз` | `Задача 6: кирилиця в report.json без \u-кодів` |
+| `json.dumps(obj)` | об'єкт → рядок JSON (s — string) |
+| `json.loads(text)` | рядок JSON → об'єкт |
+| `json.dump(obj, file)` | об'єкт → у відкритий файл |
+| `json.load(file)` | з відкритого файлу → об'єкт |
 
-Один коміт — одна логічна зміна. Якщо в повідомленні хочеться написати «і ще», це два коміти.
+Два параметри для людей: `ensure_ascii=False` залишає кирилицю кирилицею, а `indent=2` розбиває JSON на рядки з відступами. Без `ensure_ascii=False` українські літери стануть кодами:
 
-### .gitignore: що не потрапляє в репозиторій
-
-Після запуску програми в теці з'являються `__pycache__/` (кеш Python, урок 12), `report.json` і `errors.txt` (результати `main.py`, урок 14). Їх генерує програма, у кожного вони свої, а в спільному репозиторії вони лише створюють конфлікти. Файл `.gitignore` проєкту каже Git їх не помічати:
-
-```text title=".gitignore"
-# Python
-__pycache__/
-*.pyc
-.venv/
-.env
-
-# Результати запуску main.py — генеруються, не зберігаємо
-report.json
-errors.txt
-```
-
-Після запусків тек і файлів побільшало, а `git status --short` мовчить: ігноровані файли він не показує. Чому саме файл ігнорується, пояснить `git check-ignore -v`:
-
-```bash
-git check-ignore -v __pycache__/rules.cpython-312.pyc report.json
+```python
+print(json.dumps({"cafe": "Смачно"}))
 ```
 
 ```text
-.gitignore:2:__pycache__/	__pycache__/rules.cpython-312.pyc
-.gitignore:8:report.json	report.json
+{"cafe": "\u0421\u043c\u0430\u0447\u043d\u043e"}
 ```
 
-!!! warning "`.env` — ніколи в репозиторій"
-    Паролі, токени, ключі API тримають у файлі `.env`, і він завжди в `.gitignore`. Файл, який потрапив на GitHub хоч на хвилину, вважай скомпрометованим: історія комітів зберігає його навіть після видалення.
+Це теж правильний JSON, і `json.loads` поверне «Смачно», але людина такий файл не прочитає.
 
-## Гілка — рухомий вказівник
+### Що JSON вміє, а що ні
 
-Гілка не копіює файли. Це **ім'я, яке вказує на коміт**. Коли ти комітиш у гілці, вказівник пересувається на новий коміт. `HEAD` показує, в якій гілці ти зараз.
+| Python | JSON |
+|---|---|
+| `dict` | об'єкт `{...}`, ключі — лише рядки |
+| `list`, `tuple` | масив `[...]` |
+| `str` | рядок у подвійних лапках |
+| `int`, `float` | число |
+| `True`, `False`, `None` | `true`, `false`, `null` |
 
-Оксана бере задачу 1:
+**Прогноз:** що повернеться після запису й читання?
 
-```bash
-git switch -c task-1-rules
-```
+```python
+from collections import Counter
 
-```text
-Switched to a new branch 'task-1-rules'
-```
-
-Вона пише `meal_type` і `day_name` у `rules.py`, перевіряє свою задачу і дописує себе в `TEAM.md`:
-
-```bash
-python check.py 1
-```
-
-```text
-Задача 1: rules.py — день тижня і прийом їжі
-  test_meal_type_borders: OK
-  test_day_name: OK
-```
-
-```bash
-git add rules.py TEAM.md
-git status --short
-git commit -m "Задача 1: meal_type і day_name"
+data = {"best_day": ("сб", 980.0), 7: "липень", "by_time": Counter({"вечеря": 3, "обід": 1})}
+back = json.loads(json.dumps(data, ensure_ascii=False))
+print(back)
 ```
 
 ```text
-M  TEAM.md
-M  rules.py
-[task-1-rules 0dcd132] Задача 1: meal_type і day_name
- 2 files changed, 7 insertions(+), 2 deletions(-)
+{'best_day': ['сб', 980.0], '7': 'липень', 'by_time': {'вечеря': 3, 'обід': 1}}
 ```
 
-`M` у першій колонці — файл змінено й додано в staging. Якби `M` стояло в другій колонці, файл було б змінено, але ще не додано.
+Три тихі зміни: кортеж повернувся **списком**, ключ `7` — **рядком** `'7'`, а `Counter` — звичайним словником. Помилки немає, але `back[7]` дасть `KeyError`. Для звіту кафе це не страшно, якщо про це пам'ятати.
 
-У той самий час Тарас від `main` створює свою гілку `task-4-stats`, пише `stats.py`, дописує себе в `TEAM.md` і комітить. Тепер історія розгалужена:
+А `datetime` JSON не знає зовсім:
 
-```mermaid
-flowchart TD
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
-
-    C0["f423465<br>Шаблон проєкту"] --> C1["0dcd132<br>Задача 1"]
-    C0 --> C4["36d1cdd<br>Задача 4"]
-    MAIN(["main"]) -.-> C0
-    B1(["task-1-rules"]) -.-> C1
-    B4(["task-4-stats"]) -.-> C4
-
-    class C0,C1,C4 step
-    class MAIN,B1,B4 decision
-```
-
-Прямокутники — коміти, овали — гілки-вказівники. `main` досі на шаблоні: Оксана й Тарас нічого в ньому не змінили.
-
-## Контракт: як працювати, не чекаючи інших
-
-Тарасова `revenue_by_day` викликає Оксанину `day_name`. Якщо Тарас чекатиме, поки Оксана закінчить, команда працюватиме по черзі, а не разом. Щоб працювати паралельно, в кожної функції є **контракт** — докстрінг, який точно описує вхід, вихід і межові випадки. Ось заглушка, яку Тарас отримав у шаблоні:
-
-```python title="stats.py — заглушка з шаблону"
-from rules import day_name, meal_type
-
-
-def revenue_by_day(orders):
-    """Виторг за днями тижня: {"пт": 860.0, ...}. Лише дні, у які були чеки."""
-    raise NotImplementedError("задача 4: напиши revenue_by_day()")
-
-
-def best_day(revenue):
-    """День з найбільшим виторгом; для порожнього словника — None."""
-    raise NotImplementedError("задача 4: напиши best_day()")
-```
-
-Тарас знає, **що** повертає `day_name` (з її контракту), і пише свою функцію, спираючись лише на це. А тести задачі 4 підставляють замість Оксаниної функції **заглушку** — крихітну функцію, яка знає відповіді лише для тестових дат:
-
-```python title="tests/test_task4.py — фрагмент"
-def fake_day_name(timestamp):
-    """Заглушка задачі 1: знає лише 19 і 20 липня."""
-    return {19: "пт", 20: "сб"}[timestamp.day]
-
-
-def test_revenue_by_day():
-    with replaced(stats, day_name=fake_day_name):
-        assert revenue_by_day(ORDERS) == {"пт": 860.0, "сб": 980.0}, revenue_by_day(ORDERS)
-        assert revenue_by_day([]) == {}
-```
-
-`replaced` — допоміжний менеджер контексту з `tests/helpers.py`: на час блоку `with` модуль `stats` бачить заглушку замість справжньої `day_name`, а потім усе повертається. Тому `python check.py 4` проходить, навіть коли `rules.py` ще заглушка. Так само влаштовані тести задач 3 і 5.
-
-Стан усієї команди показує `check.py` без аргументів:
-
-```bash
-python check.py
+```python
+json.dumps({"first_order": datetime(2024, 7, 19, 12, 10)})
 ```
 
 ```text
-✅ 1. rules.py — день тижня і прийом їжі: 2/2
-⏳ 2. parsing.py — розбір рядка каси: 0/3
-⏳ 3. loading.py — читання файлу і всіх рядків: 0/3
-✅ 4. stats.py — підрахунки за днями і прийомами їжі: 3/3
-⏳ 5. report.py — словник звіту: 0/2
-⏳ 6. output.py — JSON і текст звіту: 0/3
+TypeError: Object of type datetime is not JSON serializable
 ```
 
-`⏳` — задачу ще не почато (заглушка піднімає `NotImplementedError`), `✅` — усі тести задачі пройдено, `❌` — задачу написано, але тести падають.
+Дату записують рядком у стандартному форматі ISO 8601 і відновлюють з нього:
 
-!!! tip "Контракт — це домовленість, а тест — її перевірка"
-    Докстрінг каже, що має бути. Тест перевіряє, що так і є. Поки обидві сторони дотримуються контракту, їм не треба бачити код одне одного.
-
-## Pull Request і злиття
-
-У командному репозиторії ніхто не комітить у `main` напряму. Кожна задача проходить однаковий шлях:
-
-```mermaid
-flowchart TD
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
-
-    A["git switch main<br>git pull"] --> B["git switch -c task-N-..."]
-    B --> C["код + python check.py N"]
-    C --> D["git add, git commit"]
-    D --> E["git push -u origin task-N-..."]
-    E --> F["Pull Request на GitHub"]
-    F --> G{"рев'ю:<br>усе гаразд?"}
-    G -- ні --> C
-    G -- так --> H["Merge у main"]
-    H --> A
-
-    class A,B,C,D,E,F step
-    class G decision
-    class H success
-```
-
-`git push -u origin task-1-rules` відправляє гілку на GitHub. `-u` запам'ятовує зв'язок, далі досить `git push`. На GitHub з'являється кнопка **Compare & pull request**, як у домашніх. Різниця одна: PR іде в `main` **командного** репозиторію, а не в репозиторій викладача. Хтось із команди переглядає код і натискає **Merge pull request**.
-
-Натискання Merge робить на GitHub те саме, що локальна команда:
-
-```bash
-git switch main
-git merge --no-ff task-1-rules -m "Merge pull request #1 from task-1-rules"
+```python
+stamp = datetime(2024, 7, 19, 12, 10).isoformat()
+print(stamp)
+print(datetime.fromisoformat(stamp))
 ```
 
 ```text
-Merge made by the 'ort' strategy.
- TEAM.md  | 1 +
- rules.py | 8 ++++++--
- 2 files changed, 7 insertions(+), 2 deletions(-)
+2024-07-19T12:10:00
+2024-07-19 12:10:00
 ```
 
-Git створив **коміт злиття** з двома батьками: попереднім `main` і останнім комітом гілки. Якби в `main` за цей час нічого не змінилося, Git міг би просто пересунути вказівник `main` вперед (**fast-forward**). Кнопка GitHub за замовчуванням завжди створює коміт злиття, щоб в історії було видно кожен PR.
+### Зіпсований JSON
 
-`git pull` — це `git fetch` (забрати нові коміти з GitHub) плюс `git merge` (злити їх у поточну гілку). Тому після кожного злиття всі в команді роблять `git switch main` і `git pull`.
+Якщо в JSON-файлі помилка (одинарні лапки, зайва кома, файл записали через `str()`), `json.loads` / `json.load` піднімає `json.JSONDecodeError`. Це різновид `ValueError`, тож обробляється так само, як в уроці 14:
 
-## Конфлікт злиття
-
-Задача 1 уже в `main`. Тарас хоче, щоб його PR злився чисто, тож спершу підтягує `main` у свою гілку:
-
-```bash
-git switch task-4-stats
-git merge main
+```python
+try:
+    json.loads("{'orders': 4}")
+except json.JSONDecodeError as error:
+    print(isinstance(error, ValueError))
+    print(error)
 ```
 
 ```text
-Auto-merging TEAM.md
-CONFLICT (content): Merge conflict in TEAM.md
-Automatic merge failed; fix conflicts and then commit the result.
+True
+Expecting property name enclosed in double quotes: line 1 column 2 (char 1)
 ```
 
-Оксана й Тарас обоє дописали рядок **в одне й те саме місце** `TEAM.md` — у кінець таблиці. Git не знає, чий рядок має бути першим, і питає людину. `rules.py` і `stats.py` злилися самі: кожен змінював **свій** файл.
+Повідомлення вказує рядок і позицію: у колонці 2 чекали `"`, а стоїть `'`.
 
-```bash
-git status --short
-cat TEAM.md
+## Налаштування у файлі
+
+У коді звіту досі вшиті назва кафе й імена файлів. Щоб перейменувати файл каси, доведеться лізти в код. Налаштування краще тримати окремо, у JSON:
+
+```json title="cafe_config.json"
+{
+  "cafe": "Кафе «Смачно»",
+  "currency": "грн",
+  "kasa_file": "kasa_{year}_{month:02d}.txt",
+  "report_file": "report_{year}_{month:02d}.json",
+  "errors_file": "errors_{year}_{month:02d}.txt",
+  "log_file": "runs.log"
+}
 ```
 
-```text
-UU TEAM.md
-M  rules.py
-```
+```python
+with open("cafe_config.json", encoding="utf-8") as file:
+    config = json.load(file)
 
-```text
-| Задача | Файл | Хто |
-|---|---|---|
-<<<<<<< HEAD
-| 4 | stats.py | Тарас |
-=======
-| 1 | rules.py | Оксана |
->>>>>>> main
-```
-
-`UU` — файл з конфліктом. Між маркерами — дві версії:
-
-- від `<<<<<<< HEAD` до `=======` — твоя версія, з поточної гілки `task-4-stats`;
-- від `=======` до `>>>>>>> main` — версія, яку ти зливаєш.
-
-**Чотири кроки розв'язання:**
-
-1. Відкрити файл і вирішити, яким він має бути. Тут потрібні обидва рядки: спершу задача 1, потім 4.
-2. Видалити **всі три** маркери: `<<<<<<<`, `=======`, `>>>>>>>`.
-3. `git add TEAM.md` — позначити конфлікт розв'язаним.
-4. `git commit` — завершити злиття.
-
-```text
-| Задача | Файл | Хто |
-|---|---|---|
-| 1 | rules.py | Оксана |
-| 4 | stats.py | Тарас |
-```
-
-```bash
-git add TEAM.md
-git commit --no-edit
+print(config["cafe"])
+print(config["kasa_file"].format(year=2024, month=7))
 ```
 
 ```text
-[task-4-stats b6d8e2c] Merge branch 'main' into task-4-stats
+Кафе «Смачно»
+kasa_2024_07.txt
 ```
 
-Тепер PR Тараса зливається в `main` без конфлікту. Якщо розв'язувати конфлікт зараз не хочеться, `git merge --abort` повертає все, як було до `git merge`.
+`"kasa_{year}_{month:02d}.txt"` — **шаблон**: `str.format` підставляє значення в `{}` за тими самими правилами, що f-string (`:02d` — два знаки з нулем попереду). f-string тут не підійде: його значення обчислюються одразу в коді, а шаблон приходить з файлу як звичайний рядок.
 
-Історія після двох PR:
+Тепер касир може змінити назву файлу, а бухгалтер — валюту, не відкриваючи Python.
 
-```bash
-git log --oneline --graph
+## CSV: таблиця в тексті
+
+Сайт замовлень кафе вивантажує дані в інший формат — **CSV** (comma-separated values): перший рядок — назви колонок, далі по рядку на запис, значення через кому:
+
+```text title="orders.csv (перші рядки)"
+order_id,customer_name,dish,price,order_date,city
+1,Anna,Pizza,320,2026-03-10 12:30,Kyiv
+2,Oleh,Burger,210,2026-03-10 13:10,Lviv
 ```
 
-```text
-*   b209e80 Merge pull request #2 from task-4-stats
-|\
-| *   b6d8e2c Merge branch 'main' into task-4-stats
-| |\
-| |/
-|/|
-* |   a3740d5 Merge pull request #1 from task-1-rules
-|\ \
-| * | 0dcd132 Задача 1: meal_type і day_name
-|/ /
-| * 36d1cdd Задача 4: виторг за днями, найкращий день, прийоми їжі
-|/
-* f423465 Шаблон проєкту: контракти, тести, заглушки
-```
+Розбирати такий файл через `split(",")` ризиковано: кома може трапитися всередині значення, у лапках. Модуль [`csv`](https://docs.python.org/3/library/csv.html) робить це правильно. `csv.DictReader` віддає кожен рядок словником з ключами-назвами колонок:
 
-!!! note "Чому код не конфліктує"
-    Конфлікт виникає, лише коли дві гілки змінили **ті самі рядки** одного файлу. У проєкті кожна задача — окремий файл, тож код шести людей зливається автоматично. Конфлікт у `TEAM.md` закладено навмисно: безпечне місце, щоб уперше зустріти конфлікт і не боятися його.
+```python
+import csv
 
-## Злиття без конфлікту, але проєкт зламано
+with open("orders.csv", encoding="utf-8", newline="") as file:
+    rows = list(csv.DictReader(file))
 
-Відсутність конфлікту ще не означає, що проєкт працює. Git порівнює рядки тексту, а не сенс коду.
-
-Уяви: автор задачі 6 не прочитав контракт задачі 5 і в `format_report` написав `report['count']` замість `report['orders']`. Свої тести він не запустив, і PR злили. Git не бачить жодної проблеми: це інший файл. Але `check.py` бачить:
-
-```bash
-python check.py all
+print(len(rows))
+print(rows[0]["dish"], repr(rows[0]["price"]))
+print(sum(float(row["price"]) for row in rows))
 ```
 
 ```text
-...
-Задача 6: output.py — JSON і текст звіту
-  test_save_json: OK
-  test_format_report: ПОМИЛКА KeyError: 'count' (output.py, рядок 25)
-  test_format_empty_report: ПОМИЛКА KeyError: 'count' (output.py, рядок 25)
-Інтеграційний тест: увесь проєкт разом
-  test_full_report: ПОМИЛКА KeyError: 'count' (output.py, рядок 25)
-  test_missing_file: OK
-❌ Проєкт ще не працює — дивись рядки вище
+12
+Pizza '320'
+2900.0
 ```
 
-Тести задачі 6 побудовані на тому самому словнику, що описаний у контракті задачі 5. Тому помилку знайшли б ще до PR, якби автор виконав `python check.py 6`. Звідси два правила команди:
+Усі значення з CSV — **рядки**, навіть `'320'`: перетворювати їх на числа й дати — наша робота, з тими самими `ValueError`, що в уроці 14. `newline=""` радить документація модуля `csv`: так він сам правильно обробляє переходи на новий рядок.
 
-- **перед push** — `python check.py N` для своєї задачі;
-- **після кожного злиття** — `python check.py all` у `main`. Інтеграційний тест запускає весь `main.py` на справжньому файлі каси.
+Для великих таблиць зазвичай беруть бібліотеку pandas: `pd.read_csv("orders.csv")`. Приклад — у ноутбуці заняття викладача [`file_json_example.ipynb`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_15_file_io_json/file_json_example.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_15_file_io_json/file_json_example.ipynb).
 
 ## Практика { #practice }
 
-### Розібраний приклад: двоє в одному репозиторії
+### Розібраний приклад: місячний звіт кафе
 
-Увесь шлях з цього розділу — від `git init` до двох злитих PR — можна пройти самому в ноутбуці заняття: він створює тимчасовий репозиторій, і ти по черзі граєш Оксану й Тараса. Git у Colab уже встановлено.
+Зберемо все разом. Правила з уроку 13 (день тижня і прийом їжі) — у згорнутому блоці:
 
-Коротко послідовність:
+??? note "Правила з уроку 13: `DAYS`, `meal_type_from_hour`"
 
-```bash
-# Ірина (лідерка): шаблон проєкту
-git init -b main
-git add .
-git commit -m "Шаблон проєкту: контракти, тести, заглушки"
+    ```python
+    DAYS = ("пн", "вт", "ср", "чт", "пт", "сб", "нд")
 
-# Оксана: задача 1
-git switch -c task-1-rules
-python check.py 1
-git add rules.py TEAM.md
-git commit -m "Задача 1: meal_type і day_name"
 
-# Тарас: задача 4, від main
-git switch main
-git switch -c task-4-stats
-python check.py 4
-git add stats.py TEAM.md
-git commit -m "Задача 4: виторг за днями, найкращий день, прийоми їжі"
+    def meal_type_from_hour(hour):
+        if 11 <= hour <= 15:
+            return "обід"
+        if 17 <= hour <= 23:
+            return "вечеря"
+        return "інше"
+    ```
 
-# PR #1 злито
-git switch main
-git merge --no-ff task-1-rules
+```python linenums="1" hl_lines="1 6 7 14 20 21 22 25 26 29 30 32 33"
+def build_report(config, period, orders, errors):
+    """Звіт за місяць — лише типи, які розуміє JSON."""
+    revenue = sum(order.total_bill for order in orders)
+    average = revenue / len(orders) if orders else 0.0
+    by_time = Counter(meal_type_from_hour(order.timestamp.hour) for order in orders)
+    first = min(order.timestamp for order in orders).isoformat() if orders else None
+    return {
+        "cafe": config["cafe"],
+        "currency": config["currency"],
+        "period": period,
+        "orders": len(orders),
+        "skipped": len(errors),
+        "revenue": round(revenue, 2),
+        "average": round(average, 2),
+        "by_time": dict(by_time.most_common()),
+        "first_order": first,
+    }
 
-# Тарас підтягує main, розв'язує конфлікт у TEAM.md
-git switch task-4-stats
-git merge main
-git add TEAM.md
-git commit --no-edit
 
-# PR #2 злито
-git switch main
-git merge --no-ff task-4-stats
+def month_report(config, year, month):
+    names = {key: config[key].format(year=year, month=month)
+             for key in ("kasa_file", "report_file", "errors_file")}
+    orders, errors = load_orders(read_kasa(names["kasa_file"]))
+    report = build_report(config, f"{year}-{month:02d}", orders, errors)
+
+    with open(names["report_file"], "w", encoding="utf-8") as file:
+        json.dump(report, file, ensure_ascii=False, indent=2)
+    with open(names["errors_file"], "w", encoding="utf-8") as file:
+        for message in errors:
+            print(message, file=file)
+    log_run(f"{report['period']}: прийнято {report['orders']}, пропущено {report['skipped']}",
+            config["log_file"])
+    return names["report_file"]
+
+
+def main(year, month):
+    with open("cafe_config.json", encoding="utf-8") as file:
+        config = json.load(file)
+    try:
+        report_file = month_report(config, year, month)
+    except FileNotFoundError as error:
+        print("Немає файлу каси:", error.filename)
+        return 1
+    print("Звіт збережено:", report_file)
+    return 0
+
+
+main(2024, 7)
+main(2024, 8)
 ```
 
-### Зміни приклад: файл, який не мав потрапити в коміт
+```text
+Звіт збережено: report_2024_07.json
+Немає файлу каси: kasa_2024_08.txt
+```
 
-Хтось із команди запустив `main.py`, а потім зробив `git add .`, коли `.gitignore` ще не мав рядка `report.json`. Тепер `report.json` у репозиторії, і кожен запуск програми «змінює» відстежуваний файл.
+Що вийшло у файлі звіту — його побачить сайт кафе:
 
-Виправ у своїй гілці:
+```python
+with open("report_2024_07.json", encoding="utf-8") as file:
+    print(file.read())
+```
 
-1. Переконайся, що в `.gitignore` є `report.json`.
-2. Прибери файл з репозиторію, але не з диска: `git rm --cached report.json`.
-3. Закоміть: `git commit -m "Не зберігати report.json: його генерує main.py"`.
+```text
+{
+  "cafe": "Кафе «Смачно»",
+  "currency": "грн",
+  "period": "2024-07",
+  "orders": 4,
+  "skipped": 5,
+  "revenue": 3040.0,
+  "average": 760.0,
+  "by_time": {
+    "вечеря": 3,
+    "обід": 1
+  },
+  "first_order": "2024-07-19T12:10:00"
+}
+```
+
+Що відбувається в ключових рядках:
+
+- **рядок 1** — `build_report` лише рахує і повертає словник, файлів не торкається. Її легко перевірити на кількох чеках;
+- **рядки 6 і 14** — усе, що JSON не знає, перетворюється заздалегідь: `datetime` → рядок ISO, `Counter` → `dict`. `if orders else` захищає від порожнього місяця: `min()` порожнього списку підняв би `ValueError`;
+- **рядки 20–22** — імена файлів з шаблонів конфігу, жодного вшитого імені;
+- **рядки 25–26** — `json.dump` пише просто у відкритий файл, `ensure_ascii=False` і `indent=2` — для людей;
+- **рядки 29–30** — перелік помилок перезаписується (`"w"`), журнал дописується (`"a"`, всередині `log_run`);
+- **рядки 32–33** — `main` ловить `FileNotFoundError` і відповідає людською мовою, як `main` в уроці 14. `month_report` про людей нічого не знає.
+
+А тепер програма, якою бухгалтер відкриє звіт, — теж Python, хоча могла б бути будь-якою мовою:
+
+```python
+with open("report_2024_07.json", encoding="utf-8") as file:
+    saved = json.load(file)
+
+print(f"{saved['cafe']}, {saved['period']}: {saved['revenue']:.2f} {saved['currency']}")
+print("Вечері:", saved["by_time"]["вечеря"])
+```
+
+```text
+Кафе «Смачно», 2024-07: 3040.00 грн
+Вечері: 3
+```
+
+### Зміни приклад: найкращий день і чайові
+
+Додай до `build_report` два ключі:
+
+- `"best_day"` — день тижня (`"пн"`…`"нд"`) з найбільшим виторгом;
+- `"tips_percent"` — чайові як відсоток від виторгу, округлені до одного знака.
+
+І перший рядок у файлі помилок: `Пропущено рядків: 5`.
+
+Очікувані значення для липня:
+
+```text
+best_day: нд
+tips_percent: 11.5
+```
 
 **Критерії перевірки:**
 
-- `git status --short` після запуску `main.py` порожній;
-- `git ls-files` не показує `report.json`;
-- файл `report.json` на диску лишився.
+- `report_2024_07.json` після запуску містить обидва нові ключі;
+- для місяця без жодного правильного чека `build_report` не падає: `"best_day"` — `null`, `"tips_percent"` — `0.0`;
+- `errors_2024_07.txt` після двох запусків поспіль містить заголовок **один** раз.
 
 ??? tip "Підказка"
-    `.gitignore` діє лише на файли, які Git **ще не відстежує**. Файл, що вже є в коміті, спершу треба прибрати з індексу — саме це робить `git rm --cached`.
+    Виторг за днями — словник, як `revenue_by_day` в уроці 8, тільки ключ — `DAYS[order.timestamp.weekday()]`. Найкращий день — `max(revenue_by_day, key=revenue_by_day.get)`, але лише якщо словник непорожній. Заголовок пиши першим `print` у тому самому `with open(..., "w")`.
 
-### Командна задача: звіт каси кафе
+### Спробуй самостійно: картка постійного гостя
 
-Команда з 4–6 людей. У маленькій команді хтось бере дві задачі.
+Кафе запускає картки лояльності: за кожен візит гість отримує бал. Бали мають зберігатися між запусками програми в `loyalty.json`, наприклад:
 
-1. **Лідер** створює новий публічний репозиторій на GitHub ([інструкція](../../00_getting_started/github/create_repository.md), сценарій B), копіює туди **вміст** теки [`team_project/`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_1/lessons/lesson_15_git_github_system/team_project) **без** теки `solution/` і робить перший коміт.
-2. Лідер додає команду: **Settings → Collaborators → Add people** ([документація GitHub](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/repository-access-and-collaboration/inviting-collaborators-to-a-personal-repository)). Кожен приймає запрошення й клонує репозиторій.
-3. Команда розподіляє задачі 1–6. Кожен:
-    - `git switch main` і `git pull`, потім `git switch -c task-N-назва`;
-    - читає контракт у докстрінгах свого файлу, пише код;
-    - `python check.py N` — поки всі тести не `OK`;
-    - дописує свій рядок у `TEAM.md`;
-    - `git add` лише свої файли, `git commit` з добрим повідомленням, `git push -u origin task-N-назва`;
-    - відкриває PR у `main` свого командного репозиторію.
-4. Кожен PR переглядає інша людина: чи дотримано контракту, чи зрозумілий код, чи немає зайвих файлів. Merge — лише після схвалення.
-5. Конфлікт у `TEAM.md` розв'язує автор PR: `git merge main` у своїй гілці, чотири кроки, `git push`.
-6. **Готово**, коли в `main` після `git pull`:
-
-```text
-✅ Проєкт працює!
+```json
+{"Оксана": 3, "Тарас": 1}
 ```
 
-— останній рядок `python check.py all`, а `python main.py kasa_2024_07.txt` друкує звіт, як на початку уроку.
+Напиши три функції:
 
-**Що надіслати викладачеві:** посилання на командний репозиторій. Там має бути видно шість PR, кожен від своєї людини, з рев'ю.
+- `load_loyalty(path)` — словник з файлу; якщо файлу ще немає (перший запуск) — порожній словник `{}`;
+- `add_visit(cards, name)` — додає гостеві бал, новому гостю створює картку з балом 1;
+- `save_loyalty(cards, path)` — записує словник у файл, кирилицею і з відступами.
+
+Перевірка — «запуск програми двічі»:
+
+```text
+перший запуск:  {}  →  після двох візитів Оксани і одного Тараса  →  {'Оксана': 2, 'Тарас': 1}
+другий запуск:  {'Оксана': 2, 'Тарас': 1}  →  ще візит Оксани  →  {'Оксана': 3, 'Тарас': 1}
+```
+
+**Правила:**
+
+- відсутній файл — через `try` / `except FileNotFoundError`, а не `Path.exists()` (EAFP з уроку 14);
+- файл читається й пишеться лише через `with`;
+- `add_visit` не торкається файлів.
 
 ### Знайди помилку
 
-Що піде не так у кожній ситуації?
+У кожному фрагменті одна помилка. Що піде не так?
 
-1. Тарас виконав `git add .` одразу після `python main.py kasa_2024_07.txt`, а в `.gitignore` немає `report.json`.
-2. Оксана відкрила проєкт, одразу написала код і закомітила в `main`.
-3. Ірина тиждень не робила `git pull`, створила гілку для виправлення і відкрила PR.
+```python
+# 1 — журнал
+with open("runs.log", "w", encoding="utf-8") as file:
+    file.write("2024-07: прийнято 4, пропущено 5")
+
+# 2 — перелік помилок
+with open("errors_2024_07.txt", "w", encoding="utf-8") as file:
+    for message in errors:
+        file.write(message)
+
+# 3 — звіт
+with open("report_2024_07.json", encoding="utf-8") as file:
+    saved = json.loads(file)
+```
 
 ??? success "Відповіді"
 
-    1. `report.json` потрапить у репозиторій. У кожного він різний, тож кожен PR змінюватиме цей файл і конфліктуватиме з іншими. Спершу `.gitignore`, потім `git add` конкретних файлів.
-    2. Коміт у `main` оминає PR і рев'ю, і всі інші при `git pull` отримають неперевірений код. Спершу `git switch -c task-...`.
-    3. Гілка створена від застарілого `main`: у ній немає тижня чужих змін. PR, найімовірніше, матиме конфлікти, а тести можуть падати через уже виправлені речі. Перед новою гілкою — `git switch main` і `git pull`.
+    1. Режим `"w"` стирає журнал при кожному запуску: лишиться лише останній рядок. Для журналу потрібен `"a"`, а ще `\n` в кінці рядка.
+    2. `write` не додає `\n`: п'ять повідомлень зліпляться в один рядок. Треба `file.write(message + "\n")` або `print(message, file=file)`.
+    3. `json.loads` чекає **рядок**, а отримує файловий об'єкт: `TypeError`. Для файлу — `json.load(file)` без `s`.
 
 ## Підсумок
 
 | Поняття | Що запам'ятати |
 |---|---|
-| Три місця | робоча тека → `git add` → staging → `git commit` → репозиторій → `git push` → GitHub |
-| Коміт | знімок + автор + повідомлення + батько; один коміт — одна зміна |
-| `.gitignore` | згенеровані файли й секрети не потрапляють у репозиторій |
-| Гілка | вказівник на коміт; одна задача — одна гілка |
-| PR | запит злити гілку в `main` з рев'ю; `pull` = `fetch` + `merge` |
-| Конфлікт | ті самі рядки в обох гілках; прибрати маркери → `add` → `commit` |
-| Контракт | докстрінг + тести; дає працювати паралельно і злити без сюрпризів |
+| `with open(path, mode, encoding="utf-8")` | файл закриється сам, навіть після винятку |
+| `read()` і `for line in file` | весь текст одним рядком або рядок за рядком; `strip()` прибирає `\n` |
+| `"r"`, `"w"`, `"a"` | читати; стерти й записати; дописати в кінець |
+| Відносний шлях | шукається від поточної теки; немає файлу — `FileNotFoundError` |
+| JSON | `dump`/`load` — файл, `dumps`/`loads` — рядок; кортеж → список, ключі → рядки |
+| `datetime` у JSON | `isoformat()` і `datetime.fromisoformat()` |
+| CSV | `csv.DictReader`; усі значення — рядки |
 
 ### Самоперевірка
 
-1. Що робить `git add` і навіщо він окремо від `git commit`?
-2. Що таке гілка технічно? Чи копіює `git switch -c` файли?
-3. Чому `rules.py` і `stats.py` злилися автоматично, а `TEAM.md` — ні?
-4. Що означають маркери `<<<<<<<`, `=======`, `>>>>>>>`? Що з ними робити?
-5. Git злив усі PR без конфліктів. Чи означає це, що проєкт працює?
-6. Як Тарас перевіряє задачу 4, якщо задача 1 ще не готова?
-7. Чому `report.json` у `.gitignore`, а `kasa_2024_07.txt` — ні?
+1. Чим `with open(...) as file:` кращий за `file = open(...)` і `file.close()`?
+2. Файл відкрили в режимі `"w"`, але нічого не записали. Що сталося з його вмістом?
+3. Чому `file.read()` вдруге поспіль повертає порожній рядок?
+4. Програма `cafe/report.py` відкриває `"kasa_2024_07.txt"`, файл лежить поруч з нею, а виходить `FileNotFoundError`. Чому?
+5. Чому звіт зберігають у JSON, а не через `str(report)`?
+6. У звіті був ключ `7`. Як дістати значення після `json.load`?
+7. Чим `json.load` відрізняється від `json.loads`?
 
 ??? success "Відповіді"
 
-    1. Кладе поточний стан файлу в staging area — набір того, що піде в наступний коміт. Окремий крок дозволяє закомітити лише частину змін.
-    2. Іменований вказівник на коміт. Файли не копіюються; змінюється лише те, на що вказує `HEAD`.
-    3. Кожен файл змінювала лише одна гілка. У `TEAM.md` обидві гілки дописали рядок в одне місце.
-    4. Межі двох версій: від `<<<<<<<` до `=======` — поточна гілка, від `=======` до `>>>>>>>` — та, що зливається. Залишити правильний варіант, прибрати всі маркери, `git add`, `git commit`.
-    5. Ні. Git порівнює текст, а не сенс. Перевіряє `python check.py all` з інтеграційним тестом.
-    6. Тести задачі 4 підставляють заглушку `fake_day_name`, яка знає відповіді для тестових дат. Задача 4 спирається лише на контракт `day_name`.
-    7. `report.json` генерує програма, у кожного свій. `kasa_2024_07.txt` — вхідні дані, однакові для всієї команди, без них проєкт не запуститься.
+    1. `with` закриває файл за будь-якого виходу з блоку, зокрема після винятку. Ручний `close()` після винятку не виконається.
+    2. Вміст стерто: `"w"` очищає файл одразу під час відкриття.
+    3. Файл — ітератор з курсором. Перший `read()` дочитав до кінця, і курсор лишився там. Потрібно відкрити файл знову (або `file.seek(0)`).
+    4. Відносний шлях шукається від поточної теки, з якої запустили програму, а не від теки файлу `.py`. Запусти програму з теки `cafe` або побудуй шлях від `Path(__file__).parent`.
+    5. `str()` дає текст, з якого словник назад не збирається, і його не прочитає програма іншою мовою. JSON відновлюється через `json.load` у той самий словник і зрозумілий будь-якій мові.
+    6. `saved["7"]`: ключі в JSON — лише рядки.
+    7. `json.load(file)` читає з відкритого файлу, `json.loads(text)` — з рядка.
 
 ### Що далі
 
-- Ноутбук заняття: [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_15_git_github_system/note_lesson_15_git_github_system_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_15_git_github_system/note_lesson_15_git_github_system.ipynb){ .solutions-link } — двоє в одному репозиторії: гілки, злиття, конфлікт, `.gitignore`, з перевірками.
-- Інструкції: [Як створити свій репозиторій](../../00_getting_started/github/create_repository.md), [Pull Request](../../00_getting_started/github/pull_request.md), [Git шпаргалка](../../git-cheatsheet.md).
-- Наступне заняття: [Урок 16. Практикум 3. Хеш-структури](lesson_16.md). А капстоун-проєкт [уроку 17](lesson_17.md) ти так само вестимеш у власному репозиторії з гілками й комітами.
+- Ноутбук заняття: [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_15_file_io_json/note_lesson_15_file_io_json_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_15_file_io_json/note_lesson_15_file_io_json.ipynb){ .solutions-link } — той самий місяць каси: ноутбук сам створює файл каси й конфіг, далі прогнози, вправи й перевірки.
+- Довідник: [`notes_file_io_json.ipynb`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_15_file_io_json/notes_file_io_json.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_15_file_io_json/notes_file_io_json.ipynb) — курсор файлу (`tell`, `seek`), типи JSON докладно, форматування таблиць, телефонна книга. Стислий повтор — [File I/O та JSON](../../reference/python_core/file_io_json.md).
+- Наступне заняття: [Урок 16. Git + GitHub](lesson_16.md). Файли проєкту кафе вже є — час зберігати їхню історію і показувати код іншим.
 
 ## Документація і джерела
 
-- Pro Git українською: [книга](https://git-scm.com/book/uk/v2) — розділи 2 (основи: коміти, `.gitignore`) і 3 (гілки та злиття)
-- Довідка Git: [`gitignore`](https://git-scm.com/docs/gitignore), [`git merge`](https://git-scm.com/docs/git-merge), [`git switch`](https://git-scm.com/docs/git-switch)
-- GitHub Docs: [Pull requests](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests), [Resolving a merge conflict on GitHub](https://docs.github.com/en/pull-requests/how-tos/merge-and-close-pull-requests/resolving-a-merge-conflict-on-github)
-- Для охочих: MIT, *The Missing Semester of Your CS Education*, [«Version Control (Git)»](https://missing.csail.mit.edu/2020/version-control/) — модель даних Git знизу вгору: знімки, коміти, вказівники.
+- Туторіал Python: [Reading and Writing Files](https://docs.python.org/3/tutorial/inputoutput.html#reading-and-writing-files), [Saving structured data with json](https://docs.python.org/3/tutorial/inputoutput.html#saving-structured-data-with-json)
+- [`open()`](https://docs.python.org/3/library/functions.html#open) — режими й параметри; [`pathlib`](https://docs.python.org/3/library/pathlib.html)
+- [`json`](https://docs.python.org/3/library/json.html), [`csv`](https://docs.python.org/3/library/csv.html), [`datetime.isoformat`](https://docs.python.org/3/library/datetime.html#datetime.datetime.isoformat)
+- Глосарій: [context manager](https://docs.python.org/3/glossary.html#term-context-manager); оператор [`with`](https://docs.python.org/3/reference/compound_stmts.html#the-with-statement)
+- Специфікація JSON: [json.org](https://www.json.org/json-uk.html) (українською)
+- Для охочих:
+    - Harvard CS50P, [лекція 6 «File I/O»](https://cs50.harvard.edu/python/weeks/6/) — `open`, `with`, CSV, `csv.DictReader`;
+    - Princeton, *Introduction to Programming in Python*, [розділ 1.5 «Input and Output»](https://introcs.cs.princeton.edu/python/15inout/) — стандартний ввід/вивід, перенаправлення у файли.

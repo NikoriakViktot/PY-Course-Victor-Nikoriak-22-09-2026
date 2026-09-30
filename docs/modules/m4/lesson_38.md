@@ -1,210 +1,479 @@
-# Урок 38. FastAPI + SQLAlchemy: повний CRUD
+# Урок 38. FastAPI basics + Postman + OpenAPI
 
-В уроці 37 агрегатор став HTTP-сервісом, але новини лежать у `NewsStore` — словнику в пам'яті процесу. Зупинили сервер — новин немає; запустили два процеси uvicorn — у кожного свої новини. Сьогодні агрегатор отримує **базу даних**: новини переживають перезапуск, унікальність `url` гарантує сама база, а API вміє повний CRUD окремої новини.
+В уроці 37 агрегатор навчився **перевіряти** новини: парсер `parse_rbc_news` дає сирі рядки, модель `NewsItem` пропускає лише правильні. Але все це живе в Python-процесі: скористатися агрегатором може лише той, хто імпортує модуль. Сьогодні агрегатор стає **сервісом** — HTTP API, який можна викликати з браузера, Postman, іншої програми чи (в уроці 48) Telegram-бота.
 
-Знову не з нуля: є готовий шар бази — стартовий `production_bot` (Telegram-бот з адмін-API): async SQLAlchemy 2.0, репозиторії, Alembic-міграції. Беремо його і робимо три рефакторинги `news_hub` з уроку 37.
+Знову не з нуля: вже є FastAPI-застосунок агрегатора — `news_dashboard/app/main.py` (618 рядків, 16 ендпоінтів, MongoDB, NLP, архівний парсер). Беремо з нього ядро й робимо три рефакторинги проєкту `news_hub` з уроку 37.
 
 | Урок | Крок агрегатора |
 |---|---|
 | 36 | парсер з типами; `NewsItem` на Pydantic |
-| 37 | FastAPI: `GET /api/news`, `POST /api/scrape`, `/docs`, Postman |
-| **38** | **SQLAlchemy: новини в базі, унікальний `url`, повний CRUD, Alembic** |
+| **37** | **FastAPI: `GET /api/news`, `POST /api/scrape`, `/docs`, Postman** |
+| 38 | SQLAlchemy: новини в базі |
 | 39 | middleware, кеш і rate limit на Redis |
 | 41 | тести API |
 | 43 | Gemini: підсумок, категорія, тональність |
 | 47 | Telegram-бот |
 | 48–50 | Docker, Compose, CI/CD |
 
-Проєкт: [`news_hub`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_4/lessons/lesson_38_fastapi_sqlalchemy/news_hub).
+Проєкт: [`news_hub`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_4/lessons/lesson_38_fastapi_basics/news_hub). Поруч — [`fastapi_demo`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_4/lessons/lesson_38_fastapi_basics/fastapi_demo) — стартовий код: шість ендпоінтів, на яких видно, що з сервером робить блокуючий код.
 
-**Що потрібно з попередніх уроків:** SQL — таблиці, `UNIQUE`, `GROUP BY`, транзакції, параметри замість f-рядків (урок 29); `async`/`await` (27); FastAPI, `Depends`, `lifespan`, `TestClient` (37); `NewsItem` (36).
+**Що потрібно з попередніх уроків:** `async`/`await` і `asyncio.gather` (27, 31), REST — ресурси, методи, статус-коди, OpenAPI (32), FastAPI-версія API нотаток (35), `NewsItem` і `validate_news` (36).
 
 **Після уроку ти зможеш:**
 
-- описати таблицю моделлю SQLAlchemy 2.0 (`Mapped`, `mapped_column`) і відрізнити її від Pydantic-моделі;
-- підключити async-engine і дати кожному HTTP-запиту свою сесію й транзакцію;
-- винести SQL у репозиторій і прочитати SQL, який генерує SQLAlchemy;
-- написати повний CRUD з правильними кодами: `201`, `404`, `409`, `204`;
-- створити й застосувати міграцію Alembic;
-- пояснити, чому «перевір, а потім встав» ламається під навантаженням.
+- написати FastAPI-застосунок: маршрути, параметри шляху й запиту з обмеженнями, тіло запиту — Pydantic-модель, `response_model`;
+- пояснити, звідки береться `422` і як його прочитати;
+- винести ресурс (сховище, клієнт) у залежність `Depends` і підмінити її в тестах;
+- ініціалізувати ресурси в `lifespan`;
+- прочитати `/docs` і `/openapi.json`, зібрати колекцію Postman з перевірками й запустити її з консолі;
+- відрізнити ендпоінт, що блокує сервер, від того, що не блокує, — і довести це вимірами.
 
-**Ноутбук заняття:** [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_38_fastapi_sqlalchemy/note_lesson_38_sqlalchemy_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_38_fastapi_sqlalchemy/note_lesson_38_sqlalchemy.ipynb){ .solutions-link } — база й CRUD на SQLite, без встановлення PostgreSQL.
+**Ноутбук заняття:** [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_38_fastapi_basics/note_lesson_38_fastapi_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_38_fastapi_basics/note_lesson_38_fastapi.ipynb){ .solutions-link } — API агрегатора через `TestClient`, без запуску сервера.
 
-**Довідник:** [FastAPI: архітектура, async і production-патерни](fastapi/fastapi_documentation.md) — розділи 6–8: пул з'єднань, Repository, Unit of Work.
+**Довідник:** [FastAPI: архітектура, async і production-патерни](fastapi/fastapi_documentation.md): розділи 1–5 — до цього уроку.
 
 ## Пригадай
 
-1. Що зробить PostgreSQL з `INSERT`, який порушує `UNIQUE` (урок 29)?
-2. Що буде з уже виконаними змінами транзакції, якщо в ній стався виняток?
-3. Навіщо в уроці 37 сховище отримували через `Depends`, а не глобальною змінною?
+1. Що поверне `NewsItem.from_raw(...)` для новини з заголовком «Коротко» (урок 37)?
+2. Чим `await asyncio.sleep(2)` відрізняється від `time.sleep(2)` усередині `async def` (урок 28)?
+3. Який статус-код відповідає на `POST`, що створює ресурс, і який — на неправильні дані (урок 33)?
 
 ??? success "Відповіді"
 
-    1. Відхилить рядок з помилкою `duplicate key value violates unique constraint`. Обмеження перевіряє сама база — для будь-якої програми, що в неї пише.
-    2. `ROLLBACK` скасує всі зміни транзакції: або все, або нічого.
-    3. Щоб замінити реалізацію, не чіпаючи ендпоінтів. Сьогодні саме це й зробимо: `NewsStore` → `NewsRepository`.
+    1. Нічого — кине `ValidationError` (`title`: мінімум 10 символів). `validate_news` не губить такі новини, а складає в `rejected` з причинами.
+    2. `await asyncio.sleep` віддає керування циклу подій — поки корутина спить, виконуються інші. `time.sleep` зупиняє весь потік разом із циклом подій. Сьогодні побачимо це на сервері в цифрах.
+    3. `201 Created`; неправильні дані — `400` або `422`. FastAPI для помилок перевірки завжди повертає `422`.
 
 ## Старт: з якого коду починаємо
 
-`production_bot` — Telegram-бот з адмін-API на FastAPI. Нам потрібен його **шар бази**, а не бот:
+`news_dashboard/app/main.py` — застосунок, що вміє все одразу: парсить rbc.ua (разом або по черзі), зберігає в MongoDB, рахує тональність і ключові слова (spaCy), збирає архів за роки у фоні, будує тренди. Для першого кроку це забагато — беремо ядро, решту переносимо в уроки, де для неї з'явиться основа:
 
-| Файл `production_bot` | Що в ньому | Куди в `news_hub` |
+| Ендпоінти стартового `main.py` | Що з ними | Коли повернуться |
 |---|---|---|
-| `backend/core/database.py` | `create_async_engine` з пулом, `async_sessionmaker`, `Base`, `get_db` з COMMIT/ROLLBACK | `news_hub/db.py` |
-| `backend/models/user.py` | модель таблиці: `Mapped[...]`, `mapped_column(...)` | `news_hub/tables.py` — `NewsRow` |
-| `backend/repositories/base.py` | `BaseRepository[ModelT]`: `get`, `create`, `delete`, `count` | `news_hub/repository.py` |
-| `alembic.ini`, `migrations/env.py` | async-міграції | `alembic.ini`, `migrations/` |
-| `docker-compose.yml`, сервіс `postgres` | PostgreSQL 16 з volume і healthcheck | `docker-compose.yml` |
-| бот, JWT, Redis, платежі | — | уроки 39, 40, 47 |
+| `/health`, `GET /api/news`, `/api/news/count`, `/api/news/stats`, `POST /api/scrape`, `DELETE /api/news` | **беремо** — ядро агрегатора | урок 38 |
+| MongoDB (`motor`) у кожному ендпоінті | → `NewsStore` через `Depends` | урок 39 — SQLAlchemy |
+| `POST /api/scrape/archive`, `/api/scrape/jobs` (`BackgroundTasks`) | фоновий збір | урок 40 |
+| `/keywords`, `/entities`, `/entity-trend`, `/reanalyze`, `/purge-russian` (spaCy, langdetect) | аналіз тексту | урок 44 — Gemini |
+| `/trends`, `/timeline` (`$regex` з рядка користувача) | пошук і агрегація | урок 39 (SQL), безпека regex — урок 47 |
+| CORS `allow_origins=["*"]` + `allow_credentials=True` | прибрано: у 37 немає браузерного клієнта | з фронтендом |
 
-## Рефакторинг 1. Engine, сесії й таблиця { #refactor-1 }
+Старий застосунок описував новину **другою** моделлю — 13 полів у `main.py`, окремо від парсера, і власним `_parse_page` у `scraper.py` зі своїм словником категорій. У `news_hub` модель одна — `NewsItem` з уроку 37 — і вона ж стане відповіддю API.
 
-### `db.py`: підключення
+## Рефакторинг 1. FastAPI над `NewsItem` { #refactor-1 }
 
-```python title="news_hub/db.py (скорочено)"
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite+aiosqlite:///news_hub.db")
+FastAPI будує API з **анотацій типів**: параметр функції стає параметром запиту, його тип і `Query(...)` — правилами перевірки, `response_model` — формою відповіді. Той самий Pydantic, що в уроці 37, тільки тепер на вході й виході HTTP.
 
-
-def make_engine(url: str = DATABASE_URL, echo: bool = False, **options: Any) -> AsyncEngine:
-    if url.startswith("postgresql"):
-        return create_async_engine(url, pool_size=10, max_overflow=20, pool_pre_ping=True, echo=echo, **options)
-    ...                                            # SQLite: без пулу на 10 з'єднань
+```python title="news_hub/api.py (фрагмент)"
+app = FastAPI(title="news_hub API", version="0.37.0", lifespan=lifespan, openapi_tags=[...])
 
 
-engine = make_engine()
-SessionFactory = async_sessionmaker(engine, expire_on_commit=False, autoflush=False)
-
-
-class Base(DeclarativeBase):
-    """Базовий клас моделей; Base.metadata — реєстр таблиць для Alembic і тестів."""
+@app.get("/api/news", response_model=list[NewsItem], tags=["news"], summary="Список новин")
+async def list_news(
+    store: StoreDep,
+    skip: int = Query(0, ge=0),
+    limit: int = Query(50, ge=1, le=1000),
+    category: str = Query("", description="Новини, Економіка, …"),
+    source: str = Query("", description="rbc.ua, auto.rbc.ua, …"),
+    lang: Literal["uk", "ru"] | None = Query(None),
+) -> list[NewsItem]:
+    """Новини з фільтрами й пагінацією: `?lang=uk&limit=5`."""
+    return store.find(skip=skip, limit=limit, category=category, source=source, lang=lang or "")
 ```
 
-- **`DATABASE_URL`** — адреса бази в одному рядку: `postgresql+asyncpg://news:news@localhost:5432/news_hub` — діалект (`postgresql`), драйвер (`asyncpg`), користувач, пароль, хост, порт, база. Береться зі змінної середовища, тож код однаковий для ноутбука, тестів і сервера.
-- **Без `DATABASE_URL`** — файл SQLite `news_hub.db` поруч із проєктом: урок і ноутбук працюють без PostgreSQL. У `production_bot` адреса була лише PostgreSQL.
-- **`engine`** — пул з'єднань: 10 постійно відкритих, до 20 тимчасових на піку, `pool_pre_ping` перевіряє з'єднання перед видачею. Чому пул — розділ 6 [довідника](fastapi/fastapi_documentation.md#s6).
-- **`SessionFactory`** — фабрика сесій. **Сесія** — робоче місце одного запиту: у ній накопичуються зміни, а `commit()` відправляє їх однією транзакцією.
+Що тут робить FastAPI без жодного рядка нашого коду:
 
-### `tables.py`: таблиця як клас
+| Запис | Що відбувається з запитом `GET /api/news?limit=abc&lang=en` |
+|---|---|
+| `limit: int = Query(50, ge=1, le=1000)` | `"abc"` → не число → `422`; `0` → менше `ge=1` → `422`; немає → `50` |
+| `lang: Literal["uk", "ru"] \| None` | `"en"` → не зі списку → `422` |
+| `response_model=list[NewsItem]` | відповідь перетворюється на JSON за моделлю: `url` → рядок, `published_time` → `"14:19:00"` |
+| `tags`, `summary`, docstring | потрапляють в OpenAPI → `/docs` |
 
-```python title="news_hub/tables.py"
-class NewsRow(Base):
-    __tablename__ = "news"
+### Запуск і перші запити
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    url: Mapped[str] = mapped_column(String(500), unique=True)    # унікальність гарантує база, а не код
-    title: Mapped[str] = mapped_column(String(300))
-    source: Mapped[str] = mapped_column(String(100), index=True)
-    lang: Mapped[str] = mapped_column(String(2), index=True)
-    category: Mapped[str] = mapped_column(String(100), index=True)
-    published_time: Mapped[time | None] = mapped_column(Time)
-    scraped_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+У папці `news_hub`:
+
+```bash
+pip install -r requirements.txt
+uvicorn news_hub.api:app --reload      # INFO: Uvicorn running on http://127.0.0.1:8000
 ```
 
-`Mapped[str]` — стовпець `NOT NULL`, `Mapped[time | None]` — може бути `NULL`: ті самі анотації типів з уроку 36 описують і таблицю. Який SQL з цього вийде в PostgreSQL (у папці `news_hub`):
+`news_hub.api:app` — «модуль `news_hub/api.py`, змінна `app`»; `--reload` перезапускає сервер, коли змінюється код. У другому терміналі (або в Python-консолі) — запити клієнтом `httpx` з уроку 32:
 
 ```python
-from sqlalchemy.dialects import postgresql
-from sqlalchemy.schema import CreateIndex, CreateTable
+import httpx
 
-from news_hub.tables import NewsRow
-
-print(CreateTable(NewsRow.__table__).compile(dialect=postgresql.dialect()))
-for index in sorted(NewsRow.__table__.indexes, key=lambda i: i.name):
-    print(CreateIndex(index).compile(dialect=postgresql.dialect()))
+api = httpx.Client(base_url="http://127.0.0.1:8000")
+print(api.get("/health").json())
+print(api.get("/api/news").json(), api.get("/api/news/count").json())
 ```
 
 ```text
-
-CREATE TABLE news (
-	id SERIAL NOT NULL,
-	url VARCHAR(500) NOT NULL,
-	title VARCHAR(300) NOT NULL,
-	source VARCHAR(100) NOT NULL,
-	lang VARCHAR(2) NOT NULL,
-	category VARCHAR(100) NOT NULL,
-	published_time TIME WITHOUT TIME ZONE,
-	scraped_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
-	PRIMARY KEY (id),
-	UNIQUE (url)
-)
-
-
-CREATE INDEX ix_news_category ON news (category)
-CREATE INDEX ix_news_lang ON news (lang)
-CREATE INDEX ix_news_source ON news (source)
+{'status': 'ok'}
+[] {'count': 0}
 ```
 
-### Дві моделі однієї новини
-
-| | `NewsItem` (Pydantic, `models.py`) | `NewsRow` (SQLAlchemy, `tables.py`) |
-|---|---|---|
-| Навіщо | **перевірити** дані з парсера чи тіла запиту | **зберегти** рядок таблиці |
-| Звідки поля | з HTML і URL | з бази: `id`, `scraped_at` дає PostgreSQL |
-| Правила | довжина заголовка, домен rbc.ua, `Literal["uk", "ru"]` | типи стовпців, `UNIQUE`, `NOT NULL`, індекси |
-| Коли працює | до запису | під час запису й читання |
-
-Відповідь API — `NewsOut(NewsItem)` з полями `id` і `scraped_at` та `from_attributes=True`: Pydantic будує її прямо з об'єкта `NewsRow`.
-
-## Рефакторинг 2. Репозиторій замість `NewsStore` { #refactor-2 }
-
-`NewsRepository` має **ті самі методи**, що `NewsStore` з уроку 37: `add_many`, `find`, `count`, `stats`, `clear`. Тому ендпоінти майже не змінилися:
-
-```diff title="news_hub/api.py: було (37) → стало (38)"
--StoreDep = Annotated[NewsStore, Depends(get_store)]
-+SessionDep = Annotated[AsyncSession, Depends(get_db, scope="function")]
-+
-+def get_repo(session: SessionDep) -> NewsRepository:
-+    return NewsRepository(session)
-+
-+RepoDep = Annotated[NewsRepository, Depends(get_repo)]
-
--@app.get("/api/news", response_model=list[NewsItem], ...)
--async def list_news(store: StoreDep, ...) -> list[NewsItem]:
--    return store.find(skip=skip, limit=limit, category=category, source=source, lang=lang or "")
-+@app.get("/api/news", response_model=list[NewsOut], ...)
-+async def list_news(repo: RepoDep, ...) -> list[NewsRow]:
-+    return await repo.find(skip=skip, limit=limit, category=category, source=source, lang=lang or "")
-```
-
-Було: словник і list comprehension у пам'яті. Стало: SQL-запит. Подивимось, який SQL будує SQLAlchemy для трьох методів репозиторію:
+Сховище порожнє: новин ще ніхто не збирав. Збираємо зі знімка (168 новин, урок 37) — рефакторинг 3 розбере цей ендпоінт докладно:
 
 ```python
-from sqlalchemy import func, select
+report = api.post("/api/scrape", json={"source": "snapshot"}).json()
+print({key: report[key] for key in ("news_found", "news_valid", "news_saved", "news_total")})
 
-pg = postgresql.dialect()
-
-find = select(NewsRow).where(NewsRow.lang == "uk").order_by(NewsRow.id).offset(0).limit(5)
-print(find.compile(dialect=pg), "\n")
-
-stats = select(NewsRow.lang, func.count()).group_by(NewsRow.lang).order_by(func.count().desc(), NewsRow.lang)
-print(stats.compile(dialect=pg), "\n")
-
-add_many = (postgresql.insert(NewsRow)
-            .values(url="https://www.rbc.ua/ukr/news/x.html", title="Заголовок новини", source="rbc.ua",
-                    lang="uk", category="Новини", published_time=None)
-            .on_conflict_do_nothing(index_elements=["url"]).returning(NewsRow.id))
-print(add_many.compile(dialect=pg))
+response = api.get("/api/news", params={"lang": "uk", "limit": 2})
+print(response.status_code, response.headers["content-type"])
+for news in response.json():
+    print(news)
+print(api.get("/api/news/stats").json())
 ```
 
 ```text
-SELECT news.id, news.url, news.title, news.source, news.lang, news.category, news.published_time, news.scraped_at
-FROM news
-WHERE news.lang = %(lang_1)s::VARCHAR ORDER BY news.id
- LIMIT %(param_1)s::INTEGER OFFSET %(param_2)s::INTEGER
-
-SELECT news.lang, count(*) AS count_1
-FROM news GROUP BY news.lang ORDER BY count(*) DESC, news.lang
-
-INSERT INTO news (url, title, source, lang, category, published_time) VALUES (%(url)s::VARCHAR, %(title)s::VARCHAR, %(source)s::VARCHAR, %(lang)s::VARCHAR, %(category)s::VARCHAR, %(published_time)s::TIME WITHOUT TIME ZONE) ON CONFLICT (url) DO NOTHING RETURNING news.id
+{'news_found': 168, 'news_valid': 168, 'news_saved': 168, 'news_total': 168}
+200 application/json
+{'title': 'Реформа ВСУ', 'url': 'https://www.rbc.ua/ukr/news/reforma-zsu-kih-zmin-armiyi-chekati-vzhe-1777644218.html', 'source': 'rbc.ua', 'lang': 'uk', 'category': 'Новини', 'published_time': None}
+{'title': 'Долги теплокоммунэнерго перед "Нафтогазом" превысили 150 млрд грн, - Свириденко', 'url': 'https://www.rbc.ua/ukr/news/borgi-teplokomunenergo-pered-naftogazom-perevishchili-1778323211.html', 'source': 'rbc.ua', 'lang': 'uk', 'category': 'Новини', 'published_time': None}
+{'total': 168, 'category': {'Новини': 168}, 'lang': {'ru': 138, 'uk': 30}, 'source': {'rbc.ua': 167, 'auto.rbc.ua': 1}}
 ```
 
-- `%(lang_1)s`, `%(param_1)s` — **параметри**: значення йдуть окремо від SQL, як в уроці 29. SQL-ін'єкція через фільтр `?lang=` неможлива.
-- `stats` рахує в базі (`GROUP BY`), а не тягне всі рядки в Python.
-- `add_many` — один `INSERT` на весь збір: `ON CONFLICT (url) DO NOTHING` — дублікат **пропускає база**, `RETURNING news.id` повертає id лише вставлених рядків, тож `len(...)` — «скільки нових».
+Два спостереження:
 
-### Покроково: повторний збір з `ON CONFLICT`
+- `published_time` у JSON — `null`: у цих двох новин у стрічці не було часу. Для інших — рядок `"HH:MM:SS"`: `response_model` перетворює `time` на JSON сам;
+- обидві новини лежать під `/ukr/`, тож `lang="uk"`, а заголовки — російською («Реформа ВСУ», «Долги …»). Мову ми **виводимо з URL**, а не з тексту, — і сайт не завжди кладе текст туди, куди обіцяє адреса. Визначати мову за змістом навчимо агрегатор з Gemini в уроці 44.
 
-Той самий знімок збираємо вдруге. Для кожного рядка PostgreSQL бере наступне значення лічильника `id` **до** перевірки `UNIQUE`:
+### 422: помилка перевірки { #errors }
+
+Неправильні параметри до нашої функції навіть не доходять — FastAPI відповідає `422 Unprocessable Content` з переліком помилок:
+
+```python
+for params in ({"limit": 0}, {"limit": "abc"}, {"lang": "en"}):
+    response = api.get("/api/news", params=params)
+    error = response.json()["detail"][0]
+    print(response.status_code, params, "→", error["loc"], error["msg"])
+```
+
+```text
+422 {'limit': 0} → ['query', 'limit'] Input should be greater than or equal to 1
+422 {'limit': 'abc'} → ['query', 'limit'] Input should be a valid integer, unable to parse string as an integer
+422 {'lang': 'en'} → ['query', 'lang'] Input should be 'uk' or 'ru'
+```
+
+`loc` — де помилка: `["query", "limit"]` — параметр запиту `limit`; для тіла запиту буде `["body", …]`. Той самий формат отримає і Postman, і фронтенд, і бот — один раз навчився читати, читаєш скрізь.
+
+### Що змінилося
+
+| Було (`news_dashboard/app/main.py`) | Стало (`news_hub/news_hub/api.py`) | Навіщо |
+|---|---|---|
+| `class NewsItem(BaseModel)` — 13 полів у `main.py`, окремо від парсера | `response_model=list[NewsItem]` — модель з уроку 37 | одна модель на весь проєкт |
+| `lang: str = Query(default="", description="uk \| ru \| unknown")` | `lang: Literal["uk", "ru"] \| None` | `?lang=en` — `422`, а не порожній список |
+| `mode: str = Field(pattern="^(async\|sequential)$")` | `mode: Literal["async", "sequential"]` | те саме без regex; mypy знає значення |
+| `from fastapi import HTTPException` усередині функцій | імпорти вгорі модуля | читабельність |
+| 16 ендпоінтів | 6 + `openapi_tags` | ядро, згруповане в `/docs` |
+
+## Рефакторинг 2. Сховище через `Depends` і `lifespan` { #refactor-2 }
+
+У стартовому коді кожен ендпоінт сам діставав базу: `db = get_db()` → `db.news.find(query)`. Ендпоінт знає про MongoDB, а протестувати його без MongoDB неможливо. Виносимо «де лежать новини» в клас з тим самим контрактом:
+
+```diff title="GET /api/news: було → стало"
+ @app.get("/api/news", response_model=list[NewsItem])
+-async def list_news(skip: int = Query(default=0, ge=0), limit: int = ..., category: str = ..., ...):
+-    db = get_db()
+-    query: dict = {}
+-    if category:
+-        query["category"] = category
+-    ...
+-    cursor = db.news.find(query).sort("scraped_at", -1).skip(skip).limit(limit)
+-    docs = await cursor.to_list(length=limit)
+-    return [_doc_to_item(d) for d in docs]
++async def list_news(store: StoreDep, skip: int = Query(0, ge=0), limit: int = ..., ...) -> list[NewsItem]:
++    return store.find(skip=skip, limit=limit, category=category, source=source, lang=lang or "")
+```
+
+```python title="news_hub/store.py (скорочено)"
+class NewsStore:
+    def __init__(self) -> None:
+        self._items: dict[str, NewsItem] = {}      # url → новина: той самий url двічі не збережеться
+
+    def add_many(self, items: Iterable[NewsItem]) -> int:
+        """Додає лише нові (як `$setOnInsert` + `upsert` у Mongo); повертає, скільки додано."""
+
+    def find(self, *, skip=0, limit=50, category="", source="", lang="") -> list[NewsItem]: ...
+    def count(self) -> int: ...
+    def stats(self) -> dict[str, dict[str, int]]: ...
+    def clear(self) -> int: ...
+```
+
+Урок 39 замінить `NewsStore` на SQLAlchemy **з тими самими методами** — ендпоінти не зміняться.
+
+### `Depends`: ендпоінт просить, FastAPI дає
+
+```python title="news_hub/api.py (фрагмент)"
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+    app.state.store = NewsStore()        # до першого запиту
+    yield                                # тут сервер працює
+    app.state.store.clear()              # після зупинки
+
+
+def get_store(request: Request) -> NewsStore:
+    store: NewsStore = request.app.state.store
+    return store
+
+
+StoreDep = Annotated[NewsStore, Depends(get_store)]
+```
+
+- **`Depends(get_store)`** — «перед викликом ендпоінта виклич `get_store` і передай результат». Ендпоінт оголошує, *що* йому потрібно, а не *звідки* це взяти. Докладніше — розділ 5 [довідника](fastapi/fastapi_documentation.md#s5).
+- **`Annotated[NewsStore, Depends(...)]`** — тип для mypy і `/docs` плюс інструкція для FastAPI в одному записі; `StoreDep` — щоб не повторювати його в кожному ендпоінті.
+- **`lifespan`** — код до `yield` виконується один раз при старті, після `yield` — при зупинці. Старий `@app.on_event("startup")` у FastAPI застарів; `lifespan` тримає старт і зупинку поруч. У уроці 39 тут з'явиться пул з'єднань з базою (розділ 6 довідника).
+
+### Підміна залежності в тестах
+
+Живий скрапінг ходить у мережу — у тестах він не потрібен. `app.dependency_overrides` підміняє залежність на час тесту:
+
+```python title="tests/test_api.py (фрагмент)"
+async def fake_scraper(pages: list[str] | None) -> ScrapeOutcome:
+    page = PageResult(url=(pages or ["https://www.rbc.ua/ukr/news/"])[0], start=0.0, end=0.1, count=2)
+    return ScrapeOutcome(pages=[page], news=FAKE_NEWS, total_time=0.1)
+
+
+@pytest.fixture
+def client() -> Iterator[TestClient]:
+    app.dependency_overrides[get_scrapers] = lambda: {"async": fake_scraper, "sequential": fake_scraper}
+    with TestClient(app) as c:          # with → спрацює lifespan: нове порожнє сховище
+        yield c
+    app.dependency_overrides.clear()
+```
+
+`TestClient` надсилає запити прямо в застосунок — без uvicorn і мережі. Так само працює ноутбук заняття. Повністю тестування API — урок 42.
+
+## Рефакторинг 3. `POST /api/scrape`: парсинг через API { #refactor-3 }
+
+Тепер головне: агрегатор збирає новини за HTTP-запитом. Тіло запиту — Pydantic-модель:
+
+```python title="news_hub/api.py (фрагмент)"
+class ScrapeRequest(BaseModel):
+    source: Literal["live", "snapshot"] = Field("live", description="live — сайт; snapshot — збережений знімок")
+    mode: Literal["async", "sequential"] = Field("async", description="сторінки одночасно чи по черзі")
+    pages: list[HttpUrl] | None = Field(None, max_length=20, description="порожньо — стандартний список сторінок")
+
+    @field_validator("pages")
+    @classmethod
+    def only_rbc(cls, pages: list[HttpUrl] | None) -> list[HttpUrl] | None:
+        for url in pages or []:
+            if not (url.host or "").endswith("rbc.ua"):
+                raise ValueError(f"сервер завантажує лише сторінки rbc.ua, а не {url.host}")
+        return pages
+
+
+@app.post("/api/scrape", response_model=ScrapeReport, tags=["scrape"], summary="Зібрати новини")
+async def scrape(request: ScrapeRequest, store: StoreDep,
+                 scrapers: Annotated[dict[str, Scraper], Depends(get_scrapers)]) -> ScrapeReport:
+    if request.source == "snapshot":
+        outcome = ScrapeOutcome(pages=[], news=load_snapshot(), total_time=0.0)
+    else:
+        pages = [str(url) for url in request.pages] if request.pages else None
+        outcome = await scrapers[request.mode](pages)
+
+    valid, rejected = validate_news(outcome.news)       # урок 37: нічого не губиться мовчки
+    saved = store.add_many(valid)
+    return ScrapeReport(...)
+```
+
+Як FastAPI розрізняє, звідки брати параметр: простий тип (`int`, `str`, `Literal`) — з рядка запиту (`?limit=5`), Pydantic-модель — з тіла запиту (JSON), `Depends(...)` — із залежності.
+
+```mermaid
+sequenceDiagram
+    participant C as Клієнт (Postman, httpx)
+    participant F as FastAPI
+    participant S as scrape_all_async
+    participant R as rbc.ua
+    participant V as validate_news
+    participant DB as NewsStore
+
+    C->>F: POST /api/scrape {"mode": "async"}
+    F->>F: JSON → ScrapeRequest (інакше 422)
+    F->>S: pages = None → 7 стандартних сторінок
+    par одночасно, asyncio.gather
+        S->>R: GET /ukr/news/
+        S->>R: GET /rus/news/
+        S->>R: … ще 5 сторінок
+    end
+    R-->>S: HTML або помилка
+    S-->>F: ScrapeOutcome: сирі новини + час кожної сторінки
+    F->>V: list[RawNews]
+    V-->>F: перевірені NewsItem + відхилені з причинами
+    F->>DB: add_many(перевірені)
+    DB-->>F: скільки нових
+    F-->>C: 200 ScrapeReport
+```
+
+### Знімок, повторний збір і чужий сайт
+
+```python
+first = api.post("/api/scrape", json={"source": "snapshot"}).json()
+print("вдруге:", {key: first[key] for key in ("news_found", "news_saved", "news_total")})
+
+response = api.post("/api/scrape", json={"pages": ["https://example.com/admin"]})
+print(response.status_code, response.json()["detail"][0]["msg"])
+
+response = api.post("/api/scrape", json={"mode": "fast"})
+print(response.status_code, response.json()["detail"][0]["loc"], response.json()["detail"][0]["msg"])
+```
+
+```text
+вдруге: {'news_found': 168, 'news_saved': 0, 'news_total': 168}
+422 Value error, сервер завантажує лише сторінки rbc.ua, а не example.com
+422 ['body', 'mode'] Input should be 'async' or 'sequential'
+```
+
+Повторний збір не дублює новин (`news_saved: 0`): ключ сховища — `url`, як `upsert` зі `$setOnInsert` у стартовому коді.
+
+Обмеження `pages` лише сайтом rbc.ua — не формальність. Старий `ScrapeRequest` приймав будь-які URL: хто завгодно міг змусити сервер завантажити довільну адресу — зокрема внутрішню, недоступну ззовні (`http://localhost:…`, адреси хмарної інфраструктури). Це **SSRF** (Server-Side Request Forgery) — розберемо в уроці 47.
+
+### Живий збір
+
+`scraper.py` — `scrape_all_async` і `scrape_sequential` з прототипу `news_dashboard`: `aiohttp`, `asyncio.gather`, час початку й кінця кожної сторінки (у `news_dashboard` з них будувалась діаграма Ганта «разом vs по черзі»). Змінилося: розбір — `parse_rbc_news` з уроку 37 замість другої копії парсера; сторінка з кодом помилки (`403`, `503`) — помилка, а не «0 новин»:
+
+```python
+report = api.post("/api/scrape", json={"pages": ["https://www.rbc.ua/ukr/news/"]}).json()
+for page in report["pages"]:
+    print(page["url"], "→ новин:", page["count"], "| помилка:", page["error"])
+print({key: report[key] for key in ("news_found", "news_saved", "news_total")})
+```
+
+Приклад виводу (у середовищі, де збирався курс, rbc.ua недоступний; з доступом до сайту тут буде кількість новин і `помилка: None`):
+
+```text
+https://www.rbc.ua/ukr/news/ → новин: 0 | помилка: ClientResponseError: 403, message='Forbidden', url='https://www.rbc.ua/ukr/news/'
+{'news_found': 0, 'news_saved': 0, 'news_total': 168}
+```
+
+Старий `fetch_one` не перевіряв статус: сторінку «403 Forbidden» він розбирав як стрічку новин і повідомляв «0 новин, помилки немає». Тепер `resp.raise_for_status()` — і причина видна у звіті.
+
+## OpenAPI і `/docs` { #openapi }
+
+FastAPI сам описує API за стандартом **OpenAPI** (урок 33) — з маршрутів, типів параметрів, моделей і docstring-ів:
+
+```python
+schema = api.get("/openapi.json").json()
+print(schema["openapi"], "|", schema["info"]["title"], schema["info"]["version"])
+for path, methods in schema["paths"].items():
+    for method, operation in methods.items():
+        print(f"{method.upper():6} {path:18} {operation['tags']} {operation['summary']}")
+print(sorted(schema["components"]["schemas"]))
+```
+
+```text
+3.1.0 | news_hub API 0.37.0
+GET    /health            ['system'] Health
+GET    /api/news          ['news'] Список новин
+DELETE /api/news          ['news'] Delete All News
+GET    /api/news/count    ['news'] News Count
+GET    /api/news/stats    ['news'] News Stats
+POST   /api/scrape        ['scrape'] Зібрати новини
+['HTTPValidationError', 'NewsItem', 'PageResult', 'ScrapeReport', 'ScrapeRequest', 'Stats', 'ValidationError']
+```
+
+- `http://127.0.0.1:8000/docs` — **Swagger UI**: інтерактивна документація з цього опису;
+- `http://127.0.0.1:8000/redoc` — ReDoc: той самий опис для читання;
+- `/openapi.json` — сам опис: з нього генерують клієнтів, його імпортує Postman.
+
+![Swagger UI агрегатора: ендпоінти згруповані за тегами news, scrape, system](img/lesson_38_swagger.png)
+
+**Try it out** → параметри → **Execute**: Swagger UI надсилає справжній запит і показує команду `curl`, URL, відповідь і заголовки:
+
+![GET /api/news з lang=uk і limit=2 у Swagger UI: відповідь 200 з двома новинами](img/lesson_38_swagger_try.png)
+
+Опис моделі `NewsItem` у розділі **Schemas** — та сама JSON Schema, яку в уроці 37 ми отримували через `NewsItem.model_json_schema()`.
+
+## Postman: колекція запитів з перевірками { #postman }
+
+`/docs` зручний, щоб спробувати один запит. **Postman** — щоб зберегти набір запитів, передати його команді й перевіряти відповіді автоматично. У проєкті є колекція [`postman/news_hub.postman_collection.json`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_38_fastapi_basics/news_hub/postman/news_hub.postman_collection.json): 7 запитів, у кожного — вкладка **Tests** з перевірками на JavaScript:
+
+```javascript
+// 2. зібрати знімок — POST {{baseUrl}}/api/scrape, тіло {"source": "snapshot"}
+const report = pm.response.json();
+pm.test("200", () => pm.response.to.have.status(200));
+pm.test("усі 168 новин зі знімка перевірені", () => pm.expect(report.news_valid).to.eql(168));
+pm.collectionVariables.set("total", report.news_total);   // запам'ятали для запитів 4 і 7
+```
+
+- `{{baseUrl}}` — змінна колекції (`http://127.0.0.1:8000`): змінив раз — змінилося в усіх запитах;
+- `pm.collectionVariables.set` — передати значення з одного запиту в інший.
+
+**Як працювати:** Postman → **Import** → файл колекції → **Run collection**. Або **Import** → `http://127.0.0.1:8000/openapi.json`: Postman сам створить запит на кожен ендпоінт (без перевірок).
+
+Ту саму колекцію запускає з консолі **newman** — так її можна проганяти в CI (урок 51). Приклад виводу (сервер запущено на порту 8000; час запитів залежить від машини):
+
+```text
+$ npx newman run postman/news_hub.postman_collection.json
+newman
+
+news_hub — урок 38
+
+→ 1. health
+  GET http://127.0.0.1:8000/health [200 OK, 140B, 24ms]
+  ✓  200 і status ok
+
+→ 2. зібрати знімок
+  POST http://127.0.0.1:8000/api/scrape [200 OK, 270B, 14ms]
+  ✓  200
+  ✓  усі 168 новин зі знімка перевірені
+
+→ 3. українські новини
+  GET http://127.0.0.1:8000/api/news?lang=uk&limit=5 [200 OK, 1.69kB, 4ms]
+  ✓  200
+  ✓  не більше limit
+  ✓  усі lang = uk
+
+→ 4. статистика
+  GET http://127.0.0.1:8000/api/news/stats [200 OK, 237B, 6ms]
+  ✓  total = кількості після збору
+  ✓  є мови uk і ru
+
+→ 5. помилка: lang=en
+  GET http://127.0.0.1:8000/api/news?lang=en [422 Unprocessable Content, 289B, 3ms]
+  ✓  422 — FastAPI перевірив параметр
+  ✓  помилка в полі lang
+
+→ 6. помилка: чужий сайт
+  POST http://127.0.0.1:8000/api/scrape [422 Unprocessable Content, 364B, 3ms]
+  ✓  422 — сервер не завантажує чужі URL
+
+→ 7. очистити
+  DELETE http://127.0.0.1:8000/api/news [200 OK, 140B, 3ms]
+  ✓  видалено стільки, скільки було
+
+┌─────────────────────────┬─────────────────┬─────────────────┐
+│                         │        executed │          failed │
+├─────────────────────────┼─────────────────┼─────────────────┤
+│              iterations │               1 │               0 │
+├─────────────────────────┼─────────────────┼─────────────────┤
+│                requests │               7 │               0 │
+├─────────────────────────┼─────────────────┼─────────────────┤
+│            test-scripts │               7 │               0 │
+├─────────────────────────┼─────────────────┼─────────────────┤
+│      prerequest-scripts │               0 │               0 │
+├─────────────────────────┼─────────────────┼─────────────────┤
+│              assertions │              12 │               0 │
+├─────────────────────────┴─────────────────┴─────────────────┤
+│ total run duration: 187ms                                   │
+├─────────────────────────────────────────────────────────────┤
+│ total data received: 2.22kB (approx)                        │
+├─────────────────────────────────────────────────────────────┤
+│ average response time: 8ms [min: 3ms, max: 24ms, s.d.: 7ms] │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## Async чи blocking: виміри { #measure }
+
+FastAPI приймає і `async def`, і звичайний `def`. Різниця — у тому, **хто** виконує функцію:
+
+- `async def` — виконується в **циклі подій** (один потік на всі запити). Поки корутина чекає на `await`, цикл обслуговує інші запити;
+- `def` — FastAPI запускає в **пулі потоків** (за замовчуванням 40), щоб блокуючий код не зупиняв цикл подій.
+
+Небезпечне поєднання — `async def` + блокуючий виклик (`time.sleep`, `requests.get`, синхронний драйвер бази): функція займає цикл подій, і **весь сервер** чекає. Саме тому скрапер агрегатора — на `aiohttp` з `await`, а не на `requests`.
+
+Покроково — три одночасні запити до ендпоінта, що «чекає 2 секунди», у двох варіантах:
 
 ```mermaid
 flowchart TD
@@ -214,255 +483,64 @@ flowchart TD
     classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
     classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
 
-    subgraph S0 ["перший збір: 168 новин"]
+    subgraph B0 ["sync-broken, t = 0 с: time.sleep(2) у async def"]
         direction LR
-        a0["id 1 … 168<br>вставлено 168"] ~~~ a1["лічильник id = 168"]
+        b0a["запит 1<br>спить, тримає цикл"] ~~~ b0b["запит 2<br>чекає в черзі"] ~~~ b0c["запит 3<br>чекає в черзі"] ~~~ b0h["/health<br>не відповідає"]
     end
-    subgraph S1 ["другий збір, рядок 1: url уже є"]
+    subgraph B2 ["t = 2 с: цикл звільнився на мить"]
         direction LR
-        b0["nextval → 169"] --> b1{"url у news?"} -- так --> b2["DO NOTHING<br>id 169 пропав"]
+        b2a["запит 1<br>готово за 2 с"] ~~~ b2b["запит 2<br>спить, тримає цикл"] ~~~ b2c["запит 3<br>чекає"]
     end
-    subgraph S2 ["рядки 2–168: те саме"]
+    subgraph B4 ["t = 4 с"]
         direction LR
-        c0["nextval → 170 … 336"] --> c1["усі url є<br>вставлено 0"]
+        b4b["запит 2<br>готово за 4 с"] ~~~ b4c["запит 3<br>спить, тримає цикл"]
     end
-    subgraph S3 ["POST /api/news: новий url"]
+    subgraph B6 ["t = 6 с: разом 6 с = 3 × 2 с"]
         direction LR
-        d0["nextval → 337"] --> d1{"url у news?"} -- ні --> d2["INSERT<br>id = 337"]
+        b6c["запит 3<br>готово за 6 с"]
     end
-    S0 --> S1 --> S2 --> S3
+    B0 --> B2 --> B4 --> B6
 
-    class a0,a1 step
-    class b0,c0,d0 warning
-    class b1,d1 decision
-    class b2,c1 error
-    class d2 success
+    subgraph A0 ["async-correct, t = 0 с: await asyncio.sleep(2)"]
+        direction LR
+        a0a["запит 1<br>await, цикл вільний"] ~~~ a0b["запит 2<br>await, цикл вільний"] ~~~ a0c["запит 3<br>await, цикл вільний"] ~~~ a0h["/health<br>відповідає одразу"]
+    end
+    subgraph A2 ["t = 2 с: разом 2 с"]
+        direction LR
+        a2a["запит 1<br>готово за 2 с"] ~~~ a2b["запит 2<br>готово за 2 с"] ~~~ a2c["запит 3<br>готово за 2 с"]
+    end
+    A0 --> A2
+    B6 ~~~ A0
+
+    class b0a,b2b,b4c warning
+    class b0b,b0c,b2c step
+    class b0h error
+    class b2a success
+    class b4b,b6c error
+    class a0a,a0b,a0c step
+    class a0h,a2a,a2b,a2c success
 ```
 
-Перевіримо на справжній базі (PostgreSQL, сервер з кроку нижче) — таблиця чиста:
+Перевіримо на [`fastapi_demo`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_4/lessons/lesson_38_fastapi_basics/fastapi_demo). Сервер — `uvicorn app.main:app --port 8001`, навантаження — `python load_test.py` (одночасні запити, загальний час). Результати з машини, де збирався курс (4 ядра, один процес uvicorn; числа на іншій машині будуть трохи інші, співвідношення — ті самі):
 
-```python
-import httpx
+| Ендпоінт | Як написаний | Одночасних запитів | Загальний час |
+|---|---|---:|---:|
+| `/sync-broken` | `async def` + `time.sleep(2)` | 10 | 20.57 с |
+| `/sync-broken` | те саме | 20 | 40.03 с |
+| `/sync-safe` | `def` + `time.sleep(2)` | 20 | 2.03 с |
+| `/async-correct` | `async def` + `await asyncio.sleep(2)` | 20 | 2.01 с |
+| `/async-correct` | те саме | 500 | 2.21 с |
+| `/db-sync-broken/1` | `async def` + синхронний «драйвер бази» (1.5 с) | 8 | 12.01 с |
+| `/db-async-correct/1` | те саме через `run_in_executor` | 8 | 1.51 с |
 
-api = httpx.Client(base_url="http://127.0.0.1:8000")
-for attempt in (1, 2):
-    report = api.post("/api/scrape", json={"source": "snapshot"}).json()
-    print(f"збір {attempt}:", {key: report[key] for key in ("news_found", "news_saved", "news_total")})
+Поки йшли 10 запитів до `/sync-broken`, тест щосекунди питав `/health` — і шість разів поспіль не дочекався відповіді за 2 с: сервер не відповідав **нікому**.
 
-created = api.post("/api/news", json={"title": "Гривня зміцнилася до долара на міжбанку",
-                                      "url": "https://www.rbc.ua/ukr/news/hryvnia-777.html"}).json()
-print("нова новина: id =", created["id"])
-```
+!!! warning "Спершу виміряй вимірювач"
+    Клієнт навантажувального тесту — теж частина досліду. `httpx.AsyncClient` на сотнях одночасних з'єднань сам стає вузьким місцем: 500 запитів до миттєвого `/health` через httpx тривають 5.66 с, через aiohttp — 0.22 с. І тайм-аут клієнта має бути більшим за тривалість тесту (20 × 2 = 40 с): інакше клієнт обриває запити, а сервер їх усе одно виконує й гальмує наступний вимір. Тому `load_test.py` — на aiohttp без ліміту з'єднань, з тайм-аутом 60 с.
 
-```text
-збір 1: {'news_found': 168, 'news_saved': 168, 'news_total': 168}
-збір 2: {'news_found': 168, 'news_saved': 0, 'news_total': 168}
-нова новина: id = 337
-```
+    Правило: коли вимір дивує, перевір, що ти вимірюєш. Клієнт, мережа й тайм-аути — теж частина досліду.
 
-Дірки в id — нормальні: **id — ідентифікатор, а не лічильник новин**. Скільки новин — питай `count(*)` (`/api/news/count`), а не найбільший id. На SQLite (ноутбук заняття) та сама послідовність дає id = 169: там `INTEGER PRIMARY KEY` бере найбільший id + 1 і пропущені рядки номерів не забирають. Одна програма — різні id на різних базах; ще одна причина не рахувати новини за id.
-
-## Сесія на запит і COMMIT до відповіді { #session }
-
-`get_db` — зі стартового `database.py` майже без змін:
-
-```python title="news_hub/db.py"
-async def get_db() -> AsyncIterator[AsyncSession]:
-    """FastAPI Depends: одна сесія (і одна транзакція) на HTTP-запит."""
-    async with SessionFactory() as session:
-        try:
-            yield session                # тут виконується ендпоінт
-            await session.commit()       # ендпоінт без винятку → COMMIT
-        except Exception:
-            await session.rollback()     # виняток → ROLLBACK
-            raise
-```
-
-Одна сесія на запит — усі зміни запиту однією транзакцією: або все, або нічого. Якщо ендпоінт отримує і `RepoDep`, і `RowDep`, FastAPI викличе `get_db` **один раз** на запит і дасть обом ту саму сесію.
-
-```mermaid
-sequenceDiagram
-    participant C as Клієнт
-    participant F as FastAPI
-    participant G as get_db
-    participant R as NewsRepository
-    participant DB as PostgreSQL
-
-    C->>F: PATCH /api/news/7 {"category": "Економіка"}
-    F->>G: відкрити сесію
-    F->>R: get(7)
-    R->>DB: SELECT … WHERE id = 7
-    DB-->>R: рядок
-    F->>F: row.category = "Економіка"
-    F->>G: ендпоінт завершився без винятку
-    G->>DB: UPDATE news SET category=…, потім COMMIT
-    DB-->>G: OK
-    G-->>F: сесію закрито
-    F-->>C: 200 {"id": 7, "category": "Економіка", …}
-```
-
-!!! danger "З FastAPI 0.118 COMMIT за замовчуванням іде вже після відповіді"
-    До FastAPI 0.118 код після `yield` виконувався **до** відповіді. З версії 0.118 за замовчуванням — **після**: клієнт отримує `200`/`201` ще до COMMIT. Якщо COMMIT не вдасться (обрив з'єднання, обмеження бази, що перевіряється при COMMIT), клієнт уже почув «збережено», а даних немає.
-
-    Перевірили однією залежністю, що падає після `yield` (`raise` замість COMMIT):
-
-    ```text
-    FastAPI 0.115.0 → 500 Internal Server Error
-    FastAPI 0.117.1 → 500 Internal Server Error
-    FastAPI 0.118.0 → 200 {"ok":true}
-    FastAPI 0.141.1 → 200 {"ok":true}
-    FastAPI 0.141.1, Depends(dep, scope="function") → 500 Internal Server Error
-    ```
-
-    Тому — `Depends(get_db, scope="function")` (є з FastAPI 0.121): залежність завершується **до** відправлення відповіді. Тест `test_failed_commit_is_500_not_200` закріплює це: без `scope="function"` він падає.
-
-## Рефакторинг 3. Повний CRUD { #refactor-3 }
-
-| Дія | Метод і шлях | Успіх | Помилки |
-|---|---|---|---|
-| створити | `POST /api/news` | `201` + новина з `id` | `422` — не пройшла `NewsItem`; `409` — такий url уже є |
-| прочитати | `GET /api/news/{news_id}` | `200` | `404` |
-| змінити | `PATCH /api/news/{news_id}` | `200` | `404`, `422` |
-| видалити | `DELETE /api/news/{news_id}` | `204`, без тіла | `404` |
-| список, пошук | `GET /api/news`, `GET /api/news/search?q=` | `200` | `422` |
-
-```python title="news_hub/api.py (фрагмент)"
-async def get_news_or_404(news_id: int, repo: RepoDep) -> NewsRow:
-    row = await repo.get(news_id)
-    if row is None:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, detail=f"новини {news_id} немає")
-    return row
-
-
-RowDep = Annotated[NewsRow, Depends(get_news_or_404)]
-
-
-@app.post("/api/news", response_model=NewsOut, status_code=status.HTTP_201_CREATED, ...)
-async def create_news(body: NewsCreate, repo: RepoDep) -> NewsRow:
-    item = NewsItem.from_raw({...})                   # та сама перевірка, що для парсера (урок 36)
-    try:
-        return await repo.create(item)                # INSERT + flush: помилку UNIQUE видно одразу
-    except IntegrityError as error:
-        raise HTTPException(status.HTTP_409_CONFLICT, detail=f"новина з url {item.url} уже є") from error
-
-
-@app.patch("/api/news/{news_id}", response_model=NewsOut, ...)
-async def update_news(body: NewsPatch, row: RowDep) -> NewsRow:
-    for field, value in body.model_dump(exclude_unset=True).items():   # лише передані поля
-        setattr(row, field, value)                                     # UPDATE зробить COMMIT у get_db
-    return row
-```
-
-- **`RowDep`** — «знайди новину або `404`» один раз для `GET`, `PATCH`, `DELETE`.
-- **`flush()` у `repo.create`** відправляє `INSERT` одразу, в межах транзакції: помилку `UNIQUE` ловимо в ендпоінті й перетворюємо на `409`, а не на `500` при COMMIT.
-- **`exclude_unset=True`** — `PATCH {"category": …}` не затре заголовок.
-
-```python
-row = api.post("/api/news", json={"title": "НБУ залишив облікову ставку без змін",
-                                  "url": "https://www.rbc.ua/ukr/news/nbu-rate-778.html",
-                                  "published_time": "14:00"})
-news_id = row.json()["id"]
-print("POST  ", row.status_code, {key: row.json()[key] for key in ("id", "lang", "category", "published_time")})
-
-again = api.post("/api/news", json={"title": "НБУ залишив облікову ставку без змін",
-                                    "url": "https://www.rbc.ua/ukr/news/nbu-rate-778.html"})
-print("POST  ", again.status_code, again.json())
-
-patched = api.patch(f"/api/news/{news_id}", json={"category": "Економіка"})
-print("PATCH ", patched.status_code, patched.json()["category"], "|", patched.json()["title"])
-print("GET   ", api.get(f"/api/news/{news_id}").json()["category"])
-
-deleted = api.delete(f"/api/news/{news_id}")
-print("DELETE", deleted.status_code, repr(deleted.text))
-missing = api.get(f"/api/news/{news_id}")
-print("GET   ", missing.status_code, missing.json())
-```
-
-```text
-POST   201 {'id': 338, 'lang': 'uk', 'category': 'Новини', 'published_time': '14:00:00'}
-POST   409 {'detail': 'новина з url https://www.rbc.ua/ukr/news/nbu-rate-778.html уже є'}
-PATCH  200 Економіка | НБУ залишив облікову ставку без змін
-GET    Економіка
-DELETE 204 ''
-GET    404 {'detail': 'новини 338 немає'}
-```
-
-### Дані переживають перезапуск
-
-Новини тепер у PostgreSQL, а не в процесі сервера. Порахуємо їх **окремою програмою** — без FastAPI, лише через репозиторій:
-
-```text
-$ python -c "import asyncio; from news_hub.db import SessionFactory; from news_hub.repository import NewsRepository; print(asyncio.run(NewsRepository(SessionFactory()).count()))"
-169
-```
-
-Зупини uvicorn (`Ctrl+C`), запусти знову — `GET /api/news/count` поверне те саме число. Два процеси uvicorn бачать ті самі новини.
-
-## Міграції Alembic { #alembic }
-
-`Base.metadata.create_all()` створює таблиці, яких немає, — але не змінює наявні. Коли в уроці 43 у таблиці з'явиться стовпець `summary`, база з тисячами новин має отримати його **без втрати даних**. Для цього — **міграції**: версії схеми як код, у git поруч із програмою (як `makemigrations`/`migrate` у Django, урок 33).
-
-```bash
-alembic revision --autogenerate --rev-id 0001 -m "news table"   # порівняти NewsRow з базою → файл міграції
-alembic upgrade head                                            # застосувати всі нові міграції
-alembic downgrade -1                                            # відкотити останню
-```
-
-Історія й поточна версія бази:
-
-```text
-$ alembic history
-<base> -> 0001 (head), news table — таблиця новин агрегатора (урок 38)
-$ alembic current
-0001 (head)
-INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
-INFO  [alembic.runtime.migration] Will assume transactional DDL.
-```
-
-SQL, який виконує міграція, можна подивитись, не чіпаючи бази (`--sql` — «офлайн»-режим):
-
-```text
-$ alembic upgrade head --sql
-BEGIN;
-
-CREATE TABLE alembic_version (
-    version_num VARCHAR(32) NOT NULL,
-    CONSTRAINT alembic_version_pkc PRIMARY KEY (version_num)
-);
-
--- Running upgrade  -> 0001
-
-CREATE TABLE news (
-    id SERIAL NOT NULL,
-    url VARCHAR(500) NOT NULL,
-    title VARCHAR(300) NOT NULL,
-    source VARCHAR(100) NOT NULL,
-    lang VARCHAR(2) NOT NULL,
-    category VARCHAR(100) NOT NULL,
-    published_time TIME WITHOUT TIME ZONE,
-    scraped_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
-    PRIMARY KEY (id),
-    UNIQUE (url)
-);
-
-CREATE INDEX ix_news_category ON news (category);
-
-CREATE INDEX ix_news_lang ON news (lang);
-
-CREATE INDEX ix_news_source ON news (source);
-
-INSERT INTO alembic_version (version_num) VALUES ('0001') RETURNING alembic_version.version_num;
-
-COMMIT;
-
-INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
-INFO  [alembic.runtime.migration] Generating static SQL
-INFO  [alembic.runtime.migration] Will assume transactional DDL.
-INFO  [alembic.runtime.migration] Running upgrade  -> 0001, news table — таблиця новин агрегатора (урок 38)
-```
-
-!!! warning "Autogenerate — чернетка, а не готова міграція"
-    Alembic записав `server_default=sa.text('now()')`: текст функції PostgreSQL. На SQLite такої функції немає — міграція там падала. Тому в міграції — `sa.func.now()`: SQLAlchemy підставляє правильний SQL для кожної бази (`now()` для PostgreSQL, `CURRENT_TIMESTAMP` для SQLite). Правило: **кожну автоміграцію читай перед комітом**, а `alembic check` покаже, чи збігаються моделі з базою.
+Для CPU-задач (`/cpu-broken` → `/cpu-fixed` через `ProcessPoolExecutor`) і пулу з'єднань з базою — розділи 3–6 [довідника](fastapi/fastapi_documentation.md#s3).
 
 ## Архітектура: було → стало { #architecture }
 
@@ -474,39 +552,37 @@ flowchart TD
     classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
     classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
 
-    subgraph OLD ["урок 37: у пам'яті процесу"]
+    subgraph OLD ["до рефакторингу: news_dashboard,<br>16 ендпоінтів в одному main.py"]
         direction LR
-        A0["api.py"] -- "Depends" --> S0["NewsStore<br>dict url → NewsItem"]
-        S0 --> L0["зникає при<br>перезапуску"]
+        E0["ендпоінт"] --> M0["MongoDB<br>напряму: get_db()"]
+        E0 --> S0["scraper.py<br>власний _parse_page + NLP"]
+        S0 --> N0["друга модель новини<br>13 полів у main.py"]
     end
-    subgraph NEW ["урок 38: база даних"]
+    subgraph NEW ["news_hub, урок 38"]
         direction LR
-        A1["api.py<br>CRUD, 201/404/409/204"] -- "Depends" --> R1["NewsRepository<br>увесь SQL"]
-        A1 -- "Depends, scope=function" --> G1["get_db<br>сесія й транзакція"]
-        R1 --> G1
-        G1 --> DB[("PostgreSQL<br>або SQLite")]
-        M1["Alembic<br>migrations/"] --> DB
-        T1["tables.py<br>NewsRow"] -.-> R1
-        T1 -.-> M1
+        API["api.py<br>маршрути, ScrapeRequest"] -- "Depends" --> ST["NewsStore<br>find, add_many, stats"]
+        API -- "Depends" --> SC["scraper.py<br>aiohttp, gather"]
+        SC --> P["parser.py<br>parse_rbc_news, урок 37"]
+        API --> V["models.py<br>NewsItem, validate_news"]
+        V --> ST
     end
     subgraph NEXT ["далі"]
         direction LR
-        N1["урок 39: кеш Redis<br>перед репозиторієм"] ~~~ N2["урок 41: тести API<br>на тестовій базі"] ~~~ N3["урок 43: стовпець summary<br>міграція 0002"]
+        D["урок 39: NewsStore → SQLAlchemy"] ~~~ R["урок 40: кеш і rate limit"] ~~~ G["урок 44: Gemini"]
     end
     OLD --> NEW --> NEXT
 
-    class A0,S0 step
-    class L0 error
-    class A1,R1,T1 step
-    class G1 warning
-    class DB,M1 success
-    class N1,N2,N3 success
+    class E0,S0 step
+    class M0,N0 error
+    class API,SC,P step
+    class V warning
+    class ST success
+    class D,R,G success
 ```
 
-- **Репозиторій — єдине місце з SQL.** Ендпоінти не знають, PostgreSQL це чи SQLite; тести ганяють ті самі 32 тести на обох (`TEST_DATABASE_URL`). Детальніше про патерн — розділ 7 [довідника](fastapi/fastapi_documentation.md#s7).
-- **Транзакція = запит.** `get_db` відкриває сесію, ендпоінт працює, COMMIT — до відповіді (`scope="function"`). Розділ 8 довідника — Unit of Work, той самий принцип для кількох репозиторіїв.
-- **Правила даних — у базі.** `UNIQUE (url)` тримає і API, і міграції, і будь-яку іншу програму, що пише в `news`; код лише перетворює помилку на зрозумілий `409`.
-- **Схема — у git.** `tables.py` описує, якою таблиця має бути; `migrations/` — як до цього дійти з будь-якої попередньої версії.
+- **Шари.** `api.py` знає HTTP (маршрути, коди, моделі запитів), `scraper.py` — мережу, `parser.py` — HTML, `models.py` — правила даних, `store.py` — зберігання. Кожен можна замінити, не чіпаючи інших: урок 39 змінить лише `store.py`.
+- **Залежності через `Depends`.** Ендпоінт не створює сховище і не вибирає скрапер — отримує їх. Тому тест підмінює скрапер одним рядком, а урок 39 підставить сесію бази.
+- **Одна модель.** `NewsItem` перевіряє дані з парсера (урок 37) і описує відповідь API й схему в `/docs` (урок 38) — змінимо модель, і все це зміниться узгоджено.
 
 ### Тести і mypy
 
@@ -514,157 +590,132 @@ flowchart TD
 
 ```text
 $ pytest -q -p no:cacheprovider
-................................                                                             [100%]
-32 passed in 0.93s
-$ TEST_DATABASE_URL=postgresql+asyncpg://news:news@localhost:5432/news_hub_test pytest -q -p no:cacheprovider
-................................                                                             [100%]
-32 passed in 2.46s
+.......................                                                                      [100%]
+23 passed in 0.64s
 $ mypy --strict news_hub
-Success: no issues found in 9 source files
+Success: no issues found in 7 source files
 ```
 
-`tests/conftest.py` створює для кожного тесту окремий engine і порожні таблиці (`Base.metadata.create_all`) і підміняє `get_db`; за замовчуванням — SQLite у пам'яті, з `TEST_DATABASE_URL` — PostgreSQL. Додалось 9 тестів CRUD: `201`, `409`, `422`, `404`, `PATCH` і збереження змін, `204`, `GROUP BY`, пошук, «COMMIT не вдався → `500`».
+Додалось 11 тестів API: порожнє сховище, збір зі знімка й фільтри, повторний збір, відхилені новини зі «скрапера»-заглушки, чотири випадки `422`, очищення, перелік шляхів в OpenAPI.
 
 ## Практика { #practice }
 
-### Розібраний приклад: пошук `GET /api/news/search?q=`
+### Розібраний приклад: ендпоінт `GET /api/news/sources`
 
-В уроці 37 пошук був завданням «спробуй самостійно». У прототипі `news_dashboard` він виглядав так: `{"title": {"$regex": keyword, "$options": "i"}}` — рядок користувача ставав **регулярним виразом** у MongoDB. Тепер — SQL:
+Задача: список джерел з кількістю новин — `{"rbc.ua": 167, "auto.rbc.ua": 1}`.
 
-1. **Репозиторій.** `NewsRow.title.icontains(q, autoescape=True)` → `title ILIKE '%' || :q || '%'` у PostgreSQL. `q` — параметр; `autoescape=True` — символи `%` і `_` у запиті шукаються буквально, а не як «будь-що».
-2. **Ендпоінт.** `q: str = Query(min_length=2, max_length=60)` — порожній чи надто довгий пошук відсічено до SQL.
-3. **Порядок маршрутів.** `/api/news/search` оголошено **до** `/api/news/{news_id}`: інакше FastAPI спробував би прочитати `"search"` як `news_id: int` і відповів би `422` (урок 37, розібраний приклад).
+1. **Шлях і метод.** Читаємо — `GET`; ресурс — джерела новин → `/api/news/sources`.
+2. **Звідки дані.** `store.stats()["source"]` уже рахує джерела — нової логіки не треба.
+3. **Що повертаємо.** `dict[str, int]` — анотація результату одразу стає схемою в `/docs`.
 
 ```python
-for q in ("зеленськ", "ЗЕЛЕНСЬК", "%%"):
-    found = api.get("/api/news/search", params={"q": q, "limit": 100}).json()
-    print(repr(q), "→", len(found), [news["title"][:40] for news in found[:2]])
-print(api.get("/api/news/search", params={"q": "а"}).status_code)
+from fastapi.testclient import TestClient
+from news_hub.api import StoreDep, app
+
+
+@app.get("/api/news/sources", tags=["news"])
+async def news_sources(store: StoreDep) -> dict[str, int]:
+    """Джерела новин і скільки новин з кожного."""
+    return store.stats()["source"]
+
+
+with TestClient(app) as client:
+    client.post("/api/scrape", json={"source": "snapshot"})
+    print(client.get("/api/news/sources").json())
+    print("/api/news/sources" in client.get("/openapi.json").json()["paths"])
 ```
 
 ```text
-'зеленськ' → 11 ['У Путіна образилися на дозвіл Зеленськог', 'Зеленський дозволив проведення параду в ']
-'ЗЕЛЕНСЬК' → 11 ['У Путіна образилися на дозвіл Зеленськог', 'Зеленський дозволив проведення параду в ']
-'%%' → 0 []
-422
+{'rbc.ua': 167, 'auto.rbc.ua': 1}
+True
 ```
+
+Порядок має значення: якби в застосунку був маршрут `/api/news/{news_id}`, оголошений **раніше**, запит `/api/news/sources` потрапив би в нього з `news_id="sources"`. Конкретні шляхи оголошуй перед шляхами з параметрами.
 
 ### Зміни приклад
 
-1. Додай до пошуку фільтр `lang: Literal["uk", "ru"] | None` — у репозиторії це ще одна умова `.where(...)`.
-2. Додай у `NewsRepository` метод `latest(limit)` — найновіші за `scraped_at` (`order_by(NewsRow.scraped_at.desc())`), і ендпоінт `GET /api/news/latest`. Не забудь про порядок маршрутів.
+1. Додай до `/api/news/sources` параметр `min_count: int = Query(1, ge=1)` — повертати лише джерела, де новин не менше `min_count`. Перевір `422` для `min_count=0`.
+2. Додай у колекцію Postman запит «8. джерела» з перевіркою, що сума значень дорівнює `total` зі збору.
 
-### Спробуй самостійно: міграція 0002
+### Спробуй самостійно: пошук за словом
 
-Підготуй таблицю до уроку 43 (підсумки від Gemini):
+Ендпоінт `GET /api/news/search?q=…`:
 
-- у `NewsRow` — стовпець `summary: Mapped[str | None] = mapped_column(Text)`;
-- `alembic revision --autogenerate --rev-id 0002 -m "news summary"` → **прочитай** файл міграції;
-- `alembic upgrade head` на базі, де вже є новини; `alembic downgrade -1` і знову `upgrade head`;
-- `summary` — у `NewsOut` і в `NewsPatch`.
+- `q` — обов'язковий, 2–60 символів (`Query(min_length=2, max_length=60)`);
+- шукає `q` у заголовку без урахування регістру (`q.lower() in item.title.lower()`), повертає `list[NewsItem]`;
+- пошук — метод `NewsStore.search(q, limit)`, а не код в ендпоінті.
 
-**Критерії перевірки:** новини, зібрані до міграції, лишились на місці з `summary: null`; `PATCH {"summary": "…"}` зберігає підсумок; `alembic check` — «No new upgrade operations detected»; тести проходять на SQLite і PostgreSQL.
+**Критерії перевірки:** `?q=Зеленськ` на знімку повертає лише новини з цим словом у заголовку; `?q=а` — `422`; тест у `tests/test_api.py`; `mypy --strict` чистий. Старий `/api/news/trends` робив те саме через `$regex` з рядка користувача — чому так не варто, розберемо в уроці 47.
 
 ### Знайди помилку { #find-bug }
 
-Студент вирішив, що `ON CONFLICT` — це складно, і написав збір «по-простому»: для кожної новини перевірити, чи є такий url, і лише тоді додати. Запускаємо **два збори одночасно** — як два користувачі натиснули «Зібрати» або бот і планувальник спрацювали разом:
+Студент додав ендпоінт «зібрати одну сторінку» — через `requests`, як в уроці 32:
 
-```python
-import asyncio
+```python title="news_hub/api.py"
+import requests
 
-from sqlalchemy import delete, select
-
-from news_hub.db import SessionFactory
-from news_hub.models import validate_news
-from news_hub.repository import news_values
-from news_hub.snapshot import load_snapshot
-
-news, _ = validate_news(load_snapshot()[:20])
-
-
-async def naive_add_many(items):
-    async with SessionFactory() as session:
-        saved = 0
-        for item in items:
-            exists = await session.scalar(select(NewsRow.id).where(NewsRow.url == str(item.url)))
-            if exists is None:                     # «такого url ще немає — додаю»
-                session.add(NewsRow(**news_values(item)))
-                saved += 1
-        await session.commit()
-        return saved
-
-
-async def two_scrapes_at_once():
-    async with SessionFactory() as session:
-        await session.execute(delete(NewsRow))
-        await session.commit()
-    results = await asyncio.gather(naive_add_many(news), naive_add_many(news), return_exceptions=True)
-    for result in results:
-        print(type(result).__name__, str(result).splitlines()[0].split(") ", 1)[-1])
-
-
-asyncio.run(two_scrapes_at_once())
+@app.post("/api/scrape/page")
+async def scrape_page(url: str, store: StoreDep) -> dict[str, int]:
+    html = requests.get(url, timeout=15).text
+    valid, _ = validate_news(parse_rbc_news(html))
+    return {"saved": store.add_many(valid)}
 ```
 
-```text
-int 20
-IntegrityError duplicate key value violates unique constraint "news_url_key"
-```
-
-Кожен збір «перевірив» усі 20 url, і кожен вирішив, що новин немає. Чому, і що з цим робити?
+Локально з одним користувачем усе працює. Що станеться, коли rbc.ua відповідатиме 10 секунд, а до агрегатора прийде ще кілька запитів? Знайди дві проблеми.
 
 ??? success "Відповідь"
 
-    **Гонка «перевір, потім зроби» (check-then-act).** Між `SELECT` і `COMMIT` є проміжок, і на кожному `await` цикл подій перемикається на інший збір. Обидва встигли виконати `SELECT` раніше, ніж хтось зробив `COMMIT`, тож обидва «побачили» порожню таблицю. Перший COMMIT пройшов, другий упав на `UNIQUE`: у справжньому ендпоінті це був би `500`.
+    1. **`requests.get` у `async def` блокує цикл подій.** Поки сторінка вантажиться (до 15 с), сервер не відповідає нікому — навіть `/health`. Це `/sync-broken` з [вимірів](#measure): 10 таких запитів — 10 × час сторінки. Виправлення: асинхронний клієнт з `await` (`aiohttp`, як у `scraper.py`, або `httpx.AsyncClient`) — або `def` замість `async def`, щоб FastAPI виконав функцію в пулі потоків.
+    2. **`url: str` без перевірки — SSRF.** Будь-хто може попросити сервер завантажити `http://localhost:…` чи внутрішню адресу. Виправлення: `HttpUrl` і перевірка домену, як у `ScrapeRequest.only_rbc`.
 
-    У тестах з одним користувачем цей код працює завжди — помилка проявляється лише під паралельними запитами. Найгірший вид помилок: у розробці її не видно.
-
-    Виправлення — не перевіряти в Python, а **віддати рішення базі одним оператором**: `INSERT … ON CONFLICT (url) DO NOTHING` у `NewsRepository.add_many`. База перевіряє унікальність атомарно, тому два одночасні збори просто вставлять кожну новину рівно один раз. Для одиничного `POST /api/news` — те саме правило з іншого боку: `UNIQUE` у таблиці + `IntegrityError` → `409`.
+    Бонус: `url: str` без моделі — це параметр **рядка запиту** (`POST /api/scrape/page?url=…`), а не тіла; для `POST` з даними краще модель у тілі.
 
 ## Підсумок
 
 | Поняття | Що запам'ятати |
 |---|---|
-| `DATABASE_URL` | діалект+драйвер://користувач:пароль@хост:порт/база; зі змінної середовища |
-| `create_async_engine` | пул з'єднань; для PostgreSQL — `asyncpg`, для SQLite — `aiosqlite` |
-| `Mapped` / `mapped_column` | таблиця як клас; `X \| None` — `NULL` дозволено |
-| Pydantic vs SQLAlchemy модель | перевірка даних vs рядок таблиці; `from_attributes=True` з'єднує їх у відповіді |
-| Сесія | робоче місце запиту: зміни → `flush` (SQL у транзакції) → `commit` |
-| `get_db` + `scope="function"` | одна сесія й транзакція на запит, COMMIT до відповіді |
-| Репозиторій | увесь SQL в одному місці; ендпоінти не знають, яка база |
-| `ON CONFLICT DO NOTHING` | дублікати відсіює база атомарно; id при цьому можуть «перескакувати» |
-| CRUD-коди | `201` створено, `404` немає, `409` конфлікт, `204` видалено без тіла |
-| Alembic | версії схеми в git; autogenerate — чернетка, читай перед комітом |
-| Check-then-act | «перевір, потім встав» ламається під паралельними запитами — правило даних віддай базі |
+| `FastAPI()` + `@app.get/post/delete` | маршрут = метод + шлях → функція |
+| Параметри | простий тип — з рядка запиту; Pydantic-модель — з тіла; `Depends` — із залежності |
+| `Query(..., ge=, le=)`, `Literal` | правила перевірки параметрів; порушення → `422` |
+| `422` | `detail[i].loc` — де помилка, `msg` — що не так |
+| `response_model` | форма відповіді й JSON з моделі |
+| `Depends`, `Annotated` | ендпоінт просить ресурс, FastAPI дає; у тестах — `dependency_overrides` |
+| `lifespan` | код при старті й зупинці сервера (замість `on_event`) |
+| `/docs`, `/redoc`, `/openapi.json` | опис API, який FastAPI будує сам |
+| Postman / newman | збережені запити з перевірками; newman — те саме з консолі й CI |
+| `async def` vs `def` | `async def` — у циклі подій, лише з `await`; блокуючий код — у `def` (пул потоків) або через async-бібліотеку |
+| Вимір | перевір клієнт і тайм-аути, перш ніж робити висновки про сервер |
 
 ### Самоперевірка
 
-1. Чим `NewsRow` відрізняється від `NewsItem` і чому не одна модель на все?
-2. Навіщо `flush()` у `repo.create`, якщо COMMIT однаково буде в `get_db`?
-3. Що станеться з клієнтом, якщо COMMIT не вдасться, з `scope="function"` і без нього (FastAPI ≥ 0.118)?
-4. Чому id новин ідуть з дірками і чи це проблема?
-5. Навіщо міграції, якщо є `Base.metadata.create_all()`?
-6. Чому два одночасні `naive_add_many` зламались, а два `add_many` — ні?
+1. Звідки FastAPI бере значення параметра `limit: int = Query(50)`, а звідки — `request: ScrapeRequest`?
+2. Що поверне `GET /api/news?limit=0` і де в відповіді шукати причину?
+3. Навіщо сховище в `Depends`, якщо можна створити глобальну змінну `store = NewsStore()`?
+4. Що робить код до і після `yield` у `lifespan`?
+5. Чим відрізняються `/docs` і колекція Postman? Коли що використовувати?
+6. `async def` + `time.sleep(2)`, 20 одночасних запитів — скільки чекатиме останній і чому? А з `def`?
+7. Чому `POST /api/scrape` приймає сторінки лише з rbc.ua?
 
 ??? success "Відповіді"
 
-    1. `NewsItem` перевіряє дані ззовні (довжина, домен, мова); `NewsRow` описує рядок таблиці (типи стовпців, `UNIQUE`, `id` і `scraped_at` від бази). У них різні задачі й різний час роботи; змішування тягне SQL у перевірку або правила перевірки в таблицю.
-    2. Щоб `INSERT` пішов у базу зараз і помилка `UNIQUE` виникла в ендпоінті — там її перетворюємо на `409`. Без `flush` вона вилетіла б при COMMIT у `get_db` як `500`.
-    3. З `scope="function"` — `500`: залежність завершується до відповіді. Без нього — клієнт уже отримав `200`/`201`, а дані не збережено.
-    4. PostgreSQL бере значення лічильника до перевірки `UNIQUE`, і пропущені рядки його «з'їдають». Не проблема: id лише ідентифікує рядок; кількість — `count(*)`.
-    5. `create_all` лише створює відсутні таблиці. Міграції змінюють наявну схему (додати стовпець, індекс) без втрати даних, у контрольованому порядку, з можливістю відкату — і зберігаються в git.
-    6. `naive_add_many` вирішує в Python між `SELECT` і `COMMIT` — інший збір встигає втрутитись. `add_many` робить один `INSERT … ON CONFLICT DO NOTHING`: унікальність перевіряє база атомарно.
+    1. `limit` — з рядка запиту (`?limit=5`), бо це простий тип; `ScrapeRequest` — Pydantic-модель, тому з JSON-тіла.
+    2. `422`, `detail[0].loc == ["query", "limit"]`, `msg` — «Input should be greater than or equal to 1».
+    3. Залежність можна підмінити в тестах (`dependency_overrides`) і замінити реалізацію (SQLAlchemy в уроці 39), не змінюючи ендпоінтів. Глобальна змінна жорстко зв'язує код з однією реалізацією і живе між тестами.
+    4. До `yield` — один раз при старті (створити сховище, пул з'єднань), після — при зупинці (закрити, прибрати).
+    5. `/docs` — спробувати запит тут і зараз, прочитати контракт. Postman — зберегти набір запитів із перевірками, поділитися з командою, проганяти в CI через newman.
+    6. ~40 с: `time.sleep` займає цикл подій, запити виконуються по черзі (виміряно: 40.03 с). З `def` — ~2 с: FastAPI виконує функції в пулі потоків (виміряно: 2.03 с).
+    7. Інакше будь-хто змусить сервер завантажити довільну адресу, зокрема внутрішню (SSRF).
 
 ### Що далі
 
-- Ноутбук заняття: [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_38_fastapi_sqlalchemy/note_lesson_38_sqlalchemy_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_38_fastapi_sqlalchemy/note_lesson_38_sqlalchemy.ipynb){ .solutions-link }.
-- Урок 39 — middleware і Redis: кеш `GET /api/news` перед репозиторієм, rate limit на `POST /api/scrape`, фоновий збір.
+- Ноутбук заняття: [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_38_fastapi_basics/note_lesson_38_fastapi_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_38_fastapi_basics/note_lesson_38_fastapi.ipynb){ .solutions-link }.
+- Урок 39 — `NewsStore` → SQLAlchemy: новини переживають перезапуск сервера, унікальний `url` — обмеження бази, `GET /api/news` — SQL-запит з фільтрами. Довідник: розділи 6–8 (пул з'єднань, Repository, Unit of Work).
 
 ## Документація і джерела
 
-- Код: [`news_hub`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_4/lessons/lesson_38_fastapi_sqlalchemy/news_hub) — шар бази зі стартового `production_bot` (`backend/core/database.py`, `backend/repositories/base.py`, `migrations/`, `docker-compose.yml`), API — з уроку 37.
-- Довідник курсу: [FastAPI: архітектура, async і production-патерни](fastapi/fastapi_documentation.md), розділи 6–8.
-- SQLAlchemy 2.0: [ORM Quick Start](https://docs.sqlalchemy.org/en/20/orm/quickstart.html), [Declarative Mapping](https://docs.sqlalchemy.org/en/20/orm/declarative_tables.html), [Asynchronous I/O](https://docs.sqlalchemy.org/en/20/orm/extensions/asyncio.html), [Session Basics](https://docs.sqlalchemy.org/en/20/orm/session_basics.html), [INSERT…ON CONFLICT (PostgreSQL)](https://docs.sqlalchemy.org/en/20/dialects/postgresql.html#insert-on-conflict-upsert)
-- FastAPI: [SQL (Relational) Databases](https://fastapi.tiangolo.com/tutorial/sql-databases/), [Dependencies with yield](https://fastapi.tiangolo.com/tutorial/dependencies/dependencies-with-yield/)
-- Alembic: [Tutorial](https://alembic.sqlalchemy.org/en/latest/tutorial.html), [Auto Generating Migrations](https://alembic.sqlalchemy.org/en/latest/autogenerate.html)
-- PostgreSQL: [INSERT … ON CONFLICT](https://www.postgresql.org/docs/current/sql-insert.html#SQL-ON-CONFLICT), [Sequence functions](https://www.postgresql.org/docs/current/functions-sequence.html)
+- Код: [`news_hub`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_4/lessons/lesson_38_fastapi_basics/news_hub) — API й скрапер з `news_dashboard/app/main.py` і `scraper.py` прототипу `news_dashboard`; [`fastapi_demo`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_4/lessons/lesson_38_fastapi_basics/fastapi_demo) — там само.
+- Довідник курсу: [FastAPI: архітектура, async і production-патерни](fastapi/fastapi_documentation.md).
+- FastAPI: [First Steps](https://fastapi.tiangolo.com/tutorial/first-steps/), [Query Parameters and String Validations](https://fastapi.tiangolo.com/tutorial/query-params-str-validations/), [Request Body](https://fastapi.tiangolo.com/tutorial/body/), [Response Model](https://fastapi.tiangolo.com/tutorial/response-model/), [Handling Errors](https://fastapi.tiangolo.com/tutorial/handling-errors/), [Dependencies](https://fastapi.tiangolo.com/tutorial/dependencies/), [Lifespan Events](https://fastapi.tiangolo.com/advanced/events/), [Testing](https://fastapi.tiangolo.com/tutorial/testing/), [Testing Dependencies with Overrides](https://fastapi.tiangolo.com/advanced/testing-dependencies/), [Concurrency and async / await](https://fastapi.tiangolo.com/async/)
+- [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
+- Postman: [Write scripts to test API response data](https://learning.postman.com/docs/tests-and-scripts/write-scripts/test-scripts/), [Run collections using Newman CLI](https://learning.postman.com/docs/collections/using-newman-cli/command-line-integration-with-newman/)
+- aiohttp: [Client Quickstart](https://docs.aiohttp.org/en/stable/client_quickstart.html)

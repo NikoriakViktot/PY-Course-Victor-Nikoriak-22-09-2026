@@ -12,8 +12,8 @@
 ```
 PY-Course-Victor-Nikoriak-22-09-2026
 │
-├── module_1/                        ← М1. Python Core (уроки 1–17 за програмою v5.0)
-│   ├── docs/                        ← Довідкові ноутбуки модуля 1 (*_docs.ipynb)
+├── module_1/                        ← М1. Python Core (уроки 1–18 за програмою v5.0)
+│   ├── bonus/                       ← Довідкові ноутбуки модуля 1 (*_docs.ipynb)
 │   └── lessons/                     ← Уроки модуля 1: lesson_NN_<тема>, NN = номер уроку v5.0
 │       ├── lesson_01_intro_and_course_format/
 │       ├── lesson_02_first_steps_environment_setup/
@@ -21,21 +21,22 @@ PY-Course-Victor-Nikoriak-22-09-2026
 │       ├── lesson_04_conditions_and_control/
 │       ├── lesson_05_lists_tuples_sets/
 │       ├── lesson_06_dicts_loops_comprehensions/
-│       ├── lesson_07_functions/
-│       ├── lesson_08_practicum_big_o/
-│       ├── lesson_09_decorators/
-│       ├── lesson_10_iterators_generators/
-│       ├── lesson_11_practicum_search/
-│       ├── lesson_12_modules_stdlib/
-│       ├── lesson_13_exceptions/
-│       ├── lesson_14_file_io_json/
-│       ├── lesson_15_git_github_system/
-│       ├── lesson_16_practicum_hashing/
-│       └── lesson_17_module1_review/
+│       ├── lesson_08_functions/
+│       ├── lesson_09_practicum_big_o/
+│       ├── lesson_10_decorators/
+│       ├── lesson_11_iterators_generators/
+│       ├── lesson_12_practicum_search/
+│       ├── lesson_13_modules_stdlib/
+│       ├── lesson_14_exceptions/
+│       ├── lesson_15_file_io_json/
+│       ├── lesson_16_git_github_system/
+│       ├── lesson_17_practicum_hashing/
+│       └── lesson_18_module1_review/
 │
-├── module_2/                        ← М2. Python Advanced (уроки 18–28)
+├── module_2/                        ← М2. Python Advanced (уроки 19–29)
+│   ├── bonus/                       ← Бонусні уроки М2 (context_managers, module2_review)
 │   └── lessons/
-│       └── lesson_18_functions_first_class/
+│       └── lesson_19_functions_first_class/
 │
 ├── assignments/                     ← Домашні завдання (HW3/, HW4/ …)
 │   ├── HW3/
@@ -63,7 +64,8 @@ PY-Course-Victor-Nikoriak-22-09-2026
 | `module_2/lessons/` | уроки Модуля 2 (наповнюються) |
 | `assignments/` | домашні завдання |
 | `tools/` | допоміжні скрипти (`sync_notebook_metadata.py`) |
-| `module_1/docs/` | довідкові ноутбуки модуля 1 |
+| `module_1/bonus/` | довідкові ноутбуки модуля 1 |
+| `module_2/bonus/` | бонусні уроки модуля 2 (не входять у нумеровану послідовність) |
 | `course.yaml` / `course.json` | конфігурація модулів для Django LMS |
 | `README.md` | основна інформація про курс |
 

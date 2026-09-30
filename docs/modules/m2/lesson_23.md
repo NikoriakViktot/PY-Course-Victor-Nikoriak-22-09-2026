@@ -1,176 +1,89 @@
-# Урок 23. @property, декоратори класів, dunder
+# Урок 23. Практикум П4. Рекурсія, «розділяй і володарюй», перебір з поверненням
 
-Сервіс «Смачно + Таксі» отримав мобільний застосунок. Його розробник пише код поверх наших класів так, як пише звичайний Python: `sorted(deliveries)`, `len(cart)`, `"Борщ" in cart`, `price + fee`. І перший же рядок падає:
+Три практикуми модуля 1 навчили диспетчерську **оцінювати** рішення (П1), **обирати** стратегію за властивостями даних (П2) і **змінювати представлення** даних (П3). Сьогодні — четверте вміння: розбивати задачу на **менші копії самої себе**.
 
-```python
-class Delivery:
-    def __init__(self, order_id, minutes):
-        self.order_id = order_id
-        self.minutes = minutes
+Три питання з роботи сервісу «Смачно + Таксі»:
 
+1. Меню кафе вкладене: «Кухня» → «Перші страви» → «Борщ», а в «Напоях» є «Гарячі» й «Холодні», і глибину ніхто не обмежував. Скільки всього страв? Де лежить «Узвар»?
+2. Доставки за день треба відсортувати за ціною. Сортування вставкою з П1 на тисячах доставок задуже повільне.
+3. Ваучер з П3 тепер покриває не дві поїздки, а **скільки завгодно**. Які поїздки дають рівно 500 грн?
 
-deliveries = [Delivery(1, 35), Delivery(2, 20), Delivery(3, 50)]
-try:
-    sorted(deliveries)
-except TypeError as error:
-    print(error)
-print(Delivery(1, 35) == Delivery(1, 35))
-```
+У всіх трьох задачах відповідь для цілого збирається з відповідей для частин. Це три обличчя **рекурсії**: функції, яка викликає сама себе.
 
-```text
-'<' not supported between instances of 'Delivery' and 'Delivery'
-False
-```
-
-Список чисел Python сортує, а список доставок — ні: він не знає, що означає «одна доставка менша за іншу». А дві однакові доставки для нього різні, бо `==` за замовчуванням порівнює **ідентичність** — чи це той самий об'єкт.
-
-Є ще дві проблеми. Тариф таксі має три поля, і кожне має бути додатним. Три пари `@property` із сеттерами — це тричі та сама перевірка. А класи, які просто зберігають дані, обростають однаковими `__init__`, `__repr__` і `__eq__`.
-
-Сьогодні вчимо класи **говорити мовою Python**: dunder-методи підключають об'єкт до вбудованого синтаксису, дескриптори дають одну перевірку на багато полів, а декоратори класів пишуть шаблонний код за нас.
-
-**Що потрібно з попередніх уроків:** декоратори функцій (урок 9), хешування (урок 16), функції як об'єкти й `key=` (урок 18), класи й `__repr__` (урок 19), качина типізація (урок 20), `@property` і сеттер (урок 21).
+**Що потрібно з попередніх уроків:** функції й `return` (урок 8), Big O і лічильники кроків (урок 9), бінарний пошук (урок 12), Two Sum (урок 17), `lru_cache` (урок 10).
 
 **Після уроку ти зможеш:**
 
-- пояснювати, який dunder-метод викликає Python для `len`, `in`, `for`, `+`, `<`, `==`, `hash`;
-- робити власні класи-контейнери й об'єкти-значення (гроші), що працюють з `sorted`, `sum`, `set`;
-- пояснювати, чому `__eq__` без `__hash__` робить об'єкт непридатним для множини;
-- писати обчислювані властивості й уникати рекурсії в сеттері;
-- писати дескриптор, який перевіряє багато полів одним класом;
-- застосовувати декоратори класів: власні, `@total_ordering`, `@dataclass`;
-- відрізняти об'єкт-значення від сутності й обирати інструмент під задачу.
+- писати рекурсивну функцію з базовим і рекурсивним випадком і пояснювати, як працює стек викликів;
+- обходити вкладені структури — дерева — рекурсією;
+- застосовувати «розділяй і володарюй»: сортування злиттям за `O(n log n)`;
+- розв'язувати задачі перебору з поверненням (backtracking) і відсікати безнадійні гілки;
+- обирати між рекурсією та циклом і розпізнавати, коли рекурсія повторює роботу.
 
-**Задача розділу.** Кошик замовлення з грошима як об'єктом-значенням: `len(cart)`, `"Узвар" in cart`, `cart.total` і позиції, які неможливо створити з нульовою кількістю. Повний код — у розділі [«Практика»](#practice).
+**Задача розділу.** Звіт за вкладеним меню, сортування доставок і пошук комбінацій поїздок для ваучера. Повний код — у розділі [«Практика»](#practice).
 
-**Ноутбук заняття:** [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_23_property_decorators_dunder/note_lesson_23_property_dunder_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_23_property_decorators_dunder/note_lesson_23_property_dunder.ipynb){ .solutions-link }
+**Ноутбук заняття:** [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_23_practicum_recursion/note_lesson_23_recursion_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_23_practicum_recursion/note_lesson_23_recursion.ipynb){ .solutions-link }
 
 ## Пригадай
 
-1. Що приймає і що повертає декоратор функції з уроку 9?
-2. Яке правило про хеш і рівність ключів словника ми бачили в уроці 16?
-3. Що робить `@property` без сеттера?
-4. Чому функцію з `fare()` можна викликати для будь-якої доставки, не знаючи її класу (урок 20)?
+1. Скільки кроків робить бінарний пошук на 1 000 000 записів і чому?
+2. Два вказівники з П2 шукали пару за `O(n)`, а Two Sum з П3 — на невідсортованих даних. А якщо чисел у сумі може бути скільки завгодно?
+3. Що робить `@lru_cache` з уроку 10?
 
 ??? success "Відповіді"
 
-    1. Приймає функцію й повертає функцію — зазвичай обгортку.
-    2. Рівні ключі мусять мати однаковий хеш, інакше словник шукатиме ключ не в тій комірці.
-    3. Дає читати метод як атрибут; запис падає з `AttributeError`.
-    4. Качина типізація: важливо, що об'єкт **вміє**, а не який у нього клас.
+    1. Близько 20: кожен крок відкидає половину, а 2²⁰ ≈ 1 000 000.
+    2. Пари вже не досить: потрібні комбінації будь-якого розміру. Сьогодні — перебір з поверненням.
+    3. Запам'ятовує результати функції для аргументів, з якими її вже викликали.
 
-## Dunder-методи: як Python розмовляє з об'єктом
+## Рекурсія: функція, що викликає сама себе
 
-Коли Python бачить `len(cart)`, він не шукає функцію `len` усередині кошика. Він викликає **спеціальний метод** класу: `type(cart).__len__(cart)`. Таких методів — із двома підкресленнями з обох боків, **dunder** (double underscore) — десятки. Разом вони утворюють **протоколи**: реалізував потрібні методи — і твій об'єкт працює з вбудованим синтаксисом, як список чи число.
-
-| Вираз | Що викликає Python | Протокол |
-|---|---|---|
-| `len(x)` | `x.__len__()` | розмір |
-| `item in x` | `x.__contains__(item)` | належність |
-| `for item in x` | `x.__iter__()` | ітерація |
-| `x[key]` | `x.__getitem__(key)` | доступ за ключем |
-| `bool(x)`, `if x:` | `x.__bool__()`, інакше `x.__len__()` | істинність |
-| `a + b` | `a.__add__(b)`, інакше `b.__radd__(a)` | арифметика |
-| `a == b`, `a < b` | `a.__eq__(b)`, `a.__lt__(b)` | порівняння |
-| `hash(x)` | `x.__hash__()` | хешування |
-| `repr(x)`, `str(x)` | `x.__repr__()`, `x.__str__()` | подання |
-| `x(arg)` | `x.__call__(arg)` | виклик |
-
-Це качина типізація з уроку 20, доведена до кінця: `len` не питає, чи ти список, — лише чи вмієш ти `__len__`.
-
-### Кошик як контейнер
+Меню кафе — вкладені словники. Лист — страва з ціною, вузол — категорія:
 
 ```python
-class Cart:
-    def __init__(self):
-        self._items = {}
+MENU = {
+    "Кухня": {
+        "Перші страви": {"Борщ": 95, "Юшка": 85},
+        "Основні": {"Вареники": 80, "Деруни": 75},
+    },
+    "Напої": {
+        "Гарячі": {"Чай": 30, "Кава": {"Еспресо": 40, "Лате": 55}},
+        "Холодні": {"Узвар": 35},
+    },
+    "Хліб": 10,
+}
+```
 
-    def add(self, dish, qty=1):
-        self._items[dish] = self._items.get(dish, 0) + qty
+Скільки страв у меню? Цикл `for` не допоможе: невідомо, скільки рівнів вкладень. Зате відповідь легко сформулювати **через саму себе**: страв у категорії — це сума страв у кожній її частині. А частина — або страва (1), або знову категорія.
 
-    def __len__(self):
-        return sum(self._items.values())
-
-    def __contains__(self, dish):
-        return dish in self._items
-
-    def __iter__(self):
-        return iter(self._items.items())
-
-    def __getitem__(self, dish):
-        return self._items[dish]
-
-    def __repr__(self):
-        return f"Cart({self._items})"
+```python
+def count_dishes(node):
+    if not isinstance(node, dict):
+        return 1
+    return sum(count_dishes(child) for child in node.values())
 
 
-cart = Cart()
-cart.add("Борщ", 2)
-cart.add("Узвар")
-print(len(cart), "Борщ" in cart, cart["Борщ"])
-for dish, qty in cart:
-    print(dish, qty)
+print(count_dishes(MENU))
+print(count_dishes(MENU["Напої"]))
+print(count_dishes(95))
 ```
 
 ```text
-3 True 2
-Борщ 2
-Узвар 1
+9
+4
+1
 ```
 
-`_items` лишився внутрішнім (урок 21), а зовнішній код користується кошиком як звичайною колекцією. `len` рахує порції, а не рядки: це наше рішення, і його видно в одному методі.
+Кожна рекурсивна функція має дві частини:
 
-Методу `__bool__` ми не писали. Як гадаєш, що надрукує цей код?
+- **базовий випадок** — задача настільки мала, що відповідь відома одразу: страва — це 1. Тут рекурсія **зупиняється**;
+- **рекурсивний випадок** — задачу зводимо до **менших** задач того самого виду й збираємо їхні відповіді: категорія — сума по частинах.
 
-```python
-print(bool(Cart()), bool(cart))
-```
+Без базового випадку функція викликала б себе вічно. Без «менших» задач — теж.
 
-```text
-False True
-```
+### Стек викликів
 
-Без `__bool__` Python бере `__len__`: нульова довжина — хибність. Тому `if cart:` читається природно — «якщо в кошику щось є».
-
-### Гроші: об'єкт-значення з арифметикою
-
-Ціни як голі числа легко переплутати: хвилини, кілометри й гривні — усе `int`. Клас `Money` робить одиницю явною і дозволяє складати лише гроші з грошима.
-
-```python
-class Money:
-    def __init__(self, amount):
-        self.amount = amount
-
-    def __add__(self, other):
-        if not isinstance(other, Money):
-            return NotImplemented
-        return Money(self.amount + other.amount)
-
-    def __eq__(self, other):
-        if not isinstance(other, Money):
-            return NotImplemented
-        return self.amount == other.amount
-
-    def __repr__(self):
-        return f"Money({self.amount})"
-
-    def __str__(self):
-        return f"{self.amount} грн"
-
-
-bill = Money(95) + Money(60)
-print(bill, repr(bill), bill == Money(155))
-try:
-    Money(95) + 60
-except TypeError as error:
-    print(error)
-```
-
-```text
-155 грн Money(155) True
-unsupported operand type(s) for +: 'Money' and 'int'
-```
-
-`__repr__` — для розробника (однозначно, як створити об'єкт), `__str__` — для людини; `print` бере `__str__`. А `NotImplemented` — не помилка, а сигнал «я не вмію з цим типом». Python тоді дає шанс іншому операнду і лише потім кидає `TypeError`:
+Кожен виклик функції — окремий **кадр** (frame) з власними локальними змінними. Кадри складаються в **стек**: новий кладеться зверху, а коли функція повертає результат, її кадр знімається. Для `count_dishes(MENU["Напої"])`:
 
 ```mermaid
 flowchart TD
@@ -180,336 +93,124 @@ flowchart TD
     classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
     classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
 
-    A["a + b"] --> L["a.__add__(b)"]
-    L --> Q1{"повернув<br>NotImplemented?"}
-    Q1 -- ні --> OK["результат"]
-    Q1 -- так --> R["b.__radd__(a)"]
-    R --> Q2{"повернув<br>NotImplemented?"}
-    Q2 -- ні --> OK
-    Q2 -- так --> ERR["TypeError"]
+    N["Напої<br>3 + 1 = 4"] --> H["Гарячі<br>1 + 2 = 3"]
+    N --> C["Холодні<br>1"]
+    H --> T["Чай → 1"]
+    H --> K["Кава<br>1 + 1 = 2"]
+    K --> E["Еспресо → 1"]
+    K --> L["Лате → 1"]
+    C --> U["Узвар → 1"]
 
-    class A,L,R step
-    class Q1,Q2 decision
-    class OK success
-    class ERR error
+    class N,H,C,K step
+    class T,E,L,U success
 ```
 
-Звідси пастка з `sum`: він починає рахувати з `0`, тобто перший крок — `0 + Money(95)`. Число не вміє додавати гроші, а `__radd__` у нас немає:
+Зелені — базові випадки: там стек перестає рости. Відповіді піднімаються знизу вгору: «Кава» = 2, «Гарячі» = 1 + 2 = 3, «Напої» = 3 + 1 = 4. Найглибше в усьому меню — п'ять кадрів один над одним: Меню → Напої → Гарячі → Кава → Лате.
+
+### Рекурсія, що повертає шлях
+
+Де в меню «Узвар»? Функція повертає шлях категорій або `None`, якщо страви немає:
 
 ```python
-prices = [Money(95), Money(60), Money(40)]
-try:
-    sum(prices)
-except TypeError as error:
-    print(error)
-print(sum(prices, Money(0)))
+def find_path(node, dish, path=()):
+    if not isinstance(node, dict):
+        return None
+    for name, child in node.items():
+        if name == dish:
+            return path + (name,)
+        found = find_path(child, dish, path + (name,))
+        if found:
+            return found
+    return None
+
+
+print(find_path(MENU, "Узвар"))
+print(find_path(MENU, "Лате"))
+print(find_path(MENU, "Піца"))
 ```
 
 ```text
-unsupported operand type(s) for +: 'int' and 'Money'
-195 грн
-```
-
-Два виходи: передати `sum` стартове значення `Money(0)` або навчити гроші «правого» додавання:
-
-```python
-class Money(Money):
-    def __radd__(self, other):
-        if other == 0:
-            return self
-        return NotImplemented
-
-
-print(sum([Money(95), Money(60), Money(40)]))
-```
-
-```text
-195 грн
-```
-
-!!! note "`class Money(Money)`"
-    Як і в уроці 21, нарощуємо клас частинами: кожен новий `Money` наслідує попередній. У справжньому проєкті всі методи живуть в одному класі.
-
-### `__eq__` і `__hash__`: пара, яку не розривають
-
-Спробуймо покласти гроші в множину:
-
-```python
-try:
-    {Money(95), Money(95)}
-except TypeError as error:
-    print(error)
-print(Money.__hash__)
-```
-
-```text
-unhashable type: 'Money'
+('Напої', 'Холодні', 'Узвар')
+('Напої', 'Гарячі', 'Кава', 'Лате')
 None
 ```
 
-Щойно клас визначає `__eq__`, Python **прибирає** успадкований `__hash__`. Причина — правило з уроку 16: рівні об'єкти мусять мати однаковий хеш. Стандартний хеш рахується з ідентичності об'єкта, тож два рівні `Money(95)` отримали б різні хеші, і множина вважала б їх різними. Python волів відмовити, ніж тихо помилятися. Якщо об'єкт має бути ключем, хеш рахують із тих самих полів, що й рівність:
+Шлях передається **параметром**: кожен рівень додає своє ім'я до кортежу й передає новий кортеж глибше. Кортеж, а не список, — щоб гілки не псували шлях одна одній (урок 8, змінювані значення за замовчуванням).
+
+### Межа глибини
+
+Кожен кадр займає пам'ять, тож Python обмежує глибину стеку:
 
 ```python
-class Money(Money):
-    def __hash__(self):
-        return hash(self.amount)
+import sys
 
 
-print(len({Money(95), Money(95), Money(60)}), Money(95) in {Money(95)})
-```
-
-```text
-2 True
-```
-
-Але хеш від **змінюваного** поля — міна. Об'єкт лежить у комірці множини, що відповідає старому хешу:
-
-```python
-wallet = {Money(95)}
-coin = next(iter(wallet))
-coin.amount = 100
-print(Money(100) in wallet, coin in wallet)
-```
-
-```text
-False False
-```
-
-Монета в множині є, але знайти її неможливо ні за старим, ні за новим значенням. Висновок: хешованим має бути лише **незмінний** об'єкт. Як зробити `Money` незмінним одним рядком — у розділі про `@dataclass`.
-
-### Порівняння і сортування
-
-Для `sorted` досить одного методу — `__lt__`:
-
-```python
-class Delivery:
-    def __init__(self, order_id, minutes):
-        self.order_id = order_id
-        self.minutes = minutes
-
-    def __lt__(self, other):
-        return self.minutes < other.minutes
-
-    def __repr__(self):
-        return f"Delivery(№{self.order_id}, {self.minutes} хв)"
+def countdown(n):
+    if n == 0:
+        return 0
+    return countdown(n - 1)
 
 
-deliveries = [Delivery(1, 35), Delivery(2, 20), Delivery(3, 50)]
-print(sorted(deliveries))
-print(max(deliveries))
+print(sys.getrecursionlimit())
+print(countdown(500))
 try:
-    Delivery(1, 35) <= Delivery(2, 20)
-except TypeError as error:
-    print(error)
-```
-
-```text
-[Delivery(№2, 20 хв), Delivery(№1, 35 хв), Delivery(№3, 50 хв)]
-Delivery(№3, 50 хв)
-'<=' not supported between instances of 'Delivery' and 'Delivery'
-```
-
-`max` порівнює через `>`, і Python сам перевернув його на `b < a`. А для `<=` дзеркальної пари з `__lt__` немає — треба або дописати ще методи, або скористатися `@total_ordering` (нижче).
-
-Але спершу архітектурне питання: яка доставка «менша»? Швидша? Дешевша? Раніша за номером? Сьогодні звіт сортує за часом, завтра — за ціною. **Природного** порядку в доставок немає, тому надійніше передати порядок явно, як в уроці 18:
-
-```python
-print(sorted(deliveries, key=lambda delivery: delivery.order_id, reverse=True))
-```
-
-```text
-[Delivery(№3, 50 хв), Delivery(№2, 20 хв), Delivery(№1, 35 хв)]
-```
-
-!!! tip "Коли писати `__lt__`"
-    Лише коли порядок один і очевидний: гроші, час, версії. Якщо сортувати можна по-різному — `key=`.
-
-### `__call__`: об'єкт, що поводиться як функція
-
-У вечірні години тариф множиться на коефіцієнт. Коефіцієнт — це налаштування, а застосувати його треба як функцію:
-
-```python
-class Surge:
-    def __init__(self, factor):
-        self.factor = factor
-
-    def __call__(self, fare):
-        return round(fare * self.factor)
-
-
-evening = Surge(1.5)
-print(evening(120), callable(evening))
-print(list(map(evening, [100, 80])))
-```
-
-```text
-180 True
-[150, 120]
-```
-
-`evening` можна передати туди, де чекають функцію, — у `map`, `sorted(key=…)`, у стратегію з уроку 18. Замикання (урок 18) робить те саме; клас із `__call__` зручніший, коли налаштувань кілька або їх треба показати в `repr`.
-
-## @property докладніше
-
-В уроці 21 `@property` захищав запис. Друге його призначення — **обчислювані атрибути**: значення, яке не зберігається, а рахується щоразу, коли його читають.
-
-```python
-PRICES = {"Борщ": 95, "Вареники": 110, "Узвар": 40}
-
-
-class Cart(Cart):
-    @property
-    def total(self):
-        return sum(PRICES[dish] * qty for dish, qty in self)
-
-
-cart = Cart()
-cart.add("Борщ", 2)
-cart.add("Узвар")
-print(cart.total)
-cart.add("Вареники")
-print(cart.total)
-```
-
-```text
-230
-340
-```
-
-Якби `add` оновлював поле `self.total`, кожен новий метод (прибрати страву, змінити кількість) мусив би не забути його оновити. Обчислювана властивість **не може застаріти**: її джерело правди — лише `_items`. І зверни увагу: `total` перебирає `self`, тобто користується нашим же `__iter__`.
-
-### Пастка: сеттер, що викликає сам себе
-
-```python
-class Courier:
-    def __init__(self, name, rating):
-        self.name = name
-        self.rating = rating
-
-    @property
-    def rating(self):
-        return self.rating
-
-    @rating.setter
-    def rating(self, value):
-        if not 1 <= value <= 5:
-            raise ValueError("рейтинг має бути від 1 до 5")
-        self.rating = value
-
-
-try:
-    Courier("Олег", 4.8)
+    countdown(100_000)
 except RecursionError as error:
     print(type(error).__name__)
 ```
 
 ```text
+1000
+0
 RecursionError
 ```
 
-`self.rating = value` у сеттері — це знову присвоєння властивості, тобто знову виклик сеттера, і так до переповнення стеку (урок 22). Значення зберігають в **іншому** імені — `self._rating`. А ось у `__init__` писати саме `self.rating = rating` правильно: так перевірка спрацює і при створенні об'єкта.
+Меню, дерево папок, JSON з API — вкладеність там рідко сягає сотні рівнів, і рекурсія доречна. А «пройти список з 100 000 доставок» рекурсією — погана ідея: для лінійних даних є цикл.
 
-### `cached_property`: порахувати один раз
+## Розділяй і володарюй: сортування злиттям
 
-Довжина маршруту рахується довго, а маршрут після створення не змінюється. `functools.cached_property` обчислює значення при першому читанні й кладе результат в атрибут екземпляра:
+В П1 ми бачили: алгоритм, що порівнює кожен елемент з кожним, росте як `O(n²)`. Сортування вставкою — саме таке. **Розділяй і володарюй** (divide and conquer) пропонує інше:
+
+1. **розділити** список навпіл;
+2. **відсортувати** кожну половину — рекурсивно, тим самим алгоритмом;
+3. **злити** дві відсортовані половини в одну.
+
+Базовий випадок — список з 0 чи 1 елемента вже відсортований. Уся робота — у злитті:
 
 ```python
-from functools import cached_property
+def merge(left, right, counter):
+    result = []
+    i = j = 0
+    while i < len(left) and j < len(right):
+        counter[0] += 1
+        if left[i] <= right[j]:
+            result.append(left[i])
+            i += 1
+        else:
+            result.append(right[j])
+            j += 1
+    return result + left[i:] + right[j:]
 
 
-class Route:
-    def __init__(self, stops):
-        self.stops = stops
+def merge_sort(items, counter):
+    if len(items) <= 1:
+        return list(items)
+    middle = len(items) // 2
+    left = merge_sort(items[:middle], counter)
+    right = merge_sort(items[middle:], counter)
+    return merge(left, right, counter)
 
-    @cached_property
-    def length(self):
-        print("рахую маршрут…")
-        return sum(abs(b - a) for a, b in zip(self.stops, self.stops[1:]))
 
-
-route = Route([0, 4, 1, 7])
-print(route.length)
-print(route.length)
+fares = [230, 150, 270, 180, 320, 120, 410, 150]
+counter = [0]
+print(merge_sort(fares, counter), counter[0])
 ```
 
 ```text
-рахую маршрут…
-13
-13
+[120, 150, 150, 180, 230, 270, 320, 410] 16
 ```
 
-Ціна — застарілість: якщо змінити `route.stops`, `length` лишиться старим. Тому `cached_property` — лише для даних, що не змінюються.
-
-## Дескриптори: одна перевірка на багато полів
-
-Тариф таксі: подача, ціна кілометра і мінімальна вартість — усі мають бути більшими за нуль. Через `@property` це три геттери й три сеттери з однаковим `if value <= 0` — близько 25 рядків повторів. Повтор — сигнал винести правило в окремий об'єкт. Такий об'єкт — **дескриптор**: клас із методами `__get__` і `__set__`, екземпляр якого лежить в атрибуті **класу**.
-
-```python
-class Positive:
-    def __set_name__(self, owner, name):
-        self.name = "_" + name
-
-    def __get__(self, obj, objtype=None):
-        if obj is None:
-            return self
-        return getattr(obj, self.name)
-
-    def __set__(self, obj, value):
-        if value <= 0:
-            raise ValueError(f"{self.name[1:]} має бути більшим за 0, а маємо {value}")
-        setattr(obj, self.name, value)
-
-
-class Tariff:
-    base = Positive()
-    per_km = Positive()
-    min_fare = Positive()
-
-    def __init__(self, base, per_km, min_fare):
-        self.base = base
-        self.per_km = per_km
-        self.min_fare = min_fare
-
-    def fare(self, km):
-        return max(self.min_fare, self.base + self.per_km * km)
-
-
-day = Tariff(40, 12, 80)
-print(day.fare(2), day.fare(10))
-try:
-    day.per_km = -5
-except ValueError as error:
-    print(error)
-print(vars(day))
-```
-
-```text
-80 160
-per_km має бути більшим за 0, а маємо -5
-{'_base': 40, '_per_km': 12, '_min_fare': 80}
-```
-
-Що відбувається:
-
-1. Коли Python створює клас `Tariff`, він викликає `__set_name__` для кожного дескриптора — так `Positive()` дізнається, що його звуть `per_km`, і зберігатиме значення в `_per_km`.
-2. `day.per_km = -5` — Python бачить у **класі** об'єкт із `__set__` і замість запису в екземпляр викликає `Positive.__set__(дескриптор, day, -5)`.
-3. `day.per_km` — так само викликається `__get__`. Умова `obj is None` — для звернення через клас, `Tariff.per_km`: тоді повертаємо сам дескриптор.
-
-Один дескриптор — три поля, і правило живе в одному місці. Новий тариф чи новий клас з додатними полями — ще один рядок `поле = Positive()`.
-
-### Порядок пошуку атрибута
-
-`@property` — теж дескриптор, просто вбудований:
-
-```python
-print(type(vars(Tariff)["base"]).__name__, hasattr(property, "__set__"))
-```
-
-```text
-Positive True
-```
-
-Дескриптори бувають двох видів: **data** (є `__set__`: `property`, `Positive`) і **non-data** (лише `__get__`: звичайні методи, `cached_property`). Від виду залежить, хто виграє, коли в класі є дескриптор, а в екземплярі — однойменний атрибут:
+`counter` — список з одного числа, бо лічильник треба ділити між усіма рекурсивними викликами. Число всередині `merge` змінити не вийшло б: це локальна змінна (урок 19).
 
 ```mermaid
 flowchart TD
@@ -519,148 +220,244 @@ flowchart TD
     classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
     classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
 
-    A["obj.attr"] --> D1{"у класі data-дескриптор?<br>property, Positive"}
-    D1 -- так --> G1["__get__ дескриптора"]
-    D1 -- ні --> D2{"attr у vars(obj)?"}
-    D2 -- так --> V["значення з екземпляра"]
-    D2 -- ні --> D3{"у класі non-data дескриптор?<br>метод, cached_property"}
-    D3 -- так --> G2["__get__ дескриптора"]
-    D3 -- ні --> D4{"attr у класі чи батьках (MRO)?"}
-    D4 -- так --> C["атрибут класу"]
-    D4 -- ні --> E["AttributeError"]
+    A["230 150 270 180 320 120 410 150"] --> B["230 150 270 180"]
+    A --> C["320 120 410 150"]
+    B --> B1["150 230"]
+    B --> B2["180 270"]
+    C --> C1["120 320"]
+    C --> C2["150 410"]
+    B1 --> M1["150 180 230 270"]
+    B2 --> M1
+    C1 --> M2["120 150 320 410"]
+    C2 --> M2
+    M1 --> R["120 150 150 180 230 270 320 410"]
+    M2 --> R
 
-    class A step
-    class D1,D2,D3,D4 decision
-    class G1,G2,V,C success
-    class E error
+    class A,B,C step
+    class B1,B2,C1,C2,M1,M2 decision
+    class R success
 ```
 
-Звідси два факти, які ми вже бачили. `property` стоїть **перед** словником екземпляра — тому обійти сеттер записом в атрибут не можна. А `cached_property` стоїть **після** — тому, поклавши результат у `vars(route)`, він більше не викликається: наступне читання знаходить значення в екземплярі.
+Верхня половина схеми — поділ, нижня — злиття. Рівнів поділу `log₂ n`: для 8 доставок — 3. На кожному рівні злиття разом переглядає всі n елементів. Разом — `n · log n`.
 
-## Декоратори класів
-
-Декоратор функції (урок 9) приймає функцію й повертає функцію. **Декоратор класу** приймає клас і повертає клас — той самий, доповнений, або новий. Найпростіше застосування — реєстр: кожен клас сам записується в довідник, щойно його оголосили.
+Дослід подвоєння з П1, порівняння з сортуванням вставкою:
 
 ```python
-PAYMENTS = {}
+def insertion_sort(items, counter):
+    result = list(items)
+    for k in range(1, len(result)):
+        j = k
+        while j > 0:
+            counter[0] += 1
+            if result[j - 1] <= result[j]:
+                break
+            result[j - 1], result[j] = result[j], result[j - 1]
+            j -= 1
+    return result
 
 
-def payment(code):
-    def register(cls):
-        PAYMENTS[code] = cls
-        return cls
-    return register
-
-
-@payment("card")
-class CardPayment:
-    def pay(self, amount):
-        return f"картка: {amount} грн"
-
-
-@payment("cash")
-class CashPayment:
-    def pay(self, amount):
-        return f"готівка кур'єру: {amount} грн"
-
-
-print(PAYMENTS)
-print(PAYMENTS["cash"]().pay(340))
+for n in [1000, 2000, 4000]:
+    data = list(range(n, 0, -1))
+    slow, fast = [0], [0]
+    insertion_sort(data, slow)
+    merge_sort(data, fast)
+    print(n, slow[0], fast[0])
 ```
 
 ```text
-{'card': <class '__main__.CardPayment'>, 'cash': <class '__main__.CashPayment'>}
-готівка кур'єру: 340 грн
+1000 499500 5044
+2000 1999000 11088
+4000 7998000 24176
 ```
 
-Застосунок обирає спосіб оплати за кодом із запиту: `PAYMENTS[code]().pay(amount)`. Новий спосіб — новий клас із декоратором; жоден `if/elif` правити не треба. Це поліморфізм з уроку 20 плюс автоматична реєстрація.
+Для списку у зворотному порядку (найгірший випадок вставки) подвоєння дає ×4 для вставки (`O(n²)`) і трохи більше ніж ×2 для злиття (`O(n log n)`). На 4000 доставок — 8 мільйонів порівнянь проти 24 тисяч. Вбудований `sorted()` — це Timsort, нащадок сортування злиттям: у житті сортуй ним, а `merge_sort` пишемо, щоб зрозуміти ідею.
 
-### `@total_ordering`: решту порівнянь допише Python
+!!! tip "Бінарний пошук — теж «розділяй і володарюй»"
+    Бінарний пошук з П2 ділить задачу навпіл і йде лише в **одну** половину. Рекурсивно: `search(items, target)` → перевір середину → `search(ліва або права половина)`. Сортування злиттям іде в **обидві** половини й потім зливає. Обидва — `log n` рівнів поділу.
 
-`functools.total_ordering` — декоратор класу зі стандартної бібліотеки. Даєш йому `__eq__` і один із `__lt__`, `__le__`, `__gt__`, `__ge__` — він дописує решту:
+
+## Перебір з поверненням: ваучер на будь-яку кількість поїздок
+
+У П3 ваучер покривав **дві** поїздки, і словник знаходив пару за один прохід. Тепер ваучер на 500 грн можна розділити між **скількома завгодно** поїздками зміни. Які набори поїздок дають рівно 500?
+
+Кожна поїздка або входить у набір, або ні. **Перебір з поверненням** (backtracking) будує набір крок за кроком: «беру цю поїздку й дивлюся далі». Потім **повертається** на крок назад — прибирає поїздку — і пробує наступну. Параметр `start` каже, що далі розглядаємо лише поїздки після поточної: так кожен набір з'являється один раз.
 
 ```python
-from functools import total_ordering
+def voucher_sets(fares, target):
+    found = []
+    calls = [0]
+
+    def explore(start, chosen, total):
+        calls[0] += 1
+        if total == target:
+            found.append(list(chosen))
+            return
+        for i in range(start, len(fares)):
+            chosen.append(fares[i])
+            explore(i + 1, chosen, total + fares[i])
+            chosen.pop()
+
+    explore(0, [], 0)
+    return found, calls[0]
 
 
-@total_ordering
-class Money(Money):
-    def __lt__(self, other):
-        if not isinstance(other, Money):
-            return NotImplemented
-        return self.amount < other.amount
-
-
-print(Money(95) > Money(60), Money(60) <= Money(60), max([Money(95), Money(40)]))
+trip_fares = [230, 150, 270, 180, 120, 410]
+print(voucher_sets(trip_fares, 500))
 ```
 
 ```text
-True True 95 грн
+([[230, 150, 120], [230, 270]], 56)
 ```
 
-Для грошей порядок природний — це якраз той випадок, коли порівняння мають жити в класі.
+Два набори: три поїздки на 230 + 150 + 120 і дві на 230 + 270. Друга — та сама пара, яку знайшов Two Sum у П3, а перша — те, чого пара знайти не могла.
 
-### `@dataclass`: клас-дані без шаблонного коду
+- `chosen.append` — крок уперед: беремо поїздку;
+- рекурсивний виклик досліджує все, що може піти після неї;
+- `chosen.pop()` — **повернення**: прибираємо поїздку, щоб спробувати іншу на її місці.
 
-`Money` уже має `__init__`, `__repr__`, `__eq__`, `__hash__`, `__lt__` — і всі вони механічні: беруть поля й роблять з ними очевидне. `dataclasses.dataclass` читає **анотації полів** і генерує ці методи сам:
+Дерево рішень для перших кроків:
+
+```mermaid
+flowchart TD
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+
+    R["[] 0"] --> A["[230] 230"]
+    R --> B["[150] 150"]
+    A --> A1["[230, 150] 380"]
+    A --> A2["[230, 270] 500"]
+    A --> A3["[230, 410] 640"]
+    A1 --> A11["[230, 150, 120] 500"]
+    A1 --> A12["[230, 150, 410] 790"]
+
+    class R,A,B,A1 step
+    class A2,A11 success
+    class A3,A12 error
+```
+
+Червоні вузли — сума вже більша за 500. Але наша функція не знає, що далі буде лише гірше, і перебирає їхніх нащадків до кінця.
+
+### Відсікання
+
+Якщо відсортувати поїздки за зростанням, то, щойно чергова поїздка перевищує залишок, **усі наступні** перевищать теж. Ці гілки можна не досліджувати зовсім — це **відсікання** (pruning):
 
 ```python
-from dataclasses import dataclass
+def voucher_sets_pruned(fares, target):
+    fares = sorted(fares)
+    found = []
+    calls = [0]
+
+    def explore(start, chosen, total):
+        calls[0] += 1
+        if total == target:
+            found.append(list(chosen))
+            return
+        for i in range(start, len(fares)):
+            if total + fares[i] > target:
+                break
+            chosen.append(fares[i])
+            explore(i + 1, chosen, total + fares[i])
+            chosen.pop()
+
+    explore(0, [], 0)
+    return found, calls[0]
 
 
-@dataclass(frozen=True, order=True)
-class Money:
-    amount: int
+print(voucher_sets_pruned(trip_fares, 500))
 
-    def __add__(self, other):
-        if not isinstance(other, Money):
-            return NotImplemented
-        return Money(self.amount + other.amount)
-
-    def __str__(self):
-        return f"{self.amount} грн"
-
-
-a = Money(95)
-print(repr(a), a == Money(95), a < Money(100), len({a, Money(95)}))
-print([name for name in ("__init__", "__repr__", "__eq__", "__lt__", "__hash__") if name in vars(Money)])
-try:
-    a.amount = 100
-except AttributeError as error:
-    print(type(error).__name__)
+big_shift = [230, 150, 270, 180, 120, 410, 95, 60, 310, 200, 140, 175]
+print(voucher_sets(big_shift, 500)[1], voucher_sets_pruned(big_shift, 500)[1])
 ```
 
 ```text
-Money(amount=95) True True 1
-['__init__', '__repr__', '__eq__', '__lt__', '__hash__']
-FrozenInstanceError
+([[120, 150, 230], [230, 270]], 19)
+3454 150
 ```
 
-- `@dataclass` згенерував `__init__`, `__repr__`, `__eq__` з полів;
-- `order=True` — порівняння `<`, `<=`, `>`, `>=` (порівнюються кортежі полів);
-- `frozen=True` — присвоєння полю падає з `FrozenInstanceError` (нащадок `AttributeError`), а раз об'єкт незмінний, генерується й `__hash__`. Пастка з монетою, що «загубилася» в множині, тепер неможлива.
+На 6 поїздках — 19 викликів замість 56, на 12 — 150 замість 3454. Набори ті самі, лише записані за зростанням. Без відсікання перебір усіх підмножин n поїздок — до `2ⁿ` викликів: кожна поїздка «є» чи «немає». Відсікання не змінює найгіршого випадку, але на реальних даних прибирає більшість гілок.
 
-Свої методи (`__add__`, `__str__`) пишемо як завжди: `@dataclass` не перезаписує `__init__`, `__repr__` чи `__eq__`, якщо вони вже є в класі. Виняток — порівняння: з `order=True` власний `__lt__` дає `TypeError`, тож обирай щось одне.
+!!! note "Коли перебір — єдиний вихід"
+    Для пари словник з П3 дає `O(n)`. Для наборів будь-якого розміру швидкого загального алгоритму немає: задача про підмножину із заданою сумою (subset sum) — класична «важка» задача. Перебір з відсіканням — чесне рішення для десятків елементів. Для великих сум з цілими числами є динамічне програмування — тема практикуму П5 (урок 27).
 
-Перевірка полів у датакласі — у методі `__post_init__`, який викликається одразу після згенерованого `__init__`. Його ми використаємо в практиці.
+## Коли рекурсія повторює роботу
 
-## Архітектура: значення, сутності й вибір інструменту { #architecture }
+Рекурсія природна, коли підзадачі **незалежні**: ліва й права половина злиття, різні категорії меню. Але якщо ті самі підзадачі трапляються знову і знову, рекурсія перераховує їх щоразу. Класичний приклад — числа Фібоначчі:
 
-### Об'єкт-значення і сутність
+```python
+calls = [0]
 
-У сервісі є два різні види об'єктів, і dunder-методи для них різні.
 
-| | Об'єкт-значення | Сутність |
+def fib(n):
+    calls[0] += 1
+    if n < 2:
+        return n
+    return fib(n - 1) + fib(n - 2)
+
+
+print(fib(20), calls[0])
+```
+
+```text
+6765 21891
+```
+
+21 891 виклик, щоб отримати 20-те число: `fib(18)` рахується двічі, `fib(17)` — тричі і так далі. `@lru_cache` з уроку 10 запам'ятовує вже пораховані результати:
+
+```python
+from functools import lru_cache
+
+
+@lru_cache(maxsize=None)
+def fib_memo(n):
+    if n < 2:
+        return n
+    return fib_memo(n - 1) + fib_memo(n - 2)
+
+
+print(fib_memo(20), fib_memo.cache_info().misses)
+```
+
+```text
+6765 21
+```
+
+21 справжнє обчислення замість 21 891. Це **мемоізація** — перший крок до динамічного програмування (урок 27).
+
+## Архітектура: рекурсія чи цикл { #architecture }
+
+Кожну рекурсію можна переписати циклом з **явним стеком** — списком, у який кладемо «що ще треба обробити». Той самий підрахунок страв:
+
+```python
+def count_dishes_iterative(menu):
+    stack = [menu]
+    count = 0
+    while stack:
+        node = stack.pop()
+        if isinstance(node, dict):
+            stack.extend(node.values())
+        else:
+            count += 1
+    return count
+
+
+print(count_dishes_iterative(MENU))
+```
+
+```text
+9
+```
+
+| | Рекурсія | Цикл з явним стеком |
 |---|---|---|
-| Приклади | `Money`, `CartItem`, координати | `Order`, `Courier`, `Delivery` |
-| Що таке «рівні» | однакові поля: `Money(95) == Money(95)` | той самий об'єкт або той самий `id`: два замовлення з однаковими стравами — різні замовлення |
-| Змінюваність | незмінний: «змінити» — створити новий | змінюється з часом: статус, рейтинг |
-| Хеш | з полів; можна в `set` і ключем `dict` | за замовчуванням (ідентичність) або за незмінним `id` |
-| Інструмент | `@dataclass(frozen=True)` | звичайний клас, `@property`, методи-двері (урок 21) |
+| Читабельність | повторює визначення задачі: «сума по частинах» | стек і цикл видно явно, ідея — менше |
+| Глибина | обмежена ~1000 кадрів (`RecursionError`) | обмежена лише пам'яттю |
+| Повернення з кроку | природне: стек викликів сам пам'ятає, де ми | треба зберігати стан у стеку вручну |
+| Коли | дерева, вкладені структури, «розділяй і володарюй», перебір | лінійні дані, дуже глибокі структури, продакшн-обхід великих дерев |
 
-Помилка, якої варто уникати: `@dataclass` без `frozen` для сутності з хешем за змінюваними полями — це та сама «загублена монета», лише з замовленням.
-
-### Який інструмент обрати
+Як обрати техніку для задачі:
 
 ```mermaid
 flowchart TD
@@ -670,282 +467,140 @@ flowchart TD
     classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
     classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
 
-    S["що потрібно класу?"] --> Q1{"працювати з синтаксисом Python?<br>len, in, +, sorted"}
-    Q1 -- так --> DUN["dunder-методи"]
-    Q1 -- ні --> Q2{"поле з правилом?"}
-    Q2 -- "одне поле" --> PROP["@property + сеттер"]
-    Q2 -- "те саме правило<br>на багатьох полях" --> DESC["дескриптор"]
-    Q2 -- ні --> Q3{"клас переважно<br>зберігає дані?"}
-    Q3 -- так --> DC["@dataclass<br>frozen для значень"]
-    Q3 -- ні --> Q4{"треба зареєструвати<br>чи доповнити клас?"}
-    Q4 -- так --> CD["декоратор класу"]
-    Q4 -- ні --> PLAIN["звичайний клас"]
+    Q{"задача складається<br>з менших копій себе?"} -- ні --> LOOP["цикл, словник, П1–П3"]
+    Q -- так --> S{"підзадачі<br>повторюються?"}
+    S -- так --> MEMO["мемоізація / ДП<br>урок 27"]
+    S -- ні --> K{"треба перебрати<br>варіанти вибору?"}
+    K -- так --> BT["перебір з поверненням<br>+ відсікання"]
+    K -- ні --> DC["розділяй і володарюй<br>або обхід дерева"]
 
-    class S step
-    class Q1,Q2,Q3,Q4 decision
-    class DUN,PROP,DESC,DC,CD,PLAIN success
+    class Q,S,K decision
+    class LOOP,MEMO,BT,DC success
 ```
-
-Інструменти поєднуються: у практиці нижче `@dataclass` дає поля, `@property` — обчислювану суму, а dunder-методи — `len` і `in`.
-
-### Схема класів кошика
-
-```mermaid
-classDiagram
-    class Money {
-        <<value>>
-        +amount: int
-        +#95;#95;add#95;#95;(other) Money
-        +#95;#95;mul#95;#95;(times) Money
-        +#95;#95;lt#95;#95;(other) bool
-        +#95;#95;hash#95;#95;() int
-    }
-    class CartItem {
-        <<value>>
-        +dish: str
-        +price: Money
-        +qty: int
-        +total: Money
-        +#95;#95;post_init#95;#95;()
-    }
-    class Cart {
-        +items: list
-        +add(dish, price, qty)
-        +total: Money
-        +#95;#95;len#95;#95;() int
-        +#95;#95;iter#95;#95;()
-        +#95;#95;contains#95;#95;(dish) bool
-    }
-    class Positive {
-        <<descriptor>>
-        +#95;#95;set_name#95;#95;(owner, name)
-        +#95;#95;get#95;#95;(obj, objtype)
-        +#95;#95;set#95;#95;(obj, value)
-    }
-    class Tariff {
-        +base: Positive
-        +per_km: Positive
-        +min_fare: Positive
-        +fare(km) int
-    }
-    Cart "1" *-- "*" CartItem
-    CartItem --> Money
-    Tariff ..> Positive : поля
-```
-
-### Компроміси: як описати клас-дані
-
-| Варіант | Плюси | Мінуси | Коли |
-|---|---|---|---|
-| `dict` | нуль коду | опечатка в ключі — тихий баг; немає методів | тимчасові дані, JSON на вході (урок 14) |
-| `NamedTuple` | незмінний, розпаковується як кортеж | поля лише за позицією/ім'ям, мало гнучкості | прості записи, рядки з файлу |
-| `@dataclass` | методи з анотацій, `frozen`, `order`, `__post_init__` | перевірки — вручну в `__post_init__` | більшість класів-даних сервісу |
-| ручний клас | повний контроль | шаблонний код, легко забути `__hash__` | сутності з поведінкою й правилами |
 
 ## Практика { #practice }
 
-### Розібраний приклад: кошик із грошима
+### Розібраний приклад: звіт за вкладеним меню
 
-```python linenums="1" hl_lines="4 20 26 27 28 30 37 42 45 48 51 53"
-from dataclasses import dataclass, field
+Три відповіді — три маленькі рекурсії одного шаблону «базовий випадок — страва, рекурсивний — категорія»:
 
-
-@dataclass(frozen=True, order=True)
-class Money:
-    amount: int
-
-    def __add__(self, other):
-        if not isinstance(other, Money):
-            return NotImplemented
-        return Money(self.amount + other.amount)
-
-    def __mul__(self, times):
-        return Money(self.amount * times)
-
-    def __str__(self):
-        return f"{self.amount} грн"
+```python linenums="1" hl_lines="2 3 4 8 9 10 14 15 16 17"
+def total_price(node):
+    if not isinstance(node, dict):
+        return node
+    return sum(total_price(child) for child in node.values())
 
 
-@dataclass(frozen=True)
-class CartItem:
-    dish: str
-    price: Money
-    qty: int = 1
-
-    def __post_init__(self):
-        if self.qty < 1:
-            raise ValueError(f"кількість має бути від 1, а маємо {self.qty}")
-
-    @property
-    def total(self):
-        return self.price * self.qty
+def cheapest(node):
+    if not isinstance(node, dict):
+        return node
+    return min(cheapest(child) for child in node.values())
 
 
-@dataclass
-class Cart:
-    items: list = field(default_factory=list)
-
-    def add(self, dish, price, qty=1):
-        self.items.append(CartItem(dish, Money(price), qty))
-
-    def __len__(self):
-        return sum(item.qty for item in self.items)
-
-    def __iter__(self):
-        return iter(self.items)
-
-    def __contains__(self, dish):
-        return any(item.dish == dish for item in self.items)
-
-    @property
-    def total(self):
-        return sum((item.total for item in self.items), Money(0))
+def depth(node):
+    if not isinstance(node, dict):
+        return 0
+    return 1 + max(depth(child) for child in node.values())
 
 
-cart = Cart()
-cart.add("Борщ", 95, 2)
-cart.add("Узвар", 40)
-print(len(cart), "Узвар" in cart, cart.total)
-print(max(cart, key=lambda item: item.total))
-try:
-    cart.add("Вареники", 110, 0)
-except ValueError as error:
-    print(error)
-print(len(cart))
+print("Страв:", count_dishes(MENU), "| усе меню:", total_price(MENU), "грн")
+print("Найдешевша страва кухні:", cheapest(MENU["Кухня"]), "грн")
+print("Рівнів вкладеності:", depth(MENU))
 ```
 
 ```text
-3 True 230 грн
-CartItem(dish='Борщ', price=Money(amount=95), qty=2)
-кількість має бути від 1, а маємо 0
-3
+Страв: 9 | усе меню: 505 грн
+Найдешевша страва кухні: 75 грн
+Рівнів вкладеності: 4
 ```
 
-Що тут працює:
+Що відбувається в ключових рядках:
 
-- `Money` і `CartItem` — об'єкти-значення: `frozen=True`, рівність за полями, хеш.
-- `__post_init__` перевіряє кількість — позицію з `qty=0` неможливо навіть створити, тому вона не потрапила в кошик, і `len(cart)` лишився 3.
-- `__mul__` дає `price * qty` → `Money`; `sum(…, Money(0))` стартує з грошей, тож `__radd__` не потрібен.
-- `field(default_factory=list)` — кожен кошик отримує **свій** список (чому не `items: list = []` — у «Знайди помилку»).
-- `max(cart, key=…)` працює, бо є `__iter__`; `print` показує `repr`, згенерований датакласом.
+- **рядки 2–4, 8–10, 14–16** — однаковий каркас. Базовий випадок повертає значення страви, рекурсивний — **згортку** відповідей частин: `sum`, `min`, `max`. Це reducer з уроку 8, застосований до дерева;
+- **рядок 17** — глибина: категорія на один рівень глибша за свою найглибшу частину. Для меню це Меню → Напої → Гарячі → Кава → страва, 4 рівні категорій;
+- жодна функція не знає, скільки рівнів у меню. Додай категорію «Десерти → Торти → Шоколадні» — код не зміниться.
 
-!!! note "Поля датакласу публічні"
-    `cart.items.append(…)` обійде перевірки `add`. Для кошика це прийнятно; де потрібен сильний інваріант — ховаємо стан за `_` і методами, як в уроці 21.
+### Зміни приклад: усі страви зі шляхами
 
-### Зміни приклад: об'єднати кошики
+Напиши **генератор** `dishes(node, path=())` (урок 11), який видає пари `(шлях, ціна)` для кожної страви меню:
 
-Сім'я замовляє з двох телефонів. Додай `Cart.__add__`, щоб `family = cart_mom + cart_son` повертав **новий** кошик з усіма позиціями, не змінюючи жодного з вихідних.
-
-??? tip "Підказка"
-
-    ```python
-    def __add__(self, other):
-        if not isinstance(other, Cart):
-            return NotImplemented
-        return Cart(self.items + other.items)
-    ```
-
-    `self.items + other.items` створює новий список. А позиції `CartItem` незмінні, тож ділити їх між кошиками безпечно.
-
-### Спробуй самостійно: рейтинг кур'єра
-
-Напиши дескриптор `Range(low, high)`, який пропускає лише значення з проміжку `[low, high]`, і клас `Courier` з полями `rating = Range(1, 5)` та `experience = Range(0, 50)` (роки). Перевір:
-
-- `Courier("Олег", 4.8, 3).rating == 4.8`;
-- `Courier("Ірина", 7, 2)` падає з `ValueError`;
-- у `vars(courier)` значення лежать під `_rating` і `_experience`;
-- список кур'єрів сортується за рейтингом через `key=`.
-
-??? tip "Підказка"
-
-    Відмінність від `Positive` — лише `__init__(self, low, high)`, що запам'ятовує межі, і умова в `__set__`: `if not self.low <= value <= self.high`.
-
-### Знайди помилку
-
-```python
-# 1
-class Money:
-    def __init__(self, amount):
-        self.amount = amount
-
-    def __add__(self, other):
-        self.amount += other.amount
-        return self
-
-# 2
-from dataclasses import dataclass
-
-@dataclass
-class Order:
-    order_id: int
-    dishes: list = []
-
-# 3
-class Money:
-    def __init__(self, amount):
-        self.amount = amount
-
-    def __eq__(self, other):
-        return self.amount == other.amount
+```text
+next(dishes(MENU))              →  (('Кухня', 'Перші страви', 'Борщ'), 95)
+len(list(dishes(MENU)))         →  9
 ```
 
-??? success "Відповіді"
+**Критерії перевірки:**
 
-    1. `__add__` змінює лівий операнд: після `total = price + fee` змінилася і сама `price`. Оператор має повертати **новий** об'єкт: `return Money(self.amount + other.amount)`.
-    2. Датаклас узагалі не створиться: `ValueError: mutable default <class 'list'> for field dishes is not allowed: use default_factory`. Спільний список за замовчуванням — та сама пастка, що й змінюваний аргумент за замовчуванням в уроці 7. Правильно: `dishes: list = field(default_factory=list)`.
-    3. `Money(5) == 5` падає з `AttributeError`, бо в числа немає `amount`. Треба `if not isinstance(other, Money): return NotImplemented` — тоді Python чесно поверне `False`. І ще: після `__eq__` зник `__hash__`, тож такі гроші не покладеш у множину.
+- генератор рекурсивний: для категорії — `yield from dishes(child, path + (name,))`;
+- `count_dishes` можна переписати через нього одним рядком: `sum(1 for _ in dishes(node))`;
+- страви «Кава» мають шлях з чотирьох частин: `('Напої', 'Гарячі', 'Кава', 'Лате')`.
+
+??? tip "Підказка"
+    Базовий випадок: якщо `node` — не словник, `yield path, node` і `return`. Інакше для кожної пари `name, child` — `yield from` рекурсивного виклику з довшим шляхом.
+
+### Спробуй самостійно: обід на рівну суму
+
+Клієнт хоче обід рівно на **150 грн** зі страв меню, кожна не більше одного разу. Напиши `lunch_sets(menu, budget)`, що повертає всі такі набори назв страв. Для 150 грн їх шість:
+
+```text
+['Борщ', 'Лате']
+['Юшка', 'Чай', 'Узвар']
+['Юшка', 'Лате', 'Хліб']
+['Вареники', 'Чай', 'Еспресо']
+['Деруни', 'Чай', 'Узвар', 'Хліб']
+['Деруни', 'Еспресо', 'Узвар']
+```
+
+**Правила:**
+
+- спершу розгорни меню у список `(назва, ціна)` генератором зі «Зміни приклад» — порядок страв як у меню;
+- перебір з поверненням: `chosen.append` → рекурсія → `chosen.pop()`;
+- відсікання: гілку, де сума вже більша за бюджет, не досліджувати;
+- порахуй виклики з відсіканням і без: у скільки разів менше?
 
 ## Підсумок
 
 | Поняття | Що запам'ятати |
 |---|---|
-| Dunder-методи | Python викликає їх сам: `len` → `__len__`, `in` → `__contains__`, `+` → `__add__` |
-| `NotImplemented` | «не вмію з цим типом» — Python спробує інший операнд, потім `TypeError` |
-| `__radd__` | потрібен, коли лівий операнд не наш: `0 + Money(…)` у `sum` |
-| `__eq__` + `__hash__` | `__eq__` прибирає `__hash__`; хеш — з тих самих полів і лише для незмінних об'єктів |
-| `__lt__` чи `key=` | `__lt__` — коли порядок один і природний; інакше `key=` |
-| `__call__` | об'єкт із налаштуваннями, що викликається як функція |
-| Обчислювана властивість | рахується при читанні, не може застаріти |
-| Сеттер | зберігає в `_name`, інакше рекурсія |
-| Дескриптор | `__set_name__`, `__get__`, `__set__`; одне правило — багато полів |
-| Декоратор класу | приймає клас, повертає клас: реєстр, `@total_ordering`, `@dataclass` |
-| `@dataclass` | `__init__`, `__repr__`, `__eq__`; `order`, `frozen`, `__post_init__`, `default_factory` |
-| Значення і сутність | значення — рівність за полями, незмінне; сутність — ідентичність, змінюється |
+| Рекурсія | функція викликає себе для меншої задачі; базовий випадок зупиняє |
+| Стек викликів | кожен виклик — кадр; глибина ~1000 → `RecursionError` |
+| Дерева | вкладені структури природно обходити рекурсією: «значення листа» + «згортка частин» |
+| Розділяй і володарюй | поділити → розв'язати частини → зібрати; сортування злиттям `O(n log n)` |
+| Перебір з поверненням | крок уперед → рекурсія → крок назад (`pop`); до `2ⁿ` варіантів |
+| Відсікання | не досліджувати гілки, що не можуть дати відповідь; сортування допомагає |
+| Мемоізація | підзадачі повторюються → `lru_cache`, далі ДП |
+| Рекурсія чи цикл | дерева й перебір — рекурсія; лінійні й дуже глибокі дані — цикл і явний стек |
 
 ### Самоперевірка
 
-1. Що викликає Python для `if cart:`, якщо в класі немає `__bool__`?
-2. Навіщо `__add__` повертає `NotImplemented`, а не кидає `TypeError` сам?
-3. Чому `sum([Money(95), Money(60)])` без `__radd__` падає, а `Money(95) + Money(60)` — ні?
-4. Чому після визначення `__eq__` об'єкт не можна покласти в множину? Чому хеш від змінюваного поля небезпечний?
-5. Чому `self.rating = value` у сеттері `rating` призводить до `RecursionError`?
-6. Чому `cached_property` спрацьовує лише один раз, а `property` — щоразу?
-7. Що робить `__set_name__` і коли його викликають?
-8. Чим `Money` має відрізнятися від `Order` щодо `__eq__`, `__hash__` і змінюваності?
+1. Що буде з функцією без базового випадку? А якщо рекурсивний виклик не зменшує задачу?
+2. Чому `find_path` передає шлях кортежем `path + (name,)`, а не списком з `append`?
+3. Чому сортування злиттям — `O(n log n)`? Звідки `log n`?
+4. Що в переборі з поверненням робить `chosen.pop()`? Що буде без нього?
+5. Чому відсікання `break` правильне лише для **відсортованого** списку?
+6. Чому `fib(20)` робить 21 891 виклик і що змінює `lru_cache`?
+7. Меню з 5 рівнями вкладеності й список з 100 000 доставок: де рекурсія доречна, а де ні?
 
 ??? success "Відповіді"
 
-    1. `__len__`: нульова довжина — хибність.
-    2. Щоб Python спробував другий операнд (`__radd__`). Якщо і той не вміє — `TypeError` кине сам Python.
-    3. `sum` починає з `0`, тобто рахує `0 + Money(95)`: `int` не вміє додавати гроші, а `Money.__radd__` немає. У другому виразі лівий операнд — `Money`, і його `__add__` працює.
-    4. Python прибирає `__hash__`, щоб рівні об'єкти не мали різних хешів. Якщо поле, з якого рахується хеш, змінити, об'єкт лишиться в комірці старого хешу, і множина його не знайде.
-    5. Присвоєння властивості викликає сеттер, який знову присвоює властивості, — нескінченна рекурсія. Значення треба зберігати в `self._rating`.
-    6. `property` — data-дескриптор, він перед словником екземпляра. `cached_property` — non-data, після словника: записавши результат в екземпляр, він більше не викликається.
-    7. Повідомляє дескриптору ім'я атрибута, в який його поклали. Python викликає його один раз — під час створення класу.
-    8. `Money` — значення: рівність за сумою, незмінний (`frozen`), хеш з полів. `Order` — сутність: рівність за ідентичністю чи `id`, змінюється (статус), не хешується за змінюваними полями.
+    1. Функція викликатиме себе, доки не впаде з `RecursionError`. Те саме, якщо задача не зменшується: базового випадку не досягнемо.
+    2. Кожен рівень створює **новий** кортеж, і гілки не діляться одним об'єктом. Спільний список, у який усі дописують, накопичував би імена з різних гілок.
+    3. Поділ навпіл дає `log₂ n` рівнів, і на кожному рівні злиття разом проходить усі n елементів.
+    4. Прибирає останню взяту поїздку, щоб на її місці спробувати наступну. Без нього `chosen` накопичував би поїздки з усіх гілок.
+    5. `break` означає «наступні теж не влізуть». Це правда, лише якщо наступні не менші за поточну — тобто список відсортований за зростанням.
+    6. Ті самі `fib(k)` обчислюються знову й знову. `lru_cache` рахує кожне `k` один раз, далі бере з пам'яті: 21 обчислення.
+    7. Меню — дерево з невеликою глибиною: рекурсія природна. 100 000 доставок — лінійні дані: цикл; рекурсія впала б на тисячному рівні.
 
 ### Що далі
 
-- Ноутбук заняття: [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_23_property_decorators_dunder/note_lesson_23_property_dunder_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_23_property_decorators_dunder/note_lesson_23_property_dunder.ipynb){ .solutions-link } — прогнози й вправи з перевірками: кошик, гроші, дескриптор `Range`, реєстр способів оплати.
-- Практикум на реальних даних: [`lab_lesson_23_cars_descriptors.ipynb`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_23_property_decorators_dunder/lab_lesson_23_cars_descriptors.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_23_property_decorators_dunder/lab_lesson_23_cars_descriptors.ipynb) — автомобілі з уроку 21: від `set_mpg()` до `@property` і дескриптора `PositiveNumber` на датасеті `mpg`.
-- Наступне заняття — урок 24 «Ітератори advanced»: сьогодні `__iter__` повертав готовий ітератор списку, а далі — власний `__next__`, генератори з `.send()` і конвеєри з `itertools`.
-- Урок 25 — тестування з `pytest`: перевірки на кшталт наших `assert` стануть справжніми тестами.
+- Ноутбук заняття: [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_23_practicum_recursion/note_lesson_23_recursion_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_23_practicum_recursion/note_lesson_23_recursion.ipynb){ .solutions-link } — меню, сортування і ваучер: прогнози, лічильники викликів, вправи з перевірками.
+- Наступне заняття — урок 24 «`@property`, декоратори класів, dunder»: як зробити так, щоб `sorted(deliveries)` і `len(menu)` працювали для наших класів.
+- Практикум П5 (урок 27): динамічне програмування — коли підзадачі повторюються.
 
 ## Документація і джерела
 
-- Довідник мови: [Data model — Special method names](https://docs.python.org/3/reference/datamodel.html#special-method-names)
-- [Descriptor HowTo Guide](https://docs.python.org/3/howto/descriptor.html) — дескриптори, порядок пошуку атрибутів, як влаштовані `property` і методи
-- [`dataclasses`](https://docs.python.org/3/library/dataclasses.html), [`functools.total_ordering`](https://docs.python.org/3/library/functools.html#functools.total_ordering), [`functools.cached_property`](https://docs.python.org/3/library/functools.html#functools.cached_property), [`property`](https://docs.python.org/3/library/functions.html#property)
-- [Mermaid: Class diagrams](https://mermaid.js.org/syntax/classDiagram.html)
-- Harvard CS50P: [Lecture 8 — Object-Oriented Programming](https://cs50.harvard.edu/python/notes/8/) — `@property`, `__str__`, перевантаження операторів
-- Для охочих: Martin Fowler, [Value Object](https://martinfowler.com/bliki/ValueObject.html) — чому гроші й точки мають бути незмінними значеннями.
+- Туторіал Python: [Defining Functions](https://docs.python.org/3/tutorial/controlflow.html#defining-functions); [`sys.getrecursionlimit`](https://docs.python.org/3/library/sys.html#sys.getrecursionlimit), [`RecursionError`](https://docs.python.org/3/library/exceptions.html#RecursionError), [`functools.lru_cache`](https://docs.python.org/3/library/functools.html#functools.lru_cache)
+- [Sorting Techniques](https://docs.python.org/3/howto/sorting.html) — чому в житті `sorted()`
+- Для охочих:
+    - MIT 6.0001, [лекція 6 «Recursion and Dictionaries»](https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/resources/lecture-6-recursion-and-dictionaries/);
+    - Harvard CS50x, [тиждень 3 «Algorithms»](https://cs50.harvard.edu/x/weeks/3/) — рекурсія й сортування злиттям.

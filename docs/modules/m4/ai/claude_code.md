@@ -1,6 +1,6 @@
 # Довідник: Claude Code
 
-Довідник до [уроку 42](../lesson_42.md). Кожне твердження звірено з установленим `claude` (версія 2.1.283, `claude --help`) і з [офіційною документацією](https://code.claude.com/docs/en/overview) станом на 27.09.2026.
+Довідник до [уроку 43](../lesson_43.md). Кожне твердження звірено з установленим `claude` (версія 2.1.283, `claude --help`) і з [офіційною документацією](https://code.claude.com/docs/en/overview) станом на 27.09.2026.
 
 Інструмент змінюється щомісяця. Якщо команда з цієї сторінки не працює, джерело правди — `claude --help`, `/help` і документація.
 
@@ -137,7 +137,7 @@ claude -r                            # вибрати розмову зі спи
    mypy --strict news_hub, тести не змінюй. Наприкінці перелічи рішення, які ухвалив сам.»
 ```
 
-Урок 42 порівнює саме ці два запити на одному проєкті — з реальним результатом.
+Урок 43 порівнює саме ці два запити на одному проєкті — з реальним результатом.
 
 | Прийом | Навіщо |
 |---|---|
@@ -173,7 +173,7 @@ claude -r                            # вибрати розмову зі спи
 - Нових залежностей не додавай без пояснення.
 ```
 
-Повний файл проєкту — [`news_hub/CLAUDE.md`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_42_ai_dev_tools/news_hub/CLAUDE.md).
+Повний файл проєкту — [`news_hub/CLAUDE.md`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_43_ai_dev_tools/news_hub/CLAUDE.md).
 
 - **Імпорти:** `@README.md` або `@docs/deploy.md` у тексті CLAUDE.md підключає файл (до 4 рівнів вкладеності). У бектиках (`` `@README` ``) — просто текст.
 - **Правила для частини файлів:** `.claude/rules/*.md` з полем `paths:` у frontmatter — завантажуються, лише коли агент працює з відповідними файлами:
@@ -249,7 +249,7 @@ disable-model-invocation: true
 | `context: fork`, `agent` | виконати в окремому субагенті |
 | `paths` | активувати лише для відповідних файлів |
 
-Повний skill проєкту — [`.claude/skills/add-news-source/SKILL.md`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_42_ai_dev_tools/news_hub/.claude/skills/add-news-source/SKILL.md). Поглиблено: [Skills](https://code.claude.com/docs/en/skills).
+Повний skill проєкту — [`.claude/skills/add-news-source/SKILL.md`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_43_ai_dev_tools/news_hub/.claude/skills/add-news-source/SKILL.md). Поглиблено: [Skills](https://code.claude.com/docs/en/skills).
 
 ## 9. MCP — зовнішні інструменти
 
@@ -329,7 +329,7 @@ Hook отримує на stdin JSON: `tool_name`, `tool_input` (для файл�
 | `2` | **заблокувати** виклик; stderr — причина для агента | дію вже виконано; stderr іде агенту як помилка, яку треба виправити |
 | інший | некритична помилка, продовжуємо | те саме |
 
-```python title=".claude/hooks/unit_tests.py (news_hub, урок 42)"
+```python title=".claude/hooks/unit_tests.py (news_hub, урок 43)"
 import json
 import subprocess
 import sys
@@ -360,7 +360,7 @@ if result.returncode != 0:
 4. **`.claude/settings.json`** — проєкт, у git;
 5. **`~/.claude/settings.json`** — ти, усі проєкти.
 
-```json title="news_hub/.claude/settings.json (урок 42)"
+```json title="news_hub/.claude/settings.json (урок 43)"
 {
   "permissions": {
     "allow": ["Bash(pytest *)", "Bash(python -m pytest *)", "Bash(mypy *)",
@@ -375,7 +375,7 @@ if result.returncode != 0:
 - **`deny` сильніший за `allow`**: широке `Bash(git *)` у `allow` не відкриє `git push`, якщо його заборонено.
 - `Bash(pytest *)` — `*` після пробілу покриває й саме `pytest`. Правило перевіряє **кожну** частину складеної команди (`&&`, `|`, `;`): `Bash(pytest *)` не дозволить `pytest && rm -rf .`.
 - Шляхи: `Read(./.env)` — відносно поточної папки; `Edit(/src/**)` — відносно кореня проєкту; `Read(~/…)` — домашня папка.
-- **Довіра до папки.** `allow`-правила з `.claude/settings.json` діють лише після того, як ти довірив папку (діалог при першому запуску). Інакше будь-який клонований репозиторій сам собі дозволив би команди. `deny` і `ask` діють одразу. `claude -p` діалог пропускає — і в недовіреній папці `allow` з файлу мовчки ігнорує (урок 42 на це натрапив).
+- **Довіра до папки.** `allow`-правила з `.claude/settings.json` діють лише після того, як ти довірив папку (діалог при першому запуску). Інакше будь-який клонований репозиторій сам собі дозволив би команди. `deny` і `ask` діють одразу. `claude -p` діалог пропускає — і в недовіреній папці `allow` з файлу мовчки ігнорує (урок 43 на це натрапив).
 
 | Режим (`--permission-mode`) | Поведінка |
 |---|---|
@@ -415,7 +415,7 @@ claude -p "Додай джерело …" \
   --max-budget-usd 5 --output-format json > run.json
 ```
 
-`--output-format json` повертає результат, кількість кроків, вартість і `permission_denials` — перелік дій, які агентові не дозволили. Саме так проведено експеримент уроку 42.
+`--output-format json` повертає результат, кількість кроків, вартість і `permission_denials` — перелік дій, які агентові не дозволили. Саме так проведено експеримент уроку 43.
 
 **GitHub Actions** — офіційна дія `anthropics/claude-code-action@v1`. Найпростіше налаштувати командою `/install-github-app` у сесії:
 
@@ -461,7 +461,7 @@ async def main() -> None:
 asyncio.run(main())
 ```
 
-Це не те саме, що **Client SDK** (`pip install anthropic`): там ти сам викликаєш модель і сам пишеш цикл інструментів — це тема уроку 43. Поглиблено: [Agent SDK overview](https://code.claude.com/docs/en/agent-sdk/overview).
+Це не те саме, що **Client SDK** (`pip install anthropic`): там ти сам викликаєш модель і сам пишеш цикл інструментів — це тема уроку 44. Поглиблено: [Agent SDK overview](https://code.claude.com/docs/en/agent-sdk/overview).
 
 **Паралельна робота.** `claude --bg "…"` — фонова сесія (`claude agents` — список, `claude attach <id>` — під'єднатися); `claude -w назва` — сесія в окремому git worktree, щоб дві задачі не заважали одна одній.
 

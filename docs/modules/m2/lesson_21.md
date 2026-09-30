@@ -1,461 +1,99 @@
-# Урок 21. Інкапсуляція, область видимості
+# Урок 21. Наслідування, поліморфізм
 
-В уроці 19 `Order` перевіряв суму чека в `__init__`: замовлення на −120 грн створити неможливо. Але тиждень потому бухгалтер знайшла в звіті від'ємний виторг. Виявилося, що скрипт знижок писав прямо в атрибут: `order.bill = order.bill - 600`. Перевірка в `__init__` спрацювала один раз, при створенні, а потім у стан міг писати будь-хто.
+Сервіс «Смачно + Таксі» доставляв лише таксі. Та замовлень побільшало, і з'явилися нові способи. **Кур'єр-пішохід** бере 40 грн, але ходить лише Подолом. **Самовивіз** безкоштовний. А вночі таксі коштує дорожче. У кожного способу своя ціна, свій час і свої правила, але звіт однаковий: номер замовлення, район, ціна, скільки чекати.
 
-Той самий скрипт виставляв замовленням статус `"delivered"`, хоча кухня ще й не почала готувати. Звіт кухні показував порожні черги, а клієнти чекали годинами.
+Як це записати? Можна додати в клас `Delivery` з уроку 20 поле `kind` і в кожному методі писати `if kind == "taxi" … elif kind == "courier" …`. Можна зробити окремий клас на кожен спосіб і навчити їх відповідати на **однакові питання** — `fare()`, `eta()` — кожен по-своєму. Це і є **наслідування** та **поліморфізм**.
 
-**Інкапсуляція** — це про те, щоб у стан об'єкта вели лише **правильні двері**: методи, які перевіряють правила. Об'єкт тоді сам гарантує, що ніколи не опиниться в неможливому стані, хоч би хто й звідки з ним працював. А **область видимості** — про те саме на рівні функцій і модулів: чим менше коду може змінити змінну, тим менше місць, де її можна зламати.
+Наприкінці уроку, у розділі «Архітектура», порівняємо три рішення: `if` за типом, ієрархію класів і **композицію**. Побачимо, чому досвідчені розробники часто кажуть «віддавай перевагу композиції».
 
-**Що потрібно з попередніх уроків:** винятки (урок 13), LEGB і `nonlocal` (урок 18), класи й атрибути (урок 19), наслідування й `super()` (урок 20).
+**Що потрібно з попередніх уроків:** функції як об'єкти й фабрики (урок 19), класи, атрибути класу й екземпляра, `isinstance` (урок 20).
 
 **Після уроку ти зможеш:**
 
-- формулювати інваріанти класу й захищати їх методами, а не домовленостями;
-- розрізняти `name`, `_name` і `__name`, пояснювати name mangling і коли він справді потрібен;
-- будувати скінченний автомат статусів із дозволеними переходами;
-- давати доступ до стану лише для читання через `@property` і перевіряти запис у сеттері;
-- пояснювати, чим небезпечний `global`, і тримати змінні в найменшій потрібній області видимості;
-- вирішувати, яке правило має жити в моделі, а яке — в сервісі.
+- створювати підкласи, перевизначати методи й розширювати їх через `super()`;
+- пояснювати, як Python шукає метод по MRO, у тому числі при множинному наслідуванні;
+- писати поліморфний код: один виклик — різна поведінка, без `if` за типом;
+- розпізнавати качину типізацію, пастки несумісних сигнатур і «нащадка, що ламає батька»;
+- обирати між наслідуванням і композицією за правилом «є» (is-a) проти «має» (has-a).
 
-**Задача розділу.** `Order`, у якого сума змінюється лише через знижку з перевіркою, а статус — лише за дозволеними переходами, з історією змін. Повний код — у розділі [«Практика»](#practice).
+**Задача розділу.** Звіт за доставками різних типів, в якому сервіс не знає, які саме типи існують. Повний код — у розділі [«Практика»](#practice).
 
-**Ноутбук заняття:** [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_21_encapsulation_scope/note_lesson_21_encapsulation_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_21_encapsulation_scope/note_lesson_21_encapsulation.ipynb){ .solutions-link }
+**Ноутбук заняття:** [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_21_inheritance_polymorphism/note_lesson_21_inheritance_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_21_inheritance_polymorphism/note_lesson_21_inheritance.ipynb){ .solutions-link }
 
 ## Пригадай
 
-1. Де в `Order` з уроку 19 стояла перевірка `bill > 0` і коли вона виконувалась?
-2. Навіщо в уроці 18 знадобився `nonlocal`?
-3. Чому в уроці 20 нащадок, який повертає з `fare()` рядок, зламав звіт?
+1. Де Python шукає `first.FEES`, якщо в екземплярі такого атрибута немає?
+2. Що повертає `isinstance(True, int)` і чому?
+3. Що таке фабрика функцій з уроку 19?
 
 ??? success "Відповіді"
 
-    1. У `__init__`, тобто один раз — при створенні об'єкта.
-    2. Щоб змінити змінну оточуючої функції: присвоєння без нього створює локальну змінну.
-    3. Він порушив обіцянку батька «`fare()` повертає число» — принцип підстановки Лісков.
+    1. У класі. Спершу екземпляр, потім клас.
+    2. `True`: `bool` — нащадок `int`. Сьогодні розберемо, що це означає.
+    3. Функція, яка створює й повертає іншу функцію, налаштовану параметрами: `make_discount(10)`.
 
-## Інваріант і як його зламати
+## Спільне — в батьківському класі
 
-**Інваріант** — правило, яке має бути правдою **завжди**, протягом усього життя об'єкта:
-
-- сума чека більша за 0;
-- статус змінюється лише за маршрутом «нове → готується → в дорозі → доставлено»;
-- кількість використань промокоду не від'ємна.
-
-Перевірка в `__init__` захищає лише **народження** об'єкта:
-
-```python
-class Order:
-    def __init__(self, order_id, bill):
-        if bill <= 0:
-            raise ValueError(f"сума чека має бути більшою за 0, а маємо {bill}")
-        self.id = order_id
-        self.bill = bill
-
-
-order = Order(1, 540.0)
-order.bill = order.bill - 600
-print(order.bill)
-```
-
-```text
--60.0
-```
-
-Ні помилки, ні попередження. `bill` — відкритий атрибут, і записати в нього може кожен рядок будь-якого модуля. Інваріант порушено, і дізнаємося ми про це аж зі звіту бухгалтера.
-
-## Конвенції доступу: _name і __name
-
-Python не має ключових слів `private` чи `public`, як Java чи C#. Замість них — **домовленості в іменах**:
-
-| Ім'я | Що означає | Чи захищає |
-|---|---|---|
-| `bill` | публічний атрибут: частина інтерфейсу | ні |
-| `_bill` | внутрішній: «не чіпай ззовні, це деталь реалізації» | домовленість, Python не заважає |
-| `__bill` | Python перейменовує в `_Order__bill` (name mangling) | від випадкових збігів імен у нащадках |
-
-```python
-class Order:
-    def __init__(self, order_id, bill):
-        self.id = order_id
-        self._bill = bill
-        self.__kitchen_note = "без цибулі"
-
-
-order = Order(1, 540.0)
-print(order.__dict__)
-print(order._bill)
-
-try:
-    print(order.__kitchen_note)
-except AttributeError as error:
-    print("AttributeError:", error)
-```
-
-```text
-{'id': 1, '_bill': 540.0, '_Order__kitchen_note': 'без цибулі'}
-540.0
-AttributeError: 'Order' object has no attribute '__kitchen_note'
-```
-
-`_bill` читається без проблем: підкреслення — лише сигнал для людей, IDE й лінтерів. А `__kitchen_note` усередині класу Python записав як `_Order__kitchen_note`. Звернутися до нього все одно можна — `order._Order__kitchen_note`, — тож це не замок, а захист від **випадковостей**.
-
-### Навіщо __: колізія імен у нащадках
-
-Випадковість, від якої захищає `__`, — конфлікт імен між батьком і нащадком:
+Усі доставки мають номер замовлення й район, і всі вміють описати себе. Це спільне — у **базовому** (батьківському) класі:
 
 ```python
 class Delivery:
-    def __init__(self, order_id):
+    """Будь-яка доставка: номер замовлення, район, ціна, час."""
+
+    kind = "Доставка"
+
+    def __init__(self, order_id, district):
         self.order_id = order_id
-        self._status = "нова"
+        self.district = district
 
-    def status(self):
-        return self._status
+    def fare(self):
+        raise NotImplementedError(f"{type(self).__name__} має визначити fare()")
 
+    def eta(self):
+        return 30
 
-class TrackedDelivery(Delivery):
-    def __init__(self, order_id, gps):
-        super().__init__(order_id)
-        self._status = f"GPS {gps}"
-
-
-tracked = TrackedDelivery(7, "50.45,30.52")
-print(tracked.status())
+    def describe(self):
+        return f"{self.kind} №{self.order_id}: {self.district}, {self.fare()} грн, ~{self.eta()} хв"
 ```
 
-```text
-GPS 50.45,30.52
-```
+`fare()` базовий клас не знає — ціна залежить від способу доставки. Тож він піднімає `NotImplementedError`: «нащадок, визнач мене». `eta()` має типове значення, яке нащадок може змінити. А `describe()` уже написаний і користується `fare()` та `eta()` — **якими б вони не були**.
 
-Автор `TrackedDelivery` не знав, що в батька вже є `_status`, і назвав так своє поле. Він **затер** стан батька, і `status()` повертає нісенітницю. З двома підкресленнями імена не перетинаються:
+**Нащадок** (підклас) вказує батька в дужках і отримує все, що в того є:
 
 ```python
-class Delivery:
-    def __init__(self, order_id):
-        self.order_id = order_id
-        self.__status = "нова"
+class Pickup(Delivery):
+    kind = "Самовивіз"
 
-    def status(self):
-        return self.__status
+    def fare(self):
+        return 0
 
-
-class TrackedDelivery(Delivery):
-    def __init__(self, order_id, gps):
-        super().__init__(order_id)
-        self.__status = f"GPS {gps}"
+    def eta(self):
+        return 15
 
 
-tracked = TrackedDelivery(7, "50.45,30.52")
-print(tracked.status())
-print(tracked.__dict__)
+pickup = Pickup(3, "кафе")
+print(pickup.describe())
+print(isinstance(pickup, Pickup), isinstance(pickup, Delivery))
 ```
 
 ```text
-нова
-{'order_id': 7, '_Delivery__status': 'нова', '_TrackedDelivery__status': 'GPS 50.45,30.52'}
+Самовивіз №3: кафе, 0 грн, ~15 хв
+True True
 ```
 
-Два різні атрибути — `_Delivery__status` і `_TrackedDelivery__status`. Кожен клас бачить свій.
+У `Pickup` немає ні `__init__`, ні `describe` — вони знайдені в `Delivery`. А `fare`, `eta` і `kind` — власні: нащадок їх **перевизначив**. Самовивіз **є** доставкою (is-a), тому `isinstance(pickup, Delivery)` — `True`.
 
-!!! tip "Коли яке підкреслення"
-    За замовчуванням — одне: `_bill`. Воно чесно каже «це внутрішнє» і не заважає нащадкам. Два — лише для атрибутів класу, який **задумано** як базовий для чужих нащадків, щоб їхні поля випадково не затерли твої. [PEP 8](https://peps.python.org/pep-0008/#designing-for-inheritance) радить саме так.
+### Як Python шукає метод: MRO
 
-## Методи — двері в стан
-
-Сховати `bill` за підкресленням мало: треба дати **правильний спосіб** її змінити. Знижку дає не той, хто викликає, віднімаючи число, а сам об'єкт — методом з перевіркою:
+`pickup.describe()` — Python шукає `describe` по ланцюжку класів. Цей ланцюжок називається **MRO** (method resolution order, порядок пошуку методів):
 
 ```python
-class Order:
-    MAX_DISCOUNT = 50
-
-    def __init__(self, order_id, bill):
-        if bill <= 0:
-            raise ValueError(f"сума чека має бути більшою за 0, а маємо {bill}")
-        self.id = order_id
-        self._bill = bill
-
-    def bill(self):
-        return self._bill
-
-    def apply_discount(self, percent):
-        if not 0 < percent <= self.MAX_DISCOUNT:
-            raise ValueError(f"знижка має бути від 1 до {self.MAX_DISCOUNT} %, а маємо {percent}")
-        self._bill = round(self._bill * (100 - percent) / 100, 2)
-
-
-order = Order(1, 540.0)
-order.apply_discount(10)
-print(order.bill())
-
-try:
-    order.apply_discount(111)
-except ValueError as error:
-    print(error)
-print(order.bill())
+print([cls.__name__ for cls in Pickup.mro()])
 ```
 
 ```text
-486.0
-знижка має бути від 1 до 50 %, а маємо 111
-486.0
+['Pickup', 'Delivery', 'object']
 ```
-
-Зовнішній код більше не **обчислює** нову суму сам — він **просить** об'єкт: «застосуй знижку 10 %». Правило «не більше 50 %» живе в одному місці, і обійти його випадково вже не вийде. Цей принцип називають **«Tell, don't ask»**: кажи об'єкту, що зробити, замість того щоб читати його стан, рахувати й записувати назад.
-
-## Статуси замовлення: скінченний автомат
-
-Статус — найнебезпечніше поле: від нього залежать кухня, водії й звіти. Замовлення проходить чіткий маршрут, і не кожен перехід дозволено:
-
-```mermaid
-stateDiagram-v2
-    [*] --> new
-    new --> cooking : cook()
-    new --> cancelled : cancel()
-    cooking --> on_the_way : send()
-    cooking --> cancelled : cancel()
-    on_the_way --> delivered : deliver()
-    delivered --> [*]
-    cancelled --> [*]
-```
-
-Така схема — **скінченний автомат** (finite state machine): є скінченний набір станів і список дозволених переходів між ними. Скасувати можна, поки водій не виїхав. Доставлене замовлення вже нікуди не рухається.
-
-Автомат переноситься в код майже дослівно: словник «стан → дозволені наступні стани» і один внутрішній метод, через який проходить **кожна** зміна:
-
-```python
-class Order:
-    TRANSITIONS = {
-        "new": {"cooking", "cancelled"},
-        "cooking": {"on_the_way", "cancelled"},
-        "on_the_way": {"delivered"},
-        "delivered": set(),
-        "cancelled": set(),
-    }
-
-    def __init__(self, order_id, bill):
-        if bill <= 0:
-            raise ValueError(f"сума чека має бути більшою за 0, а маємо {bill}")
-        self.id = order_id
-        self._bill = bill
-        self._status = "new"
-        self._history = ["new"]
-
-    def _move(self, new_status):
-        if new_status not in self.TRANSITIONS[self._status]:
-            raise ValueError(f"замовлення №{self.id}: не можна {self._status} → {new_status}")
-        self._status = new_status
-        self._history.append(new_status)
-
-    def cook(self):
-        self._move("cooking")
-
-    def send(self):
-        self._move("on_the_way")
-
-    def deliver(self):
-        self._move("delivered")
-
-    def cancel(self):
-        self._move("cancelled")
-
-
-order = Order(1, 540.0)
-order.cook()
-order.send()
-try:
-    order.cancel()
-except ValueError as error:
-    print(error)
-order.deliver()
-print(order._history)
-```
-
-```text
-замовлення №1: не можна on_the_way → cancelled
-['new', 'cooking', 'on_the_way', 'delivered']
-```
-
-Скасування в дорозі відхилено, і стан лишився правильним. Публічні методи `cook`, `send`, `deliver`, `cancel` — це **інтерфейс** замовлення. `_move`, `_status` і `_history` — внутрішня кухня, про яку зовнішньому коду знати не треба.
-
-## @property: читати можна, писати — лише через правила
-
-Методи `bill()` і доступ до `order._history` зсередини — незручно. Хочеться читати стан як звичайний атрибут, `order.status`, але не дозволяти запис. Для цього є **`@property`**: метод, до якого звертаються як до атрибута.
-
-```python
-class Order(Order):
-    @property
-    def status(self):
-        return self._status
-
-    @property
-    def history(self):
-        return tuple(self._history)
-
-
-order = Order(2, 320.0)
-order.cook()
-print(order.status, order.history)
-
-try:
-    order.status = "delivered"
-except AttributeError as error:
-    print(type(error).__name__)
-```
-
-```text
-cooking ('new', 'cooking')
-AttributeError
-```
-
-`order.status` виглядає як атрибут, а насправді викликає метод. Сеттера немає — запис дає `AttributeError`. Статус змінюється лише методами автомата. А `history` повертає **кортеж-копію**: якби він повертав сам список `_history`, зовнішній код міг би дописати в нього що завгодно.
-
-Якщо запис дозволений, але з правилами, до `@property` додають **сеттер**. Тоді звичайне присвоєння запускає перевірку:
-
-```python
-class Order(Order):
-    @property
-    def bill(self):
-        return self._bill
-
-    @bill.setter
-    def bill(self, value):
-        if value <= 0:
-            raise ValueError(f"сума чека має бути більшою за 0, а маємо {value}")
-        self._bill = value
-
-
-order = Order(3, 980.0)
-order.bill = 900.0
-try:
-    order.bill = order.bill - 1000
-except ValueError as error:
-    print(error)
-print(order.bill)
-```
-
-```text
-сума чека має бути більшою за 0, а маємо -100.0
-900.0
-```
-
-Той самий рядок, що на початку уроку зламав звіт, тепер зупиняється з поясненням. Зовнішній код не змінився — `order.bill = …`, — а інваріант захищено. Усе про `@property`, сеттери й дескриптори — в уроці 23.
-
-!!! note "`class Order(Order)`"
-    У прикладах вище ми нарощуємо клас частинами, щоб не повторювати весь код: кожен новий `Order` наслідує попередній. У справжньому проєкті всі ці методи живуть в одному класі.
-
-## Область видимості: чим менше, тим безпечніше
-
-Інкапсуляція класу — окремий випадок ширшої ідеї: **кожна змінна має бути видимою в найменшій потрібній області**. В уроці 18 ми розібрали LEGB — як Python **шукає** ім'я. Тепер про те, де його **тримати**.
-
-### global: змінна, яку може змінити будь-хто
-
-Перша версія сервісу рахувала замовлення в глобальній змінній:
-
-```python
-total_orders = 0
-
-
-def add_order_broken():
-    total_orders += 1
-
-
-try:
-    add_order_broken()
-except UnboundLocalError as error:
-    print(type(error).__name__)
-```
-
-```text
-UnboundLocalError
-```
-
-Та сама пастка, що з `nonlocal` в уроці 18: присвоєння робить `total_orders` локальною змінною. «Виправлення» через `global` працює:
-
-```python
-def add_order():
-    global total_orders
-    total_orders += 1
-    return total_orders
-
-
-add_order()
-add_order()
-print(total_orders)
-```
-
-```text
-2
-```
-
-Але тепер **будь-яка** функція будь-якого модуля може змінити `total_orders`. А коли кафе відкриває друге відділення, обидва рахують в одну змінну:
-
-```python
-podil_first = add_order()
-obolon_first = add_order()
-print(podil_first, obolon_first)
-```
-
-```text
-3 4
-```
-
-Перше замовлення Оболоні отримало №4, бо лічильник спільний на весь модуль. Щоб знайти, хто і де змінює глобальну змінну, треба прочитати **весь** код. Лічильник у класі (урок 19) чи в замиканні (урок 18) видно лише там, де він потрібен, і кожне відділення отримує свій:
-
-```python
-class Branch:
-    def __init__(self, name):
-        self.name = name
-        self._next_id = 1
-
-    def add_order(self):
-        order_id = self._next_id
-        self._next_id += 1
-        return order_id
-
-
-podil, obolon = Branch("Поділ"), Branch("Оболонь")
-print(podil.add_order(), podil.add_order(), obolon.add_order())
-```
-
-```text
-1 2 1
-```
-
-| Де тримати змінну | Хто може змінити | Коли |
-|---|---|---|
-| локальна змінна функції | лише ця функція | проміжні обчислення — за замовчуванням |
-| атрибут об'єкта `self._x` | методи об'єкта | стан, що живе між викликами |
-| змінна модуля | будь-який код, що імпортує модуль | константи: `FEES`, `DAYS`, `MAX_DISCOUNT` — **не змінюються** |
-| `global` | будь-хто | майже ніколи |
-
-!!! warning "Константи — так, змінний глобальний стан — ні"
-    `FEES = {...}` на рівні модуля — нормально, якщо його ніхто не змінює. Великими літерами (PEP 8) пишуть саме такі значення. Змінний стан — лічильники, списки замовлень, кеші — тримай в об'єктах.
-
-### Межа модуля: _helper і __all__
-
-Ті самі домовленості діють для модулів з уроку 12. Функція з підкресленням — внутрішня для модуля:
-
-```python title="pricing.py"
-__all__ = ["fare_for"]
-
-FEES = {"Поділ": 60, "Оболонь": 80}
-
-
-def _round_to_ten(value):
-    return round(value / 10) * 10
-
-
-def fare_for(district, night=False):
-    fare = FEES[district]
-    return _round_to_ten(fare * 1.3) if night else fare
-```
-
-- `from pricing import *` імпортує лише імена з `__all__`, тобто `fare_for`. Без `__all__` — усі імена без підкреслення;
-- `_round_to_ten` лишається доступною як `pricing._round_to_ten`, але підкреслення каже: «це не частина інтерфейсу модуля, завтра її можуть перейменувати».
-
-## Архітектура: публічний інтерфейс і внутрішній стан { #architecture }
-
-Інкапсуляція ділить клас на дві частини: **інтерфейс**, на який можуть спиратися інші, і **реалізацію**, яку можна змінювати, нікого не попереджаючи.
 
 ```mermaid
 flowchart TD
@@ -465,257 +103,412 @@ flowchart TD
     classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
     classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
 
-    EXT["зовнішній код<br>сервіс, CLI, звіти, тести"] --> API["інтерфейс Order<br>cook, send, deliver, cancel, status, bill"]
-    API --> RULES["правила<br>_move, перевірки в сеттерах"]
-    RULES --> STATE["стан<br>_status, _history, _bill"]
-    EXT -. "order._status = ..." .-> STATE
+    Q["pickup.describe()"] --> I{"в екземплярі?"}
+    I -- ні --> P{"у Pickup?"}
+    P -- ні --> D{"у Delivery?"}
+    D -- так --> R["Delivery.describe(pickup)"]
+    R --> F["усередині self.fare()<br>знову пошук з початку: Pickup.fare → 0"]
 
-    class EXT step
-    class API success
-    class RULES,STATE warning
+    class Q step
+    class I,P,D decision
+    class R,F success
 ```
 
-Суцільні стрілки — дозволений шлях: через інтерфейс і правила до стану. Пунктир — обхідний шлях, який Python технічно не забороняє. Домовленість `_` робить його **помітним**: і на рев'ю, і в лінтері, і в IDE.
+Головне — останній крок: `describe` написаний у `Delivery`, але `self` — це `pickup`, і `self.fare()` знаходить `Pickup.fare`. Базовий клас задає **сценарій**, нащадки підставляють **деталі**.
 
-На діаграмі класів видимість позначають символами: `+` — публічне, `-` — приватне (`__`), `#` — захищене (`_`):
+`object` в кінці ланцюжка — спільний предок усіх класів Python. Саме від нього кожен клас отримує, наприклад, типовий `__repr__`.
 
-```mermaid
-classDiagram
-    class Order {
-        +id: int
-        #_bill: float
-        #_status: str
-        #_history: list
-        +TRANSITIONS: dict$
-        +bill: float
-        +status: str
-        +history: tuple
-        +cook()
-        +send()
-        +deliver()
-        +cancel()
-        +apply_discount(percent)
-        #_move(new_status)
-    }
-    class DeliveryService {
-        #_orders: dict
-        #_next_id: int
-        +add_order(line) Order
-        +add_delivery(order_id, district, driver)
-    }
-    DeliveryService "1" o-- "*" Order
-```
+## super(): розширити, а не замінити
 
-### Скільки захисту потрібно
+Таксі потребує ще й водія. Новий `__init__` нащадка **заміняє** батьківський, тому спершу треба викликати батьківський через `super()`, а потім додати своє:
 
-| Рівень | Як | Ціна | Коли |
-|---|---|---|---|
-| 1. Відкриті атрибути | `order.bill = …` | нуль коду; правила тримаються на дисципліні | прості контейнери даних без правил: `NamedTuple`, конфіг |
-| 2. `_` + методи | `_bill`, `apply_discount()` | трохи більше коду; явні дії з назвами | стан змінюється **діями**: знижка, статус, оплата |
-| 3. `@property` + сеттер | `order.bill = …` з перевіркою | магія: присвоєння, що може кинути виняток | зовні зручно працювати як з атрибутом, а правило просте |
+```python
+class TaxiDelivery(Delivery):
+    kind = "Таксі"
+    FEES = {"Поділ": 60, "Оболонь": 80, "Печерськ": 90}
 
-Не кожен клас потребує рівня 3. `Delivery` з уроку 20 чи `RawOrder` з модуля 1 — прості дані, їм досить рівня 1. Захист окупається там, де є **інваріант**, який дорого порушити.
+    def __init__(self, order_id, district, driver):
+        super().__init__(order_id, district)
+        self.driver = driver
 
-### Де живе правило: у моделі чи в сервісі
+    def fare(self):
+        return self.FEES[self.district]
 
-| Правило | Де | Чому |
-|---|---|---|
-| сума чека > 0 | `Order` | стосується лише одного об'єкта — його перевіряє сам об'єкт |
-| переходи статусів | `Order` | стан одного замовлення |
-| одна доставка на замовлення | `DeliveryService` | зв'язок між **різними** об'єктами: замовлення не знає про чужі доставки |
-| номери замовлень унікальні | `DeliveryService` | знає про всі замовлення одразу |
+    def eta(self):
+        return 25
 
-Просте правило: інваріант одного об'єкта — в його класі; правило між об'єктами — в тому, хто тримає їх усіх. Саме так ролі розподілено на схемі шарів з уроку 19.
-
-## Практика { #practice }
-
-### Розібраний приклад: замовлення, яке себе захищає
-
-Зберемо все в один клас:
-
-```python linenums="1" hl_lines="2 13 17 21 23 26 28 30 32 33 34 35 36"
-class SafeOrder:
-    TRANSITIONS = Order.TRANSITIONS
-    MAX_DISCOUNT = 50
-
-    def __init__(self, order_id, bill):
-        if bill <= 0:
-            raise ValueError(f"сума чека має бути більшою за 0, а маємо {bill}")
-        self.id = order_id
-        self._bill = bill
-        self._status = "new"
-        self._history = ["new"]
-
-    @property
-    def bill(self):
-        return self._bill
-
-    @property
-    def status(self):
-        return self._status
-
-    @property
-    def history(self):
-        return tuple(self._history)
-
-    def apply_discount(self, percent):
-        if self._status != "new":
-            raise ValueError(f"знижку можна дати лише новому замовленню, а статус {self._status}")
-        if not 0 < percent <= self.MAX_DISCOUNT:
-            raise ValueError(f"знижка має бути від 1 до {self.MAX_DISCOUNT} %, а маємо {percent}")
-        self._bill = round(self._bill * (100 - percent) / 100, 2)
-
-    def _move(self, new_status):
-        if new_status not in self.TRANSITIONS[self._status]:
-            raise ValueError(f"замовлення №{self.id}: не можна {self._status} → {new_status}")
-        self._status = new_status
-        self._history.append(new_status)
-
-    def cook(self):
-        self._move("cooking")
-
-    def send(self):
-        self._move("on_the_way")
-
-    def deliver(self):
-        self._move("delivered")
-
-    def cancel(self):
-        self._move("cancelled")
+    def describe(self):
+        return super().describe() + f", водій {self.driver}"
 
 
-order = SafeOrder(1, 540.0)
-order.apply_discount(10)
-order.cook()
-for action in (lambda: order.apply_discount(5), order.deliver, lambda: setattr(order, "bill", 1.0)):
-    try:
-        action()
-    except (ValueError, AttributeError) as error:
-        print(type(error).__name__, "—", error if isinstance(error, ValueError) else "запис заборонено")
-order.send()
-order.deliver()
-print(order.bill, order.status, order.history)
+taxi = TaxiDelivery(1, "Оболонь", "D-3")
+print(taxi.describe())
+print(taxi.__dict__)
 ```
 
 ```text
-ValueError — знижку можна дати лише новому замовленню, а статус cooking
-ValueError — замовлення №1: не можна cooking → delivered
-AttributeError — запис заборонено
-486.0 delivered ('new', 'cooking', 'on_the_way', 'delivered')
+Таксі №1: Оболонь, 80 грн, ~25 хв, водій D-3
+{'order_id': 1, 'district': 'Оболонь', 'driver': 'D-3'}
+```
+
+`super()` — це «наступний клас за MRO». `super().__init__(…)` заповнив `order_id` і `district`, а `super().describe()` зібрав спільний опис, до якого таксі дописало водія. Без `super().__init__` в об'єкті не було б `order_id`, і `describe` впав би з `AttributeError`.
+
+## Поліморфізм: один виклик — різна поведінка
+
+Кур'єр — третій спосіб:
+
+```python
+class CourierDelivery(Delivery):
+    kind = "Кур'єр"
+    AREA = {"Поділ"}
+
+    def __init__(self, order_id, district):
+        if district not in self.AREA:
+            raise ValueError(f"кур'єр не ходить у район {district}")
+        super().__init__(order_id, district)
+
+    def fare(self):
+        return 40
+
+    def eta(self):
+        return 45
+```
+
+А тепер звіт, якому байдуже, що за доставка перед ним:
+
+```python
+deliveries = [TaxiDelivery(1, "Оболонь", "D-3"), CourierDelivery(2, "Поділ"), Pickup(3, "кафе")]
+
+for delivery in deliveries:
+    print(delivery.describe())
+print("Разом за доставку:", sum(delivery.fare() for delivery in deliveries), "грн")
+```
+
+```text
+Таксі №1: Оболонь, 80 грн, ~25 хв, водій D-3
+Кур'єр №2: Поділ, 40 грн, ~45 хв
+Самовивіз №3: кафе, 0 грн, ~15 хв
+Разом за доставку: 120 грн
+```
+
+Той самий рядок `delivery.describe()` робить три різні речі. Це **поліморфізм** («багато форм»): код звертається до спільного **інтерфейсу** — набору методів `fare`, `eta`, `describe`, — а кожен клас відповідає по-своєму. У циклі немає жодного `if isinstance(...)`. Новий спосіб доставки — новий клас, а звіт не змінюється.
+
+### Качина типізація
+
+Python не питає, **від кого** походить об'єкт, — лише чи **вміє** він потрібне. «Якщо воно ходить як качка і крякає як качка — це качка». Партнерська служба має свою бібліотеку, класи якої не наслідують наш `Delivery`. Але якщо в її об'єктів є `fare()` і `describe()`, звіт працює:
+
+```python
+class PartnerCourier:
+    """Клас з бібліотеки партнера — не наслідує Delivery."""
+
+    def __init__(self, order_id, price):
+        self.order_id = order_id
+        self.price = price
+
+    def fare(self):
+        return self.price
+
+    def describe(self):
+        return f"Партнер №{self.order_id}: {self.price} грн"
+
+
+mixed = deliveries + [PartnerCourier(4, 95)]
+print(sum(delivery.fare() for delivery in mixed))
+print(mixed[-1].describe(), isinstance(mixed[-1], Delivery))
+```
+
+```text
+215
+Партнер №4: 95 грн False
+```
+
+Наслідування — один спосіб отримати спільний інтерфейс, але не єдиний. `len()` працює для рядків, списків і словників, хоча спільного предка з методом `__len__` у них немає. Це та сама качина типізація. У модулі 2 до неї ще повернемося.
+
+## Множинне наслідування і міксини
+
+Уночі таксі дорожче на 30 %. Ця надбавка стосується **будь-якої** доставки, тому зручно винести її в окремий маленький клас — **міксин** (mixin). Він не описує самостійну річ, лише додає поведінку. Клас може мати кілька батьків:
+
+```python
+class NightMixin:
+    """Нічна надбавка 30 % до ціни будь-якої доставки."""
+
+    def fare(self):
+        return round(super().fare() * 1.3)
+
+    def describe(self):
+        return super().describe() + " (ніч)"
+
+
+class NightTaxi(NightMixin, TaxiDelivery):
+    pass
+
+
+night = NightTaxi(5, "Печерськ", "D-2")
+print(night.describe())
+print([cls.__name__ for cls in NightTaxi.mro()])
+```
+
+```text
+Таксі №5: Печерськ, 117 грн, ~25 хв, водій D-2 (ніч)
+['NightTaxi', 'NightMixin', 'TaxiDelivery', 'Delivery', 'object']
+```
+
+Порядок батьків у дужках — порядок MRO. `NightMixin.fare` викликає `super().fare()`, і це **не** `object`: наступний клас у MRO **екземпляра** — `TaxiDelivery`. Тому міксин працює з будь-якою доставкою: `class NightCourier(NightMixin, CourierDelivery)` дасть 52 грн.
+
+```mermaid
+flowchart TD
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+
+    N["NightTaxi.fare()<br>немає — далі"] --> M["NightMixin.fare()<br>super().fare() × 1.3"]
+    M -- "super()" --> T["TaxiDelivery.fare()<br>FEES → 90"]
+    T --> R["round(90 × 1.3) = 117"]
+
+    class N,M,T step
+    class R success
+```
+
+!!! warning "Кожен у ланцюжку має викликати super()"
+    Якщо один клас у ланцюжку MRO не викликає `super()` — наприклад, міксин з `__init__` без `super().__init__()`, — естафета обривається, і класи після нього мовчки не ініціалізуються. У кооперативному множинному наслідуванні **кожен** метод, що бере участь у ланцюжку, передає виклик далі.
+
+## Пастки наслідування
+
+### Несумісні сигнатури
+
+Сервіс створює доставку за назвою типу — таблиця класів, як таблиця команд в уроці 19:
+
+```python
+KINDS = {"taxi": TaxiDelivery, "courier": CourierDelivery, "pickup": Pickup}
+
+for name, cls in KINDS.items():
+    try:
+        print(cls(7, "Поділ").describe())
+    except TypeError as error:
+        print(name, "→", error)
+```
+
+```text
+taxi → TaxiDelivery.__init__() missing 1 required positional argument: 'driver'
+Кур'єр №7: Поділ, 40 грн, ~45 хв
+Самовивіз №7: Поділ, 0 грн, ~15 хв
+```
+
+`TaxiDelivery` вимагає більше аргументів, ніж батько, тож код, який створює доставки «за шаблоном батька», ламається лише на ній. Коли класи в ієрархії мають працювати взаємозамінно, їхні конструктори теж мають бути сумісні: водія можна зробити необов'язковим (`driver=None`) або передавати окремим методом.
+
+### Нащадок, що ламає батька
+
+Колега вирішила, що самовивіз має показувати не `0`, а слово:
+
+```python
+class FriendlyPickup(Pickup):
+    def fare(self):
+        return "безкоштовно"
+
+
+try:
+    print(sum(delivery.fare() for delivery in deliveries + [FriendlyPickup(6, "кафе")]))
+except TypeError as error:
+    print(error)
+```
+
+```text
+unsupported operand type(s) for +: 'int' and 'str'
+```
+
+Звіт, який працював з **усіма** доставками, зламався на новому нащадку. Батько обіцяв: `fare()` повертає число. Нащадок цю обіцянку порушив. Правило, яке це формулює, — **принцип підстановки Лісков** (LSP): об'єкт нащадка має працювати всюди, де очікують батька. Перевизначаючи метод, не змінюй, **що** він повертає і **які** винятки піднімає — лише **як** він це обчислює.
+
+## Архітектура: як моделювати різні способи доставки { #architecture }
+
+Задача: три способи доставки, і будь-який може бути нічним. Три рішення.
+
+**А. Один клас і `if` за типом.** `Delivery(kind="taxi")`, а в `fare()` — `if self.kind == "taxi": … elif …`. Просто, поки способів два. Кожен новий спосіб — правки в кожному методі, де є `if`, і легко забути один.
+
+**Б. Ієрархія класів** — те, що ми щойно зробили:
+
+```mermaid
+classDiagram
+    class Delivery {
+        kind: str$
+        order_id: int
+        district: str
+        fare() int
+        eta() int
+        describe() str
+    }
+    class TaxiDelivery {
+        FEES: dict$
+        driver: str
+        fare() int
+    }
+    class CourierDelivery {
+        AREA: set$
+        fare() int
+    }
+    class Pickup {
+        fare() int
+    }
+    class NightMixin {
+        fare() int
+    }
+    Delivery <|-- TaxiDelivery
+    Delivery <|-- CourierDelivery
+    Delivery <|-- Pickup
+    NightMixin <|-- NightTaxi
+    TaxiDelivery <|-- NightTaxi
+```
+
+Стрілка з порожнім трикутником `<|--` — **наслідування**: «NightTaxi є TaxiDelivery». Новий спосіб — новий клас, решта коду не змінюється. Але ознаки **множаться**: три способи × день/ніч — уже шість класів. Додай «з промокодом» — дванадцять. Це **вибух класів**.
+
+**В. Композиція.** Доставка не **є** нічною чи таксі — вона **має** правило ціни. Правило — окремий об'єкт чи функція (урок 19), яку передають у доставку:
+
+```mermaid
+classDiagram
+    class Delivery {
+        order_id: int
+        district: str
+        pricing: Pricing
+        fare() int
+    }
+    class Pricing {
+        <<функція district → int>>
+    }
+    Delivery *-- Pricing : має
+    Pricing <.. taxi_pricing
+    Pricing <.. courier_pricing
+    Pricing <.. night
+```
+
+Ромб `*--` — **композиція**: «доставка має правило ціни». Правила комбінуються як конвеєр з уроку 19: `night(taxi_pricing)`. Три способи й нічна надбавка — чотири маленькі функції, а не шість класів.
+
+| | А. `if` за типом | Б. Ієрархія класів | В. Композиція |
+|---|---|---|---|
+| Новий спосіб доставки | правки в кожному `if` | новий клас | нова функція-правило |
+| Комбінації ознак (ніч, промо) | ще більше `if` | вибух класів або міксини | `night(promo(taxi_pricing))` |
+| Зв'язність | усе в одному місці | нащадки залежать від батька | частини незалежні |
+| Коли доречно | 2 типи, які не зростатимуть | стабільне «є»: самовивіз **є** доставкою | змінні правила, комбінації |
+
+Правило вибору просте. Якщо природно сказати «X **є** Y» і так буде завжди — наслідування. Якщо «X **має** Y» або «X поводиться як Y, але правила змінюються» — композиція. На практиці їх поєднують: `Delivery` з підкласами для **різних сутностей** і з композицією для **змінних правил**.
+
+## Практика { #practice }
+
+### Розібраний приклад: звіт, що не знає типів доставок
+
+```python linenums="1" hl_lines="2 6 7 10 11 12 13"
+def delivery_report(deliveries):
+    by_kind = {}
+    for delivery in deliveries:
+        by_kind.setdefault(delivery.kind, []).append(delivery)
+    lines = []
+    for kind, group in by_kind.items():
+        total = sum(delivery.fare() for delivery in group)
+        lines.append(f"{kind}: {len(group)} шт., {total} грн")
+    fastest = min(deliveries, key=lambda delivery: delivery.eta())
+    lines.append(f"Найшвидша: {fastest.describe()}")
+    return "\n".join(lines)
+
+
+shift = [TaxiDelivery(1, "Оболонь", "D-3"), CourierDelivery(2, "Поділ"), Pickup(3, "кафе"),
+         NightTaxi(4, "Печерськ", "D-2"), TaxiDelivery(5, "Поділ", "D-1")]
+print(delivery_report(shift))
+```
+
+```text
+Таксі: 3 шт., 257 грн
+Кур'єр: 1 шт., 40 грн
+Самовивіз: 1 шт., 0 грн
+Найшвидша: Самовивіз №3: кафе, 0 грн, ~15 хв
 ```
 
 Що відбувається в ключових рядках:
 
-- **рядок 2** — правила переходів — дані в атрибуті класу, а не розкидані `if` по методах;
-- **рядки 13–23** — три властивості лише для читання: `bill`, `status`, `history`. Записати напряму не можна, а `history` віддає копію;
-- **рядки 26–30** — знижка перевіряє **два** правила: статус і розмір знижки. Готувати замовлення зі зміненою сумою кухня не повинна;
-- **рядки 32–36, `_move`** — єдине місце, де змінюється статус; кожен публічний метод лише називає потрібний перехід;
-- три спроби порушити правила закінчились винятками, а стан лишився правильним: сума 486.0, чесна історія переходів.
+- **рядок 2** — групи за атрибутом класу `kind`: кожен підклас визначає свій, `NightTaxi` успадковує «Таксі» від `TaxiDelivery`;
+- **рядки 6–7** — `fare()` у кожної доставки своя, і для нічного таксі це 117 з надбавкою. Звіт про це не знає;
+- **рядки 10–13** — `min` з `key=` з уроку 19 порівнює `eta()` доставок різних класів. `describe()` найшвидшої — теж поліморфний виклик;
+- жодного `isinstance` і жодного `if` за типом: новий клас доставки потрапить у звіт без змін у `delivery_report`.
 
-### Зміни приклад: повернення
+### Зміни приклад: доставка дроном
 
-Клієнт може **повернути** доставлене замовлення, якщо щось не так. Додай у `SafeOrder` стан `"returned"`:
-
-- перехід можливий лише з `"delivered"`;
-- метод `return_order(reason)` зберігає причину в `_return_reason`, а властивість `return_reason` її читає;
-- порожня причина → `ValueError`.
+Сервіс тестує **дрон**: 120 грн, 10 хвилин, лише на Оболонь. Додай клас `DroneDelivery(Delivery)` і додай дрон у зміну. Очікуваний рядок у звіті:
 
 ```text
-order.return_order("холодна піца")
-order.status         →  'returned'
-order.return_reason  →  'холодна піца'
-order.history[-2:]   →  ('delivered', 'returned')
+Дрон: 1 шт., 120 грн
 ```
 
 **Критерії перевірки:**
 
-- новий перехід — рядок у `TRANSITIONS`, а не новий `if` у `_move`;
-- повернути `"cooking"` чи `"cancelled"` не можна;
-- `order.return_reason = "інше"` → `AttributeError`.
+- `delivery_report` не змінюється;
+- дрон на Поділ → `ValueError` у конструкторі, як у кур'єра;
+- найшвидшою в звіті тепер стає доставка дроном;
+- `NightDrone(NightMixin, DroneDelivery)` працює без нового коду в міксині: 156 грн.
 
-### Спробуй самостійно: захищений промокод
+??? tip "Підказка"
+    Скопіюй будову `CourierDelivery`: атрибути класу `kind` і `AREA`, перевірка району в `__init__` перед `super().__init__`, `fare()` і `eta()`.
 
-Візьми клас `Promo` з уроку 19 і захисти його стан:
+### Спробуй самостійно: те саме композицією
 
-- кількість використань — у `__left` (name mangling);
-- `left` — властивість лише для читання;
-- `apply(bill)` — єдині двері, які зменшують `__left`;
-- `promo.left = 999` → `AttributeError`, а `promo.__dict__` показує `_Promo__left`.
+Перепиши доставки **без підкласів**: один клас `Delivery(order_id, district, pricing, kind)`, де `pricing` — функція «район → ціна». Напиши:
 
-Потім зроби `VipPromo(Promo)` з власним полем `__left` для VIP-бонусів і переконайся, що батьківський лічильник від цього не постраждав.
+- `taxi_pricing(district)` — ціни з `FEES`;
+- `courier_pricing(district)` — 40 грн, лише Поділ, інакше `ValueError`;
+- `night(pricing)` — **фабрика** з уроку 19: повертає нову функцію, що додає 30 % до ціни `pricing`.
 
-### Знайди помилку
-
-```python
-# 1
-DISCOUNT = 10
-def set_discount(value):
-    global DISCOUNT
-    DISCOUNT = value
-
-# 2
-class Order:
-    def __init__(self):
-        self._history = []
-
-    @property
-    def history(self):
-        return self._history
-
-# 3
-order._Order__status = "delivered"
+```text
+Delivery(4, "Печерськ", night(taxi_pricing), "Таксі").fare()  →  117
+Delivery(2, "Поділ", night(courier_pricing), "Кур'єр").fare()  →  52
 ```
 
-??? success "Відповіді"
+**Правила:**
 
-    1. `DISCOUNT` виглядає як константа, але її змінює будь-хто через `set_discount`. Знижка для всіх замовлень залежить від того, хто останнім викликав функцію. Знижка — стан замовлення або параметр виклику, не глобальна змінна.
-    2. Властивість повертає **сам** список: `order.history.append("delivered")` оминає автомат статусів. Треба повертати копію — `tuple(self._history)`.
-    3. Name mangling — не замок: так «зламати» стан можна, але це свідоме порушення, яке видно на рев'ю. Інкапсуляція в Python захищає від **помилок**, а не від зловмисників.
+- `Delivery.fare()` лише викликає `self.pricing(self.district)`;
+- жодного `if` за типом доставки і жодного підкласу;
+- порівняй: скільки класів знадобилося б в ієрархії для «таксі / кур'єр × день / ніч × з промокодом / без»? А скільки функцій у композиції?
 
 ## Підсумок
 
 | Поняття | Що запам'ятати |
 |---|---|
-| Інваріант | правило, що завжди правда; `__init__` захищає лише народження об'єкта |
-| `_name` | «внутрішнє, не чіпай» — домовленість |
-| `__name` | name mangling `_Клас__name`; захист від збігу імен у нащадках |
-| Методи-двері | стан змінюють методи з перевірками; «Tell, don't ask» |
-| Скінченний автомат | словник дозволених переходів + один метод `_move` |
-| `@property` | читання як атрибута; без сеттера — лише читання; сеттер перевіряє запис |
-| Область видимості | локальна → атрибут об'єкта → модуль (лише константи); `global` — майже ніколи |
-| Модель чи сервіс | інваріант одного об'єкта — в моделі; правило між об'єктами — в сервісі |
+| Наслідування | `class Taxi(Delivery)` — нащадок отримує атрибути й методи батька, може їх перевизначити |
+| MRO | порядок пошуку методу: `Клас.mro()`; `self.fare()` завжди шукається з класу екземпляра |
+| `super()` | наступний клас за MRO; розширити батьківський метод, а не переписати |
+| Поліморфізм | один виклик `d.fare()` — різна поведінка; нові класи без змін у коді, що їх використовує |
+| Качина типізація | важить, що об'єкт уміє, а не від кого походить |
+| Міксин | маленький клас з поведінкою для множинного наслідування; кожен викликає `super()` |
+| LSP | нащадок працює всюди, де батько: той самий тип результату й ті самі винятки |
+| Is-a / has-a | «є» — наслідування; «має», змінні правила — композиція |
 
 ### Самоперевірка
 
-1. Чому перевірки в `__init__` недостатньо, щоб сума чека завжди була додатною?
-2. Чим `_bill` відрізняється від `__bill`? Чи можна прочитати `__bill` ззовні?
-3. Навіщо `TrackedDelivery` потрібні два підкреслення?
-4. Навіщо автомату статусів словник `TRANSITIONS` і один метод `_move`?
-5. Чому `history` повертає `tuple(self._history)`, а не сам список?
-6. Чому два відділення з глобальним лічильником отримали номери 3 і 4?
-7. Де має жити правило «одна доставка на замовлення» і чому не в `Order`?
+1. У `Pickup` немає `describe`. Звідки він береться і чому всередині нього `self.fare()` повертає 0?
+2. Що станеться, якщо в `TaxiDelivery.__init__` забути `super().__init__(order_id, district)`?
+3. Чому цикл зі звітом не містить жодного `if isinstance(...)`? Що це дає?
+4. `PartnerCourier` не наслідує `Delivery`. Чому звіт з ним працює?
+5. Чому в `NightMixin.fare()` вираз `super().fare()` веде до `TaxiDelivery`, а не до `object`?
+6. Чим поганий `FriendlyPickup`, хоча він «просто повертає текст»?
+7. Три способи доставки × день/ніч × з промокодом / без: скільки класів в ієрархії і скільки функцій у композиції?
 
 ??? success "Відповіді"
 
-    1. `__init__` виконується один раз. Далі відкритий атрибут може змінити будь-який код; захищає лише доступ через методи чи сеттер.
-    2. `_bill` — домовленість, читається як завгодно. `__bill` Python перейменовує в `_Order__bill`; ззовні — лише за цим повним іменем.
-    3. Щоб поле нащадка не затерло однойменне поле батька: `_Delivery__status` і `_TrackedDelivery__status` — різні атрибути.
-    4. Правила — дані в одному місці, перевірка — в одному методі. Новий перехід — рядок у словнику, і жоден метод не може змінити статус в обхід перевірки.
-    5. Список можна змінити ззовні й дописати в історію будь-що. Кортеж — незмінна копія.
-    6. Лічильник у `global` один на весь модуль: обидва відділення рахують у ту саму змінну.
-    7. У сервісі: правило стосується зв'язку між замовленнями й доставками, а замовлення про чужі доставки не знає.
+    1. `describe` знайдено в `Delivery` за MRO. `self` — об'єкт `Pickup`, тому `self.fare()` шукається знову з `Pickup` і знаходить `Pickup.fare`.
+    2. В об'єкті не буде `order_id` і `district`; перший же `describe()` впаде з `AttributeError`.
+    3. Кожен клас сам відповідає на `fare()`, `eta()`, `describe()`. Новий тип доставки не вимагає змін у звіті.
+    4. Качина типізація: звіт лише викликає `fare()` і `describe()`, а вони в об'єкта є.
+    5. `super()` бере наступний клас у MRO **екземпляра** `NightTaxi`: після `NightMixin` іде `TaxiDelivery`.
+    6. Порушує обіцянку батька «`fare()` повертає число» (LSP): будь-який код, що рахує суму, падає на ньому з `TypeError`.
+    7. В ієрархії — 3 × 2 × 2 = 12 класів, у композиції — 3 правила ціни + 2 обгортки (`night`, `promo`) = 5 функцій, які комбінуються.
 
 ### Що далі
 
-- Ноутбук заняття: [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_21_encapsulation_scope/note_lesson_21_encapsulation_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_21_encapsulation_scope/note_lesson_21_encapsulation.ipynb){ .solutions-link } — сервіс доставки: прогнози, вправи з перевірками, автомат статусів.
-- Практикум на реальних даних: [`lab_lesson_21_cars_oop.ipynb`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_21_encapsulation_scope/lab_lesson_21_cars_oop.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_21_encapsulation_scope/lab_lesson_21_cars_oop.ipynb) — «Автомобілі як об'єкти»: інкапсуляція на даних про авто, а заодно поліморфізм (урок 20) і dunder-методи (урок 23).
-- Наступне заняття — урок 22, практикум П4: рекурсія, «розділяй і володарюй», перебір з поверненням.
-- Урок 23 — `@property`, декоратори класів і dunder-методи докладно.
+- Ноутбук заняття: [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_21_inheritance_polymorphism/note_lesson_21_inheritance_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_21_inheritance_polymorphism/note_lesson_21_inheritance.ipynb){ .solutions-link } — доставки різних типів: прогнози, вправи з перевірками, пастки міксинів і сигнатур.
+- Практикум на реальних даних: [`lab_lesson_21_titanic_inheritance.ipynb`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_21_inheritance_polymorphism/lab_lesson_21_titanic_inheritance.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_21_inheritance_polymorphism/lab_lesson_21_titanic_inheritance.ipynb) — «Жінки та діти — першими»: ієрархія пасажирів «Титаніка», MRO як маршрут, композиція проти наслідування.
+- Наступне заняття — урок 22 «Інкапсуляція, область видимості»: як не дати коду ззовні записати в доставку від'ємну ціну.
 
 ## Документація і джерела
 
-- Туторіал Python: [Private Variables](https://docs.python.org/3/tutorial/classes.html#private-variables), [Python Scopes and Namespaces](https://docs.python.org/3/tutorial/classes.html#python-scopes-and-namespaces)
-- [`global`](https://docs.python.org/3/reference/simple_stmts.html#the-global-statement), [`nonlocal`](https://docs.python.org/3/reference/simple_stmts.html#the-nonlocal-statement), [`property`](https://docs.python.org/3/library/functions.html#property)
-- PEP 8: [Designing for Inheritance](https://peps.python.org/pep-0008/#designing-for-inheritance) — коли `_`, коли `__`
-- [Mermaid: State diagrams](https://mermaid.js.org/syntax/stateDiagram.html)
-- Для охочих: Martin Fowler, [TellDontAsk](https://martinfowler.com/bliki/TellDontAsk.html).
+- Туторіал Python: [Inheritance](https://docs.python.org/3/tutorial/classes.html#inheritance), [Multiple Inheritance](https://docs.python.org/3/tutorial/classes.html#multiple-inheritance)
+- [`super()`](https://docs.python.org/3/library/functions.html#super); [The Python 2.3 Method Resolution Order](https://docs.python.org/3/howto/mro.html) — як будується MRO
+- Глосарій: [duck-typing](https://docs.python.org/3/glossary.html#term-duck-typing)
+- Raymond Hettinger, [Python's super() considered super!](https://rhettinger.wordpress.com/2011/05/26/super-considered-super/) — кооперативне множинне наслідування
+- Для охочих: MIT 6.0001, [лекція 9 «Python Classes and Inheritance»](https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/resources/lecture-9-python-classes-and-inheritance/).

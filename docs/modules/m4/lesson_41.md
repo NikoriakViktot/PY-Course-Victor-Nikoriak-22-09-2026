@@ -1,241 +1,342 @@
-# Урок 41. Тестування API (pytest + httpx)
+# Урок 41. Автентифікація та security basics (JWT, hashing, OWASP)
 
-Після уроку 39 в агрегатора 41 зелений тест. Здається, все перевірено. Але подивимось, що ці тести **не** роблять:
+Django-гілка курсу веде той самий застосунок нотаток з уроку 34: сторінки з формами (34), JSON API на DRF (35). Вхід на сайт і правило «кожен бачить лише свої нотатки» вже є — `login_required`, `user=request.user`, чужа нотатка → `404`. Сьогодні **рефакторинг 4** — безпека:
 
-- код, який ходить у мережу (`scraper.fetch_one`), не виконується жодного разу: API-тести підміняють скрапер заглушкою;
-- справжній `get_db` теж не виконується: його підміняє тестова версія з `conftest.py`;
-- парсер і модель перевірено окремо, кожен на своїх даних, — а разом їх не запускав ніхто;
-- звіт покриття показує 88%, і навіть ця цифра неточна.
+- **спільний доступ**: нотатка належить групі («Сім'я», «Команда») — і тоді вже не можна просто писати `user=request.user`;
+- **паролі**: як Django їх зберігає, зміна й скидання пароля листом;
+- **JWT** для API — вхід для програм, яким не підходить cookie браузера;
+- **налаштування безпеки** і `check --deploy`; карта ризиків OWASP Top 10 на нашому коді.
 
-Сьогодні `news_hub` не змінюється ззовні — змінюються його **тести**: шість рефакторингів папки `tests/`. Нові тести знаходять у коді уроків 36–39 **чотири помилки**, які старі тести пропускали, — кожну розберемо нижче.
+Стартовий код — той самий `crispy_notes_project`, до якого додано групи, скидання пароля й блок налаштувань безпеки. Теорія — [частина VII Django-книги](https://nikoriakviktot.github.io/notes_chat_app/07_auth_and_security/): тут лише зміни в коді й те, що знайшли, коли зібрали все разом.
 
-| Урок | Крок агрегатора |
-|---|---|
-| 36 | парсер з типами; `NewsItem` на Pydantic |
-| 37 | FastAPI: `GET /api/news`, `POST /api/scrape`, `/docs`, Postman |
-| 38 | SQLAlchemy: новини в базі, повний CRUD, Alembic |
-| 39 | middleware, кеш і rate limit на Redis, фоновий збір |
-| **41** | **тести: unit / integration, HTML-фікстури, мок і фейк мережі, httpx, покриття** |
-| 43 | Gemini: підсумок, категорія, тональність |
-| 47 | Telegram-бот |
-| 48–50 | Docker, Compose, CI/CD |
+| Урок | Django-гілка: застосунок нотаток | Проєкт |
+|---|---|---|
+| 33 | MVT, ORM, admin | `hello_project` |
+| 34 | форми, Bootstrap, crispy | `crispy_notes_project` |
+| 35 | REST API на DRF | + `api.py` |
+| **40** | **групи, паролі, JWT, налаштування безпеки** | **+ групи, `/api/token/`** |
+| 44 | архітектура: services і selectors | — |
+| 45 | чат на WebSocket | — |
 
-Проєкт: [`news_hub`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_4/lessons/lesson_41_api_testing/news_hub).
+Проєкт: [`crispy_notes_project`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_4/lessons/lesson_41_auth_security/crispy_notes_project).
 
-**Що потрібно з попередніх уроків:** pytest, fixtures, `parametrize`, mock і правило «patch where used», покриття, піраміда тестів (урок 25); `asyncio.gather` (27); `TestClient` і `dependency_overrides` (37); `get_db` і COMMIT (38); `fakeredis` і rate limit (39).
+**Що потрібно з попередніх уроків:** застосунок нотаток і його `services`/`selectors` (33–35), DRF-серіалізатори й `ViewSet` (35), HTTP-заголовки й статус-коди (31–32), хеш-функції (урок 17).
 
 **Після уроку ти зможеш:**
 
-- розкласти тести на unit та integration і запускати їх окремо;
-- тестувати парсер на збережених сторінках, а не на рядках у коді тесту;
-- замокати мережу в правильному місці — і пояснити, чого мок не побачить;
-- підняти фейковий HTTP-сервер для тесту та тестувати API асинхронно через `httpx.AsyncClient`;
-- читати звіт покриття гілок і перетворювати червоні рядки на тести.
+- відрізнити автентифікацію («хто ти») від авторизації («що тобі можна») і перевірити обидві на кожному вході в застосунок;
+- дати доступ до об'єкта групі користувачів і розділити права «читати» і «змінювати»;
+- пояснити, як Django зберігає пароль і чому той самий пароль дає різні хеші;
+- видати й перевірити JWT, пояснити, з чого складається токен і чому його не можна «підправити»;
+- прочитати `manage.py check --deploy` і зв'язати знахідки з OWASP Top 10.
 
-**Ноутбук заняття:** [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_41_api_testing/note_lesson_41_testing_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_41_api_testing/note_lesson_41_testing.ipynb){ .solutions-link } — pytest запускається з ноутбука, без серверів.
+**Ноутбук заняття:** [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_41_auth_security/note_lesson_41_auth_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_41_auth_security/note_lesson_41_auth.ipynb){ .solutions-link } — хеші паролів, JWT по частинах, групи й права в API.
 
 ## Пригадай
 
-1. Що дає `@pytest.mark.parametrize` і чим fixture відрізняється від звичайної функції (урок 25)?
-2. Модуль `a` робить `from b import f`. Що треба патчити, щоб підмінити `f` для коду з `a`?
-3. Що робить `app.dependency_overrides[get_db] = test_db` (урок 37)?
+1. Що поверне API уроку 36 на запит чужої нотатки і чому не `403`?
+2. Хеш-функція з уроку 17: чи можна з хешу отримати вхідні дані?
+3. Де браузер зберігає «я увійшов» між запитами до Django?
 
 ??? success "Відповіді"
 
-    1. `parametrize` запускає один тест на кожному рядку таблиці випадків. Fixture pytest викликає сам — за іменем параметра тесту — і дає кожному тесту свіжий результат; код після `yield` прибирає.
-    2. `a.f`. Після `from b import f` у модулі `a` є власне ім'я `f`; код з `a` шукає саме його. Патч `b.f` змінить лише ім'я в `b`.
-    3. Щоразу, коли ендпоінт просить `get_db`, FastAPI викликає `test_db`. Сам `get_db` при цьому не виконується — це стане важливим сьогодні.
+    1. `404`: для чужого користувача нотатки «немає». `403` підтвердив би, що нотатка з таким id існує, — це вже витік.
+    2. Ні: хеш — односторонній. Можна лише порахувати хеш іншого рядка й порівняти.
+    3. У cookie `sessionid`: у ній лише випадковий ключ, а дані сесії (хто увійшов) — на сервері, в таблиці `django_session`. Детально — [Сесії в Django-книзі](https://nikoriakviktot.github.io/notes_chat_app/07_auth_and_security/sessions_flow_full/).
 
 ## Старт: з якого коду починаємо
 
-| Що є | Що там | Куди в `news_hub` |
+Стартовий `crispy_notes_project` — той самий проєкт, що в уроці 35, плюс:
+
+| Файл | Що змінилось у стартовому коді |
+|---|---|
+| `models.py`, міграція `0003` | `Note.group`, `ShoppingList.group` → `ForeignKey(Group, SET_NULL, null=True)` |
+| `selectors.py` | нотатки й списки: `Q(user=user) \| Q(group__in=user.groups.all())`; вибір груп користувача |
+| `views.py` | редагувати й видаляти — лише автор (повідомлення й redirect для учасника групи); сторінки груп |
+| `forms.py` | поле `group` — лише **свої** групи (`user.groups.all()`); форми створення групи й додавання учасника |
+| `services.py` | `create_group`, `add_user_to_group`, `remove_user_from_group`; `group` у create/update |
+| `templates/registration/` | 7 шаблонів зміни й скидання пароля |
+| `settings.py` | `EMAIL_BACKEND` (console), `SESSION_COOKIE_HTTPONLY`, `SAMESITE`, `X_FRAME_OPTIONS`, `SECURE_CONTENT_TYPE_NOSNIFF` |
+
+Ці зміни перенесені на проєкт уроку 36 (з API) без змін логіки; конфлікт був лише в `create_note` — там наш параметр `is_pinned` з уроку 35.
+
+## Рефакторинг 4a. Нотатки групи { #groups }
+
+Коли нотатку бачить не лише автор, правило «`user=request.user`» розпадається на два:
+
+| Хто | Бачить | Змінює й видаляє |
 |---|---|---|
-| `TESTING_FOUNDATIONS.md` | піраміда тестів: багато швидких unit, менше integration | `tests/unit/` і `tests/integration/`, маркери |
-| `MOCKING_AND_PATCHING.md` | «patch where used»; «мокай зовнішні межі, а не всю систему» | `tests/unit/test_scraper.py` — мок мережі |
-| `TEST_DATA_AND_FIXTURES.md` | фабрики: у тесті видно лише важливі поля | `tests/factories.py` → `make_raw(...)` |
-| ноутбук web scraping | справжній фрагмент стрічки rbc.ua (клітинка 44), демо-розмітка (клітинка 12) | `tests/fixtures/*.html` |
-| урок 39 курсу | 41 тест у трьох файлах, `TestClient`, fakeredis | основа; нічого не видалено |
+| автор | так | так |
+| учасник групи нотатки | так | ні |
+| інший користувач | ні — `404` | ні — `404` |
 
-Теорію тестування з цих файлів тепер містить частина VIII [Django-книги](https://nikoriakviktot.github.io/notes_chat_app/08_testing_and_quality/). Тут — лише те, що з'являється в проєкті.
-
-## Рефакторинг 1. Шари тестів: unit і integration { #refactor-1 }
-
-Було — три файли поруч: `test_models.py`, `test_api.py`, `test_redis.py`. Щоб перевірити одну функцію парсера, pytest однаково збирав тести, які піднімають застосунок, базу й Redis.
-
-```text title="tests/: було (39) → стало (41)"
-tests/                              tests/
-├── conftest.py                     ├── conftest.py        ← фікстура html(), маркер за папкою
-├── test_models.py                  ├── factories.py       ← make_raw(**зміни)
-├── test_api.py                     ├── fixtures/          ← збережені сторінки *.html
-└── test_redis.py                   ├── unit/              ← без бази, Redis і мережі
-                                    │   ├── test_parser.py, test_models.py
-                                    │   ├── test_pipeline.py    ← парсер → модель
-                                    │   └── test_scraper.py     ← мережа під моком
-                                    └── integration/       ← застосунок цілком
-                                        ├── conftest.py    ← client, aclient, тестова база
-                                        ├── test_api.py, test_crud.py, test_redis.py
-                                        ├── test_async_api.py   ← httpx.AsyncClient
-                                        ├── test_db.py          ← справжній get_db
-                                        └── test_scraper_server.py  ← локальний HTTP-сервер
+```diff title="hello_app/selectors.py (стартовий код)"
+ def get_user_notes(user, archived=False, notebook=None, search=None):
++    user_groups = user.groups.all()
+     qs = Note.objects.filter(
+-        user=user, is_archived=archived
+-    ).select_related('notebook').prefetch_related('tags')
++        Q(user=user) | Q(group__in=user_groups), is_archived=archived
++    ).select_related('notebook', 'group').prefetch_related('tags')
 ```
 
-Маркер ставить сама папка — не треба пам'ятати про `@pytest.mark.unit` у кожному файлі:
-
-```python title="tests/conftest.py (фрагмент)"
-def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
-    """Маркер з назви папки: не треба пам'ятати про @pytest.mark.unit у кожному файлі."""
-    for item in items:
-        for layer in ("unit", "integration"):
-            if f"{Path('tests') / layer}" in str(item.path):
-                item.add_marker(getattr(pytest.mark, layer))
+```diff title="hello_app/views.py, note_edit і note_delete (стартовий код)"
+-    note = get_object_or_404(Note, pk=pk, user=request.user)
++    user_groups = request.user.groups.all()
++    note = get_object_or_404(
++        Note.objects.filter(Q(user=request.user) | Q(group__in=user_groups)),
++        pk=pk,
++    )
++    if note.user != request.user:
++        messages.error(request, 'Ти не можеш редагувати нотатку іншого користувача.')
++        return redirect('hello_app:note_detail', pk=pk)
 ```
 
-`pytest_collection_modifyitems` — **хук** pytest: функція з цим ім'ям у `conftest.py` отримує всі зібрані тести до запуску. Маркери оголошено в `pytest.ini` — інакше pytest попередить про невідомий маркер:
-
-```ini title="pytest.ini"
-[pytest]
-testpaths = tests
-pythonpath = .
-markers =
-    unit: швидкі тести однієї функції чи класу — без бази, Redis і мережі
-    integration: API разом з базою й Redis
-asyncio_default_fixture_loop_scope = function
-```
-
-Приклад виводу (час залежить від машини):
+Перевіримо в `manage.py shell` (у папці `crispy_notes_project`): Олена ділиться нотаткою з сім'єю, Тарас — у сім'ї, Іван — ні.
 
 ```text
-$ pytest -q -p no:cacheprovider -m unit
-.......................................                                                      [100%]
-39 passed, 47 deselected in 0.85s
+$ python manage.py migrate -v 0
 ```
-
-Unit-тести ганяють після кожної зміни — вони йдуть близько секунди. Повний набір — перед комітом і в CI (урок 50).
-
-Поглиблено: [піраміда тестів](https://nikoriakviktot.github.io/notes_chat_app/08_testing_and_quality/testing_foundations_full/), [маркери й конфігурація pytest](https://nikoriakviktot.github.io/notes_chat_app/08_testing_and_quality/pytest_basics_full/).
-
-## Рефакторинг 2. Збережені сторінки замість рядків у тесті { #refactor-2 }
-
-Тести парсера в уроці 36 містили HTML прямо в коді — рядки, які автор тесту придумав сам. Тепер розмітка лежить у файлах `tests/fixtures/`:
-
-- `rbc_newsline_item.html` — **справжній** фрагмент стрічки rbc.ua з ноутбука web scraping: `div.item > a > span.time`, контейнерів `newsline__item` немає;
-- `demo_newsline.html` — демо-розмітка з того ж ноутбука: контейнери `newsline__item`, час в атрибуті `<time datetime="…">`.
-
-Файл видно в браузері; коли сайт змінить розмітку, його оновлюють збереженою сторінкою — і тести показують, що зламалось. Фікстура віддає вміст за назвою:
-
-```python title="tests/conftest.py і tests/unit/test_parser.py (фрагменти)"
-@pytest.fixture
-def html() -> Callable[[str], str]:
-    """html("demo_newsline") → вміст tests/fixtures/demo_newsline.html."""
-    return lambda name: (FIXTURES / f"{name}.html").read_text(encoding="utf-8")
-
-
-def test_real_rbc_markup_links_strategy(html: Callable[[str], str]) -> None:
-    """Справжній фрагмент стрічки: div.item > a > span.time — контейнерів newsline__item немає."""
-    assert parse_rbc_news(html("rbc_newsline_item")) == [{
-        "title": "США хочуть підкупити кубинців безплатним інтернетом, - AP",
-        "url": "https://www.rbc.ua/rus/news/ssha-hochut-pidkupiti-kubintsiv-bezpaltnim-1778194920.html",
-        "category": "", "description": "", "datetime": "02:06"}]
-```
-
-Фабрика з `TEST_DATA_AND_FIXTURES.md` прибирає однакові словники з тестів моделі — у тесті видно лише поле, яке він перевіряє:
-
-```python title="tests/factories.py"
-def make_raw(**overrides: str) -> RawNews:
-    """make_raw(title="Коротко") — сира новина, як її дає парсер, з одним зміненим полем."""
-    item: RawNews = {"title": "Уряд затвердив новий бюджет", "url": "https://www.rbc.ua/ukr/news/budget-1.html",
-                     "category": "", "description": "", "datetime": "14:19"}
-    return {**item, **overrides}  # type: ignore[typeddict-item]
-```
-
-Найважливіший новий тест — **конвеєр**: те, що дає парсер на збереженій сторінці, модель має прийняти.
-
-```python title="tests/unit/test_pipeline.py (фрагмент)"
-@pytest.mark.parametrize(("page", "expected"), [
-    ("rbc_newsline_item", [("США хочуть підкупити кубинців безплатним інтернетом, - AP", "ru", "02:06:00")]),
-    ("demo_newsline", [("Уряд затвердив новий бюджет на 2024 рік", "uk", "10:30:00"),
-                       ("Збірна України перемогла у фіналі", "uk", "09:15:00")]),
-])
-def test_every_parsed_item_passes_the_model(html, page, expected) -> None:
-    valid, rejected = validate_news(parse_rbc_news(html(page)))
-    assert rejected == []
-```
-
-На коді уроку 39 цей тест упав: обидві новини з `demo_newsline` модель **відхилила**. Тести парсера й моделі при цьому були зелені. Чому так сталося — розбір у «[Знайди помилку](#find-bug)»; правильне рішення — `field_validator` у `models.py`.
-
-## Рефакторинг 3. Мок мережі: patch where used { #refactor-3 }
-
-`fetch_one` робить HTTP-запит. У тесті інтернету може не бути, а rbc.ua може відповісти 403 — тест залежав би від погоди. **Мок** замінює `aiohttp.ClientSession` об'єктом, який відповідає так, як скаже тест: 200 з HTML, 403, тайм-аут, обрив з'єднання.
-
-```python title="tests/unit/test_scraper.py (фрагмент)"
-def fake_session(html: str = "", error: BaseException | None = None) -> mock.MagicMock:
-    """Замість aiohttp.ClientSession: session.get(...) — async-контекст, що віддає відповідь з html."""
-    response = mock.MagicMock()
-    response.text = mock.AsyncMock(return_value=html)
-    session = mock.MagicMock()
-    if isinstance(error, aiohttp.ClientResponseError):
-        response.raise_for_status.side_effect = error       # статус 4xx/5xx
-    elif error is not None:
-        session.get.side_effect = error                     # мережа впала до відповіді
-    session.get.return_value.__aenter__.return_value = response
-    return session
-
-
-@pytest.mark.asyncio
-@pytest.mark.parametrize(("error", "expected"), [
-    (http_error(403), "ClientResponseError: 403"),
-    (asyncio.TimeoutError(), "TimeoutError"),
-    (aiohttp.ClientConnectionError("Connection reset by peer"), "ClientConnectionError: Connection reset"),
-], ids=["403", "timeout", "connection-reset"])
-async def test_network_errors_become_page_error(error, expected) -> None:
-    """Сторінка з помилкою — не виняток на весь збір, а PageResult з error і нулем новин."""
-    page, items = await scraper.fetch_one(fake_session(error=error), URL, t0=0.0)
-    assert (page.count, items) == (0, [])
-    assert page.error is not None and page.error.startswith(expected)
-```
-
-`MagicMock` підтримує `async with`: `__aenter__` у нього — `AsyncMock`. `@pytest.mark.asyncio` (пакет `pytest-asyncio`) запускає тест-корутину в циклі подій. Ті самі три помилки — поза pytest:
 
 ```python
-import asyncio
+from django.contrib.auth.models import User
+from django.test.utils import setup_test_environment
+from rest_framework.test import APIClient
 
-import aiohttp
+from hello_app import services
+from hello_app.models import Note
 
-from news_hub import scraper
-from tests.unit.test_scraper import URL, fake_session, http_error
+setup_test_environment()
+olena = User.objects.create_user("olena", email="olena@example.com", password="Sup3r-secret!")
+taras = User.objects.create_user("taras", password="Sup3r-secret!")
+ivan = User.objects.create_user("ivan", password="Sup3r-secret!")
+family = services.create_group(name="Сім'я", creator=olena)
+family.user_set.add(taras)
+wifi = services.create_note(user=olena, title="Пароль від Wi-Fi", group=family)
+services.create_note(user=olena, title="Подарунок Тарасу")          # особиста
 
-for error in (http_error(403), asyncio.TimeoutError(), aiohttp.ClientConnectionError("Connection reset by peer")):
-    page, items = asyncio.run(scraper.fetch_one(fake_session(error=error), URL, t0=0.0))
-    print(f"{page.count} новин, error = {page.error!r}")
+from django.test import Client
+for user in (olena, taras, ivan):
+    browser = Client()
+    browser.force_login(user)
+    page = browser.get("/notes/").content.decode()
+    visible = [title for title in ("Пароль від Wi-Fi", "Подарунок Тарасу") if title in page]
+    print(f"{user.username:6} бачить {visible}; сторінка нотатки → {browser.get(f'/notes/{wifi.pk}/').status_code}")
+
+browser = Client()
+browser.force_login(taras)
+browser.post(f"/notes/{wifi.pk}/delete/")
+print("Тарас видаляє на сайті → нотатка на місці:", Note.objects.filter(pk=wifi.pk).exists())
 ```
 
 ```text
-0 новин, error = "ClientResponseError: 403, message='Forbidden', url='https://www.rbc.ua/ukr/news/'"
-0 новин, error = 'TimeoutError: '
-0 новин, error = 'ClientConnectionError: Connection reset by peer'
+olena  бачить ['Пароль від Wi-Fi', 'Подарунок Тарасу']; сторінка нотатки → 200
+taras  бачить ['Пароль від Wi-Fi']; сторінка нотатки → 200
+Not Found: /notes/1/
+ivan   бачить []; сторінка нотатки → 404
+Тарас видаляє на сайті → нотатка на місці: True
 ```
 
-Тепер — правило з уроку 25 на справжньому проєкті. `scraper.py` робить `from .parser import parse_rbc_news`: у модулі `scraper` з'являється **власне** ім'я, що вказує на ту саму функцію. `mock.patch` міняє ім'я лише в одному модулі:
+### Права в API: групи відкривають ще один вхід { #api-bypass }
+
+Сторінки перевіряють `note.user != request.user`. А API уроку 36 бере нотатку тим самим селектором `get_note_detail`, який тепер **віддає й нотатки групи**. Якщо в API не додати перевірку автора, та сама спроба, що вище, через API дає:
+
+```text
+Тарас через API: PATCH → 200, заголовок став «Зламано учасником групи»
+Тарас через API: DELETE → 204, нотатки більше немає
+```
+
+Класична **Broken Access Control** (OWASP A01, перше місце в рейтингу): доступ розширили, а один із входів у застосунок забули оновити. HTML і API — два входи до тих самих даних, і перевіряти права треба на **кожному**.
+
+```python title="hello_app/api.py (фрагмент)"
+    def _get_note(self, request, pk):
+        """Читати: свою нотатку або нотатку своєї групи (урок 41). Чужа — 404, ніби її немає."""
+        try:
+            return selectors.get_note_detail(request.user, pk)
+        except Note.DoesNotExist:
+            raise NotFound("Нотатку не знайдено.")
+
+    def _get_own_note(self, request, pk):
+        """Змінювати й видаляти: лише автор. Нотатка групи видима учаснику, але не його — 403."""
+        note = self._get_note(request, pk)
+        if note.user_id != request.user.id:
+            raise PermissionDenied("Змінювати й видаляти нотатку може лише її автор.")
+        return note
+```
+
+`partial_update`, `destroy` і `pin` тепер беруть `_get_own_note`:
 
 ```python
-from unittest import mock
-
-from news_hub import parser, scraper
-
-print("одна функція, два імена:", scraper.parse_rbc_news is parser.parse_rbc_news)
-with mock.patch("news_hub.parser.parse_rbc_news") as fake:
-    print("patch news_hub.parser  → scraper бачить мок:", scraper.parse_rbc_news is fake)
-with mock.patch("news_hub.scraper.parse_rbc_news") as fake:
-    print("patch news_hub.scraper → scraper бачить мок:", scraper.parse_rbc_news is fake)
-print("після with — знову справжня:", scraper.parse_rbc_news is parser.parse_rbc_news)
+api = APIClient()
+api.force_authenticate(taras)
+print("Тарас читає       →", api.get(f"/api/notes/{wifi.pk}/").status_code)
+print("Тарас змінює      →", api.patch(f"/api/notes/{wifi.pk}/", {"title": "Зламано учасником групи"}, format="json").status_code)
+print("Тарас видаляє     →", api.delete(f"/api/notes/{wifi.pk}/").status_code, api.delete(f"/api/notes/{wifi.pk}/").data["detail"])
+api.force_authenticate(ivan)
+print("Іван читає        →", api.get(f"/api/notes/{wifi.pk}/").status_code)
+api.force_authenticate(olena)
+print("Олена змінює      →", api.patch(f"/api/notes/{wifi.pk}/", {"title": "Пароль від Wi-Fi (новий)"}, format="json").status_code)
 ```
 
 ```text
-одна функція, два імена: True
-patch news_hub.parser  → scraper бачить мок: False
-patch news_hub.scraper → scraper бачить мок: True
-після with — знову справжня: True
+Тарас читає       → 200
+Forbidden: /api/notes/1/
+Тарас змінює      → 403
+Forbidden: /api/notes/1/
+Forbidden: /api/notes/1/
+Тарас видаляє     → 403 Змінювати й видаляти нотатку може лише її автор.
+Not Found: /api/notes/1/
+Іван читає        → 404
+Олена змінює      → 200
 ```
+
+`403` для учасника групи чесний: нотатку він і так бачить, приховувати нічого. Для Івана — `404`, як і в уроці 36. Тест `test_api_member_reads_but_cannot_write` закріплює правило: без `_get_own_note` він падає.
+
+Поглиблено: [Права доступу](https://nikoriakviktot.github.io/notes_chat_app/07_auth_and_security/permissions_full/), [Автентифікація, сесії й права: IDOR](https://nikoriakviktot.github.io/notes_chat_app/07_auth_and_security/auth_sessions_permissions/).
+
+## Паролі { #passwords }
+
+Django **ніколи не зберігає пароль**. У полі `password` — рядок `алгоритм$ітерації$сіль$хеш`:
+
+```python
+from django.contrib.auth.hashers import check_password, make_password
+import time
+
+print(olena.password)
+print(taras.password)
+start = time.perf_counter()
+make_password("Sup3r-secret!")
+print(f"один хеш: {time.perf_counter() - start:.2f} с")
+print(check_password("Sup3r-secret!", olena.password), check_password("sup3r-secret!", olena.password))
+```
+
+Приклад виводу (сіль і хеш — випадкові, час залежить від машини):
+
+```text
+pbkdf2_sha256$1000000$gr731R4wX4noyVbhCAb0FV$mFZOgLHmvZIKdBWR/2EiLKZJQglRYEYI14GH5U5w+XU=
+pbkdf2_sha256$1000000$p5KcrASXd5UWpKxRZmsqbM$NLrWG1boJBX2fr7diWhStJRxl38NP2qG+zl5Mxez92Y=
+один хеш: 0.79 с
+True False
+```
+
+- **Той самий пароль — різні рядки.** Сіль — випадкова для кожного користувача, тож однакові паролі не видно з бази, а заздалегідь пораховані таблиці хешів (rainbow tables) марні.
+- **Навмисно повільно.** PBKDF2 повторює хеш-функцію мільйон разів (у Django 5.2 — `1000000`, число записане в рядку, тож його можна збільшувати з версіями). Для входу одна перевірка — непомітно, для перебору мільйонів паролів після витоку бази — роки.
+- **`check_password`** рахує хеш введеного пароля з тією ж сіллю й порівнює. Зворотного шляху немає.
+
+### Зміна й скидання пароля
+
+`path("accounts/", include("django.contrib.auth.urls"))` уже дає всі сторінки; стартовий код додав 7 шаблонів у `templates/registration/` і `EMAIL_BACKEND = "…console.EmailBackend"` — лист друкується в термінал `runserver` замість справжньої пошти.
+
+```mermaid
+sequenceDiagram
+    participant U as Користувач
+    participant D as Django
+    participant M as Пошта (console)
+
+    U->>D: POST /accounts/password_reset/ email
+    D->>D: є користувач з таким email?
+    D->>M: так — лист з посиланням /accounts/reset/uid/token/
+    D-->>U: 302 → «лист надіслано» (однаково, є email чи ні)
+    U->>D: GET посилання з листа
+    D->>D: токен: підпис SECRET_KEY + хеш пароля + час
+    D-->>U: форма нового пароля
+    U->>D: POST новий пароль
+    D->>D: set_password → новий хеш → старий токен більше не діє
+```
+
+```python
+from django.core import mail
+
+for email in ("olena@example.com", "nobody@example.com"):
+    response = Client().post("/accounts/password_reset/", {"email": email})
+    print(f"{email:20} → {response.status_code} {response['Location']}")
+print("листів:", len(mail.outbox), "| кому:", mail.outbox[0].to)
+link = next(line for line in mail.outbox[0].body.splitlines() if "/accounts/reset/" in line)
+print("посилання:", link.strip().rsplit("/", 3)[0] + "/…/")
+```
+
+```text
+olena@example.com    → 302 /accounts/password_reset/done/
+nobody@example.com   → 302 /accounts/password_reset/done/
+листів: 1 | кому: ['olena@example.com']
+посилання: http://testserver/accounts/reset/…/
+```
+
+Однакова відповідь для відомого й невідомого email — не випадковість: інакше форма скидання стала б способом **перевіряти, хто зареєстрований** (user enumeration, OWASP A07). Токен у посиланні одноразовий: він залежить від хешу пароля, тож після зміни пароля старе посилання не спрацює.
+
+Поглиблено: [Автентифікація](https://nikoriakviktot.github.io/notes_chat_app/07_auth_and_security/auth_basics_full/), [Основи безпеки](https://nikoriakviktot.github.io/notes_chat_app/07_auth_and_security/security_foundations_full/).
+
+## Рефакторинг 4b. JWT для API { #jwt }
+
+Сесія (cookie + CSRF) зручна браузеру на тому самому сайті. Мобільному застосунку, скрипту чи Telegram-боту (урок 48) потрібне інше: отримати **токен** і надсилати його в заголовку `Authorization: Bearer …`. У прототипі `production_bot` токени видавались вручну через PyJWT; у Django — готовий пакет `djangorestframework-simplejwt`.
+
+| | Сесія (cookie) | JWT (Bearer) |
+|---|---|---|
+| Де «я увійшов» | ключ у cookie, дані — на сервері (`django_session`) | усе в самому токені, підписаному `SECRET_KEY` |
+| Хто надсилає | браузер сам, з кожним запитом | клієнт явно, в заголовку |
+| CSRF | потрібен захист | не потрібен (браузер сам заголовок не додає) |
+| Вийти / відкликати | видалити сесію на сервері | токен діє до `exp`; тому access-токен короткий |
+| Кому | сайт | мобільний застосунок, скрипт, бот, інший сервіс |
+
+```diff title="hello_project/settings.py (урок 41)"
+ REST_FRAMEWORK = {
++    # Порядок важливий: без облікових даних DRF відповідає за ПЕРШИМ класом. JWT першим → 401 з
++    # WWW-Authenticate: Bearer; сесія першою → 403 (у неї немає заголовка WWW-Authenticate).
+     "DEFAULT_AUTHENTICATION_CLASSES": [
++        "rest_framework_simplejwt.authentication.JWTAuthentication",
+         "rest_framework.authentication.SessionAuthentication",
+-        "rest_framework.authentication.BasicAuthentication",
+     ],
+     ...
++    "DEFAULT_THROTTLE_RATES": {"login": "5/min"},
+ }
++
++SIMPLE_JWT = {
++    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
++    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
++    "ROTATE_REFRESH_TOKENS": True,
++    "AUTH_HEADER_TYPES": ("Bearer",),
++}
+```
+
+- `BasicAuthentication` прибрано: вона надсилає логін і пароль **з кожним** запитом.
+- **Access** живе 5 хвилин — викрадений токен швидко «згорає»; **refresh** (доба) обмінюють на новий access без пароля.
+- `/api/token/` — видача пари токенів, з throttle 5 спроб за хвилину (`ScopedRateThrottle`, файл `hello_app/auth_api.py`); `/api/token/refresh/` — оновлення.
+
+```python
+import base64
+import json
+
+api = APIClient()
+r = api.get("/api/notes/")
+print("без токена        →", r.status_code, r["WWW-Authenticate"])
+
+tokens = api.post("/api/token/", {"username": "olena", "password": "Sup3r-secret!"}, format="json").json()
+access = tokens["access"]
+print("токен             →", access[:40] + "…", "| частин:", len(access.split(".")))
+
+header, payload, signature = access.split(".")
+decode = lambda part: json.loads(base64.urlsafe_b64decode(part + "=" * (-len(part) % 4)))
+print("header            →", decode(header))
+claims = decode(payload)
+print("payload           →", {key: claims[key] for key in ("token_type", "user_id")}, "| живе", claims["exp"] - claims["iat"], "с")
+
+api.credentials(HTTP_AUTHORIZATION=f"Bearer {access}")
+print("з токеном         →", api.get("/api/notes/").status_code, [n["title"] for n in api.get("/api/notes/").json()])
+```
+
+```text
+Unauthorized: /api/notes/
+без токена        → 401 Bearer realm="api"
+токен             → eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ… | частин: 3
+header            → {'alg': 'HS256', 'typ': 'JWT'}
+payload           → {'token_type': 'access', 'user_id': '1'} | живе 300 с
+з токеном         → 200 ['Пароль від Wi-Fi (новий)', 'Подарунок Тарасу']
+```
+
+Payload **не зашифрований** — його прочитає будь-хто (ми щойно прочитали без жодного ключа). Тому в токен не кладуть нічого секретного. Захищає його **підпис**.
+
+### Як сервер перевіряє токен — покроково
 
 ```mermaid
 flowchart TD
@@ -245,408 +346,162 @@ flowchart TD
     classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
     classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
 
-    subgraph S1["імпорт: from .parser import parse_rbc_news"]
+    subgraph S1 ["1. розібрати заголовок"]
         direction LR
-        P1["news_hub.parser<br>parse_rbc_news"] --> F1["функція<br>parse_rbc_news"]
-        C1["news_hub.scraper<br>parse_rbc_news"] --> F1
+        a1["Authorization: Bearer xxx.yyy.zzz"] --> a2["header . payload . signature"]
     end
-    subgraph S2["patch('news_hub.parser.parse_rbc_news')"]
+    subgraph S2 ["2. перевірити підпис"]
         direction LR
-        P2["news_hub.parser<br>parse_rbc_news"] --> M2["Mock"]
-        C2["news_hub.scraper<br>parse_rbc_news"] --> F2["справжня функція"]
-        FO2["fetch_one шукає<br>у scraper"] --> C2
+        b1["HMAC-SHA256(header.payload,<br>SECRET_KEY)"] --> b2{"= signature?"}
+        b2 -- ні --> b3["401: підправлений<br>або чужий ключ"]
     end
-    subgraph S3["patch('news_hub.scraper.parse_rbc_news')"]
+    subgraph S3 ["3. перевірити час"]
         direction LR
-        P3["news_hub.parser<br>parse_rbc_news"] --> F3["справжня функція"]
-        C3["news_hub.scraper<br>parse_rbc_news"] --> M3["Mock"]
-        FO3["fetch_one шукає<br>у scraper"] --> C3
+        c1{"exp > зараз?"} -- ні --> c2["401: токен<br>прострочений"]
     end
-    S1 --> S2 --> S3
+    subgraph S4 ["4. знайти користувача"]
+        direction LR
+        d1["user_id з payload"] --> d2{"активний?"} -- так --> d3["request.user = olena"]
+    end
+    S1 --> S2 --> S3 --> S4
 
-    class P1,C1,F1,P3,F3 step
-    class P2,M2 warning
-    class C2,F2,FO2 error
-    class C3,M3,FO3 success
+    class a1,a2,b1,d1 step
+    class b2,c1,d2 decision
+    class b3,c2 error
+    class d3 success
 ```
 
-Тест `test_patch_where_used` робить те саме з `fetch_one`: після патча `news_hub.parser` мок не викликано жодного разу, і `fetch_one` розібрав сторінку справжнім парсером.
-
-Поглиблено: [Mock і patch](https://nikoriakviktot.github.io/notes_chat_app/08_testing_and_quality/mocking_and_patching_full/).
-
-## Рефакторинг 4. Фейк замість моку: локальний HTTP-сервер { #refactor-4 }
-
-Мок відповідає тим, що йому сказали. Код, що стоїть **між** запитом і рядком HTML, — з'єднання, заголовки, статус, **декодування байтів**, тайм-аут — під моком не виконується. **Фейк** — справжня, але спрощена реалізація: тут це HTTP-сервер на `127.0.0.1` з `aiohttp.test_utils`, який віддає сторінки з `tests/fixtures/`. `fetch_one` працює проти нього без жодної підміни:
-
-```python title="tests/integration/test_scraper_server.py (фрагмент)"
-@pytest_asyncio.fixture
-async def site(html: Callable[[str], str]) -> AsyncIterator[TestServer]:
-    ...
-    async def broken_bytes(request: web.Request) -> web.Response:       # сервер обіцяє UTF-8, а байт 0xff — ні
-        body = html("rbc_newsline_item").encode() + b"<p>\xff</p>"
-        return web.Response(body=body, content_type="text/html", charset="utf-8")
-
-    app = web.Application()
-    app.router.add_get("/ukr/news/", feed)
-    app.router.add_get("/slow-1/", slow)          # asyncio.sleep(0.3) — для gather проти черги
-    app.router.add_get("/forbidden/", forbidden)  # 403
-    app.router.add_get("/broken/", broken_bytes)
-    async with TestServer(app) as server:         # вільний порт на 127.0.0.1
-        yield server
-```
-
-Перший же прогін знайшов помилку, якої мок не бачив. Сторінка з одним невалідним байтом UTF-8 — і **весь** збір падає:
+Перевіримо кожну гілку: підправлений підпис, підпис чужим ключем, прострочений токен і оновлення через refresh:
 
 ```python
-import asyncio
-from pathlib import Path
-from urllib.parse import urlsplit
+from datetime import timedelta
 
-import aiohttp
-from aiohttp import web
-from aiohttp.test_utils import TestServer
+import jwt
+from rest_framework_simplejwt.tokens import AccessToken
 
-from news_hub import scraper
+tampered = f"{header}.{payload}.{signature[:-4]}AAAA"
+foreign = jwt.encode({**claims, "user_id": str(ivan.id)}, "зовсім-інший-ключ-підпису-довжиною-понад-32-байти",
+                     algorithm="HS256")
+expired = AccessToken.for_user(olena)
+expired.set_exp(lifetime=-timedelta(seconds=1))
+for name, token in (("підправлений", tampered), ("чужий ключ", foreign), ("прострочений", str(expired))):
+    api.credentials(HTTP_AUTHORIZATION=f"Bearer {token}")
+    response = api.get("/api/notes/")
+    print(f"{name:13} → {response.status_code} {response.json()['detail']}")
 
-FEED = Path("tests/fixtures/rbc_newsline_item.html").read_bytes()
-
-
-async def good(request: web.Request) -> web.Response:
-    return web.Response(body=FEED, content_type="text/html", charset="utf-8")
-
-
-async def broken(request: web.Request) -> web.Response:
-    return web.Response(body=FEED + b"<p>\xff</p>", content_type="text/html", charset="utf-8")
-
-
-async def main() -> None:
-    app = web.Application()
-    app.router.add_get("/good/", good)
-    app.router.add_get("/broken/", broken)
-    async with TestServer(app) as server:
-        async with aiohttp.ClientSession() as session, session.get(server.make_url("/broken/")) as resp:
-            try:
-                await resp.text()                                   # так було в уроках 37–39
-            except UnicodeDecodeError as error:
-                print(f"resp.text(): {type(error).__name__}; це aiohttp.ClientError? "
-                      f"{isinstance(error, aiohttp.ClientError)}")
-        outcome = await scraper.scrape_all_async([str(server.make_url(p)) for p in ("/broken/", "/good/")])
-        print("урок 41:", [(urlsplit(p.url).path, p.count, p.error) for p in outcome.pages])
-
-asyncio.run(main())
+api.credentials()
+fresh = api.post("/api/token/refresh/", {"refresh": tokens["refresh"]}, format="json").json()
+print("refresh       →", sorted(fresh), "| новий refresh:", fresh["refresh"] != tokens["refresh"])
 ```
 
 ```text
-resp.text(): UnicodeDecodeError; це aiohttp.ClientError? False
-урок 41: [('/broken/', 1, None), ('/good/', 1, None)]
+Unauthorized: /api/notes/
+підправлений  → 401 Given token not valid for any token type
+Unauthorized: /api/notes/
+чужий ключ    → 401 Given token not valid for any token type
+Unauthorized: /api/notes/
+прострочений  → 401 Given token not valid for any token type
+refresh       → ['access', 'refresh'] | новий refresh: True
 ```
 
-`fetch_one` ловить лише `aiohttp.ClientError` і `asyncio.TimeoutError`. `UnicodeDecodeError` пролітав повз, `asyncio.gather` передавав його нагору, і `POST /api/scrape` відповідав `500`: новини **решти шести** сторінок губилися через один байт. Правильно — один аргумент:
+Усі три відмови — з тим самим повідомленням: сервер не підказує, яка саме перевірка не пройшла. `ROTATE_REFRESH_TOKENS` — з кожним оновленням новий refresh-токен. Відкликати вже видані токени (кнопка «вийти на всіх пристроях») дає додаток `token_blacklist` — див. «Спробуй самостійно».
 
-```diff title="news_hub/scraper.py: fetch_one"
--            html = await resp.text()
-+            html = await resp.text(errors="replace")   # один битий байт ≠ втрачена сторінка
-```
-
-Під моком цієї помилки не видно в принципі: `response.text` там — `AsyncMock(return_value=html)`, готовий рядок, декодування немає. Без `errors="replace"` тест `test_undecodable_page_does_not_kill_scrape` падає, а всі шість мок-тестів — зелені.
-
-Ще два тести на фейковому сервері, неможливі з моком: заголовок `User-Agent` справді дійшов до сервера; `scrape_all_async` дві «повільні» сторінки бере за ~0,3 с, а `scrape_sequential` — за ~0,6 с (урок 27 — тепер як тест).
-
-### Межа фейку: fakeredis і гонка
-
-Фейк теж щось спрощує. `fakeredis` виконує команду одразу і **не віддає керування** циклу подій — тож одночасні корутини на ньому ніколи не перемежовуються. Ось лічильник «прочитати → +1 → записати» (дві команди) і `INCR` (одна), по 10 одночасних викликів:
+### Перебір паролів: throttle
 
 ```python
-import asyncio
+from django.core.cache import cache
 
-import fakeredis
-from redis.asyncio import Redis
-
-
-async def naive_hit(redis: Redis, key: str) -> None:     # прочитати → +1 → записати
-    count = int(await redis.get(key) or 0) + 1
-    await redis.set(key, count)
-
-
-async def run(redis: Redis) -> tuple[str, str]:
-    await redis.delete("naive", "atomic")
-    await asyncio.gather(*(naive_hit(redis, "naive") for _ in range(10)))
-    await asyncio.gather(*(redis.incr("atomic") for _ in range(10)))
-    result = (await redis.get("naive"), await redis.get("atomic"))
-    await redis.aclose()
-    return result
-
-print("fakeredis:     naive, atomic =", asyncio.run(run(fakeredis.FakeAsyncRedis(decode_responses=True))))
-print("Redis-сервер:  naive, atomic =", asyncio.run(run(Redis.from_url("redis://localhost:6379/15",
-                                                                        decode_responses=True))))
+cache.clear()                     # лічильник спроб живе в кеші; вхід з попереднього кроку теж рахувався
+api = APIClient()
+statuses = [api.post("/api/token/", {"username": "olena", "password": f"guess-{n}"}, format="json").status_code
+            for n in range(6)]
+print("6 невдалих спроб →", statuses)
+right = api.post("/api/token/", {"username": "olena", "password": "Sup3r-secret!"}, format="json")
+print("правильний пароль →", right.status_code, right["Retry-After"], "с")
 ```
 
 ```text
-fakeredis:     naive, atomic = ('10', '10')
-Redis-сервер:  naive, atomic = ('2', '10')
+Unauthorized: /api/token/
+Unauthorized: /api/token/
+Unauthorized: /api/token/
+Unauthorized: /api/token/
+Unauthorized: /api/token/
+Too Many Requests: /api/token/
+6 невдалих спроб → [401, 401, 401, 401, 401, 429]
+Too Many Requests: /api/token/
+правильний пароль → 429 57 с
 ```
 
-На fakeredis «наївний» лічильник дорахував до 10 — гонки не видно. На справжньому Redis — далеко не 10 (у цьому прогоні 2, щоразу по-різному): поки одна корутина чекала відповіді на `GET`, інші прочитали те саме значення — і записали те саме. Тому `test_concurrent_requests_hit_rate_limit_exactly` (рефакторинг 5) доводить атомарність rate limit **лише** з `TEST_REDIS_URL`; з fakeredis він проходить і з «наївним» `RateLimiter` — ми перевірили, підставивши такий. Про це сказано в docstring тесту.
+Після 5 спроб за хвилину — `429`, навіть з правильним паролем: зловмисник не може перебирати швидко, а справжній користувач чекає хвилину. Той самий принцип, що rate limit агрегатора в уроці 40, — тут готовий `ScopedRateThrottle` DRF.
 
-## Рефакторинг 5. API асинхронно: `httpx.AsyncClient` { #refactor-5 }
+Поглиблено: [DRF: автентифікація й permissions у Django-книзі](https://nikoriakviktot.github.io/notes_chat_app/06_application_architecture/drf_rest_api_full/).
 
-`TestClient` синхронний: застосунок крутиться в окремому потоці, запити йдуть по одному, а до Redis чи бази тест дістається через `client.portal.call(...)`. `httpx.AsyncClient` з `ASGITransport` викликає застосунок **напряму**, в тому ж циклі подій, що й тест:
+## Налаштування безпеки і `check --deploy` { #settings }
 
-```diff title="tests/integration/conftest.py: client (39) → client + aclient (41)"
--@pytest.fixture
--def client() -> Iterator[TestClient]:
--    extra = {"poolclass": StaticPool} if TEST_DATABASE_URL.startswith("sqlite") else {}
--    engine = make_engine(TEST_DATABASE_URL, **extra)
--    ...
--    app.dependency_overrides[get_db] = test_db
-+class TestDatabase:
-+    """Тестова база + підміна залежностей застосунку. Спільне для `client` (sync) і `aclient` (async)."""
-+    def __init__(self) -> None: ...                  # engine і фабрика сесій
-+    async def create_tables(self) -> None: ...
-+    async def get_db(self) -> AsyncIterator[AsyncSession]: ...
-+    def install(self) -> None: ...                   # dependency_overrides
-+
-+@pytest.fixture
-+def client() -> Iterator[TestClient]: ...           # як і було, через TestDatabase
-+
-+@pytest_asyncio.fixture
-+async def aclient() -> AsyncIterator[httpx.AsyncClient]:
-+    db = TestDatabase()
-+    db.install()
-+    async with app.router.lifespan_context(app):    # ASGITransport lifespan не запускає
-+        await db.create_tables()
-+        await app.state.redis.flushdb()
-+        transport = httpx.ASGITransport(app=app)
-+        async with httpx.AsyncClient(transport=transport, base_url="http://test") as c:
-+            yield c
-+        await db.engine.dispose()
-+    app.dependency_overrides.clear()
+Стартовий код додав блок налаштувань; урок 41 — `SECRET_KEY`, `DEBUG` і `ALLOWED_HOSTS` зі змінних середовища:
+
+```python title="hello_project/settings.py (фрагмент)"
+# Цим ключем підписуються сесії, токени скидання пароля і JWT. Хто його знає — підробить будь-який токен.
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "django-insecure-crispy-notes-dev-key-change-in-production")
+DEBUG = os.environ.get("DJANGO_DEBUG", "1") == "1"
+ALLOWED_HOSTS = [host for host in os.environ.get("DJANGO_ALLOWED_HOSTS", "").split(",") if host]
+
+SESSION_COOKIE_HTTPONLY = True        # JavaScript не прочитає cookie сесії (XSS не вкраде вхід)
+SESSION_COOKIE_SAMESITE = "Lax"       # cookie не йде з чужих сайтів (частина захисту від CSRF)
+X_FRAME_OPTIONS = "DENY"              # сторінку не вставиш в <iframe> (clickjacking)
+SECURE_CONTENT_TYPE_NOSNIFF = True    # браузер не вгадує тип файлу
 ```
 
-Що це дає — два тести з `test_async_api.py`:
+Django сам перевіряє, що ще не готово до сервера:
 
-```python title="tests/integration/test_async_api.py (фрагмент)"
-async def test_cache_state_is_awaited_directly(aclient: httpx.AsyncClient) -> None:
-    """Без portal: той самий Redis-клієнт, що в застосунку, — просто await."""
-    assert (await aclient.get("/api/news")).headers["X-Cache"] == "MISS"
-    assert (await aclient.get("/api/news")).headers["X-Cache"] == "HIT"
-    assert await app.state.redis.get("news:version") is None                  # записів ще не було
-    await aclient.post("/api/scrape", json={"source": "snapshot"})
-    assert await app.state.redis.get("news:version") == "1"
+```text
+$ python manage.py check --deploy
+System check identified some issues:
 
+WARNINGS:
+?: (security.W004) You have not set a value for the SECURE_HSTS_SECONDS setting. If your entire site is served only over SSL, you may want to consider setting a value and enabling HTTP Strict Transport Security. Be sure to read the documentation first; enabling HSTS carelessly can cause serious, irreversible problems.
+?: (security.W008) Your SECURE_SSL_REDIRECT setting is not set to True. Unless your site should be available over both SSL and non-SSL connections, you may want to either set this setting True or configure a load balancer or reverse-proxy server to redirect all connections to HTTPS.
+?: (security.W009) Your SECRET_KEY has less than 50 characters, less than 5 unique characters, or it's prefixed with 'django-insecure-' indicating that it was generated automatically by Django. Please generate a long and random value, otherwise many of Django's security-critical features will be vulnerable to attack.
+?: (security.W012) SESSION_COOKIE_SECURE is not set to True. Using a secure-only session cookie makes it more difficult for network traffic sniffers to hijack user sessions.
+?: (security.W016) You have 'django.middleware.csrf.CsrfViewMiddleware' in your MIDDLEWARE, but you have not set CSRF_COOKIE_SECURE to True. Using a secure-only CSRF cookie makes it more difficult for network traffic sniffers to steal the CSRF token.
+?: (security.W018) You should not have DEBUG set to True in deployment.
+?: (security.W020) ALLOWED_HOSTS must not be empty in deployment.
 
-async def test_concurrent_requests_hit_rate_limit_exactly(aclient: httpx.AsyncClient) -> None:
-    total = RATE_LIMIT_REQUESTS * 2
-    responses = await asyncio.gather(*(aclient.post("/api/scrape", json={"source": "ftp"}) for _ in range(total)))
-    statuses = sorted(r.status_code for r in responses)
-    assert statuses == [422] * RATE_LIMIT_REQUESTS + [429] * RATE_LIMIT_REQUESTS
+System check identified 7 issues (0 silenced).
 ```
 
-Тіло `{"source": "ftp"}` навмисно неправильне: відповідь `422` показує, що rate limit рахує запит **до** перевірки тіла. Інакше сервер можна було б засипати помилковими запитами без обмежень.
+Кожен рядок — готовий пункт списку перед деплоєм: `W009` — ключ з префіксом `django-insecure-`, `W018` — `DEBUG = True`, `W020` — порожній `ALLOWED_HOSTS`, решта — HTTPS (`SECURE_HSTS_SECONDS`, `SECURE_SSL_REDIRECT`, `*_COOKIE_SECURE`), які вмикають на сервері з сертифікатом (урок 50). Ті самі налаштування через змінні середовища:
 
-Коли що брати:
+```text
+$ DJANGO_SECRET_KEY="$(python -c 'import secrets; print(secrets.token_urlsafe(50))')" DJANGO_DEBUG=0 DJANGO_ALLOWED_HOSTS=notes.example.com python manage.py check --deploy
+System check identified some issues:
 
-| | `TestClient` | `httpx.AsyncClient` + `ASGITransport` |
+WARNINGS:
+?: (security.W004) You have not set a value for the SECURE_HSTS_SECONDS setting. If your entire site is served only over SSL, you may want to consider setting a value and enabling HTTP Strict Transport Security. Be sure to read the documentation first; enabling HSTS carelessly can cause serious, irreversible problems.
+?: (security.W008) Your SECURE_SSL_REDIRECT setting is not set to True. Unless your site should be available over both SSL and non-SSL connections, you may want to either set this setting True or configure a load balancer or reverse-proxy server to redirect all connections to HTTPS.
+?: (security.W012) SESSION_COOKIE_SECURE is not set to True. Using a secure-only session cookie makes it more difficult for network traffic sniffers to hijack user sessions.
+?: (security.W016) You have 'django.middleware.csrf.CsrfViewMiddleware' in your MIDDLEWARE, but you have not set CSRF_COOKIE_SECURE to True. Using a secure-only CSRF cookie makes it more difficult for network traffic sniffers to steal the CSRF token.
+
+System check identified 4 issues (0 silenced).
+```
+
+Лишились лише попередження про HTTPS — їх закриває урок 50.
+
+## OWASP Top 10 на нашому коді { #owasp }
+
+[OWASP Top 10](https://owasp.org/Top10/) — рейтинг найпоширеніших ризиків вебзастосунків. Де вони в застосунку нотаток:
+
+| Ризик | Де в проєкті | Що захищає |
 |---|---|---|
-| тест | звичайна функція | корутина, `@pytest.mark.asyncio` |
-| `lifespan` | запускає сам (`with TestClient(app)`) | запускаєш сам (`app.router.lifespan_context`) |
-| Redis / база в тесті | `client.portal.call(redis.get, …)` | `await redis.get(…)` |
-| одночасні запити | ні, по одному | `asyncio.gather` |
-| коли | більшість тестів API | конкурентність, async-стан застосунку |
+| **A01** Broken Access Control | чужа нотатка; нотатка групи в API | `404` для чужих (35), `_get_own_note` → `403` для учасників (40), групи у формі — лише свої |
+| **A02** Cryptographic Failures | паролі, `SECRET_KEY` | PBKDF2 з сіллю; ключ зі змінної середовища |
+| **A03** Injection | фільтри й пошук | ORM передає значення параметрами (урок 30); автоекранування шаблонів |
+| **A05** Security Misconfiguration | `DEBUG`, `ALLOWED_HOSTS`, заголовки | `check --deploy`, блок налаштувань безпеки |
+| **A07** Identification and Authentication Failures | вхід, скидання пароля, API | throttle на `/api/token/`, однакова відповідь для невідомого email, короткий access-токен, валідатори пароля |
 
-Поглиблено: [async-тести й клієнти](https://nikoriakviktot.github.io/notes_chat_app/08_testing_and_quality/pytest_basics_full/); FastAPI — [Async Tests](https://fastapi.tiangolo.com/advanced/async-tests/).
+Решта пунктів (A04, A06, A08–A10) і розбір кожного — [OWASP Top 10 у Django-книзі](https://nikoriakviktot.github.io/notes_chat_app/07_auth_and_security/owasp_top_10_full/), а поглиблено — урок 47.
 
-## Рефакторинг 6. Покриття: що тести не зачепили { #refactor-6 }
-
-Покриття тестів уроку 39 — стандартний звіт `pytest-cov`:
-
-```text
-$ cd ../../lesson_39_middleware_redis/news_hub && pytest -q -p no:cacheprovider --cov=news_hub --cov-report=term:skip-covered tests | tail -n 12
-news_hub/cache.py           33      1    97%
-news_hub/db.py              26      8    69%
-news_hub/jobs.py            58      1    98%
-news_hub/parser.py          75     10    87%
-news_hub/repository.py      58      6    90%
-news_hub/scraper.py         49     28    43%
-news_hub/tables.py          16      1    94%
---------------------------------------------
-TOTAL                      596     70    88%
-
-4 files skipped due to complete coverage.
-41 passed in 2.41s
-```
-
-Перше: 88% — **занижена** цифра. Async SQLAlchemy виконує роботу з базою в greenlet (урок 38), а coverage за замовчуванням стежить лише за звичайними потоками. Рядки сесії, `flush`, `commit` насправді виконуються, але у звіт не потрапляють. Тому в проєкті тепер `.coveragerc`:
-
-```ini title=".coveragerc"
-[run]
-source = news_hub
-branch = true
-# Без greenlet coverage не бачить рядків, які async SQLAlchemy виконує в greenlet
-# (сесія, flush, commit) — і показує занижене покриття.
-concurrency = thread,greenlet
-
-[report]
-show_missing = true
-```
-
-`branch = true` рахує ще й **гілки**: чи виконувались обидва виходи кожного `if` і `for`. Ті самі тести уроку 39 з цими налаштуваннями:
-
-```text
-$ cd ../../lesson_39_middleware_redis/news_hub && pytest -q -p no:cacheprovider --cov=news_hub --cov-config=../../lesson_41_api_testing/news_hub/.coveragerc --cov-report=term:skip-covered tests | tail -n 12
-news_hub/api.py            170      3     18      2    97%   97, 110, 160->159, 162
-news_hub/cache.py           33      1      2      1    94%   28
-news_hub/db.py              26      8      2      1    68%   26, 54-60
-news_hub/parser.py          75     10     26      9    81%   69, 73, 78, 89, 95-96, 108, 111, 116, 120
-news_hub/repository.py      58      3     10      3    91%   57, 71, 73
-news_hub/scraper.py         49     28      6      0    38%   50-61, 65-72, 78-81, 86-89
-news_hub/tables.py          16      1      0      0    94%   28
---------------------------------------------------------------------
-TOTAL                      596     54     80     16    89%
-
-5 files skipped due to complete coverage.
-41 passed in 3.25s
-```
-
-Непокритих рядків стало 54 замість 70: ці 16 рядків виконувались і раніше, звіт їх просто не бачив. Загальна цифра — 89%, бо тепер рахуються ще й гілки (16 частково пройдених).
-
-Червоні рядки — це список питань «а що тут має статися?». Чотири з них стали тестами уроку:
-
-| Непокрите (урок 39) | Новий тест | Знайшов |
-|---|---|---|
-| `scraper.py` 43%: `fetch_one`, `scrape_*` | `unit/test_scraper.py` (мок), `integration/test_scraper_server.py` (фейк) | битий байт валить увесь збір |
-| `db.py` 54–60: справжній `get_db` | `integration/test_db.py` | — (працює; тепер це доведено) |
-| `api.py`: `pages` з правильними адресами | `test_custom_pages_reach_scraper_as_strings`, `test_is_rbc_host` | `fakerbc.ua` проходить перевірку |
-| `repository.py` 71, 73: фільтри `category`, `source` | `test_filters_combine` | — |
-| `parser.py`: гілки `continue` | `test_what_parser_skips` | — |
-
-### Справжній `get_db`
-
-API-тести підміняють `get_db` копією з `conftest.py`. Копія може розійтися з оригіналом, і ніхто не помітить. `test_db.py` викликає **оригінал** так, як це робить FastAPI, а патчить лише фабрику сесій, яку `get_db` шукає в модулі `db`:
-
-```python title="tests/integration/test_db.py (фрагмент)"
-@pytest_asyncio.fixture
-async def factory(monkeypatch):
-    engine = db.make_engine("sqlite+aiosqlite://", poolclass=StaticPool)
-    ...
-    monkeypatch.setattr(db, "SessionFactory", test_factory)    # patch where used
-
-
-async def test_exception_rolls_back_and_propagates(factory) -> None:
-    dependency = db.get_db()
-    session = await anext(dependency)              # FastAPI: код до yield
-    session.add(row(1))
-    await session.flush()                          # INSERT уже в базі, але в незавершеній транзакції
-    with pytest.raises(RuntimeError, match="ендпоінт упав"):
-        await dependency.athrow(RuntimeError("ендпоінт упав"))    # так FastAPI передає виняток у залежність
-    assert await count(factory) == 0
-```
-
-### `fakerbc.ua`
-
-Червона гілка в `ScrapeRequest.only_rbc`: жоден тест не передавав **правильний** список `pages`. Тест з межовими значеннями знайшов, що перевірка пропускає не лише rbc.ua:
-
-```python
-from news_hub.models import is_rbc_host
-
-for host in ("rbc.ua", "www.rbc.ua", "auto.rbc.ua", "fakerbc.ua", "rbc.ua.evil.com"):
-    print(f"{host:16} endswith('rbc.ua'): {host.endswith('rbc.ua')!s:5}  is_rbc_host: {is_rbc_host(host)}")
-```
-
-```text
-rbc.ua           endswith('rbc.ua'): True   is_rbc_host: True
-www.rbc.ua       endswith('rbc.ua'): True   is_rbc_host: True
-auto.rbc.ua      endswith('rbc.ua'): True   is_rbc_host: True
-fakerbc.ua       endswith('rbc.ua'): True   is_rbc_host: False
-rbc.ua.evil.com  endswith('rbc.ua'): False  is_rbc_host: False
-```
-
-`POST /api/scrape` з `{"pages": ["https://fakerbc.ua/"]}` змушував сервер завантажити чужий сайт на прохання будь-кого — і те саме пропускала модель `NewsItem`. Правильно — одна функція для обох місць:
-
-```diff title="news_hub/models.py"
-+def is_rbc_host(host: str | None) -> bool:
-+    """rbc.ua або його піддомен (www., auto.). Не endswith("rbc.ua"): тоді пройшов би і fakerbc.ua."""
-+    return host == "rbc.ua" or (host or "").endswith(".rbc.ua")
- ...
--        if not (url.host or "").endswith("rbc.ua"):
-+        if not is_rbc_host(url.host):
-```
-
-Після всіх рефакторингів:
-
-```text
-$ pytest -q -p no:cacheprovider --cov=news_hub --cov-report=term:skip-covered | tail -n 10
-Name                 Stmts   Miss Branch BrPart  Cover   Missing
-----------------------------------------------------------------
-news_hub/cache.py       33      1      2      1    94%   28
-news_hub/parser.py      75      1     26      1    98%   111
-news_hub/tables.py      16      1      0      0    94%   28
-----------------------------------------------------------------
-TOTAL                  607      3     82      2    99%
-
-9 files skipped due to complete coverage.
-86 passed in 6.72s
-```
-
-Лишились три рядки — і їх свідомо не покрито: `cache.py:28` — гілка справжнього Redis (її покриває прогін з `TEST_REDIS_URL`), `parser.py:111` — перевірка типу для mypy (`find_all(href=True)` дає лише `Tag`), `tables.py:28` — `__repr__`. **100% — не мета**; мета — щоб кожен червоний рядок був рішенням, а не випадком.
-
-## Мінімальні версії залежностей { #min-versions }
-
-`requirements.txt` обіцяє, що проєкт працює з `beautifulsoup4>=4.12`, `fastapi>=0.121`, `aiohttp>=3.10`… Перевіряли досі лише найновіші версії. Прогін тих самих тестів на **мінімальних** версіях (Python 3.10) знайшов четверту помилку:
-
-```text
-# Python 3.10, beautifulsoup4 4.12.3, парсер уроку 39
-$ pytest -q -p no:cacheprovider tests/unit/test_parser.py
-FAILED tests/unit/test_parser.py::test_description_equal_to_title_is_dropped_time_from_class
-E       TypeError: sequence item 0: expected str instance, NoneType found
-```
-
-Для тегу без атрибута `class` bs4 4.12 повертає `get_attribute_list("class") == [None]`, новіші версії — `[]`. `" ".join([None])` падає — а `_classes` викликається для кожного тегу всередині контейнера новини. На справжній сторінці з тегом `<p>` без класу парсер падав би з bs4 4.12. Тести на новій bs4 цього не бачили:
-
-```diff title="news_hub/parser.py"
- def _classes(tag: Tag) -> str:
--    return " ".join(tag.get_attribute_list("class"))
-+    # Тег без class: beautifulsoup4 4.12 дає [None] (join падав з TypeError), новіші — [] (урок 41)
-+    return " ".join(cls for cls in tag.get_attribute_list("class") if cls)
-```
-
-Тепер `news_hub` перевірено на трьох наборах: Python 3.10 з мінімальними версіями, Python 3.10 і 3.13 з найновішими. Окремо — на PostgreSQL 16 і Redis 7 (`TEST_DATABASE_URL`, `TEST_REDIS_URL`). У CI (урок 50) ці набори стануть матрицею.
-
-## Архітектура: що справжнє, а що підмінене { #architecture }
-
-Кожен шар тестів відповідає на своє питання. Різниця — в тому, що справжнє, а що підмінене:
-
-```mermaid
-graph LR
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
-
-    subgraph U["unit: 39 тестів, ≈1 с"]
-        UP["parser, models<br>на fixtures/*.html"]
-        US["fetch_one"] --> UM["Mock<br>ClientSession"]
-    end
-    subgraph I["integration: 47 тестів, ≈4 с"]
-        TC["TestClient /<br>httpx.AsyncClient"] --> APP["FastAPI app<br>middleware, Depends"]
-        APP --> DB["SQLite у пам'яті<br>або PostgreSQL"]
-        APP --> RD["fakeredis<br>або Redis"]
-        APP --> FS["скрапер-заглушка<br>dependency_overrides"]
-        SC["scrape_all_async"] --> TS["TestServer<br>127.0.0.1"]
-        GD["справжній get_db"] --> DB
-    end
-
-    class UP,US,TC,APP,SC,GD success
-    class UM,FS warning
-    class DB,RD,TS decision
-```
-
-- **зелене** — справжній код застосунку, який тест виконує;
-- **жовте** — мок або заглушка: тест вирішує, що вона відповість;
-- **синє** — фейк або справжній сервер: поводиться як реальний (SQL, команди Redis, HTTP), лише локальний.
-
-Як обрати підміну для залежності:
+## Архітектура: два входи, одні правила { #architecture }
 
 ```mermaid
 flowchart TD
@@ -656,184 +511,164 @@ flowchart TD
     classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
     classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
 
-    Q1{"залежність — твій код<br>(парсер, модель, репозиторій)?"}
-    Q2{"є локальний аналог?<br>SQLite, fakeredis, TestServer"}
-    Q3{"перевіряєш гонки чи<br>SQL конкретної бази?"}
-    R1["виклич справжній<br>не мокай"]
-    R2["мок лише на зовнішній межі<br>мережа, email, платежі, час"]
-    R3["фейк у звичайному прогоні"]
-    R4["справжній сервер<br>TEST_DATABASE_URL, TEST_REDIS_URL"]
+    B["браузер<br>cookie sessionid + CSRF"] --> V["views.py<br>login_required"]
+    C["застосунок, скрипт, бот<br>Authorization: Bearer"] --> A["api.py<br>JWT, потім сесія"]
+    T["POST /api/token/<br>throttle 5/хв"] -. "access + refresh" .-> C
+    V --> R["selectors<br>свої + нотатки груп"]
+    A --> R
+    V --> W{"змінює?<br>автор?"}
+    A --> W
+    W -- ні --> X["сайт: повідомлення<br>API: 403"]
+    W -- так --> S["services<br>update / delete"]
+    S --> DB[("база")]
+    R --> DB
 
-    Q1 -- так --> R1
-    Q1 -- ні --> Q2
-    Q2 -- ні --> R2
-    Q2 -- так --> Q3
-    Q3 -- ні --> R3
-    Q3 -- так --> R4
-
-    class Q1,Q2,Q3 decision
-    class R1,R3,R4 success
-    class R2 warning
+    class B,C,V,A,R step
+    class T,W warning
+    class X error
+    class S,DB success
 ```
 
-### Тести і mypy
+- **Автентифікація ≠ авторизація.** Сесія чи JWT відповідають лише на «хто ти». «Що тобі можна» вирішує код: selectors (що бачиш) і перевірка автора (що змінюєш).
+- **Правила — на кожному вході.** Сайт і API читають тими самими selectors, тож перевірка автора потрібна на обох. Правило, яке треба пам'ятати у двох місцях, колись забудуть — у практиці його винесемо в один DRF-permission.
+- **Секрет — один.** `SECRET_KEY` підписує сесії, токени скидання й JWT. Він — у змінній середовища, не в git.
 
-Приклад виводу (час залежить від машини):
+### Тести
+
+Приклад виводу (час залежить від машини; хешування паролів навмисно повільне):
 
 ```text
-$ pytest -q -p no:cacheprovider
-......................................................................................       [100%]
-86 passed in 3.85s
-$ mypy --strict news_hub
-Success: no issues found in 12 source files
+$ python manage.py test
+Found 29 test(s).
+System check identified no issues (0 silenced).
+Creating test database for alias 'default'...
+.............................
+----------------------------------------------------------------------
+Ran 29 tests in 51.170s
+
+OK
+Destroying test database for alias 'default'...
 ```
 
-Було 41 тест у трьох файлах, стало 86 у десяти; покриття 88% (рядки, без greenlet) → 99% (рядки й гілки).
+`hello_app/tests_auth.py` — 13 тестів: видимість нотаток групи на сайті, заборона змін для учасника на сайті й в API (`403`) і `404` для стороннього, групи у формі — лише свої; JWT: видача, `401` + `WWW-Authenticate` без токена, неправильний пароль, refresh, підправлений / чужий / прострочений токен, токен, підписаний `SECRET_KEY`, приймається (тому ключ — секрет), throttle `429`; хеш з сіллю, скидання пароля без розкриття акаунтів.
 
 ## Практика { #practice }
 
-### Розібраний приклад: тест ключа кешу
+### Розібраний приклад: правило автора в одному місці
 
-`NewsCache.key` (урок 39) будує ключ з параметрів запиту. Що має бути правдою?
+Правило «змінює лише автор», записане в кількох місцях, легко забути в одному з них. У DRF для цього є **permission-клас** з методом `has_object_permission`:
 
-1. Той самий набір параметрів у **іншому порядку** — той самий ключ: `?lang=uk&limit=5` і `?limit=5&lang=uk` — один запит.
-2. Інші параметри — інший ключ.
-3. Після `invalidate()` ключ змінюється — старий кеш більше не читається.
+1. **Безпечні методи** (`GET`, `HEAD`, `OPTIONS` — `permissions.SAFE_METHODS`) дозволено всім, хто бачить об'єкт: видимість уже вирішили selectors.
+2. **Решта** — лише якщо `obj.user_id == request.user.id`.
+3. **У ViewSet** — `permission_classes = [IsAuthenticated, IsAuthorOrReadOnly]` і виклик `self.check_object_permissions(request, note)` після того, як нотатку знайдено: у `ViewSet` без `get_object()` DRF сам його не викликає.
 
-Шар — unit: потрібен лише Redis, і fakeredis тут достатньо (гонок у тесті немає).
-
-```python title="tests/unit/test_cache.py (розв'язок)"
-import fakeredis
-import pytest
-
-from news_hub.cache import NewsCache
+```python title="hello_app/permissions.py (розв'язок)"
+from rest_framework import permissions
 
 
-@pytest.mark.asyncio
-async def test_key_depends_on_params_not_order_and_changes_after_invalidate() -> None:
-    cache = NewsCache(fakeredis.FakeAsyncRedis(decode_responses=True))
-    first = await cache.key("list", {"lang": "uk", "limit": 5})
-    assert first == await cache.key("list", {"limit": 5, "lang": "uk"})
-    assert first != await cache.key("list", {"lang": "ru", "limit": 5})
-    await cache.invalidate()
-    assert first != await cache.key("list", {"lang": "uk", "limit": 5})
+class IsAuthorOrReadOnly(permissions.BasePermission):
+    message = "Змінювати й видаляти нотатку може лише її автор."
+
+    def has_object_permission(self, request, view, obj):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        return obj.user_id == request.user.id
 ```
 
-Перевір, що тест ловить помилку: прибери `sort_keys=True` у `NewsCache.key` — перший `assert` має впасти.
+Тоді `_get_own_note` не потрібен: `_get_note` + `self.check_object_permissions(request, note)` у кожній дії. Той самий клас можна повісити на майбутній API списків покупок — правило одне.
 
 ### Зміни приклад
 
-1. Додай до тесту випадок з кирилицею в параметрах (`{"category": "Економіка"}`) — ключ має бути ASCII, бо це хеш.
-2. Перепиши тест через `parametrize`: пари параметрів і очікування «ключі рівні / різні».
+1. Дозволь учасникам групи **закріплювати** нотатку групи (`pin`), але не змінювати й не видаляти.
+2. Зменш `ACCESS_TOKEN_LIFETIME` до 1 хвилини й переконайся (тестом із `set_exp`), що клієнт отримує `401` і має використати refresh.
 
-### Спробуй самостійно: фоновий збір проти фейкового сайту
+### Спробуй самостійно: «вийти на всіх пристроях»
 
-Напиши інтеграційний тест, у якому `POST /api/scrape/jobs` збирає новини з `TestServer`, а не із заглушки:
+Додай `rest_framework_simplejwt.token_blacklist` в `INSTALLED_APPS`, `"BLACKLIST_AFTER_ROTATION": True` у `SIMPLE_JWT` і ендпоінт `POST /api/token/logout/` (`TokenBlacklistView`).
 
-- підміни `get_scrapers` так, щоб `"async"` викликав справжній `scrape_all_async` з адресами фейкового сервера;
-- але `ScrapeRequest` пропускає лише rbc.ua — тож адреси задай у самій підміні, а не в тілі запиту;
-- тест — через `aclient` (тоді `TestServer` і застосунок в одному циклі подій).
-
-**Критерії перевірки:** статус задачі `done`, `news_saved == 1`, у базі — новина «США хочуть підкупити кубинців…»; тест проходить без інтернету; `pytest -m integration` зелений.
+**Критерії перевірки:** після logout той самий refresh-токен на `/api/token/refresh/` дає `401`; `migrate` створює таблиці чорного списку; тест у `tests_auth.py`.
 
 ### Знайди помилку { #find-bug }
 
-Ось два тести з уроків 36–39 — вони справді були в проєкті, скорочено — і модель тих уроків (лише поле часу). Обидва тести зелені:
+Проєкт уроку лежить у публічному репозиторії на GitHub, а на сервері його запустили як є — без `DJANGO_SECRET_KEY`. Хтось прочитав `settings.py`:
 
 ```python
-from datetime import time
-from pathlib import Path
+import jwt
+from django.conf import settings
 
-from pydantic import BaseModel, ValidationError
-
-from news_hub.parser import parse_rbc_news
-
-
-class NewsTime39(BaseModel):                  # поле published_time моделі уроків 36–39
-    published_time: time | None = None
-
-
-def test_parser_reads_time_attribute() -> None:
-    page = ('<div class="newsline__item"><a class="title" href="/ukr/news/1/">Уряд затвердив новий бюджет</a>'
-            '<time datetime="2024-05-08T10:30:00">10:30</time></div>')
-    assert parse_rbc_news(page)[0]["datetime"] == "2024-05-08T10:30:00"
-
-
-def test_model_parses_time() -> None:
-    assert NewsTime39(published_time="14:19").published_time == time(14, 19)
-
-
-test_parser_reads_time_attribute()
-test_model_parses_time()
-print("обидва тести зелені")
-
-raw = parse_rbc_news(Path("tests/fixtures/demo_newsline.html").read_text(encoding="utf-8"))
-for item in raw:
-    try:
-        NewsTime39(published_time=item["datetime"])
-    except ValidationError as error:
-        print(f"{item['datetime']!r} → {error.errors()[0]['msg']}")
+print("ключ з репозиторію:", settings.SECRET_KEY[:20] + "…")
+forged = jwt.encode({"token_type": "access", "user_id": str(olena.id), "exp": 4102444800, "jti": "x"},
+                    settings.SECRET_KEY, algorithm="HS256")
+api = APIClient()
+api.credentials(HTTP_AUTHORIZATION=f"Bearer {forged}")
+response = api.get("/api/notes/")
+print("підроблений токен →", response.status_code, [note["title"] for note in response.json()])
 ```
 
 ```text
-обидва тести зелені
-'2024-05-08T10:30:00' → Input should be in a valid time format, invalid time separator, expected `:`
-'2024-05-08T09:15:00' → Input should be in a valid time format, invalid time separator, expected `:`
+ключ з репозиторію: django-insecure-cris…
+підроблений токен → 200 ['Пароль від Wi-Fi (новий)', 'Подарунок Тарасу']
 ```
 
-Кожен тест правильний. Чому разом вони пропустили помилку, і який тест її ловить?
+Жодного пароля, жодного виклику `/api/token/` — а доступ до всіх нотаток Олени до 2100 року. Що пішло не так і що робити, якщо це вже сталося?
 
 ??? success "Відповідь"
 
-    Кожен тест перевіряє свою половину **на своїх даних**: тест парсера — що він віддає ISO-рядок, тест моделі — що вона приймає «14:19». Ніхто не перевіряв **контракт між ними**: чи приймає модель те, що віддає парсер. Парсер віддає `"2024-05-08T10:30:00"`, а Pydantic для поля `time` приймає лише час — `"Input should be in a valid time format"`. На сайті з контейнерами `newsline__item` модель відхиляла б **кожну** новину з атрибутом `<time datetime>`. `validate_news` не губить їх мовчки, а кладе в `rejected`. Але звіт `POST /api/scrape` показував би «знайдено N, збережено 0».
+    `SECRET_KEY` — єдиний секрет, яким підписано JWT (а ще сесії й посилання скидання пароля). Хто його знає, той **сам випускає** «справжні» токени для будь-якого `user_id` з будь-яким `exp`: перевірка підпису на сервері пройде, бо підпис правильний. Тому ключ не можна тримати в коді, який бачать інші.
 
-    Ловить **тест конвеєра** (`tests/unit/test_pipeline.py`): вихід парсера на збереженій сторінці → модель, `rejected == []`. Правило: коли дві частини з'єднані даними, потрібен хоча б один тест, у якому дані з однієї справді йдуть у другу. Спільна фікстура (`demo_newsline.html`) для обох тестів дала б те саме.
+    Що робити:
 
-    Правильно — `field_validator("published_time", mode="before")` у `NewsItem`: з ISO-рядка береться час.
+    1. **Зараз** — новий ключ (`secrets.token_urlsafe(50)`) у змінну середовища `DJANGO_SECRET_KEY` на сервері й перезапуск: усі токени, сесії й посилання скидання, підписані старим ключем, стають недійсними — користувачі входять знову.
+    2. **Назавжди** — ключ лише в оточенні сервера (урок 50); `check --deploy` попереджає про ключ з префіксом `django-insecure-`; у репозиторій — лише значення для навчання.
+    3. Ключ, що потрапив у git, вважається **скомпрометованим назавжди**: видалення коміту не допомагає, історію вже могли скопіювати.
 
 ## Підсумок
 
 | Поняття | Що запам'ятати |
 |---|---|
-| unit / integration | папки + маркери з `conftest.py`; `pytest -m unit` — секунди, після кожної зміни |
-| Збережені сторінки | `tests/fixtures/*.html`: справжня розмітка, спільна для кількох тестів |
-| Тест конвеєра | дані з однієї частини — справді в другу; ловить помилки контракту |
-| Мок | лише зовнішня межа; patch **where used**; не бачить коду між запитом і рядком |
-| Фейк | справжня поведінка локально: `TestServer`, SQLite, fakeredis; має свої межі (гонки) |
-| `httpx.AsyncClient` + `ASGITransport` | тест і застосунок в одному циклі; `await` Redis напряму; `asyncio.gather` |
-| Покриття | `concurrency = thread,greenlet` для async SQLAlchemy; `branch = true`; червоне — питання, не мета |
-| Мінімальні версії | те, що обіцяє `requirements.txt`, теж треба перевірити |
+| Автентифікація / авторизація | «хто ти» (сесія, JWT) / «що тобі можна» (selectors, перевірка автора, permissions) |
+| Нотатки групи | `Q(user=…) \| Q(group__in=user.groups.all())`; читати — учасникам, змінювати — автору |
+| `404` / `403` | не бачиш об'єкт — `404`; бачиш, але дія заборонена — `403` |
+| Хеш пароля | `pbkdf2_sha256$ітерації$сіль$хеш`; сіль — випадкова, хешування — навмисно повільне |
+| Скидання пароля | однакова відповідь для будь-якого email; токен залежить від хешу пароля — одноразовий |
+| JWT | `header.payload.signature`; payload читає будь-хто, підробити без `SECRET_KEY` не можна |
+| Access / refresh | короткий для запитів / довгий для оновлення; `401` — оновити токен |
+| Порядок автентифікаторів DRF | перший визначає `401` (+ `WWW-Authenticate`) чи `403` |
+| Throttle | обмеження спроб входу: `429`, `Retry-After` |
+| `check --deploy` | список того, що змінити в налаштуваннях перед сервером |
+| OWASP Top 10 | A01 доступ, A02 криптографія, A03 ін'єкції, A05 налаштування, A07 автентифікація |
 
 ### Самоперевірка
 
-1. Чим unit-тест відрізняється від інтеграційного в цьому проєкті? Назви по одному прикладу.
-2. Чому патч `news_hub.parser.parse_rbc_news` не впливає на `fetch_one`?
-3. Яку помилку знайшов фейковий сервер і чому мок її не бачив?
-4. Чому тест одночасних запитів на fakeredis не доводить атомарність rate limit?
-5. Що змінює `concurrency = thread,greenlet` у звіті покриття?
-6. Навіщо тестувати справжній `get_db`, якщо API-тести працюють?
+1. Чому після додавання груп не можна просто залишити `user=request.user` у selectors?
+2. Чому учасник групи на `DELETE` отримує `403`, а сторонній — `404`?
+3. Що буде в базі, якщо двоє користувачів мають однаковий пароль?
+4. Що можна прочитати з JWT без ключа і що без ключа зробити неможливо?
+5. Навіщо access-токен живе лише 5 хвилин, якщо є refresh?
+6. Чому неавтентифікований запит до API тепер отримує `401`, а в уроці 36 отримував `403`?
+7. Що робити, якщо `SECRET_KEY` потрапив у публічний репозиторій?
 
 ??? success "Відповіді"
 
-    1. Unit — одна функція чи клас без бази, Redis і мережі: `test_parser.py`, `test_scraper.py` (мережа під моком). Integration — застосунок цілком або з реальним ресурсом: `test_crud.py` (API + база), `test_scraper_server.py` (справжній aiohttp + локальний сервер).
-    2. `scraper.py` імпортував функцію до себе (`from .parser import …`), і `fetch_one` шукає ім'я в модулі `scraper`. Патч замінив ім'я лише в модулі `parser`.
-    3. Сторінка з невалідним байтом UTF-8: `resp.text()` кидав `UnicodeDecodeError`, який `fetch_one` не ловив, — і `gather` губив усі сторінки. У мока `text()` повертає готовий рядок, декодування не відбувається.
-    4. fakeredis не віддає керування циклу подій між командами — одночасні корутини не перемежовуються, гонки не буває. «Наївний» лічильник на ньому теж проходить. Доводить лише прогін зі справжнім Redis.
-    5. coverage починає бачити рядки, виконані в greenlet, — так async SQLAlchemy працює з базою. Без цього звіт занижений: на тестах уроку 39 — 70 непокритих рядків замість 54 (88% замість 91%).
-    6. API-тести підміняють `get_db` копією з `conftest.py`, тож оригінал не виконується ніколи. Копія може розійтися з оригіналом, а тести лишаться зеленими.
+    1. Учасники групи мають бачити її нотатки; фільтр лише за автором їх сховає. Видимість — `Q(user) | Q(group__in=…)`, а зміни — окрема перевірка автора.
+    2. Учасник і так бачить нотатку — приховувати нічого, чесна відповідь «заборонено». Сторонньому `403` підтвердив би, що нотатка з таким id існує.
+    3. Два різні рядки: сіль випадкова, тож хеші різні. З бази не видно, що паролі однакові.
+    4. Прочитати — header і payload (це base64). Змінити їх і отримати правильний підпис без `SECRET_KEY` — неможливо; сервер відхилить з `401`.
+    5. Викрадений access діє максимум 5 хвилин. Refresh використовується рідко й лише на одному ендпоінті, тож його важче перехопити; з ротацією він ще й змінюється щоразу.
+    6. Першим тепер `JWTAuthentication`, у нього є `WWW-Authenticate: Bearer` — DRF відповідає `401`. У уроці 36 першою була сесія без такого заголовка — `403`.
+    7. Негайно згенерувати новий ключ у змінну середовища й перезапустити сервер (усі токени й сесії стануть недійсними); ключ з git вважати скомпрометованим назавжди.
 
 ### Що далі
 
-- Ноутбук заняття: [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_41_api_testing/note_lesson_41_testing_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_41_api_testing/note_lesson_41_testing.ipynb){ .solutions-link }.
-- Урок 42 — AI-інструменти розробника і як перевіряти згенерований код. Тести цього уроку — перший інструмент такої перевірки.
-- Урок 43 — Gemini в агрегаторі; виклик LLM API — ще одна зовнішня межа, яку мокатимемо за сьогоднішніми правилами.
+- Ноутбук заняття: [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_41_auth_security/note_lesson_41_auth_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_41_auth_security/note_lesson_41_auth.ipynb){ .solutions-link }.
+- Урок 42 — тестування API на агрегаторі новин: тестова база, підміна мережі, моки.
+- Урок 47 — security advanced: SSRF, секрети, заголовки, JWT для адмін-ендпоінтів агрегатора.
 
 ## Документація і джерела
 
-- Код: [`news_hub`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_4/lessons/lesson_41_api_testing/news_hub) — тести уроку 39, перебудовані за `TESTING_FOUNDATIONS.md`, `MOCKING_AND_PATCHING.md`, `TEST_DATA_AND_FIXTURES.md`; HTML-фікстури — з ноутбука web scraping.
-- Урок 25 курсу — [pytest і тестування](../m2/lesson_25.md): fixtures, `parametrize`, mock, покриття, піраміда тестів.
-- Django-книга, частина VIII: [основи тестування](https://nikoriakviktot.github.io/notes_chat_app/08_testing_and_quality/testing_foundations_full/), [pytest](https://nikoriakviktot.github.io/notes_chat_app/08_testing_and_quality/pytest_basics_full/), [Mock і patch](https://nikoriakviktot.github.io/notes_chat_app/08_testing_and_quality/mocking_and_patching_full/), [тестові дані й фікстури](https://nikoriakviktot.github.io/notes_chat_app/08_testing_and_quality/test_data_and_fixtures_full/), [практика](https://nikoriakviktot.github.io/notes_chat_app/08_testing_and_quality/testing_practice_project_full/).
-- pytest: [markers](https://docs.pytest.org/en/stable/how-to/mark.html), [hooks: pytest_collection_modifyitems](https://docs.pytest.org/en/stable/reference/reference.html#pytest.hookspec.pytest_collection_modifyitems), [monkeypatch](https://docs.pytest.org/en/stable/how-to/monkeypatch.html); [pytest-asyncio](https://pytest-asyncio.readthedocs.io/); [pytest-cov](https://pytest-cov.readthedocs.io/).
-- Python: [unittest.mock — where to patch](https://docs.python.org/3/library/unittest.mock.html#where-to-patch), [AsyncMock](https://docs.python.org/3/library/unittest.mock.html#unittest.mock.AsyncMock).
-- FastAPI: [Testing](https://fastapi.tiangolo.com/tutorial/testing/), [Async Tests](https://fastapi.tiangolo.com/advanced/async-tests/), [Testing Dependencies with Overrides](https://fastapi.tiangolo.com/advanced/testing-dependencies/); HTTPX: [ASGI transport](https://www.python-httpx.org/advanced/transports/#asgi-transport).
-- aiohttp: [Testing — TestServer](https://docs.aiohttp.org/en/stable/testing.html); coverage.py: [branch coverage](https://coverage.readthedocs.io/en/latest/branch.html), [concurrency](https://coverage.readthedocs.io/en/latest/config.html#run-concurrency).
+- Код: [`crispy_notes_project`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_4/lessons/lesson_41_auth_security/crispy_notes_project) — проєкт уроку 36 + групи, скидання пароля й налаштування безпеки зі стартового `crispy_notes_project`.
+- Django-книга, частина VII: [огляд](https://nikoriakviktot.github.io/notes_chat_app/07_auth_and_security/), [автентифікація](https://nikoriakviktot.github.io/notes_chat_app/07_auth_and_security/auth_basics_full/), [сесії](https://nikoriakviktot.github.io/notes_chat_app/07_auth_and_security/sessions_flow_full/), [права доступу](https://nikoriakviktot.github.io/notes_chat_app/07_auth_and_security/permissions_full/), [архітектура безпеки Django](https://nikoriakviktot.github.io/notes_chat_app/07_auth_and_security/django_security_architecture_full/), [типові помилки](https://nikoriakviktot.github.io/notes_chat_app/07_auth_and_security/security_misconceptions_full/), [OWASP Top 10](https://nikoriakviktot.github.io/notes_chat_app/07_auth_and_security/owasp_top_10_full/).
+- Django: [Password management](https://docs.djangoproject.com/en/5.2/topics/auth/passwords/), [Using the authentication system](https://docs.djangoproject.com/en/5.2/topics/auth/default/), [Deployment checklist](https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/), [Security in Django](https://docs.djangoproject.com/en/5.2/topics/security/)
+- DRF: [Authentication](https://www.django-rest-framework.org/api-guide/authentication/), [Permissions](https://www.django-rest-framework.org/api-guide/permissions/), [Throttling](https://www.django-rest-framework.org/api-guide/throttling/); [Simple JWT](https://django-rest-framework-simplejwt.readthedocs.io/)
+- [RFC 7519 — JSON Web Token](https://datatracker.ietf.org/doc/html/rfc7519), [jwt.io](https://jwt.io/) — розібрати токен
+- [OWASP Top 10](https://owasp.org/Top10/), [OWASP Password Storage Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html)

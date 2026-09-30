@@ -1,251 +1,58 @@
-# Урок 36. Typing + Pydantic
+# Урок 36. DRF overview + Django vs FastAPI
 
-З цього уроку FastAPI-гілка курсу будує **новинний агрегатор**: парсер стрічки новин, який крок за кроком обростає API, базою, кешем, підсумками від Gemini й Telegram-ботом. Починаємо не з нуля: вже є робочий парсер rbc.ua — функція `parse_rbc_news` з уроку про web scraping — і 168 новин, які вона зібрала.
+Після уроку 35 застосунок нотаток уміє все для людей: сторінки, форми, dashboard, вхід. Але нотатки потрібні й **програмам** — мобільному застосунку, Streamlit-дашборду, Telegram-боту (урок 48). Їм не потрібен HTML, їм потрібен JSON і REST API, як у метео-сервісу з уроку 33.
 
-Парсер повертає `list[dict]`. Словник нічого не гарантує: ключ може бути з одруківкою, значення — порожнім рядком, «дата» — лише `"14:19"`, URL — з чужого домену. Сьогодні два рефакторинги цього коду: **анотації типів** (їх перевіряє `mypy` до запуску) і **Pydantic-модель** `NewsItem` (вона перевіряє дані під час роботи). Pydantic — фундамент FastAPI: у наступному уроці ця сама модель стане відповіддю API.
+Сьогодні — **третій рефакторинг** того самого проєкту: додаємо REST API на Django REST Framework (DRF), **не змінюючи** ні моделей, ні сторінок. Наприкінці порівнюємо Django + DRF із FastAPI, яким далі піде FastAPI-гілка курсу.
 
-| Урок | Крок агрегатора |
-|---|---|
-| **36** | **парсер з типами; `NewsItem` на Pydantic** |
-| 37 | FastAPI: `GET /api/news`, `POST /api/scrape`, `/docs`, Postman |
-| 38 | SQLAlchemy: новини в базі |
-| 39 | middleware, кеш і rate limit на Redis |
-| 41 | тести API |
-| 43 | Gemini: підсумок, категорія, тональність |
-| 47 | Telegram-бот |
-| 48–50 | Docker, Compose, CI/CD |
+| Етап | Проєкт | Що змінюємо |
+|---|---|---|
+| урок 34 | `hello_project` | модель, адмінка, сторінка списку |
+| урок 35, рефакторинг 1 | `django_bootstrap_project` | форми, CRUD, PRG, Bootstrap |
+| урок 35, рефакторинг 2 | `crispy_notes_project` | crispy, dashboard, services/selectors, вхід |
+| **урок 36, рефакторинг 3** | [`crispy_notes_project` + API](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_4/lessons/lesson_36_drf_fastapi/crispy_notes_project) | **DRF: `/api/notes/` поверх тих самих services і selectors** |
 
-Проєкт: [`news_hub`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_4/lessons/lesson_36_typing_pydantic/news_hub).
+Код API — з Django-книги ([`notes_app/api.py`](https://github.com/NikoriakViktot/notes_chat_app/blob/main/notes_app/api.py) застосунку Notes Chat App), доповнений до повного CRUD; теорія DRF — у главі книги [REST API: Django REST Framework](https://nikoriakviktot.github.io/notes_chat_app/06_application_architecture/drf_rest_api_full/).
 
-**Що потрібно з попередніх уроків:** функції й словники (М1), класи й `@classmethod` (уроки 19–23), винятки (13), pytest (25), HTTP і парсинг відповіді (31), серіалізатори DRF (35) — Pydantic робить для FastAPI те саме.
+**Що потрібно з попередніх уроків:** проєкт `crispy_notes_project` (урок 35: форми, services/selectors, `@login_required`), REST: ресурси, методи, коди (урок 33), `requests` і `curl` (урок 32).
 
 **Після уроку ти зможеш:**
 
-- анотувати функції: `list[str]`, `dict[str, int]`, `X | None`, `Literal`, `TypedDict`;
-- перевірити код `mypy` і прочитати його помилки;
-- описати Pydantic-модель з обмеженнями полів (`Field`), валідаторами (`field_validator`, `model_validator`) і незмінністю (`frozen`);
-- відділити «сирі» дані з інтернету від перевірених і не губити відхилені мовчки;
-- отримати з моделі JSON і JSON Schema.
+- прочитати рефакторинг «+ API» як diff: що додалося, що лишилося незмінним;
+- описати **серіалізатор**: вхідний (що клієнт може надіслати) і вихідний (що клієнт бачить);
+- побудувати `ViewSet` і роутер поверх наявних services/selectors;
+- закрити API для анонімів і не віддавати чужі нотатки (IDOR);
+- отримати OpenAPI-схему API;
+- порівняти Django + DRF і FastAPI і обрати інструмент під задачу.
 
-**Ноутбук заняття:** [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_36_typing_pydantic/note_lesson_36_pydantic_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_36_typing_pydantic/note_lesson_36_pydantic.ipynb){ .solutions-link } — типи й моделі на справжніх новинах з перевірками.
-
-!!! note "Звідки дані"
-    Сайт `www.rbc.ua` зараз недоступний із середовища, де збирався курс, тому агрегатор працює на **знімку** — 168 новинах, які `parse_rbc_news` зібрала раніше (`data/rbc_news_snapshot.json`). Код парсера той самий; як запустити його на свіжій сторінці — у [`README.md`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_36_typing_pydantic/news_hub/README.md) проєкту.
+**Ноутбук заняття:** [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_36_drf_fastapi/note_lesson_36_drf_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_36_drf_fastapi/note_lesson_36_drf.ipynb){ .solutions-link } — серіалізатори й API з перевірками.
 
 ## Пригадай
 
-1. Що поверне `{"title": "x"}["titel"]` і коли ти про це дізнаєшся?
-2. Що робить `@classmethod` і чим він відрізняється від звичайного методу (урок 23)?
-3. Що перевіряв `NoteInputSerializer` в уроці 35 і що повертав для неправильних даних?
+1. Який код повертає REST API, коли створено ресурс? Коли видалено? Коли дані не пройшли перевірку (урок 33)?
+2. Навіщо в уроці 35 `NoteForm(user=request.user)`?
+3. Що робить view `note_create` з перевіреними даними форми в `crispy_notes_project`?
 
 ??? success "Відповіді"
 
-    1. `KeyError: 'titel'` — лише коли рядок виконається, тобто в найгірший момент: у роботі, на справжніх даних.
-    2. Отримує клас (`cls`), а не об'єкт — типовий спосіб написати «альтернативний конструктор», як `NewsItem.from_raw(...)` сьогодні.
-    3. Типи й обмеження полів; `is_valid()` → `False`, помилки за полями, API — `400`. Pydantic робить те саме, FastAPI поверне `422`.
+    1. `201 Created`, `204 No Content`; для неправильних даних Meteo API повертав `422`, DRF за замовчуванням повертає `400` — головне, однаково в усьому API.
+    2. Щоб у списку записників були лише записники цього користувача — чужий не підставиш навіть підробленим `POST`.
+    3. Передає їх у `services.create_note(...)`: view лише координує, зберігає сервіс.
 
-## Старт: з якого коду починаємо
-
-Функція `parse_rbc_news(html) -> list[dict]` шукає на сторінці контейнери новин, а якщо їх немає — посилання `/news/` з текстом «14:19 Заголовок». Кожна новина — словник з п'ятьма рядками. Подивимось на те, що вона насправді зібрала (у папці `news_hub`):
-
-```python
-import json
-from collections import Counter
-from urllib.parse import urlsplit
-
-news = json.loads(open("data/rbc_news_snapshot.json", encoding="utf-8").read())
-print("новин:", len(news), "| ключі:", list(news[0]))
-print("перша:", news[1])
-print("порожніх category:", sum(not n["category"] for n in news),
-      "| description:", sum(not n["description"] for n in news),
-      "| datetime:", sum(not n["datetime"] for n in news))
-print("формати datetime:", Counter(len(n["datetime"]) for n in news))
-print("домени:", Counter(urlsplit(n["url"]).hostname for n in news))
-print("шляхи:", Counter("/".join(urlsplit(n["url"]).path.split("/")[1:3]) for n in news))
-```
-
-```text
-новин: 168 | ключі: ['title', 'url', 'category', 'description', 'datetime']
-перша: {'title': 'У Путіна заявили, що вихід на мирну угоду з Україною "займе багато часу"', 'url': 'https://www.rbc.ua/rus/news/putina-zayavili-shcho-vihid-mirnu-ugodu-ukrayinoyu-1778325455.html', 'category': '', 'description': '', 'datetime': '14:19'}
-порожніх category: 168 | description: 168 | datetime: 31
-формати datetime: Counter({5: 137, 0: 31})
-домени: Counter({'www.rbc.ua': 167, 'auto.rbc.ua': 1})
-шляхи: Counter({'rus/news': 138, 'ukr/news': 30})
-```
-
-Висновки з реальних даних:
-
-- `category` і `description` **порожні завжди** — стрічка їх не містить; категорію й мову доведеться виводити з URL (`/rus/news/…`);
-- `datetime` — або `""`, або лише час `"HH:MM"` без дати;
-- одна новина — з піддомену `auto.rbc.ua`: код, що «ріже» URL рядком, на ній помилиться (див. [«Знайди помилку»](#find-bug)).
-
-Із `list[dict]` усе це з'ясовується лише під час запуску. Рефакторимо.
-
-## Рефакторинг 1. Анотації типів і TypedDict { #refactor-1 }
-
-**Анотація типу** — підказка в коді, якого типу змінна, параметр чи результат: `def headline(item: RawNews) -> str`. Python її **не перевіряє** під час роботи; перевіряє окрема програма — **mypy** — до запуску, як лінтер.
-
-| Запис | Що означає | Приклад з агрегатора |
-|---|---|---|
-| `str`, `int`, `bool` | простий тип | `title: str` |
-| `list[str]` | список рядків | `ITEM_SELECTORS: list[tuple[str, str]]` |
-| `dict[str, str]` | словник: ключ → значення | `CATEGORIES: dict[str, str]` |
-| `set[str]` | множина | `seen_urls: set[str]` |
-| `X \| None` | або `X`, або `None` | `published_time: time \| None` |
-| `Literal["uk", "ru"]` | лише ці значення | `lang` |
-| `TypedDict` | словник з **відомими** ключами й типами | `RawNews` |
-| `Callable[[Tag], bool]` | функція: аргументи → результат | фільтр тегів у парсері |
+## Рефакторинг 3. Сторінки → сторінки + JSON API { #refactor-3 }
 
 ### Що змінилося
 
 | Файл | Зміна | Навіщо |
 |---|---|---|
-| `news_hub/parser.py` | `parse_rbc_news` зі стартового ноутбука: анотації всіх функцій, `list[dict]` → `list[RawNews]`, дві стратегії — окремі функції | mypy бачить ключі новини; функцію легше тестувати |
-| `news_hub/models.py` | **новий** — `NewsItem`, `validate_news` (рефакторинг 2) | перевірка даних |
-| `news_hub/snapshot.py` | **новий** — завантаження знімка через `TypeAdapter` | знімок теж перевірений |
-| `tests/` | **нові** — 12 тестів | парсер, моделі, знімок |
+| `requirements.txt` | + `djangorestframework`, `drf-spectacular` | DRF і OpenAPI-схема |
+| `settings.py` | + `rest_framework`, `drf_spectacular` в `INSTALLED_APPS`; словник `REST_FRAMEWORK` | автентифікація й права API за замовчуванням |
+| `hello_project/urls.py` | + `DefaultRouter`, `/api/`, `/api/schema/` | адреси API |
+| `hello_app/api.py` | **новий** — `NoteOutputSerializer`, `NoteInputSerializer`, `NoteViewSet` | увесь API в одному файлі |
+| `hello_app/tests_api.py` | **новий** — 10 тестів | права, IDOR, валідація, CRUD, схема |
+| `hello_app/services.py` | `update_note` зберігає й `updated_at` | баг, який показав API — див. [«Знайди помилку»](#find-bug) |
+| `models.py`, `views.py`, `forms.py`, шаблони | **без змін** | сторінки працюють як раніше; 6 тестів уроку 35 проходять |
 
-```diff title="news_hub/parser.py (фрагмент)"
-+class RawNews(TypedDict):
-+    """Одна новина так, як її дає HTML: лише рядки, ще не перевірені."""
-+    title: str
-+    url: str
-+    category: str
-+    description: str
-+    datetime: str
-+
-+
--def parse_rbc_news(html: str) -> list[dict]:
-+def parse_rbc_news(html: str) -> list[RawNews]:
-     """HTML сторінки rbc.ua → список сирих новин."""
-     soup = BeautifulSoup(html, "html.parser")
--    news_list = []
--    seen_urls = set()
-+    seen_urls: set[str] = set()
-+    # Стратегія 2 — якщо контейнерів немає або вони нічого не дали
-+    return _parse_containers(soup, seen_urls) or _parse_links(soup, seen_urls)
-```
-
-!!! warning "`TypedDict` і Pydantic на Python 3.10–3.11"
-    `RawNews` імпортується з `typing_extensions`, а не з `typing`. Pydantic перевіряє `TypedDict` з `typing` лише на Python 3.12+; на 3.10 тест упав з `PydanticUserError: Please use typing_extensions.TypedDict instead of typing.TypedDict on Python < 3.12`. `typing_extensions` встановлюється разом із Pydantic.
-
-Логіка розбору не змінилася — змінилися підписи. Два приклади в `examples/` показують, що це дає. «Було» — функції, що працюють зі звичайним `dict`:
-
-```python title="examples/before_dict.py"
-def parse() -> list[dict]:
-    return [{"title": "Реформа ЗСУ", "url": "https://www.rbc.ua/rus/news/reforma-zsu", "datetime": ""}]
-
-
-def headline(item: dict) -> str:
-    return item["titel"].upper()          # одруківка в ключі
-
-
-def hour(item: dict) -> int:
-    return int(item["datetime"][:2])      # "" → ValueError, але mypy мовчить
-```
-
-«Стало» — ті самі помилки з типами `RawNews` і `NewsItem`:
-
-```python title="examples/after_typed.py"
-from news_hub.models import NewsItem
-from news_hub.parser import RawNews
-
-
-def headline(item: RawNews) -> str:
-    return item["titel"].upper()          # та сама одруківка
-
-
-def hour(item: NewsItem) -> int:
-    return item.published_time.hour       # у 31 новини часу немає (None)
-```
-
-```text
-$ mypy examples/before_dict.py
-Success: no issues found in 1 source file
-$ mypy examples/after_typed.py
-examples/after_typed.py:7: error: TypedDict "RawNews" has no key "titel"  [typeddict-item]
-examples/after_typed.py:7: note: Did you mean "title"?
-examples/after_typed.py:11: error: Item "None" of "time | None" has no attribute "hour"  [union-attr]
-Found 2 errors in 1 file (checked 1 source file)
-```
-
-- для `dict` будь-який ключ «правильний» — mypy мовчить, помилка чекає на запуск;
-- з `TypedDict` mypy знає ключі й навіть підказує `Did you mean "title"?`;
-- `time | None` змушує обробити `None` — саме той випадок, який у реальних даних трапляється 31 раз.
-
-Анотації — лише підказки. Під час роботи Python їх не перевіряє:
-
-```python
-from news_hub.parser import RawNews
-
-item: RawNews = {"title": 42, "url": None, "category": "", "description": "", "datetime": ""}  # type: ignore
-print(type(item), item["title"], item["url"])
-```
-
-```text
-<class 'dict'> 42 None
-```
-
-Дані з інтернету не прочитали нашого коду — їх треба **перевіряти під час роботи**. Це робить Pydantic.
-
-!!! tip "Поглиблено"
-    [typing — Support for type hints](https://docs.python.org/3/library/typing.html), [mypy: Type hints cheat sheet](https://mypy.readthedocs.io/en/stable/cheat_sheet_py3.html), [TypedDict](https://docs.python.org/3/library/typing.html#typing.TypedDict), [PEP 604 (`X | None`)](https://peps.python.org/pep-0604/).
-
-## Рефакторинг 2. Pydantic: модель `NewsItem` { #refactor-2 }
-
-**Pydantic** — бібліотека, яка перетворює анотації типів на **перевірку**: клас-модель описує поля й типи, а створення об'єкта або перевіряє й приводить дані, або кидає `ValidationError` з поясненням за полями.
-
-```python title="news_hub/models.py — NewsItem"
-class NewsItem(BaseModel):
-    model_config = ConfigDict(str_strip_whitespace=True, frozen=True)
-
-    title: str = Field(min_length=10, max_length=300)
-    url: HttpUrl
-    source: str                      # домен без www: rbc.ua, auto.rbc.ua
-    lang: Literal["uk", "ru"]        # з першої частини шляху: /ukr/ або /rus/
-    category: str                    # з розділу в шляху: /ukr/news/ → «Новини»
-    published_time: time | None = None
-
-    @model_validator(mode="before")
-    @classmethod
-    def derive_from_url(cls, data: Any) -> Any:
-        """source, lang і category, яких немає в HTML, беремо з URL — розбираючи його, а не рядком."""
-        if not isinstance(data, dict) or not isinstance(data.get("url"), str):
-            return data
-        parts = urlsplit(data["url"])
-        path = [segment for segment in parts.path.split("/") if segment]
-        derived: dict[str, Any] = {"source": (parts.hostname or "").removeprefix("www.")}
-        if path and path[0] in LANGS:
-            derived["lang"] = LANGS[path[0]]
-        if len(path) > 1:
-            derived["category"] = CATEGORIES.get(path[1], path[1].capitalize())
-        return derived | {key: value for key, value in data.items() if value not in (None, "")}
-
-    @field_validator("url")
-    @classmethod
-    def only_rbc(cls, url: HttpUrl) -> HttpUrl:
-        if not (url.host or "").endswith("rbc.ua"):
-            raise ValueError("очікуємо новину з rbc.ua")
-        return url
-
-    @classmethod
-    def from_raw(cls, raw: RawNews) -> "NewsItem":
-        """Сирий рядок парсера → модель. Поле datetime зі стрічки — це лише «HH:MM»."""
-        return cls.model_validate({"title": raw["title"], "url": raw["url"],
-                                   "category": raw["category"], "published_time": raw["datetime"]})
-```
-
-| Інструмент | Що робить у `NewsItem` |
-|---|---|
-| анотація поля | тип і приведення: `"14:19"` → `time(14, 19)`, рядок → `HttpUrl` |
-| `Field(min_length=10, max_length=300)` | обмеження значення |
-| `Literal["uk", "ru"]` | лише дозволені значення |
-| `field_validator("url")` | власне правило для одного поля — після перевірки типу |
-| `model_validator(mode="before")` | обробка **сирих** даних до перевірки полів: виводимо `source`, `lang`, `category` з URL |
-| `str_strip_whitespace=True` | обрізати пробіли в усіх рядках |
-| `frozen=True` | модель не можна змінити після створення |
-
-Як це працює покроково — на справжній новині зі знімка, тій самій з піддомену `auto.rbc.ua`:
+Останній рядок — головне: API додався **поруч** зі сторінками, бо логіка вже живе в services і selectors. Views сторінок і ViewSet API — два «входи» до тих самих функцій.
 
 ```mermaid
 flowchart TD
@@ -255,318 +62,536 @@ flowchart TD
     classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
     classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
 
-    subgraph S1 ["1. from_raw: RawNews → словник полів"]
+    subgraph IN ["два входи"]
         direction LR
-        R1["url: auto.rbc.ua/rus/news/…<br>category: '' · datetime: ''"] --> R2["title · url<br>category · published_time"]
+        BR["браузер<br>HTML-форми"] --> HV["views.py<br>NoteForm"]
+        CL["бот, Streamlit, curl<br>JSON"] --> AV["api.py<br>NoteViewSet + серіалізатори"]
     end
-    subgraph S2 ["2. model_validator before: derive_from_url"]
+    subgraph CORE ["одне ядро з уроку 35"]
         direction LR
-        D1["urlsplit<br>host auto.rbc.ua · path rus/news"] --> D2["source auto.rbc.ua<br>lang ru · category Новини"] --> D3["порожні '' не перекривають<br>виведене"]
+        SV["services<br>create, update, delete, pin"] --> M["моделі<br>Note, Notebook, Tag"]
+        SL["selectors<br>get_user_notes, get_note_detail"] --> M
     end
-    subgraph S3 ["3. поля: тип і обмеження"]
-        direction LR
-        F1["title: 10–300 символів"] --> F2["url: HttpUrl"] --> F3["lang: uk або ru"] --> F4["published_time: None"]
-    end
-    subgraph S4 ["4. field_validator after: only_rbc"]
-        direction LR
-        V1["url.host закінчується<br>на rbc.ua?"] --> V2["так"]
-    end
-    subgraph S5 ["5. результат"]
-        direction LR
-        OK["NewsItem, frozen<br>source auto.rbc.ua · Новини"]
-    end
-    S1 --> S2 --> S3 --> S4 --> S5
+    IN --> CORE
 
-    class R1,R2,D1,F1,F2,F3,F4 step
-    class D2,D3 warning
-    class V1 decision
-    class V2,OK success
+    class BR,CL step
+    class HV step
+    class AV success
+    class SV,SL warning
+    class M decision
 ```
 
-Будь-яка помилка на кроках 3–4 додається до однієї `ValidationError`; модель створюється, лише якщо помилок немає.
+### Налаштування
 
-Перевіримо на справжній новині зі знімка й на зіпсованих даних:
-
-```python
-from pydantic import ValidationError
-
-from news_hub.models import NewsItem
-from news_hub.snapshot import load_snapshot
-
-raw_news = load_snapshot()
-item = NewsItem.from_raw(raw_news[1])
-print(repr(item))
-print(item.model_dump_json())
-
-broken = {"title": "Коротко", "url": "https://example.com/ukr/news/x.html",
-          "category": "", "description": "", "datetime": "25:99"}
-try:
-    NewsItem.from_raw(broken)
-except ValidationError as error:
-    print(error.error_count(), "помилки:")
-    for e in error.errors():
-        print("  ", e["loc"][0], "→", e["msg"])
-
-try:
-    item.title = "Інший заголовок новини"
-except ValidationError as error:
-    print("frozen →", error.errors()[0]["msg"])
+```diff title="hello_project/settings.py"
+ INSTALLED_APPS = [
+     ...
+     "crispy_forms",
+     "crispy_bootstrap5",
++    "rest_framework",     # Django REST Framework: серіалізатори, ViewSet, роутер
++    "drf_spectacular",    # OpenAPI-схема з ViewSet і серіалізаторів
+     "debug_toolbar",
+     "hello_app",
+ ]
++
++REST_FRAMEWORK = {
++    "DEFAULT_AUTHENTICATION_CLASSES": [
++        "rest_framework.authentication.SessionAuthentication",
++        "rest_framework.authentication.BasicAuthentication",
++    ],
++    "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
++    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
++}
++SPECTACULAR_SETTINGS = {"TITLE": "CrispyNotes API", "VERSION": "1.0.0"}
 ```
 
-```text
-NewsItem(title='У Путіна заявили, що вихід на мирну угоду з Україною "займе багато часу"', url=HttpUrl('https://www.rbc.ua/rus/news/putina-zayavili-shcho-vihid-mirnu-ugodu-ukrayinoyu-1778325455.html'), source='rbc.ua', lang='ru', category='Новини', published_time=datetime.time(14, 19))
-{"title":"У Путіна заявили, що вихід на мирну угоду з Україною \"займе багато часу\"","url":"https://www.rbc.ua/rus/news/putina-zayavili-shcho-vihid-mirnu-ugodu-ukrayinoyu-1778325455.html","source":"rbc.ua","lang":"ru","category":"Новини","published_time":"14:19:00"}
-3 помилки:
-   title → String should have at least 10 characters
-   url → Value error, очікуємо новину з rbc.ua
-   published_time → Input should be in a valid time format, hour value is outside expected range of 0-23
-frozen → Instance is frozen
+- **Автентифікація** — хто робить запит: `SessionAuthentication` бере вхід із cookie сесії (той самий вхід, що на сторінках), `BasicAuthentication` — логін і пароль у заголовку (для `curl` і скриптів). Токени для мобільних застосунків — урок 41.
+- **Права** — що йому можна: `IsAuthenticated` — без входу API не віддає нічого, нотатки приватні.
+
+```diff title="hello_project/urls.py"
++from drf_spectacular.views import SpectacularAPIView
++from rest_framework.routers import DefaultRouter
++
++from hello_app.api import NoteViewSet
++
++router = DefaultRouter()
++router.register("notes", NoteViewSet, basename="note")
+
+ urlpatterns = [
+     path("admin/", admin.site.urls),
+     path("accounts/", include("django.contrib.auth.urls")),
++    path("api/", include(router.urls)),
++    path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
+     path("", include("hello_app.urls", namespace="hello_app")),
+ ] + debug_toolbar_urls()
 ```
 
-- `published_time` — справжній `datetime.time`, у JSON — `"14:19:00"`; `source`, `lang` і `category` Pydantic вивів з URL;
-- одна `ValidationError` зібрала **всі** три помилки, а не лише першу — для клієнта API це список, що виправити;
-- `frozen=True`: перевірений об'єкт уже не зіпсуєш випадковим присвоєнням.
+### Серіалізатори: що бачить клієнт і що може надіслати
 
-### Перевірка всього знімка: нічого не губиться мовчки
+**Серіалізатор** для API — те саме, що форма для сторінки: перетворює дані й перевіряє їх. Лише замість HTML — JSON. Беремо **два**:
 
-Парсер відсіює лише посилання, що точно не новини (текст коротший за 10 символів — пункти меню на кшталт «Новини»). Усе інше перевіряє `NewsItem`, а `validate_news` розділяє **перевірені** й **відхилені** з причинами — відхилене можна показати, записати в журнал чи порахувати:
+```python title="hello_app/api.py — серіалізатори"
+class NoteOutputSerializer(serializers.ModelSerializer):
+    """Що бачить клієнт: явний список полів, без user."""
+    priority_label = serializers.CharField(source="get_priority_display", read_only=True)
+    notebook = serializers.CharField(source="notebook.title", default=None, read_only=True)
+    tags = serializers.SlugRelatedField(many=True, read_only=True, slug_field="name")
 
-```python title="news_hub/models.py — validate_news"
-def validate_news(raw_items: list[RawNews]) -> tuple[list[NewsItem], list[Rejected]]:
-    """Розділяє сирі новини на перевірені й відхилені — нічого не губиться мовчки."""
-    valid: list[NewsItem] = []
-    rejected: list[Rejected] = []
-    for raw in raw_items:
+    class Meta:
+        model = Note
+        fields = ["id", "title", "content", "priority", "priority_label", "is_pinned",
+                  "notebook", "tags", "updated_at"]
+
+
+class NoteInputSerializer(serializers.Serializer):
+    """Що клієнт може надіслати. Власника задає сервер, а не клієнт."""
+    title = serializers.CharField(max_length=200)
+    content = serializers.CharField(required=False, allow_blank=True, default="")
+    priority = serializers.ChoiceField(choices=Note.PRIORITY_CHOICES, default=Note.PRIORITY_LOW)
+    is_pinned = serializers.BooleanField(required=False, default=False)
+    notebook = serializers.PrimaryKeyRelatedField(queryset=Notebook.objects.none(), required=False,
+                                                  allow_null=True, default=None)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # як NoteForm(user=...): записник можна вибрати лише зі своїх
+        request = self.context.get("request")
+        if request is not None:
+            self.fields["notebook"].queryset = Notebook.objects.filter(user=request.user)
+```
+
+| | `NoteForm` (урок 35) | `NoteInputSerializer` | `NoteOutputSerializer` |
+|---|---|---|---|
+| Напрям | браузер → сервер | клієнт → сервер | сервер → клієнт |
+| Формат | поля HTML-форми | JSON | JSON |
+| Перевірка | `is_valid()` → `cleaned_data` | `is_valid()` → `validated_data` | — |
+| Чужий записник | `queryset` за `user` | `queryset` за `user` | — |
+| `user` | немає в `fields` | немає в полях | немає в `fields` |
+
+Чому два, а не один `ModelSerializer` на все: вихід показує більше, ніж клієнт може змінити (`id`, `priority_label`, назву записника, теги, `updated_at`), а вхід приймає лише дозволене. Поле `user` не з'являється **ніде** — власника бере сервер з `request.user`.
+
+### ViewSet: один клас — усі дії
+
+```python title="hello_app/api.py — NoteViewSet (без list і опису схеми)"
+class NoteViewSet(viewsets.ViewSet):
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = Note.objects.none()   # лише для схеми: тип {id} у шляху; дані беруть selectors
+
+    def _get_note(self, request, pk):
         try:
-            valid.append(NewsItem.from_raw(raw))
-        except ValidationError as error:
-            messages = [f"{'.'.join(map(str, e['loc'])) or 'item'}: {e['msg']}" for e in error.errors()]
-            rejected.append(Rejected(raw=raw, errors=messages))
-    return valid, rejected
+            return selectors.get_note_detail(request.user, pk)
+        except Note.DoesNotExist:
+            raise NotFound("Нотатку не знайдено.")
+
+    def _input(self, request, **kwargs):
+        data = NoteInputSerializer(data=request.data, context={"request": request}, **kwargs)
+        data.is_valid(raise_exception=True)
+        return data.validated_data
+
+    def retrieve(self, request, pk=None):
+        return Response(NoteOutputSerializer(self._get_note(request, pk)).data)
+
+    def create(self, request):
+        note = services.create_note(user=request.user, **self._input(request))
+        return Response(NoteOutputSerializer(note).data, status=status.HTTP_201_CREATED)
+
+    def partial_update(self, request, pk=None):
+        note = self._get_note(request, pk)
+        note = services.update_note(note, **self._input(request, partial=True))
+        return Response(NoteOutputSerializer(note).data)
+
+    def destroy(self, request, pk=None):
+        services.delete_note(self._get_note(request, pk))
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=True, methods=["post"])
+    def pin(self, request, pk=None):
+        note = services.toggle_pin_note(self._get_note(request, pk))
+        return Response(NoteOutputSerializer(note).data)
+```
+
+Роутер перетворює методи класу на адреси:
+
+| Запит | Метод ViewSet | Виклик ядра | Успіх |
+|---|---|---|---|
+| `GET /api/notes/` | `list` | `selectors.get_user_notes` | `200` |
+| `POST /api/notes/` | `create` | `services.create_note` | `201` |
+| `GET /api/notes/{id}/` | `retrieve` | `selectors.get_note_detail` | `200` |
+| `PATCH /api/notes/{id}/` | `partial_update` | `services.update_note` | `200` |
+| `DELETE /api/notes/{id}/` | `destroy` | `services.delete_note` | `204` |
+| `POST /api/notes/{id}/pin/` | `pin` (`@action`) | `services.toggle_pin_note` | `200` |
+
+- **ViewSet, а не ModelViewSet.** `ModelViewSet` сам робить `Note.objects…` і `serializer.save()` — він обійшов би services. Тут ViewSet лише координує, як view сторінок.
+- **IDOR** (Insecure Direct Object Reference) — отримати чужий об'єкт, підставивши його `id`. `get_note_detail(request.user, pk)` шукає нотатку **серед нотаток користувача**; чужа — `404`, ніби її немає.
+- `raise_exception=True` — помилки валідації одразу стають відповіддю `400` з помилками за полями.
+- Над класом у файлі стоїть `@extend_schema_view(...)`: звичайний `ViewSet` не знає, які серіалізатори в нього на вході й виході, тож для OpenAPI-схеми їх описано явно (`request=NoteInputSerializer`, `responses=NoteOutputSerializer`). Без цього drf-spectacular попереджає «unable to guess serializer» і будує схему без тіл запитів.
+
+### API в роботі
+
+База, двоє користувачів, записник і нотатки — через ті самі services (у папці `crispy_notes_project`):
+
+```text
+$ python manage.py migrate -v 0
 ```
 
 ```python
-from collections import Counter
+from django.contrib.auth.models import User
+from hello_app import services
+from hello_app.models import Notebook
 
-from news_hub.models import validate_news
-
-valid, rejected = validate_news(raw_news)
-print("перевірених:", len(valid), "| відхилених:", len(rejected))
-print(Counter((n.source, n.lang, n.category) for n in valid))
-print("без часу публікації:", sum(n.published_time is None for n in valid))
-
-valid, rejected = validate_news(raw_news[:2] + [broken])
-print(len(valid), "перевірених;", rejected[0].errors)
+olena = User.objects.create_user("olena", password="pass-12345")
+bob = User.objects.create_user("bob", password="pass-12345")
+study = Notebook.objects.create(user=olena, title="Навчання")
+services.create_note(user=olena, title="Вивчити DRF", content="serializers, viewsets", priority=3, notebook=study)
+services.create_note(user=olena, title="Купити квитки", priority=2)
+services.create_note(user=bob, title="Нотатка Боба")
+print(olena.notes.count(), bob.notes.count())
 ```
 
 ```text
-перевірених: 168 | відхилених: 0
-Counter({('rbc.ua', 'ru', 'Новини'): 137, ('rbc.ua', 'uk', 'Новини'): 30, ('auto.rbc.ua', 'ru', 'Новини'): 1})
-без часу публікації: 31
-2 перевірених; ['title: String should have at least 10 characters', 'url: Value error, очікуємо новину з rbc.ua', 'published_time: Input should be in a valid time format, hour value is outside expected range of 0-23']
+2 1
 ```
 
-Увесь знімок пройшов перевірку — стартовий парсер збирав коректні новини. Але тепер це **доведено** кодом і тестом `test_snapshot_is_valid`, а не припущено.
-
-### JSON Schema: опис моделі для інших програм
-
-З моделі Pydantic будує **JSON Schema** — машинний опис полів і обмежень. FastAPI вставить його у `/docs` і OpenAPI-схему (урок 37), клієнт на іншій мові згенерує з нього свої класи:
+Запити — тестовим клієнтом DRF `APIClient` (новий shell). `force_authenticate` — «увійти» без пароля, лише для тестів:
 
 ```python
-schema = NewsItem.model_json_schema()
-print(schema["required"])
-print(schema["properties"]["title"])
-print(schema["properties"]["lang"])
-print(schema["properties"]["published_time"])
+from django.test.utils import setup_test_environment
+from rest_framework.test import APIClient
+
+from hello_app.models import Note, Notebook
+
+setup_test_environment()
+api = APIClient()
+
+r = api.get("/api/notes/")
+print("анонім        →", r.status_code, r.data)
+
+olena = Note.objects.get(title="Вивчити DRF").user
+api.force_authenticate(olena)
+r = api.get("/api/notes/")
+print("список        →", r.status_code, [(n["title"], n["priority_label"], n["notebook"]) for n in r.data])
+
+r = api.post("/api/notes/", {"title": "Здати проєкт", "priority": 4, "user": 999}, format="json")
+created = r.data
+print("створено      →", r.status_code, {k: v for k, v in created.items() if k != "updated_at"})
+print("власник       →", Note.objects.get(pk=created["id"]).user)
+
+r = api.post("/api/notes/", {"title": "", "priority": 9}, format="json")
+print("помилки       →", r.status_code, {field: [str(e) for e in errors] for field, errors in r.data.items()})
+
+bob_notebook = Notebook.objects.create(user=Note.objects.get(title="Нотатка Боба").user, title="Записник Боба")
+r = api.post("/api/notes/", {"title": "Чужий записник", "notebook": bob_notebook.pk}, format="json")
+print("чужий записник→", r.status_code, [str(e) for e in r.data["notebook"]])
+
+bob_note = Note.objects.get(title="Нотатка Боба")
+print("чужа нотатка  →", api.get(f"/api/notes/{bob_note.pk}/").status_code, api.delete(f"/api/notes/{bob_note.pk}/").status_code)
+
+r = api.patch(f"/api/notes/{created['id']}/", {"title": "Здати проєкт до п'ятниці"}, format="json")
+print("PATCH         →", r.status_code, r.data["title"], r.data["priority"])
+r = api.post(f"/api/notes/{created['id']}/pin/")
+print("pin           →", r.status_code, r.data["is_pinned"])
+r = api.delete(f"/api/notes/{created['id']}/")
+print("DELETE        →", r.status_code, Note.objects.filter(pk=created["id"]).exists())
 ```
 
 ```text
-['title', 'url', 'source', 'lang', 'category']
-{'maxLength': 300, 'minLength': 10, 'title': 'Title', 'type': 'string'}
-{'enum': ['uk', 'ru'], 'title': 'Lang', 'type': 'string'}
-{'anyOf': [{'format': 'time', 'type': 'string'}, {'type': 'null'}], 'default': None, 'title': 'Published Time'}
+Forbidden: /api/notes/
+анонім        → 403 {'detail': ErrorDetail(string='Реквізити перевірки достовірності не надані.', code='not_authenticated')}
+список        → 200 [('Вивчити DRF', '🟠 Високий', 'Навчання'), ('Купити квитки', '🟡 Середній', None)]
+створено      → 201 {'id': 4, 'title': 'Здати проєкт', 'content': '', 'priority': 4, 'priority_label': '🔴 Терміново', 'is_pinned': False, 'notebook': None, 'tags': []}
+власник       → olena
+Bad Request: /api/notes/
+помилки       → 400 {'title': ['Це поле не може бути порожнім.'], 'priority': ['"9" не є коректним вибором.']}
+Bad Request: /api/notes/
+чужий записник→ 400 ['Недопустимий первинний ключ "2" - об\'єкт не існує.']
+Not Found: /api/notes/3/
+Not Found: /api/notes/3/
+чужа нотатка  → 404 404
+PATCH         → 200 Здати проєкт до п'ятниці 4
+pin           → 200 True
+DELETE        → 204 False
 ```
 
-`TypedDict` Pydantic теж уміє перевірити — через `TypeAdapter`. Так `snapshot.py` перевіряє структуру файлу знімка, перш ніж віддати його далі:
+- рядки `Forbidden: …`, `Bad Request: …`, `Not Found: …` — журнал Django, не `print` (урок 35): кожна відповідь 4xx потрапляє в термінал;
+- анонім — `403`: перший клас автентифікації, `SessionAuthentication`, не вміє «попросити» облікові дані. Якби першим стояв `BasicAuthentication`, відповідь була б `401` із заголовком `WWW-Authenticate`;
+- `"user": 999` у тілі проігноровано: такого поля у вхідному серіалізаторі немає, власника задав сервер;
+- чужий записник — `400`, чужа нотатка — `404` і на читання, і на видалення;
+- `PATCH` змінив лише `title`, `priority` лишився `4`: `partial=True` не підставляє значень за замовчуванням;
+- `pin` — власна дія (`@action`), роутер сам додав адресу `/api/notes/{id}/pin/`.
 
-```python title="news_hub/snapshot.py (фрагмент)"
-_RAW_LIST = TypeAdapter(list[RawNews])       # TypedDict теж можна перевірити Pydantic-ом
+### Browsable API і OpenAPI-схема
 
+Відкрий `http://127.0.0.1:8000/api/notes/` у **браузері** після входу на сайт — DRF замість сирого JSON покаже HTML-сторінку з відповіддю й заголовками (він дивиться на заголовок `Accept` браузера). Вхід — той самий, що на сторінках, завдяки `SessionAuthentication`:
 
-def load_snapshot(path: Path = SNAPSHOT) -> list[RawNews]:
-    """JSON-файл → список RawNews; неправильна структура файлу — ValidationError."""
-    return _RAW_LIST.validate_python(json.loads(path.read_text(encoding="utf-8")))
+![Browsable API DRF: список нотаток Олени у форматі JSON](img/lesson_36_browsable.png)
+
+drf-spectacular будує опис API за стандартом OpenAPI з ViewSet і серіалізаторів — те, що FastAPI робить сам (урок 33):
+
+```python
+r = api.get("/api/schema/")
+schema = r.content.decode()
+print(r.status_code, r["Content-Type"])
+print([line.strip() for line in schema.splitlines() if line.startswith("  /api/")])
 ```
 
-!!! tip "Поглиблено"
-    Pydantic: [Models](https://docs.pydantic.dev/latest/concepts/models/), [Fields](https://docs.pydantic.dev/latest/concepts/fields/), [Validators](https://docs.pydantic.dev/latest/concepts/validators/), [Type Adapter](https://docs.pydantic.dev/latest/concepts/type_adapter/), [JSON Schema](https://docs.pydantic.dev/latest/concepts/json_schema/). Pydantic-схеми в Django — глава книги [Django Ninja](https://nikoriakviktot.github.io/notes_chat_app/06_application_architecture/django_ninja_templates_full/).
-
-## Архітектура: межа довіри { #architecture }
-
-```mermaid
-flowchart TD
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
-
-    subgraph BEFORE ["до рефакторингу: словники скрізь"]
-        direction LR
-        H0["HTML rbc.ua"] --> P0["parse_rbc_news<br>list of dict"] --> U0["pandas, CSV, JSON<br>KeyError під час запуску"]
-    end
-    subgraph AFTER ["урок 36: перевірка на межі"]
-        direction LR
-        H1["HTML або знімок"] --> P1["parse_rbc_news<br>list of RawNews"] --> V["NewsItem<br>validate_news"]
-        V -- "відхилені + причини" --> R["Rejected"]
-        V -- "перевірені" --> OK["далі лише NewsItem"]
-    end
-    subgraph NEXT ["наступні уроки"]
-        direction LR
-        A["API, урок 37"] ~~~ D["база, урок 38"] ~~~ G["Gemini, урок 43"] ~~~ B["бот, урок 47"]
-    end
-    BEFORE --> AFTER --> NEXT
-
-    class H0,H1,P1 step
-    class P0,U0 error
-    class V warning
-    class R error
-    class OK,A,D,G,B success
+```text
+200 application/vnd.oai.openapi; charset=utf-8
+['/api/notes/:', '/api/notes/{id}/:', '/api/notes/{id}/pin/:', '/api/schema/:']
 ```
 
-- **Межа довіри.** Усе, що прийшло ззовні (HTML, файл, тіло запиту), — «сире» (`RawNews`, лише рядки). Перевірка відбувається **один раз** — у `NewsItem`. Далі код працює з гарантіями: `url` — справжній URL з rbc.ua, `lang` — `"uk"` або `"ru"`, `published_time` — `time` або `None`.
-- **Два інструменти — два моменти.** `mypy` ловить помилки в *коді* до запуску; Pydantic — помилки в *даних* під час роботи. Одне не замінює інше.
-- **Модель — контракт.** API (37), база (38), Gemini (43) і бот (47) отримуватимуть `NewsItem`, а не словник: змінимо модель — mypy і тести покажуть усі місця, які це зачепило.
+Зі схеми Swagger UI будує інтерактивну документацію, а Postman імпортує всі запити (урок 38).
 
-### Тести і mypy
+### Тести
+
+`tests_api.py` перевіряє права (анонім, чужа нотатка, чужий записник), валідацію, створення з власником від сервера, `PATCH`, `DELETE`, `pin`, фільтр за записником і схему. Разом з тестами сторінок уроку 35 — це доказ, що рефакторинг нічого не зламав:
 
 Приклад виводу (час залежить від машини):
 
 ```text
-$ pytest -q -p no:cacheprovider
-............                                                                                 [100%]
-12 passed in 0.10s
-$ mypy --strict news_hub
-Success: no issues found in 4 source files
+$ python manage.py test
+Found 16 test(s).
+System check identified no issues (0 silenced).
+Creating test database for alias 'default'...
+................
+----------------------------------------------------------------------
+Ran 16 tests in 8.687s
+
+OK
+Destroying test database for alias 'default'...
 ```
 
-`--strict` вмикає найсуворіші перевірки: кожна функція має анотації, жодного неявного `Any`.
+!!! tip "Поглиблено"
+    - Django-книга: [REST API: Django REST Framework](https://nikoriakviktot.github.io/notes_chat_app/06_application_architecture/drf_rest_api_full/) — `APIView.dispatch()` зсередини, об'єктні права, Input/Output-серіалізатори; [Serializers — Transport Layer](https://nikoriakviktot.github.io/notes_chat_app/06_application_architecture/django_serializers_full/); [Services і Selectors](https://nikoriakviktot.github.io/notes_chat_app/06_application_architecture/services_selectors_full/)
+    - DRF: [Serializers](https://www.django-rest-framework.org/api-guide/serializers/), [ViewSets](https://www.django-rest-framework.org/api-guide/viewsets/), [Routers](https://www.django-rest-framework.org/api-guide/routers/), [Permissions](https://www.django-rest-framework.org/api-guide/permissions/); [drf-spectacular](https://drf-spectacular.readthedocs.io/)
+
+## Django + DRF чи FastAPI { #architecture }
+
+Той самий API нотаток на FastAPI — [`fastapi_notes.py`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_36_drf_fastapi/fastapi_notes.py) у папці уроку: ті самі поля, обмеження й адреси. Дані тут у словнику в пам'яті — база для FastAPI (SQLAlchemy) — урок 39.
+
+```python title="fastapi_notes.py (скорочено)"
+class NoteIn(BaseModel):
+    title: str = Field(min_length=1, max_length=200)
+    content: str = ""
+    priority: int = Field(1, ge=1, le=4)
+    is_pinned: bool = False
+
+
+class NoteOut(NoteIn):
+    id: int
+
+
+@app.post("/api/notes/", status_code=201, response_model=NoteOut)
+def create_note(body: NoteIn):
+    note_id = max(NOTES, default=0) + 1
+    NOTES[note_id] = {"id": note_id, **body.model_dump()}
+    return NOTES[note_id]
+
+
+@app.get("/api/notes/{note_id}/", response_model=NoteOut)
+def get_note(note_id: int):
+    if note_id not in NOTES:
+        raise HTTPException(404, "Нотатку не знайдено.")
+    return NOTES[note_id]
+```
+
+Ті самі запити тестовим клієнтом FastAPI (у папці уроку `lesson_36_drf_fastapi`, де лежить `fastapi_notes.py`):
+
+```python
+from fastapi.testclient import TestClient
+
+from fastapi_notes import app
+
+fast = TestClient(app)
+r = fast.post("/api/notes/", json={"title": "Вивчити FastAPI", "priority": 4})
+print("створено  →", r.status_code, r.json())
+bad = fast.post("/api/notes/", json={"title": "", "priority": 9})
+print("помилки   →", bad.status_code, [(e["loc"][-1], e["msg"]) for e in bad.json()["detail"]])
+print("pin       →", fast.post("/api/notes/1/pin/").json()["is_pinned"], "| немає →", fast.get("/api/notes/7/").status_code)
+print("схема     →", sorted(app.openapi()["paths"]))
+```
+
+```text
+створено  → 201 {'title': 'Вивчити FastAPI', 'content': '', 'priority': 4, 'is_pinned': False, 'id': 1}
+помилки   → 422 [('title', 'String should have at least 1 character'), ('priority', 'Input should be less than or equal to 4')]
+pin       → True | немає → 404
+схема     → ['/api/notes/', '/api/notes/{note_id}/', '/api/notes/{note_id}/pin/']
+```
+
+| | Django + DRF | FastAPI |
+|---|---|---|
+| Що це | повний вебфреймворк + пакет для API | мікрофреймворк для API |
+| База даних | вбудований ORM + міграції | обираєш сам: SQLAlchemy + Alembic (урок 39) |
+| Валідація | серіалізатори | Pydantic-моделі за анотаціями типів (урок 37) |
+| Помилка валідації | `400`, помилки за полями | `422`, список `detail` з `loc` |
+| Адмінка, вхід, сесії, форми | є з коробки | немає: окремі пакети або свій код |
+| Документація API | drf-spectacular (пакет) | `/docs` з коробки |
+| Async | частково (урок 46) | від початку async (урок 28) |
+| Коли обрати | сайт + адмінка + API над однією базою — як наші нотатки | окремий API-сервіс, парсер, ML-модель за API, багато I/O |
+
+```mermaid
+flowchart TD
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+
+    Q["новий бекенд"] --> A{"потрібні HTML-сторінки,<br>адмінка, вхід користувачів?"}
+    A -- так --> D["Django<br>+ DRF для API"]
+    A -- ні --> B{"вже є Django-проєкт<br>з цими даними?"}
+    B -- так --> D
+    B -- ні --> C{"окремий API-сервіс:<br>парсер, ML, багато I/O?"}
+    C -- так --> F["FastAPI"]
+    C -- "ні, простий CRUD" --> E["будь-який:<br>обирай, що знає команда"]
+
+    class Q step
+    class A,B,C decision
+    class D,F success
+    class E warning
+```
+
+**Куди далі.** Django-гілка курсу продовжує нотатки: вхід і спільний доступ (урок 41), тести (41), архітектура services/selectors (44), чат на WebSocket (45). FastAPI-гілка з уроку 37 будує **новинний агрегатор** — стартовий парсер новин, який крок за кроком обростає Pydantic-моделями, FastAPI, базою, кешем, підсумками від Gemini і Telegram-ботом.
 
 ## Практика { #practice }
 
-### Розібраний приклад: `model_validator(mode="before")`
+### Розібраний приклад: фільтр за записником
 
-HTML не містить ні мови, ні категорії — але вони є в URL: `https://www.rbc.ua/ukr/news/…`. `derive_from_url` отримує **сирий** словник до перевірки полів і доповнює його:
+Клієнту потрібні нотатки одного записника: `GET /api/notes/?notebook=<id>`. Писати новий ORM-запит не треба — `selectors.get_user_notes` уже вміє фільтр `notebook=` (ним користується sidebar сторінок). У `list` лише перевіряємо параметр:
 
-1. `urlsplit(url)` ділить URL на частини: `hostname` → `www.rbc.ua`, `path` → `/ukr/news/…`;
-2. `source` — домен без `www.`;
-3. перша частина шляху → `lang` через `LANGS = {"ukr": "uk", "rus": "ru"}`;
-4. друга → `category` через словник `CATEGORIES` з прототипу `news_dashboard`;
-5. `derived | {…}` — значення, які прийшли непорожніми, мають пріоритет над виведеними.
+```diff title="hello_app/api.py — list"
+     def list(self, request):
+-        notes = selectors.get_user_notes(request.user, search=request.query_params.get("search"))
++        params = request.query_params
++        notebook = None
++        if "notebook" in params:                       # ?notebook=<id> — лише свій записник
++            if params["notebook"].isdigit():
++                notebook = Notebook.objects.filter(user=request.user, pk=params["notebook"]).first()
++            if notebook is None:
++                raise NotFound("Записник не знайдено.")
++        notes = selectors.get_user_notes(request.user, notebook=notebook, search=params.get("search"))
+         return Response(NoteOutputSerializer(notes, many=True).data)
+```
 
 ```python
-for url in ["https://www.rbc.ua/ukr/news/budget-1.html",
-            "https://auto.rbc.ua/rus/news/speka-1778085857.html",
-            "https://www.rbc.ua/ukr/economic/hryvnia-2.html"]:
-    news = NewsItem.model_validate({"title": "Заголовок для перевірки", "url": url})
-    print(news.source, news.lang, news.category)
+study = Notebook.objects.get(title="Навчання")
+for query in ({"notebook": study.pk}, {"notebook": bob_notebook.pk}, {"notebook": "abc"}, {"search": "квитки"}):
+    r = api.get("/api/notes/", query)
+    print(query, "→", r.status_code, [n["title"] for n in r.data] if r.status_code == 200 else r.data)
 ```
 
 ```text
-rbc.ua uk Новини
-auto.rbc.ua ru Новини
-rbc.ua uk Економіка
+{'notebook': 1} → 200 ['Вивчити DRF']
+Not Found: /api/notes/
+{'notebook': 2} → 404 {'detail': ErrorDetail(string='Записник не знайдено.', code='not_found')}
+Not Found: /api/notes/
+{'notebook': 'abc'} → 404 {'detail': ErrorDetail(string='Записник не знайдено.', code='not_found')}
+{'search': 'квитки'} → 200 ['Купити квитки']
 ```
 
-`mode="before"` — бо на цьому етапі полів `source`, `lang`, `category` ще немає: після перевірки полів (`mode="after"`) модель без них просто не створилася б.
+- записник шукаємо **серед своїх** — чужий `id` дає `404`, як чужа нотатка;
+- `"abc"` не падає з `500`: `isdigit()` відсікає нечислове значення до запиту в базу;
+- `search` уже був у selector — у API він з'явився одним рядком.
 
-### Зміни приклад
+### Зміни приклад: архівні нотатки
 
-1. На rbc.ua є й англомовні сторінки (`/eng/news/…`). Додай `"eng": "en"` у `LANGS` і `"en"` у `Literal`. Перевір, що `mypy --strict` не скаржиться, а новина з `/eng/` отримує `lang="en"`.
-2. Заголовок з одних великих літер — клікбейт. Додай `field_validator("title")`, який відхиляє заголовок, де `title.isupper()`. Допиши тест у `tests/test_models.py`.
+`selectors.get_user_notes` має й параметр `archived=`. Додай у `list` параметр `?archived=true`: без нього — звичайні нотатки, з ним — архівні. Перевір: нотатка, архівована через `services.archive_note(note)`, зникає зі списку й з'являється за `?archived=true`.
 
-### Спробуй самостійно: модель звіту парсингу
+### Спробуй самостійно: API записників
 
-Опиши модель `ScrapeReport` — відповідь майбутнього `POST /api/scrape` (урок 37):
+Зроби `/api/notebooks/` за тим самим рецептом: `NotebookOutputSerializer` (`id`, `title`, `color`, `is_default`, кількість нотаток), `NotebookInputSerializer`, `NotebookViewSet` з `list` і `create`.
 
-- `source: HttpUrl` — яку сторінку парсили;
-- `scraped_at: datetime` — коли; за замовчуванням — зараз (`Field(default_factory=…)`);
-- `items: list[NewsItem]`, `rejected: list[Rejected]`;
-- `@computed_field` `total` — скільки всього новин (перевірених + відхилених).
+**Критерії перевірки:**
 
-**Критерії перевірки:** `ScrapeReport(source=…, items=valid, rejected=rejected).model_dump()` містить `total`; неправильний `source` — `ValidationError`; `mypy --strict` чистий.
+- читання — через `selectors.get_user_notebooks`, створення — через `services.create_notebook`;
+- `GET /api/notebooks/` показує лише свої записники; анонім — `403`;
+- другий записник з `"is_default": true` знімає прапорець з першого (це вже робить сервіс);
+- тест у `tests_api.py` на кожен пункт.
 
 ### Знайди помилку { #find-bug }
 
-Так визначають категорію новини, розбираючи URL рядком:
+API повертає поле `updated_at`. Перевіримо, як воно оновлюється, коли модель зберігають з `update_fields` (у shell, де вже є `olena`):
 
 ```python
-url = "https://auto.rbc.ua/rus/news/speka-pislya-holodiv-ryatuemo-vid-rizikiv-1778085857.html"
+import time
 
-url_parts = [p for p in url.replace("https://www.rbc.ua", "").split("/") if p]
-category_map = {"news": "Новини", "economic": "Економіка", "politics": "Політика"}
-raw_cat = url_parts[1] if len(url_parts) > 1 else (url_parts[0] if url_parts else "")
-print(url_parts[:3], "→", category_map.get(raw_cat, raw_cat.capitalize() or "Загальні"))
+from hello_app.models import Note
+
+note = Note.objects.create(user=olena, title="Стара назва")
+before = note.updated_at
+time.sleep(0.01)
+
+note.title = "Нова назва"
+note.save(update_fields=["title"])                 # зберегти лише title
+note.refresh_from_db()
+print("лише title        → змінився updated_at?", note.updated_at != before)
+
+note.title = "Ще новіша назва"
+note.save(update_fields=["title", "updated_at"])   # title разом з updated_at
+note.refresh_from_db()
+print("title + updated_at → змінився updated_at?", note.updated_at != before)
 ```
 
 ```text
-['https:', 'auto.rbc.ua', 'rus'] → Auto.rbc.ua
+лише title        → змінився updated_at? False
+title + updated_at → змінився updated_at? True
 ```
 
-URL — справжній, зі знімка. Чому категорія «Auto.rbc.ua»?
+Чому `updated_at = models.DateTimeField(auto_now=True)` не оновився в першому випадку і чим це шкодить застосунку?
 
 ??? success "Відповідь"
 
-    `url.replace("https://www.rbc.ua", "")` — розбір URL **рядком**: він працює лише для одного точного домену. Для піддомену `auto.rbc.ua` заміна нічого не прибирає, `split("/")` дає `['https:', 'auto.rbc.ua', 'rus', …]`, і «категорією» стає домен. Помилка тиха — жодного винятку, лише неправильні дані в дашборді.
+    `auto_now` виставляє час у `pre_save()` — але Django викликає `pre_save()` і записує в базу **лише поля з `update_fields`**. Якщо `update_note` збирає `changed_fields` (`title`, `content`, …) і не додає `updated_at`, час зміни назавжди лишається часом створення.
 
-    `NewsItem` розбирає URL як URL: `urlsplit` окремо дає `hostname` і `path`, тож піддомен ні на що не впливає — див. розібраний приклад: `auto.rbc.ua ru Новини`. Тест `test_subdomain_is_parsed_not_replaced` закріплює поведінку.
+    Шкода реальна: `selectors.get_user_notes` сортує за `-updated_at` — щойно відредагована нотатка не піднімається вгору списку, а клієнт API отримує неправдивий час зміни. Помилка тиха: жодного винятку, лише неправильні дані.
 
-    Правило: структуровані дані (URL, дати, JSON) розбирай бібліотекою, а не `replace`/`split`.
+    Правильно — одне слово: `note.save(update_fields=changed_fields + ['updated_at'])`. Тест `test_patch_changes_only_sent_fields_and_updated_at` у `tests_api.py` це перевіряє.
 
 ## Підсумок
 
 | Поняття | Що запам'ятати |
 |---|---|
-| Анотації типів | підказки: `def f(x: int) -> str`; Python їх не перевіряє під час роботи |
-| `mypy` | перевіряє типи **до запуску**; `--strict` — найсуворіше |
-| `X \| None` | змушує обробити `None` |
-| `Literal[...]` | лише дозволені значення |
-| `TypedDict` | словник з відомими ключами: mypy ловить одруківки |
-| Pydantic `BaseModel` | перевірка й приведення даних **під час роботи**; помилка — `ValidationError` з усіма полями |
-| `Field(...)` | обмеження: `min_length`, `max_length`, `ge`, `le`, `default_factory` |
-| `field_validator` / `model_validator` | правило для поля / для всього об'єкта; `mode="before"` — до перевірки полів |
-| `model_config` | `str_strip_whitespace`, `frozen` |
-| `model_dump()` / `model_dump_json()` | модель → словник / JSON |
-| `model_json_schema()` | опис моделі для інших програм — основа `/docs` у FastAPI |
-| `TypeAdapter` | перевірка типів без моделі: `list[RawNews]` |
-| Межа довіри | дані ззовні — «сирі»; перевіряй один раз на вході, далі — лише моделі |
+| Рефакторинг «+ API» | новий вхід до тих самих services/selectors; моделі й сторінки не змінюються, старі тести проходять |
+| DRF | пакет для REST API на Django: серіалізатори, ViewSet, роутер, auth, permissions |
+| `REST_FRAMEWORK` | автентифікація (хто) і права (що можна) за замовчуванням |
+| Серіалізатор | для API те саме, що форма для сторінки: JSON ↔ дані + перевірка |
+| Input / Output | вхід приймає лише дозволене; вихід показує більше; `user` задає сервер |
+| `fields` | завжди явний список; `"__all__"` відкриває приховані колонки |
+| ViewSet + роутер | методи `list`, `create`, `retrieve`, `partial_update`, `destroy` → адреси; `@action` → власна дія |
+| IDOR | шукати об'єкт серед об'єктів користувача → чужий `id` дає `404` |
+| Коди DRF | `200`, `201`, `204`, `400`, `403` (або `401`), `404` |
+| OpenAPI | drf-spectacular: `/api/schema/` |
+| DRF vs FastAPI | «батарейки» й одна база для сайту, адмінки й API — проти легкого async API-сервісу з Pydantic |
 
 ### Самоперевірка
 
-1. Чим відрізняється перевірка `mypy` від перевірки Pydantic? Чи можна обійтися чимось одним?
-2. Що дає `TypedDict` порівняно з `dict`?
-3. Чому `published_time: time | None`, а не `time`?
-4. Навіщо `model_validator(mode="before")` у `NewsItem`, а не `mode="after"`?
-5. Чому `validate_news` повертає відхилені новини, а не просто пропускає їх?
-6. Чим небезпечний розбір URL через `replace`/`split`?
+1. Що змінилося в проєкті в рефакторингу 3, а що — ні? Як це перевірити?
+2. Навіщо два серіалізатори замість одного `ModelSerializer`?
+3. Що станеться з `"user": 999` у тілі `POST`?
+4. Чому `ViewSet`, а не `ModelViewSet`?
+5. Чому чужа нотатка — `404`, а не `403`?
+6. Чому без входу `403`, а не `401`?
+7. Коли обрати Django + DRF, а коли FastAPI?
 
 ??? success "Відповіді"
 
-    1. `mypy` перевіряє **код** до запуску; Pydantic — **дані** під час роботи. Код може бути бездоганно типізований, а дані з інтернету — будь-якими, і навпаки — тож потрібні обидва.
-    2. mypy знає ключі й типи значень: одруківка `"titel"` — помилка до запуску, а не `KeyError` у роботі.
-    3. У 31 новини зі знімка часу немає. `time | None` чесно це описує, і mypy змусить обробити `None`.
-    4. `source`, `lang`, `category` не приходять з HTML — їх треба вивести з URL **до** перевірки полів, інакше модель не створиться без обов'язкових полів.
-    5. Щоб нічого не губилося мовчки: відхилене можна порахувати, показати й виправити парсер.
-    6. Він працює лише для точного збігу рядка: піддомен, `http://` замість `https://`, параметри запиту — і результат тихо стає неправильним. `urlsplit` розбирає URL за стандартом.
+    1. Додалися DRF, налаштування, `api.py`, адреси `/api/…` і тести API; моделі, views, форми й шаблони — без змін. Перевірка — усі тести, і старі (сторінки), і нові (API), проходять.
+    2. Клієнт бачить більше, ніж може змінити (`id`, `priority_label`, `updated_at`, назву записника). Окремий вхідний серіалізатор приймає лише дозволені поля.
+    3. Нічого: поля `user` у вхідному серіалізаторі немає, його проігноровано; власника задає `request.user`.
+    4. `ModelViewSet` сам робить ORM-запити й `save()` і обійшов би services/selectors — правила застосунку довелося б дублювати.
+    5. `404` не підтверджує, що об'єкт з таким `id` взагалі існує, — зловмисник не може перебирати чужі `id`.
+    6. Перший клас автентифікації — сесійний — не вміє попросити облікові дані (`WWW-Authenticate`), тому `403`. З `BasicAuthentication` першим було б `401`.
+    7. Django + DRF — коли потрібні сайт, адмінка, користувачі й API над однією базою. FastAPI — окремий API-сервіс: парсер, мікросервіс, ML-модель, багато I/O.
 
 ### Що далі
 
-- Ноутбук заняття: [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_36_typing_pydantic/note_lesson_36_pydantic_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_36_typing_pydantic/note_lesson_36_pydantic.ipynb){ .solutions-link }.
-- Урок 37 — FastAPI над `NewsItem`: `GET /api/news`, `POST /api/scrape`, `/docs` з JSON Schema, Postman. Основа — прототип `news_dashboard`.
+- Ноутбук заняття: [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_36_drf_fastapi/note_lesson_36_drf_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_36_drf_fastapi/note_lesson_36_drf.ipynb){ .solutions-link }.
+- Урок 37 — типізація й Pydantic на першому кроці новинного агрегатора; урок 38 — FastAPI, Postman і OpenAPI.
+- Урок 41 — вхід за токенами для API й спільний доступ до нотаток.
 
 ## Документація і джерела
 
-- Код: [`news_hub`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_4/lessons/lesson_36_typing_pydantic/news_hub); `parse_rbc_news` і знімок — зі стартового ноутбука про web scraping, словник категорій — з прототипу `news_dashboard`.
-- Python: [typing](https://docs.python.org/3/library/typing.html), [Type hints cheat sheet (mypy)](https://mypy.readthedocs.io/en/stable/cheat_sheet_py3.html), [urllib.parse.urlsplit](https://docs.python.org/3/library/urllib.parse.html#urllib.parse.urlsplit)
-- Pydantic: [Models](https://docs.pydantic.dev/latest/concepts/models/), [Fields](https://docs.pydantic.dev/latest/concepts/fields/), [Validators](https://docs.pydantic.dev/latest/concepts/validators/), [Computed fields](https://docs.pydantic.dev/latest/concepts/fields/#the-computed_field-decorator), [Type Adapter](https://docs.pydantic.dev/latest/concepts/type_adapter/), [JSON Schema](https://docs.pydantic.dev/latest/concepts/json_schema/)
-- FastAPI: [Python Types Intro](https://fastapi.tiangolo.com/python-types/) — навіщо FastAPI анотації
+- Код: [`crispy_notes_project`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_4/lessons/lesson_36_drf_fastapi/crispy_notes_project) — проєкт уроку 35 + `api.py` з Django-книги ([`notes_app/api.py`](https://github.com/NikoriakViktot/notes_chat_app/blob/main/notes_app/api.py)), доповнений до CRUD. Порівняльний [`fastapi_notes.py`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_36_drf_fastapi/fastapi_notes.py).
+- Django-книга: [REST API: Django REST Framework](https://nikoriakviktot.github.io/notes_chat_app/06_application_architecture/drf_rest_api_full/), [Serializers — Transport Layer](https://nikoriakviktot.github.io/notes_chat_app/06_application_architecture/django_serializers_full/)
+- DRF: [Quickstart](https://www.django-rest-framework.org/tutorial/quickstart/), [Serializers](https://www.django-rest-framework.org/api-guide/serializers/), [ViewSets](https://www.django-rest-framework.org/api-guide/viewsets/), [Routers](https://www.django-rest-framework.org/api-guide/routers/), [Authentication](https://www.django-rest-framework.org/api-guide/authentication/), [Permissions](https://www.django-rest-framework.org/api-guide/permissions/), [Testing](https://www.django-rest-framework.org/api-guide/testing/), [Browsable API](https://www.django-rest-framework.org/topics/browsable-api/)
+- Django: [`Model.save(update_fields=…)`](https://docs.djangoproject.com/en/5.2/ref/models/instances/#specifying-which-fields-to-save), [`DateField.auto_now`](https://docs.djangoproject.com/en/5.2/ref/models/fields/#django.db.models.DateField.auto_now)
+- [drf-spectacular](https://drf-spectacular.readthedocs.io/); FastAPI: [Tutorial](https://fastapi.tiangolo.com/tutorial/), [Alternatives, Inspiration and Comparisons](https://fastapi.tiangolo.com/alternatives/)

@@ -1,240 +1,159 @@
-# Урок 9. Декоратори
+# Урок 9. П1. Big O + базові задачі
 
-Уяви блог, де є гості, звичайні користувачі й адміністратори. Гість може лише читати, користувач — ще й писати пости, адміністратор — усе, включно з видаленням. Кожна функція блогу має спершу перевірити роль, а вже потім робити свою справу.
+До цього уроку ми питали про програму одне: **чи правильно вона працює?** Тепер з'являється друге питання: **скільки роботи вона виконує і що буде, коли даних стане більше?**
 
-Якщо писати цю перевірку в кожній функції, одна й та сама логіка опиниться в шести місцях. А коли з'явиться нова роль, доведеться правити всі шість. У цьому уроці ми навчимося виносити таку спільну поведінку в **декоратор** — функцію, яка «загортає» іншу функцію і додає до неї поведінку, не змінюючи її коду.
+Уяви диспетчерську службу таксі. Вона починала з тисячі поїздок на день, і будь-яка перевірка журналу займала мить. Місто росте: сто тисяч поїздок, мільйон. Одна й та сама перевірка, написана двома різними способами, в одному випадку триватиме частку секунди, а в іншому — кілька годин. Обидва способи при цьому дають **правильну** відповідь.
 
-**Що потрібно з попередніх уроків:** функції, параметри, `return`, локальні змінні (урок 7), словники (урок 6), підрахунок кроків (урок 8).
+Мова, якою програмісти описують цю різницю, — **Big O** («О велике»).
+
+**Що потрібно з попередніх уроків:** цикли `for` і вкладені цикли (уроки 4, 6), `list`, `set` і `dict` (уроки 5–6), функції з `return` (урок 8).
 
 **Після уроку ти зможеш:**
 
-- передавати функцію як значення і повертати функцію з іншої функції;
-- пояснювати, що таке замикання, і змінювати зовнішню змінну через `nonlocal`;
-- писати декоратор з обгорткою `wrapper`, яка приймає будь-які аргументи й повертає результат;
-- розуміти запис `@decorator` і порядок кількох декораторів над однією функцією;
-- писати декоратор з параметрами, наприклад `@require_role("admin")`;
-- зберігати ім'я й опис функції через `functools.wraps` і кешувати результати через `functools.lru_cache`.
+- пояснити, чому ефективність рахують у кроках, а не в секундах;
+- рахувати кроки простих функцій і перевіряти оцінку дослідом подвоєння;
+- розрізняти `O(1)`, `O(n)` і `O(n²)` та впізнавати їх у коді;
+- застосовувати три правила: найгірший випадок, без констант, лише найбільший доданок;
+- знаходити прихований цикл `in` для списку і прибирати його через `set`;
+- оцінювати складність власних розв'язків: FizzBuzz, паліндром, шифр Цезаря.
 
-**Задача розділу.** Блог із ролями: перевірка прав має жити в одному місці, а функції блогу — лише робити свою справу. Повний рефакторинг — у розділі [«Практика»](#practice).
+**Задача розділу.** Чотири задачі диспетчера таксі, для кожної — повільне і швидке рішення. Одну розберемо в тексті, решту дослідиш у лабораторії.
 
-**Ноутбук заняття:** [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_09_decorators/note_lesson_09_decorators_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_09_decorators/note_lesson_09_decorators.ipynb){ .solutions-link }
+**Ноутбук заняття:** [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_09_practicum_big_o/note_lesson_09_big_o_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_09_practicum_big_o/note_lesson_09_big_o.ipynb){ .solutions-link }
+
+**Лабораторія:** [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_09_practicum_big_o/lab_lesson_09_taxi_big_o_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_09_practicum_big_o/lab_lesson_09_taxi_big_o.ipynb){ .solutions-link }
 
 ## Пригадай
 
 Дай відповідь подумки, нічого не запускаючи:
 
-1. Що поверне функція, у якої немає `return`?
-2. Змінна створена всередині функції. Чи можна прочитати її після виклику, ззовні?
-3. Що надрукує `print(greet_guest)` без дужок, якщо `greet_guest` — функція?
+1. Скільки разів виконається тіло циклу `for trip in trips:`, якщо в `trips` 500 поїздок?
+2. Скільки разів виконається `print()` у цьому коді?
+
+    ```python
+    for a in range(3):
+        for b in range(4):
+            print(a, b)
+    ```
+
+3. Як Python перевіряє `"D-7" in drivers`, якщо `drivers` — список? А якщо множина?
 
 ??? success "Відповіді"
 
-    1. `None`.
-    2. Ні: локальні змінні зникають, коли функція завершується. Ззовні це `NameError`.
-    3. Щось на зразок `<function greet_guest at 0x7f...>`: без дужок це сама функція, а не її виклик. Саме ця властивість — функція як значення — стане основою уроку.
+    1. 500 разів: по одному на кожну поїздку.
+    2. 12 разів: для кожного з 3 значень `a` внутрішній цикл робить 4 повтори, `3 × 4 = 12`.
+    3. Для списку — переглядає елементи по черзі, поки не знайде або не дійде до кінця. Для множини — одразу знаходить місце за хешем значення, не переглядаючи інших. Саме ця різниця стане головною в уроці.
 
-## Одна перевірка в шести місцях
+## Два правильні рішення
 
-Поточний користувач блогу зберігається у словнику, а кожна функція перевіряє його роль:
+Бухгалтерія помітила, що одна поїздка могла потрапити в журнал двічі. Потрібна функція: **чи є в списку номерів поїздок два однакові?**
+
+Перший спосіб — порівняти кожну пару номерів:
 
 ```python
-current_user = {"name": "Іван", "role": "guest"}
+def has_duplicate_ids_slow(ids):
+    for i in range(len(ids)):
+        for j in range(i + 1, len(ids)):
+            if ids[i] == ids[j]:
+                return True
+    return False
+```
+
+Другий — пройти список один раз і запам'ятовувати побачені номери в множині:
+
+```python
+def has_duplicate_ids_fast(ids):
+    seen = set()
+    for trip_id in ids:
+        if trip_id in seen:
+            return True
+        seen.add(trip_id)
+    return False
 
 
-def view_post(post_id):
-    if current_user["role"] not in ["guest", "user", "admin"]:
-        print("Доступ заборонено")
-        return
-    print(current_user["name"], "переглядає пост", post_id)
-
-
-def create_post(title):
-    if current_user["role"] not in ["user", "admin"]:
-        print("Доступ заборонено")
-        return
-    print(current_user["name"], "створює пост:", title)
-
-
-def delete_post(post_id):
-    if current_user["role"] not in ["admin"]:
-        print("Доступ заборонено")
-        return
-    print(current_user["name"], "видаляє пост", post_id)
-
-
-view_post(1)
-create_post("Мій перший пост")
-delete_post(1)
-
-current_user = {"name": "Оля", "role": "admin"}
-delete_post(1)
+journal = [104, 311, 205, 311, 400]
+print(has_duplicate_ids_slow(journal), has_duplicate_ids_fast(journal))
+print(has_duplicate_ids_slow([1, 2, 3]), has_duplicate_ids_fast([1, 2, 3]))
 ```
 
 ```text
-Іван переглядає пост 1
-Доступ заборонено
-Доступ заборонено
-Оля видаляє пост 1
+True True
+False False
 ```
 
-У справжньому блозі функцій шість: ще `edit_post`, `publish_post`, `archive_post`.
+Обидві функції правильні: на будь-якому списку вони дають однакову відповідь. Яка з них «краща»? Щоб відповісти чесно, потрібна мірка.
 
-| Функція | Хто має доступ |
-|---|---|
-| `view_post` | guest, user, admin |
-| `create_post`, `edit_post` | user, admin |
-| `publish_post`, `delete_post`, `archive_post` | admin |
+## Чому не секунди
 
-Тепер менеджер просить: «Додайте роль `moderator` — може редагувати й публікувати, але не видаляти». Треба зайти в кожну функцію, знайти рядок з перевіркою і дописати роль. Шість правок, і в кожній можна помилитися. Перевірка прав — не справа функції «видалити пост», але вона займає половину її тіла.
-
-Хотілося б записати так: «ось функція `delete_post`, а перевірку для неї зроби окремо». Для цього знадобляться дві властивості функцій, якими ми ще не користувалися.
-
-## Функція — теж значення
-
-Функцію можна присвоїти іншому імені, передати в іншу функцію як аргумент і повернути з функції — так само, як число чи список.
+Здавалося б, найпростіше — заміряти час. Функція `time.perf_counter()` повертає поточний час у секундах з великою точністю; різниця двох таких значень — тривалість виконання.
 
 ```python
-def say_hello(name):
-    return "Привіт, " + name
+import time
+
+ids = list(range(2000))
+for attempt in range(3):
+    start = time.perf_counter()
+    has_duplicate_ids_slow(ids)
+    print(f"{(time.perf_counter() - start) * 1000:.1f} мс")
+```
+
+Вивід щоразу трохи інший, наприклад:
+
+```text
+43.2 мс
+44.9 мс
+42.8 мс
+```
+
+Той самий код, ті самі дані — а мілісекунди різні. На іншому комп'ютері вони будуть зовсім інші. Секунди описують **залізо й момент запуску**, а не алгоритм.
+
+Тому ефективність рахують у **кроках**: скільки базових дій — порівнянь, перевірок, записів — виконує алгоритм залежно від розміру даних. Розмір даних позначають буквою **n**: тут n — кількість поїздок у журналі.
+
+## Рахуємо кроки
+
+Додамо в обидві функції лічильник. Кожне порівняння двох номерів або кожна перевірка в множині — один крок. Функції повертають пару `(відповідь, кроки)`:
+
+```python
+def has_duplicate_ids_slow(ids):
+    steps = 0
+    for i in range(len(ids)):
+        for j in range(i + 1, len(ids)):
+            steps += 1
+            if ids[i] == ids[j]:
+                return True, steps
+    return False, steps
 
 
-greet = say_hello
-print(greet("Оля"))
+def has_duplicate_ids_fast(ids):
+    steps = 0
+    seen = set()
+    for trip_id in ids:
+        steps += 1
+        if trip_id in seen:
+            return True, steps
+        seen.add(trip_id)
+    return False, steps
 
 
-def run_twice(func, value):
-    return func(value) + " / " + func(value)
-
-
-print(run_twice(say_hello, "Тарас"))
+print(has_duplicate_ids_slow([1, 2, 3, 4]))
+print(has_duplicate_ids_fast([1, 2, 3, 4]))
 ```
 
 ```text
-Привіт, Оля
-Привіт, Тарас / Привіт, Тарас
+(False, 6)
+(False, 4)
 ```
 
-`greet = say_hello` — без дужок: ми не викликаємо функцію, а даємо їй друге ім'я. `run_twice` отримує функцію як звичайний аргумент і викликає її всередині.
+Повільна функція порівняла всі пари з чотирьох номерів:
 
-Функція може також **створити** нову функцію і повернути її:
-
-```python
-def make_greeter(greeting):
-    def greeter(name):
-        return greeting + ", " + name
-    return greeter
-
-
-morning = make_greeter("Доброго ранку")
-evening = make_greeter("Доброго вечора")
-print(morning("Оля"))
-print(evening("Тарас"))
-```
-
-```text
-Доброго ранку, Оля
-Доброго вечора, Тарас
-```
-
-`make_greeter` нічого не друкує. Вона будує функцію `greeter` і повертає її — без дужок, як значення.
-
-## Замикання
-
-Подивись уважно на `greeter`: вона використовує `greeting` — параметр функції `make_greeter`. Але `make_greeter` уже завершилась, а в уроці 7 ми казали, що локальні змінні після цього зникають. Чому `morning("Оля")` досі пам'ятає «Доброго ранку»?
-
-Бо вкладена функція **запам'ятовує** змінні навколишньої функції, які вона використовує. Таку функцію разом з її запам'ятованими змінними називають **замиканням** (closure). `morning` і `evening` — два замикання з різними значеннями `greeting`.
-
-Замикання може не лише читати змінну, а й змінювати її — для цього потрібне слово `nonlocal`:
-
-```python
-def make_counter():
-    count = 0
-
-    def increment():
-        nonlocal count
-        count += 1
-        return count
-
-    return increment
-
-
-views = make_counter()
-likes = make_counter()
-print(views(), views(), views())
-print(likes())
-```
-
-```text
-1 2 3
-1
-```
-
-| Виклик | `count` у `views` | `count` у `likes` |
+| `i` | з якими `j` порівнює | кроків |
 |---|---|---|
-| `views()` | 1 | 0 |
-| `views()` | 2 | 0 |
-| `views()` | 3 | 0 |
-| `likes()` | 3 | 1 |
+| `0` | `1`, `2`, `3` | 3 |
+| `1` | `2`, `3` | 2 |
+| `2` | `3` | 1 |
+| `3` | — | 0 |
 
-Кожен виклик `make_counter()` створює новий `count`, тому лічильники незалежні.
-
-!!! warning "Без `nonlocal` — помилка"
-    Рядок `count += 1` — це присвоєння `count = count + 1`. Без `nonlocal` Python вирішує, що `count` — нова **локальна** змінна `increment`, і при спробі прочитати її до присвоєння зупиняється:
-
-    ```python
-    def broken_counter():
-        count = 0
-
-        def increment():
-            count += 1
-            return count
-
-        return increment
-
-
-    broken_counter()()
-    ```
-
-    У Python 3.11 і новіших повідомлення таке (у 3.10 — `local variable 'count' referenced before assignment`):
-
-    ```text
-    UnboundLocalError: cannot access local variable 'count' where it is not associated with a value
-    ```
-
-    `nonlocal count` каже Python: «це не нова змінна, а `count` з навколишньої функції».
-
-## Перша обгортка
-
-Тепер є все, щоб винести перевірку прав з функції. Напишемо функцію, яка **отримує** функцію блогу і **повертає** нову функцію — з перевіркою перед викликом:
-
-```python
-def require_admin(func):
-    def wrapper(post_id):
-        if current_user["role"] != "admin":
-            print("Доступ заборонено")
-            return
-        return func(post_id)
-    return wrapper
-
-
-def delete_post(post_id):
-    print(current_user["name"], "видаляє пост", post_id)
-
-
-delete_post = require_admin(delete_post)
-
-current_user = {"name": "Іван", "role": "guest"}
-delete_post(7)
-current_user = {"name": "Оля", "role": "admin"}
-delete_post(7)
-```
-
-```text
-Доступ заборонено
-Оля видаляє пост 7
-```
-
-Сама `delete_post` тепер займається лише видаленням. Перевірка живе в `require_admin`, а `wrapper` — замикання, яке пам'ятає, яку саме функцію `func` воно захищає.
+Кожна пара — один крок. Покроково для `[1, 2, 3, 4]` (порівнюються номери на позиціях `i` і `j`):
 
 ```mermaid
 flowchart TD
@@ -244,225 +163,62 @@ flowchart TD
     classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
     classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
 
-    C["виклик delete_post(7)<br>насправді викликає wrapper(7)"] --> Q{"current_user<br>має роль admin?"}
-    Q -- ні --> N["Доступ заборонено<br>func не викликається"]
-    Q -- так --> F["func(7)<br>справжня delete_post"]
-    F --> R["результат повертається<br>через return у wrapper"]
+    subgraph I0["i = 0 · номер 1"]
+        direction LR
+        A1["1 = 2?"] --> A2["1 = 3?"] --> A3["1 = 4?"] --> AS["кроків: 3"]
+    end
+    subgraph I1["i = 1 · номер 2"]
+        direction LR
+        B1["2 = 3?"] --> B2["2 = 4?"] --> BS["кроків: 5"]
+    end
+    subgraph I2["i = 2 · номер 3"]
+        direction LR
+        C1["3 = 4?"] --> CS["кроків: 6"]
+    end
+    subgraph I3["i = 3 · номер 4"]
+        direction LR
+        D1["пар праворуч немає"] --> DS["кроків: 6"]
+    end
+    I0 --> I1 --> I2 --> I3 --> R["(False, 6)"]
+    subgraph FAST["швидка: один прохід з множиною"]
+        direction LR
+        F1["1 in seen? ні"] --> F2["2 in seen? ні"] --> F3["3 in seen? ні"] --> F4["4 in seen? ні"] --> FR["(False, 4)"]
+    end
+    R ~~~ FAST
 
-    class C step
-    class Q decision
-    class N error
-    class F,R success
+    class A1,A2,A3,B1,B2,C1,F1,F2,F3,F4 warning
+    class AS,BS,CS,DS,D1 step
+    class R error
+    class FR success
 ```
 
-Ось що таке **декоратор**: функція, яка приймає функцію і повертає нову функцію з додатковою поведінкою. Код самої функції при цьому не змінюється.
+У повільній функції кожен наступний номер порівнюється з усіма правішими — «трикутник» пар. У швидкій кожен номер перевіряється рівно один раз.
 
-!!! warning "`func()` має бути всередині `wrapper`"
-    Якщо написати виклик `func(...)` на рівні `require_admin`, а не всередині `wrapper`, функція виконається **одразу**, в момент обгортання, ще до будь-якої перевірки. `require_admin` лише готує обгортку; справжня робота відбувається, коли викликають `wrapper`.
+Разом `3 + 2 + 1 = 6`. Для n номерів це `(n − 1) + (n − 2) + … + 1 = n·(n − 1) / 2` порівнянь. Швидка функція робить рівно n кроків — по одному на номер.
 
-## Запис через @
+### Дослід подвоєння
 
-Рядок `delete_post = require_admin(delete_post)` трапляється так часто, що для нього є коротший запис — `@` над оголошенням функції:
+Тепер головне питання: що станеться, коли поїздок стане **вдвічі більше**?
+
+??? question "Передбач: у скільки разів зросте кількість кроків кожної функції, якщо n подвоїти?"
+
+    Подумай: скільки стане пар, якщо номерів удвічі більше? А скільки номерів переглядає швидка функція?
+
+Перевіримо на журналах без повторів — так функціям доведеться переглянути все:
 
 ```python
-@require_admin
-def archive_post(post_id):
-    print(current_user["name"], "архівує пост", post_id)
-
-
-archive_post(3)
+for n in [1000, 2000, 4000]:
+    ids = list(range(n))
+    print(n, has_duplicate_ids_slow(ids)[1], has_duplicate_ids_fast(ids)[1])
 ```
 
 ```text
-Оля архівує пост 3
+1000 499500 1000
+2000 1999000 2000
+4000 7998000 4000
 ```
 
-`@require_admin` над `def` означає рівно те саме, що `archive_post = require_admin(archive_post)` одразу після нього. Обгортання відбувається **один раз**, коли Python виконує `def`. Далі кожен виклик `archive_post(...)` іде через `wrapper`.
-
-## Аргументи й результат
-
-### Будь-які аргументи
-
-Наша `wrapper(post_id)` приймає рівно один аргумент. Спробуймо обгорнути функцію з іншою кількістю параметрів:
-
-```python
-@require_admin
-def rename_post(post_id, title):
-    print("Пост", post_id, "тепер називається", title)
-
-
-rename_post(3, "Нова назва")
-```
-
-```text
-TypeError: require_admin.<locals>.wrapper() takes 1 positional argument but 2 were given
-```
-
-Декоратор не повинен знати, скільки аргументів у функції, яку він обгортає. Для цього є два спеціальні параметри:
-
-- `*args` збирає всі позиційні аргументи в **кортеж**;
-- `**kwargs` збирає всі іменовані аргументи в **словник**.
-
-У виклику ті самі зірочки роблять навпаки — розкладають кортеж і словник назад в аргументи:
-
-```python
-def show_args(*args, **kwargs):
-    print(args, kwargs)
-
-
-show_args(3, "Нова назва", draft=True)
-```
-
-```text
-(3, 'Нова назва') {'draft': True}
-```
-
-Тому універсальна обгортка виглядає так:
-
-```python
-def require_admin(func):
-    def wrapper(*args, **kwargs):
-        if current_user["role"] != "admin":
-            print("Доступ заборонено")
-            return
-        return func(*args, **kwargs)
-    return wrapper
-
-
-@require_admin
-def rename_post(post_id, title):
-    print("Пост", post_id, "тепер називається", title)
-
-
-rename_post(3, title="Нова назва")
-```
-
-```text
-Пост 3 тепер називається Нова назва
-```
-
-Ще більше про `*args` і `**kwargs` — в уроці 18, де функції розглядаються як об'єкти першого класу.
-
-### Не загуби результат
-
-??? question "Що надрукує останній рядок?"
-
-    ```python
-    def shout(func):
-        def wrapper(*args, **kwargs):
-            func(*args, **kwargs).upper()
-        return wrapper
-
-
-    @shout
-    def title_of(post_id):
-        return "пост " + str(post_id)
-
-
-    print(title_of(5))
-    ```
-
-??? success "Відповідь і пояснення"
-
-    ```text
-    None
-    ```
-
-    `wrapper` обчислює `"ПОСТ 5"`, але не повертає його: у ньому немає `return`. А функція без `return` повертає `None` (урок 7). Декоратор мовчки «з'їв» результат. Правильно: `return func(*args, **kwargs).upper()`.
-
-Звідси правило: обгортка майже завжди закінчується на `return func(*args, **kwargs)` або повертає змінений результат.
-
-## Ім'я функції: functools.wraps
-
-Після обгортання функція «забуває», як її звати:
-
-```python
-print(rename_post.__name__)
-```
-
-```text
-wrapper
-```
-
-`rename_post` тепер — це `wrapper`. Ім'я й опис (`__doc__`) функції видно в повідомленнях про помилки, у `help()` і в редакторі, тож така підміна заважає. Стандартний модуль `functools` має для цього готовий декоратор `wraps`, який ставлять над `wrapper`:
-
-```python
-import functools
-
-
-def require_admin(func):
-    @functools.wraps(func)
-    def wrapper(*args, **kwargs):
-        if current_user["role"] != "admin":
-            print("Доступ заборонено")
-            return
-        return func(*args, **kwargs)
-    return wrapper
-
-
-@require_admin
-def rename_post(post_id, title):
-    """Змінює назву поста."""
-    print("Пост", post_id, "тепер називається", title)
-
-
-print(rename_post.__name__)
-print(rename_post.__doc__)
-```
-
-```text
-rename_post
-Змінює назву поста.
-```
-
-`@functools.wraps(func)` копіює ім'я, опис та інші дані `func` на `wrapper`. Став його в кожному своєму декораторі.
-
-## Декоратор з параметрами
-
-`require_admin` вміє лише одне: пропускати адміна. Для блогу потрібно по-різному: `view_post` — трьом ролям, `create_post` — двом, `delete_post` — одній. Хочеться передати ролі прямо в рядку з `@`:
-
-```python
-@require_role("user", "admin")
-def create_post(title):
-    ...
-```
-
-Для цього потрібен ще один рівень: функція, яка отримує ролі і **повертає декоратор**.
-
-```python
-def require_role(*allowed_roles):
-    def decorator(func):
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            if current_user["role"] not in allowed_roles:
-                print("Доступ заборонено, потрібна роль:", " або ".join(allowed_roles))
-                return
-            return func(*args, **kwargs)
-        return wrapper
-    return decorator
-
-
-@require_role("user", "admin")
-def create_post(title):
-    print(current_user["name"], "створює пост:", title)
-
-
-current_user = {"name": "Іван", "role": "guest"}
-create_post("Привіт")
-current_user = {"name": "Марта", "role": "user"}
-create_post("Привіт")
-```
-
-```text
-Доступ заборонено, потрібна роль: user або admin
-Марта створює пост: Привіт
-```
-
-| Рівень | Отримує | Повертає |
-|---|---|---|
-| `require_role` | ролі `*allowed_roles` | `decorator` |
-| `decorator` | функцію `func` | `wrapper` |
-| `wrapper` | аргументи виклику | результат `func` або `None` |
+Подвоїли n — кроків швидкої функції стало **вдвічі** більше, а повільної — **вчетверо**. Кроки не залежать від комп'ютера: у тебе вийдуть ті самі числа.
 
 ```mermaid
 flowchart TD
@@ -472,338 +228,441 @@ flowchart TD
     classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
     classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
 
-    A["require_role(#quot;user#quot;, #quot;admin#quot;)<br>запам'ятовує ролі"] --> B["повертає decorator"]
-    B --> C["@ застосовує decorator до create_post<br>один раз, при def"]
-    C --> D["create_post тепер — wrapper<br>пам'ятає func і ролі"]
-    D --> E["кожен виклик create_post(...)<br>спершу перевіряє роль"]
+    D{"поїздок стало<br>вдвічі більше"} --> C["O(1): кроків стільки ж<br>ids[0], len(ids)"]
+    D --> L["O(n): кроків ×2<br>один прохід"]
+    D --> Q["O(n²): кроків ×4<br>усі пари"]
 
-    class A,B warning
-    class C step
-    class D,E success
+    class D decision
+    class C,L success
+    class Q error
 ```
 
-Запис `@require_role("user", "admin")` — це `create_post = require_role("user", "admin")(create_post)`. Спершу виклик `require_role(...)` повертає декоратор, потім `@` застосовує його до функції. Кожен рівень — замикання: `wrapper` пам'ятає і `func`, і `allowed_roles`.
+Цей прийом — **дослід подвоєння**: подвоюємо n і дивимось, у скільки разів зросла робота. Відношення ≈2 означає, що робота росте разом з n, ≈4 — що вона росте як n².
 
-!!! note "Дужки мають значення"
-    `@require_role("admin")` — з дужками, бо `require_role` спершу треба викликати, щоб отримати декоратор. `@require_admin` — без дужок, бо `require_admin` уже сам є декоратором. Якщо переплутати, Python спробує обгорнути функцію не тим рівнем, і помилка з'явиться при першому виклику.
+## Big O: порядок росту
 
-## Кілька декораторів
+**Big O** описує, як росте кількість кроків алгоритму, коли росте n. Не точне число кроків і не секунди, а **форму росту**. Запис `O(n²)` читається «О від ен квадрат» і означає: робота росте не швидше, ніж n².
 
-Над функцією можна поставити кілька декораторів. Ось ще один — він пише в журнал кожен виклик:
+| Клас | Назва | Приклад |
+|---|---|---|
+| `O(1)` | константний | `ids[0]`, `len(ids)`, `x in seen` для множини |
+| `O(n)` | лінійний | один прохід циклом, `sum()`, `x in ids` для списку |
+| `O(n²)` | квадратичний | цикл по тих самих даних усередині циклу |
+
+Щоб відчути різницю, уяви книжкову полицю з n книг:
+
+- **`O(1)`** — взяти першу книгу: один рух, скільки б книг не стояло;
+- **`O(n)`** — переглянути кожну книгу, шукаючи потрібну: удвічі більше книг — удвічі довше;
+- **`O(n²)`** — порівняти кожну книгу з кожною, шукаючи дві однакові: удвічі більше книг — учетверо довше.
+
+Наскільки це різні світи, видно на числах:
+
+| n | `O(n)` кроків | `O(n²)` кроків |
+|---|---|---|
+| 10 | 10 | 100 |
+| 1 000 | 1 000 | 1 000 000 |
+| 1 000 000 | 1 000 000 | 1 000 000 000 000 |
+
+Мільйон кроків Python робить приблизно за десяту частку секунди. Трильйон — це вже дні. Для 10 поїздок різниці ніхто не помітить, для мільйона — вона вирішує, чи працює сервіс взагалі.
+
+!!! note "Інші класи"
+    Є й інші класи складності. `O(log n)` — коли на кожному кроці відкидається половина даних; це бінарний пошук у [Практикумі 2](lesson_12.md). `O(n log n)` — хороші алгоритми сортування, як у `sorted()`. `O(2ⁿ)` — перебір усіх можливих комбінацій, практичний лише для дуже малих n. У цьому уроці досить трьох: `O(1)`, `O(n)` і `O(n²)`.
+
+## Три правила оцінки
+
+### Найгірший випадок
+
+Функція шукає поїздку за номером:
 
 ```python
-def log_call(func):
-    @functools.wraps(func)
-    def wrapper(*args, **kwargs):
-        print("виклик", func.__name__, args)
-        return func(*args, **kwargs)
-    return wrapper
+def find_trip(ids, target):
+    steps = 0
+    for trip_id in ids:
+        steps += 1
+        if trip_id == target:
+            return True, steps
+    return False, steps
 
 
-@log_call
-@require_role("admin")
-def delete_post(post_id):
-    print(current_user["name"], "видаляє пост", post_id)
-
-
-current_user = {"name": "Іван", "role": "guest"}
-delete_post(9)
+ids = list(range(1000))
+print(find_trip(ids, 0))
+print(find_trip(ids, 999))
+print(find_trip(ids, 5000))
 ```
 
 ```text
-виклик delete_post (9,)
-Доступ заборонено, потрібна роль: admin
+(True, 1)
+(True, 1000)
+(False, 1000)
 ```
 
-Декоратори застосовуються **знизу вгору**: спершу `require_role("admin")` обгортає `delete_post`, потім `log_call` обгортає результат. А під час виклику шар, що стоїть **вище**, спрацьовує **першим** — як обгортки подарунка: останню надягнули, першою знімають.
+Пощастило — один крок. Не пощастило — усі 1000. Big O описує **найгірший випадок**: номер останній або його немає. Це гарантія «не повільніше, ніж», тому `find_trip` — `O(n)`.
 
-??? question "Що зміниться, якщо поміняти декоратори місцями?"
+Так само `has_duplicate_ids_slow` може знайти повтор уже в першій парі й зупинитися. Але журнал без повторів змусить її перевірити всі пари, тому вона `O(n²)`.
 
-    ```python
-    @require_role("admin")
-    @log_call
-    def delete_post(post_id):
-        print(current_user["name"], "видаляє пост", post_id)
+### Константи відкидаємо
+
+Функція знаходить найдешевшу і найдорожчу поїздку двома окремими проходами:
+
+```python
+def fare_range(fares):
+    cheapest = fares[0]
+    for fare in fares:
+        if fare < cheapest:
+            cheapest = fare
+    priciest = fares[0]
+    for fare in fares:
+        if fare > priciest:
+            priciest = fare
+    return cheapest, priciest
 
 
-    delete_post(9)
-    ```
+print(fare_range([180.0, 95.5, 420.0, 260.0]))
+```
+
+```text
+(95.5, 420.0)
+```
+
+Два проходи — це `2n` кроків. Але при подвоєнні n робота зростає так само вдвічі, як і з одним проходом. Множник 2 не змінює **форми** росту, тому `O(2n)` записують як `O(n)`.
+
+З тієї самої причини повільна перевірка дублікатів — `O(n²)`, хоча кроків `n·(n − 1) / 2`, тобто приблизно `n² / 2`. Множник `½` відкидаємо.
+
+!!! warning "Вдвічі швидше — ще не інший клас"
+    Почати внутрішній цикл з `i + 1` замість 0 — корисна оптимізація: кроків удвічі менше. Але при подвоєнні n їх однаково стає вчетверо більше. Щоб змінити клас, потрібна інша ідея, як множина в `has_duplicate_ids_fast`, а не менший множник.
+
+### Лишаємо найбільший доданок
+
+Уяви алгоритм, який робить `3n² + 100n + 500` кроків. Яка частина важить найбільше?
+
+```python
+for n in [10, 1000]:
+    total = 3 * n ** 2 + 100 * n + 500
+    share = 3 * n ** 2 / total * 100
+    print(n, total, f"{share:.1f}%")
+```
+
+```text
+10 1800 16.7%
+1000 3100500 96.8%
+```
+
+Для малого n доданок `3n²` — лише шоста частина роботи. Для n = 1000 — майже вся. Чим більше n, тим сильніше найшвидший доданок «поглинає» решту. Тому лишають тільки його і без множника: `3n² + 100n + 500` — це `O(n²)`.
+
+!!! note "Три правила разом"
+    1. Оцінюємо **найгірший** випадок.
+    2. **Множники** відкидаємо: `2n` → `O(n)`, `n² / 2` → `O(n²)`.
+    3. З доданків лишаємо **найбільший**: `n² + n` → `O(n²)`.
+
+## Як впізнати складність у коді
+
+Не обов'язково рахувати кожен крок. Досить знайти в коді кілька шаблонів:
+
+| Шаблон | Приклад | Складність |
+|---|---|---|
+| дія без циклу | `ids[0]`, `d[key]`, `len(ids)` | `O(1)` |
+| один цикл по даних | `for trip in trips:` | `O(n)` |
+| два цикли **один за одним** | `fare_range` вище | `O(n + n)` = `O(n)` |
+| цикл **у циклі** по тих самих даних | `has_duplicate_ids_slow` | `O(n · n)` = `O(n²)` |
+| `in` для списку | `x in ids` | `O(n)` |
+| `in` для множини чи словника | `x in seen` | `O(1)` |
+
+Цикли **один за одним** додаються, цикли **один в одному** — множаться.
+
+```mermaid
+flowchart TD
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+
+    S{"є цикл<br>по даних?"} -- ні --> O1["O(1)"]
+    S -- так --> N{"у тілі циклу є ще цикл<br>або in для списку?"}
+    N -- ні --> ON["O(n)"]
+    N -- так --> ON2["O(n²)"]
+
+    class S,N decision
+    class O1,ON success
+    class ON2 error
+```
+
+### Прихований цикл: in для списку
+
+Диспетчер хоче привітати водіїв, які працювали **і в понеділок, і у вівторок**:
+
+```python
+def common_drivers(monday, tuesday):
+    result = []
+    for driver in monday:
+        if driver in tuesday:
+            result.append(driver)
+    return result
+
+
+monday = ["D-1", "D-2", "D-3", "D-4"]
+tuesday = ["D-3", "D-5", "D-1"]
+print(common_drivers(monday, tuesday))
+```
+
+```text
+['D-1', 'D-3']
+```
+
+??? question "Один цикл — отже, O(n)?"
+
+    Подивись уважно на рядок `if driver in tuesday:`. Скільки роботи він робить, якщо `tuesday` — список з тисячі водіїв?
 
 ??? success "Відповідь"
 
-    ```text
-    Доступ заборонено, потрібна роль: admin
-    ```
+    `in` для списку — це цикл, захований у два символи: Python переглядає `tuesday` від початку, поки не знайде водія. Для водія, якого у вівторок не було, — до кінця. Для n водіїв понеділка і m водіїв вівторка це до `n · m` кроків: `O(n·m)`, а коли списки однакової довжини — `O(n²)`.
 
-    Тепер зовні стоїть перевірка ролі. Вона не пропускає гостя далі, тож `log_call` навіть не дізнається про спробу. Порядок декораторів — рішення: чи хочемо ми записувати в журнал і заборонені спроби.
-
-## Готовий декоратор: lru_cache
-
-У стандартній бібліотеці є декоратори, які вже написали за нас. Один з найкорисніших — `functools.lru_cache`: він запам'ятовує результати функції для аргументів, з якими її вже викликали.
-
-Візьмемо числа Фібоначчі: кожне дорівнює сумі двох попередніх. Рекурсивна функція (функція, що викликає саму себе) записує це буквально. Щоб порахувати, скільки роботи вона робить, напишемо ще один декоратор — лічильник викликів, як лічильник кроків в уроці 8:
+Виправлення — перетворити вівторок на множину **один раз**, до циклу:
 
 ```python
-calls = {}
+def common_drivers_fast(monday, tuesday):
+    tuesday_set = set(tuesday)
+    result = []
+    for driver in monday:
+        if driver in tuesday_set:
+            result.append(driver)
+    return result
 
 
-def count_calls(func):
-    @functools.wraps(func)
-    def wrapper(*args, **kwargs):
-        calls[func.__name__] = calls.get(func.__name__, 0) + 1
-        return func(*args, **kwargs)
-    return wrapper
-
-
-@count_calls
-def fib(n):
-    if n < 2:
-        return n
-    return fib(n - 1) + fib(n - 2)
-
-
-print(fib(20), calls["fib"])
+print(common_drivers_fast(monday, tuesday))
 ```
 
 ```text
-6765 21891
+['D-1', 'D-3']
 ```
 
-21 891 виклик, щоб порахувати двадцяте число. `fib(20)` викликає `fib(19)` і `fib(18)`, але `fib(19)` знову викликає `fib(18)` — ту саму роботу рахують знову і знову. Кожне наступне n майже подвоює кількість викликів.
+Побудова множини — m кроків, далі кожна з n перевірок — один крок. Разом `n + m`: `O(n + m)`. Для двох змін по 10 000 водіїв це 20 000 кроків замість до 100 000 000.
 
-Додамо кеш — `lru_cache` зверху, лічильник під ним, щоб рахувати лише справжні обчислення, а не відповіді з кешу:
+!!! warning "Не створюй множину всередині циклу"
+    `if driver in set(tuesday):` усередині `for` будує нову множину на **кожному** кроці — це знову `n · m`. Множину створюють один раз, до циклу.
+
+## Що Big O не каже
+
+**Big O не перевіряє правильність.** Функція з помилкою може бути `O(n)`, а правильна — `O(n²)`. Спершу програма має працювати правильно, потім її оцінюють.
+
+**Big O не каже, скільки секунд.** Ця функція — `O(1)`: вона не залежить від кількості поїздок. Але кожен її виклик триває годину:
 
 ```python
-@functools.lru_cache(maxsize=None)
-@count_calls
-def fib_cached(n):
-    if n < 2:
-        return n
-    return fib_cached(n - 1) + fib_cached(n - 2)
+import time
 
 
-print(fib_cached(20), calls["fib_cached"])
+def first_trip_after_break(ids):
+    time.sleep(3600)
+    return ids[0]
 ```
 
-```text
-6765 21
-```
+Big O описує **ріст**: як зміниться робота, коли даних стане в тисячу разів більше.
 
-21 обчислення замість 21 891: кожне значення від `fib(0)` до `fib(20)` рахується один раз, далі береться з кешу. Мовою уроку 8: кількість викликів росла експоненційно, а з кешем росте як `O(n)`. Ціна — пам'ять під збережені результати.
+**Швидкість має ціну.** Швидкі рішення цього уроку зберігають множину, яка займає пам'ять: до n елементів. Повільні обходяться без неї. Здебільшого пам'ять дешевша за очікування, але це свідомий обмін, а не безкоштовний виграш.
 
-!!! note "Коли кеш не підходить"
-    Кешувати можна лише функції, які для тих самих аргументів завжди повертають той самий результат і нічого не змінюють ззовні — чисті функції з уроку 7. Функцію, що залежить від `current_user` або друкує, кешувати не можна: вона «відповідатиме» старим результатом.
+!!! note "Не оптимізуй передчасно"
+    Спершу — правильний і зрозумілий код. Для списку з двадцяти елементів різниця між `O(n)` і `O(n²)` невидима. Але шаблони з цього уроку — цикл у циклі, `in` для списку в циклі — варто помічати одразу: саме вони перетворюються на години очікування, коли даних стає багато.
 
 ## Практика { #practice }
 
-### Розібраний приклад: блог без повторень
+### Розібраний приклад: клієнти для розсилки
 
-Шість функцій блогу, перевірка прав — у декораторі, журнал викликів — в іншому. Роль `moderator` додано так, як просив менеджер.
+Відділ маркетингу хоче надіслати листи клієнтам таксі — кожному **один раз**, у порядку першої поїздки. У журналі клієнти повторюються.
 
-```python linenums="1" hl_lines="4 5 8 16 21 26 31 36 41 52"
-import functools
-
-
-def require_role(*allowed_roles):
-    def decorator(func):
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            if current_user["role"] not in allowed_roles:
-                print("Доступ заборонено:", func.__name__)
-                return
-            return func(*args, **kwargs)
-        return wrapper
-    return decorator
-
-
-@require_role("guest", "user", "moderator", "admin")
-def view_post(post_id):
-    print(current_user["name"], "переглядає пост", post_id)
+```python linenums="1" hl_lines="6 19 22 32"
+def unique_clients_slow(clients):
+    steps = 0
+    result = []
+    for client in clients:
+        found = False
+        for known in result:
+            steps += 1
+            if known == client:
+                found = True
+                break
+        if not found:
+            result.append(client)
+    return result, steps
 
 
-@require_role("user", "admin")
-def create_post(title):
-    print(current_user["name"], "створює пост:", title)
+def unique_clients_fast(clients):
+    steps = 0
+    result = []
+    seen = set()
+    for client in clients:
+        steps += 1
+        if client not in seen:
+            seen.add(client)
+            result.append(client)
+    return result, steps
 
 
-@require_role("user", "moderator", "admin")
-def edit_post(post_id):
-    print(current_user["name"], "редагує пост", post_id)
+journal = ["Оля", "Іван", "Оля", "Марта", "Іван"]
+print(unique_clients_slow(journal))
+print(unique_clients_fast(journal))
 
-
-@require_role("moderator", "admin")
-def publish_post(post_id):
-    print(current_user["name"], "публікує пост", post_id)
-
-
-@require_role("admin")
-def delete_post(post_id):
-    print(current_user["name"], "видаляє пост", post_id)
-
-
-@require_role("admin")
-def archive_post(post_id):
-    print(current_user["name"], "архівує пост", post_id)
-
-
-users = [
-    {"name": "Іван", "role": "guest"},
-    {"name": "Марко", "role": "moderator"},
-    {"name": "Оля", "role": "admin"},
-]
-for user in users:
-    current_user = user
-    print("---", user["name"], "---")
-    view_post(1)
-    edit_post(1)
-    publish_post(1)
-    delete_post(1)
+for n in [1000, 2000, 4000]:
+    clients = [f"C-{i}" for i in range(n)]
+    print(n, unique_clients_slow(clients)[1], unique_clients_fast(clients)[1])
 ```
 
 ```text
---- Іван ---
-Іван переглядає пост 1
-Доступ заборонено: edit_post
-Доступ заборонено: publish_post
-Доступ заборонено: delete_post
---- Марко ---
-Марко переглядає пост 1
-Марко редагує пост 1
-Марко публікує пост 1
-Доступ заборонено: delete_post
---- Оля ---
-Оля переглядає пост 1
-Оля редагує пост 1
-Оля публікує пост 1
-Оля видаляє пост 1
+(['Оля', 'Іван', 'Марта'], 6)
+(['Оля', 'Іван', 'Марта'], 5)
+1000 499500 1000
+2000 1999000 2000
+4000 7998000 4000
 ```
 
 Що відбувається в ключових рядках:
 
-- **рядки 4–5** — два рівні фабрики: ролі потрапляють у `require_role`, функція — у `decorator`;
-- **рядок 8** — перевірка ролі, **єдине** місце на весь блог. Щоб змінити текст повідомлення чи логіку перевірки, досить змінити цей рядок;
-- **рядки 16–43** — кожна функція блогу займається лише своєю справою. Хто має до неї доступ, видно одразу над `def`;
-- **рядок 52** — `current_user` змінюється, а функції блогу — ні. Декоратор читає `current_user` у момент **виклику**, а не в момент обгортання.
+- **рядки 5–10** — внутрішній цикл робить те саме, що `if client not in result:` для списку; лічильник показує роботу, яку `in` зазвичай ховає;
+- **рядок 6** — `result` **росте**: що більше клієнтів уже знайдено, то довша кожна наступна перевірка. Коли всі клієнти різні, це `0 + 1 + … + (n − 1)` порівнянь — `O(n²)`, хоча видимий цикл лише один;
+- **рядки 19 і 22** — ролі розділено: множина `seen` відповідає «чи був уже» за один крок, а список `result` лише зберігає порядок;
+- **рядки 28–30** — на малому журналі різниця майже непомітна: 6 кроків проти 5, бо `result` встигає вирости лише до трьох клієнтів;
+- **рядки 32–34** — дослід подвоєння на журналах, де всі клієнти різні (найгірший випадок): кроки повільного рішення ростуть ×4, швидкого — ×2.
 
-Додати роль `moderator` — це дописати слово в три рядки з `@`, а не переписувати тіла функцій. Нова роль `superuser`, що може все, — одне слово в кожному `@require_role`.
+!!! warning "А чому не `list(set(clients))`?"
+    Це теж `O(n)`, але множина не зберігає порядок: клієнти в результаті можуть піти в будь-якому порядку. Коли порядок важливий — множина для перевірки плюс список для результату, як у `unique_clients_fast`.
 
-### Зміни приклад: лічильник викликів
+### Визнач складність
 
-Напиши декоратор `count_views`, який рахує, скільки разів кожну функцію блогу викликали, **навіть коли доступ заборонено**. Результат зберігай у словнику `views`:
-
-```text
-{'view_post': 3, 'edit_post': 3, 'publish_post': 3, 'delete_post': 3}
-```
-
-(для циклу з трьома користувачами з розібраного прикладу).
-
-**Критерії перевірки:**
-
-- `count_views` використовує `functools.wraps`, тож `delete_post.__name__ == "delete_post"`;
-- обгортка приймає будь-які аргументи й повертає результат функції;
-- лічильник рахує і заборонені спроби, тож стоїть у правильному місці відносно `@require_role`.
-
-??? tip "Підказка"
-    Візьми за зразок `count_calls` з розділу про `lru_cache`. Подумай, який з двох декораторів має бути зверху, щоб до лічильника доходили навіть виклики гостя.
-
-### Спробуй самостійно: заборонені ролі
-
-Інший контекст: платформа онлайн-курсу, ролі `guest`, `student`, `mentor`. Тут зручніше перелічити, кому **не можна**, ніж кому можна. Напиши декоратор з параметрами `deny_role(*blocked_roles)`: він не пускає перелічені ролі, а всім іншим дозволяє.
+Для кожного фрагмента визнач складність, де n — довжина `data`. Спершу відповідай сам, потім розгорни відповідь.
 
 ```python
-current_user = {"name": "Гість", "role": "guest"}
+def fragment_a(data):
+    return data[len(data) // 2]
 
 
-@deny_role("guest")
-def open_homework(number):
-    return "Домашнє завдання " + str(number)
+def fragment_b(data):
+    total = 0
+    for x in data:
+        total += x
+    for x in data:
+        total -= x
+    return total
+
+
+def fragment_c(data):
+    count = 0
+    for x in data:
+        for y in data:
+            if x < y:
+                count += 1
+    return count
+
+
+def fragment_d(data, blocked):
+    return [x for x in data if x not in blocked]
+
+
+def fragment_e(data):
+    result = []
+    for day in range(7):
+        for x in data:
+            result.append((day, x))
+    return result
 ```
-
-Очікувана поведінка:
-
-```text
-роль guest   → open_homework(3) друкує повідомлення про заборону і повертає None
-роль student → open_homework(3) повертає 'Домашнє завдання 3'
-роль mentor  → open_homework(3) повертає 'Домашнє завдання 3'
-```
-
-**Критерії перевірки:**
-
-- `open_homework.__name__ == "open_homework"`;
-- працюють і позиційні, і іменовані аргументи: `open_homework(number=4)`;
-- `@deny_role("guest", "student")` над іншою функцією пускає лише `mentor`;
-- роль перевіряється під час **виклику**: зміна `current_user` після `def` змінює результат.
-
-## Підсумок
-
-```python
-import functools
-
-
-def my_decorator(func):                      # декоратор без параметрів
-    @functools.wraps(func)
-    def wrapper(*args, **kwargs):
-        # ... до виклику
-        result = func(*args, **kwargs)
-        # ... після виклику
-        return result
-    return wrapper
-
-
-def my_factory(*settings):                   # декоратор з параметрами
-    def decorator(func):
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            return func(*args, **kwargs)     # settings доступні тут
-        return wrapper
-    return decorator
-```
-
-| Що потрібно | Як |
-|---|---|
-| передати функцію як значення | ім'я без дужок: `run_twice(say_hello, "Оля")` |
-| змінити змінну навколишньої функції | `nonlocal count` |
-| обгорнути функцію | `f = my_decorator(f)` або `@my_decorator` над `def` |
-| прийняти будь-які аргументи | `def wrapper(*args, **kwargs)` |
-| не загубити результат | `return func(*args, **kwargs)` |
-| зберегти ім'я та опис | `@functools.wraps(func)` над `wrapper` |
-| декоратор з параметрами | три рівні: фабрика → `decorator` → `wrapper` |
-| кілька декораторів | застосовуються знизу вгору, спрацьовують згори вниз |
-| кешувати чисту функцію | `@functools.lru_cache(maxsize=None)` |
-
-### Самоперевірка
-
-1. Чим `greet = say_hello` відрізняється від `greet = say_hello()`?
-2. Що таке замикання?
-3. Навіщо `nonlocal` і що буде без нього в `count += 1`?
-4. Що означає `@require_admin` над `def delete_post`?
-5. Чому обгортка має приймати `*args, **kwargs` і закінчуватися `return`?
-6. Навіщо `functools.wraps`?
-7. Чому `@require_role("admin")` пишуть з дужками, а `@require_admin` — без?
-8. Декоратори `@log_call` і `@require_role("admin")` стоять над функцією саме в такому порядку. Що спрацює першим при виклику?
 
 ??? success "Відповіді"
 
-    1. `say_hello` без дужок — сама функція, `greet` стає її другим ім'ям. `say_hello()` — виклик, `greet` отримає результат (і без аргументу буде `TypeError`).
-    2. Вкладена функція разом зі змінними навколишньої функції, які вона запам'ятала й може використовувати після того, як навколишня функція завершилась.
-    3. Щоб змінити змінну навколишньої функції. Без `nonlocal` присвоєння робить `count` локальною змінною, і читання до присвоєння дає `UnboundLocalError`.
-    4. `delete_post = require_admin(delete_post)` одразу після `def`: ім'я `delete_post` тепер вказує на обгортку.
-    5. Щоб декоратор працював з функцією будь-якої сигнатури і не «з'їдав» її результат: без `return` виклик повертатиме `None`.
-    6. Щоб обгорнута функція зберегла власне ім'я `__name__` і опис `__doc__`, а не видавала себе за `wrapper`.
-    7. `require_role` — фабрика: її спершу викликають з ролями, і вона повертає декоратор. `require_admin` уже є декоратором.
-    8. `log_call`: він стоїть вище, тобто обгортає все інше, і спрацьовує першим — навіть для заборонених викликів.
+    - **A** — `O(1)`: одне звернення за індексом, скільки б елементів не було.
+    - **B** — `O(n)`: два цикли **один за одним**, `n + n = 2n`, множник відкидаємо.
+    - **C** — `O(n²)`: цикл по `data` у циклі по `data`.
+    - **D** — залежить від типу `blocked`. Якщо це список довжини m — `O(n·m)`: прихований цикл `not in`. Якщо множина — `O(n)`.
+    - **E** — `O(n)`: зовнішній цикл завжди робить 7 повторів, незалежно від n. Це множник `7n`, який відкидаємо. Цикл у циклі дає `O(n²)`, лише коли **обидва** залежать від n.
+
+### Лабораторія: таксі
+
+У ноутбуці [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_09_practicum_big_o/lab_lesson_09_taxi_big_o_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_09_practicum_big_o/lab_lesson_09_taxi_big_o.ipynb){ .solutions-link } — чотири задачі диспетчера:
+
+1. повторний номер поїздки;
+2. водії двох змін;
+3. клієнти для розсилки;
+4. найшвидше повернення клієнта: найменша відстань між двома поїздками одного клієнта.
+
+Для кожної спершу записуєш прогноз, потім дослід подвоєння на n = 500, 1000, 2000, 4000 показує таблицю кроків і графік. Наприкінці — оцінка часу для міста з мільйоном поїздок. Для показу на занятті той самий дослід є в інтерактивному застосунку [`taxi_lab`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_1/lessons/lesson_09_practicum_big_o/taxi_lab) на Streamlit.
+
+### Спробуй самостійно: три базові задачі
+
+Розв'язки пиши в ноутбуці заняття. Для кожної задачі визнач складність свого розв'язку.
+
+**1. FizzBuzz.** Функція `fizzbuzz(n)` повертає список рядків для чисел від 1 до n: `"FizzBuzz"` для кратних 15, `"Fizz"` для кратних 3, `"Buzz"` для кратних 5, інакше саме число рядком.
+
+```text
+fizzbuzz(5)  → ['1', '2', 'Fizz', '4', 'Buzz']
+fizzbuzz(15)[-1] → 'FizzBuzz'
+```
+
+**2. Паліндром двома способами.** `is_palindrome_v1(text)` порівнює рядок з розвернутим `text[::-1]`. `is_palindrome_v2(text)` рухає два індекси з країв назустріч і зупиняється на першій розбіжності.
+
+```text
+"потоп" → True
+"python" → False
+"" → True
+```
+
+**3. Шифр Цезаря.** `caesar_encode(text, shift)` зсуває кожну малу латинську літеру на `shift` позицій по колу алфавіту; інші символи не змінює. `caesar_decode(text, shift)` повертає вихідний текст.
+
+```text
+caesar_encode("hello, world!", 3) → 'khoor, zruog!'
+caesar_encode("xyz", 3) → 'abc'
+```
+
+**Критерії перевірки:**
+
+- кожна функція повертає результат через `return`, а не друкує його;
+- обидві версії паліндрома дають однакову відповідь для `"потоп"`, `"python"`, `""`, `"a"`, `"abba"`, `"abca"`;
+- `caesar_decode(caesar_encode(text, k), k) == text` для будь-якого тексту;
+- для кожної функції записано складність і коротке пояснення: скільки разів виконується цикл.
+
+??? tip "Підказка щодо складності"
+    У всіх трьох задачах — один прохід по n числах або символах. Для паліндрома подумай, чим відрізняються версії **на рядку, що не є паліндромом**: `text[::-1]` завжди будує весь розвернутий рядок, а два індекси можуть зупинитися на першому кроці. У найгіршому випадку обидві — `O(n)`.
+
+## Підсумок
+
+| Що потрібно | Як |
+|---|---|
+| оцінити ефективність | рахувати кроки залежно від n, а не секунди |
+| перевірити оцінку | дослід подвоєння: ×2 → `O(n)`, ×4 → `O(n²)` |
+| обрати випадок | найгірший: даних немає, елемент останній |
+| спростити формулу | відкинути множники й менші доданки |
+| цикли один за одним | складність додається |
+| цикл у циклі | складність множиться |
+| `in` для списку | `O(n)` — прихований цикл |
+| `in` для `set` / `dict` | `O(1)` — множину будують один раз, до циклу |
+
+### Самоперевірка
+
+1. Два рішення завжди дають однакову відповідь. Чи означає це, що вони однаково ефективні?
+2. Чому ефективність рахують у кроках, а не в секундах?
+3. Кількість поїздок подвоїлась, а кроки зросли ×4. Який клас складності?
+4. Внутрішній цикл почали з `i + 1` замість 0. Чи змінився клас складності?
+5. Чому `if x in my_list:` усередині `for` — підозрілий рядок?
+6. Функція має два цикли по `data` один за одним. Яка її складність?
+7. Чим швидкі рішення цього уроку платять за швидкість?
+
+??? success "Відповіді"
+
+    1. Ні. Правильність і ефективність — різні питання. `has_duplicate_ids_slow` і `has_duplicate_ids_fast` завжди відповідають однаково, але перша — `O(n²)`, друга — `O(n)`.
+    2. Секунди залежать від комп'ютера й від моменту запуску. Кроки — властивість алгоритму: однакові на будь-якій машині.
+    3. `O(n²)`.
+    4. Ні: кроків удвічі менше, але при подвоєнні n їх однаково стає вчетверо більше. Множник `½` у Big O відкидають.
+    5. `in` для списку переглядає елементи по черзі — прихований цикл. Разом із зовнішнім `for` це `O(n·m)`. Рішення — множина, створена один раз до циклу.
+    6. `O(n)`: `n + n = 2n`, множник відкидаємо.
+    7. Пам'яттю: множина чи словник зберігає до n елементів.
 
 ### Що далі
 
-- Ноутбук заняття: [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_09_decorators/note_lesson_09_decorators_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_09_decorators/note_lesson_09_decorators.ipynb){ .solutions-link } — історія блогу з ролями крок за кроком: від шести однакових перевірок до `require_role`, нова роль `superuser`, `@timer`, `lru_cache`, самоперевірка і завдання `deny_role`.
-- Поглиблення: [`note_lesson_09_decorators_architecture.ipynb`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_09_decorators/note_lesson_09_decorators_architecture.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_09_decorators/note_lesson_09_decorators_architecture.ipynb) — логер, таймер, стек декораторів як middleware, міні-проєкт обробки платежів, декоратори у FastAPI і pytest.
-- Довідник: [Функції та функціональне програмування](../../reference/python_core/functions.md), [Простори імен / LEGB](../../reference/python_core/namespaces_legb.md).
-- Наступний урок: [Урок 10. Ітератори й генератори](lesson_10.md). Функції навчаться віддавати результати по одному, не тримаючи всі дані в пам'яті.
+- Ноутбук заняття: [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_09_practicum_big_o/note_lesson_09_big_o_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_09_practicum_big_o/note_lesson_09_big_o.ipynb){ .solutions-link } — FizzBuzz, паліндром, шифр Цезаря з перевірками.
+- Лабораторія: [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_09_practicum_big_o/lab_lesson_09_taxi_big_o_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_09_practicum_big_o/lab_lesson_09_taxi_big_o.ipynb){ .solutions-link } — чотири задачі диспетчера, дослід подвоєння, «місто росте».
+- Довідник: [Python Helper Toolkit](../../reference/python_core/introspection_debug_tools.md) — вбудовані функції, якими зручно досліджувати код.
+- Наступний урок: [Урок 10. Декоратори](lesson_10.md). Лінію «скільки роботи» продовжить [Практикум 2. Пошук](lesson_12.md): як використати властивості даних, наприклад відсортованість, щоб робити ще менше кроків.
 
-## Документація
+## Документація і джерела
 
-- Глосарій: [декоратор](https://docs.python.org/3/glossary.html#term-decorator)
-- Туторіал: [довільні аргументи `*args`](https://docs.python.org/3/tutorial/controlflow.html#arbitrary-argument-lists), [іменовані аргументи і `**kwargs`](https://docs.python.org/3/tutorial/controlflow.html#keyword-arguments)
-- Довідник мови: [визначення функції і декоратори](https://docs.python.org/3/reference/compound_stmts.html#function-definitions), [інструкція `nonlocal`](https://docs.python.org/3/reference/simple_stmts.html#the-nonlocal-statement)
-- Модуль `functools`: [`wraps`](https://docs.python.org/3/library/functools.html#functools.wraps), [`lru_cache`](https://docs.python.org/3/library/functools.html#functools.lru_cache)
-- [PEP 318 — декоратори для функцій і методів](https://peps.python.org/pep-0318/)
+- Python: [складність операцій `list`, `set`, `dict`](https://wiki.python.org/moin/TimeComplexity), [множини в туторіалі](https://docs.python.org/3/tutorial/datastructures.html#sets), [тип `set`](https://docs.python.org/3/library/stdtypes.html#set-types-set-frozenset), [`time.perf_counter()`](https://docs.python.org/3/library/time.html#time.perf_counter)
+- Для охочих — як цю тему пояснюють відомі курси:
+    - MIT 6.0001, [лекція 10 «Understanding Program Efficiency»](https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/resources/lecture-10-understanding-program-efficiency-part-1/): секундомір, підрахунок операцій і порядок росту;
+    - Harvard CS50, [тиждень 3 «Algorithms»](https://cs50.harvard.edu/x/weeks/3/): лінійний і бінарний пошук, `O` та `Ω`;
+    - Princeton, Sedgewick & Wayne, [«Algorithms», розділ 1.4](https://algs4.cs.princeton.edu/14analysis/): дослід подвоєння (doubling ratio).

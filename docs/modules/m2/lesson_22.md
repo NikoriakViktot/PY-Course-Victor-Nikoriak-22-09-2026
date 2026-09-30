@@ -1,463 +1,461 @@
-# Урок 22. Практикум П4. Рекурсія, «розділяй і володарюй», перебір з поверненням
+# Урок 22. Інкапсуляція, область видимості
 
-Три практикуми модуля 1 навчили диспетчерську **оцінювати** рішення (П1), **обирати** стратегію за властивостями даних (П2) і **змінювати представлення** даних (П3). Сьогодні — четверте вміння: розбивати задачу на **менші копії самої себе**.
+В уроці 20 `Order` перевіряв суму чека в `__init__`: замовлення на −120 грн створити неможливо. Але тиждень потому бухгалтер знайшла в звіті від'ємний виторг. Виявилося, що скрипт знижок писав прямо в атрибут: `order.bill = order.bill - 600`. Перевірка в `__init__` спрацювала один раз, при створенні, а потім у стан міг писати будь-хто.
 
-Три питання з роботи сервісу «Смачно + Таксі»:
+Той самий скрипт виставляв замовленням статус `"delivered"`, хоча кухня ще й не почала готувати. Звіт кухні показував порожні черги, а клієнти чекали годинами.
 
-1. Меню кафе вкладене: «Кухня» → «Перші страви» → «Борщ», а в «Напоях» є «Гарячі» й «Холодні», і глибину ніхто не обмежував. Скільки всього страв? Де лежить «Узвар»?
-2. Доставки за день треба відсортувати за ціною. Сортування вставкою з П1 на тисячах доставок задуже повільне.
-3. Ваучер з П3 тепер покриває не дві поїздки, а **скільки завгодно**. Які поїздки дають рівно 500 грн?
+**Інкапсуляція** — це про те, щоб у стан об'єкта вели лише **правильні двері**: методи, які перевіряють правила. Об'єкт тоді сам гарантує, що ніколи не опиниться в неможливому стані, хоч би хто й звідки з ним працював. А **область видимості** — про те саме на рівні функцій і модулів: чим менше коду може змінити змінну, тим менше місць, де її можна зламати.
 
-У всіх трьох задачах відповідь для цілого збирається з відповідей для частин. Це три обличчя **рекурсії**: функції, яка викликає сама себе.
-
-**Що потрібно з попередніх уроків:** функції й `return` (урок 7), Big O і лічильники кроків (урок 8), бінарний пошук (урок 11), Two Sum (урок 16), `lru_cache` (урок 9).
+**Що потрібно з попередніх уроків:** винятки (урок 14), LEGB і `nonlocal` (урок 19), класи й атрибути (урок 20), наслідування й `super()` (урок 21).
 
 **Після уроку ти зможеш:**
 
-- писати рекурсивну функцію з базовим і рекурсивним випадком і пояснювати, як працює стек викликів;
-- обходити вкладені структури — дерева — рекурсією;
-- застосовувати «розділяй і володарюй»: сортування злиттям за `O(n log n)`;
-- розв'язувати задачі перебору з поверненням (backtracking) і відсікати безнадійні гілки;
-- обирати між рекурсією та циклом і розпізнавати, коли рекурсія повторює роботу.
+- формулювати інваріанти класу й захищати їх методами, а не домовленостями;
+- розрізняти `name`, `_name` і `__name`, пояснювати name mangling і коли він справді потрібен;
+- будувати скінченний автомат статусів із дозволеними переходами;
+- давати доступ до стану лише для читання через `@property` і перевіряти запис у сеттері;
+- пояснювати, чим небезпечний `global`, і тримати змінні в найменшій потрібній області видимості;
+- вирішувати, яке правило має жити в моделі, а яке — в сервісі.
 
-**Задача розділу.** Звіт за вкладеним меню, сортування доставок і пошук комбінацій поїздок для ваучера. Повний код — у розділі [«Практика»](#practice).
+**Задача розділу.** `Order`, у якого сума змінюється лише через знижку з перевіркою, а статус — лише за дозволеними переходами, з історією змін. Повний код — у розділі [«Практика»](#practice).
 
-**Ноутбук заняття:** [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_22_practicum_recursion/note_lesson_22_recursion_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_22_practicum_recursion/note_lesson_22_recursion.ipynb){ .solutions-link }
+**Ноутбук заняття:** [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_22_encapsulation_scope/note_lesson_22_encapsulation_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_22_encapsulation_scope/note_lesson_22_encapsulation.ipynb){ .solutions-link }
 
 ## Пригадай
 
-1. Скільки кроків робить бінарний пошук на 1 000 000 записів і чому?
-2. Два вказівники з П2 шукали пару за `O(n)`, а Two Sum з П3 — на невідсортованих даних. А якщо чисел у сумі може бути скільки завгодно?
-3. Що робить `@lru_cache` з уроку 9?
+1. Де в `Order` з уроку 20 стояла перевірка `bill > 0` і коли вона виконувалась?
+2. Навіщо в уроці 19 знадобився `nonlocal`?
+3. Чому в уроці 21 нащадок, який повертає з `fare()` рядок, зламав звіт?
 
 ??? success "Відповіді"
 
-    1. Близько 20: кожен крок відкидає половину, а 2²⁰ ≈ 1 000 000.
-    2. Пари вже не досить: потрібні комбінації будь-якого розміру. Сьогодні — перебір з поверненням.
-    3. Запам'ятовує результати функції для аргументів, з якими її вже викликали.
+    1. У `__init__`, тобто один раз — при створенні об'єкта.
+    2. Щоб змінити змінну оточуючої функції: присвоєння без нього створює локальну змінну.
+    3. Він порушив обіцянку батька «`fare()` повертає число» — принцип підстановки Лісков.
 
-## Рекурсія: функція, що викликає сама себе
+## Інваріант і як його зламати
 
-Меню кафе — вкладені словники. Лист — страва з ціною, вузол — категорія:
+**Інваріант** — правило, яке має бути правдою **завжди**, протягом усього життя об'єкта:
 
-```python
-MENU = {
-    "Кухня": {
-        "Перші страви": {"Борщ": 95, "Юшка": 85},
-        "Основні": {"Вареники": 80, "Деруни": 75},
-    },
-    "Напої": {
-        "Гарячі": {"Чай": 30, "Кава": {"Еспресо": 40, "Лате": 55}},
-        "Холодні": {"Узвар": 35},
-    },
-    "Хліб": 10,
-}
-```
+- сума чека більша за 0;
+- статус змінюється лише за маршрутом «нове → готується → в дорозі → доставлено»;
+- кількість використань промокоду не від'ємна.
 
-Скільки страв у меню? Цикл `for` не допоможе: невідомо, скільки рівнів вкладень. Зате відповідь легко сформулювати **через саму себе**: страв у категорії — це сума страв у кожній її частині. А частина — або страва (1), або знову категорія.
+Перевірка в `__init__` захищає лише **народження** об'єкта:
 
 ```python
-def count_dishes(node):
-    if not isinstance(node, dict):
-        return 1
-    return sum(count_dishes(child) for child in node.values())
+class Order:
+    def __init__(self, order_id, bill):
+        if bill <= 0:
+            raise ValueError(f"сума чека має бути більшою за 0, а маємо {bill}")
+        self.id = order_id
+        self.bill = bill
 
 
-print(count_dishes(MENU))
-print(count_dishes(MENU["Напої"]))
-print(count_dishes(95))
+order = Order(1, 540.0)
+order.bill = order.bill - 600
+print(order.bill)
 ```
 
 ```text
-9
-4
-1
+-60.0
 ```
 
-Кожна рекурсивна функція має дві частини:
+Ні помилки, ні попередження. `bill` — відкритий атрибут, і записати в нього може кожен рядок будь-якого модуля. Інваріант порушено, і дізнаємося ми про це аж зі звіту бухгалтера.
 
-- **базовий випадок** — задача настільки мала, що відповідь відома одразу: страва — це 1. Тут рекурсія **зупиняється**;
-- **рекурсивний випадок** — задачу зводимо до **менших** задач того самого виду й збираємо їхні відповіді: категорія — сума по частинах.
+## Конвенції доступу: _name і __name
 
-Без базового випадку функція викликала б себе вічно. Без «менших» задач — теж.
+Python не має ключових слів `private` чи `public`, як Java чи C#. Замість них — **домовленості в іменах**:
 
-### Стек викликів
+| Ім'я | Що означає | Чи захищає |
+|---|---|---|
+| `bill` | публічний атрибут: частина інтерфейсу | ні |
+| `_bill` | внутрішній: «не чіпай ззовні, це деталь реалізації» | домовленість, Python не заважає |
+| `__bill` | Python перейменовує в `_Order__bill` (name mangling) | від випадкових збігів імен у нащадках |
 
-Кожен виклик функції — окремий **кадр** (frame) з власними локальними змінними. Кадри складаються в **стек**: новий кладеться зверху, а коли функція повертає результат, її кадр знімається. Для `count_dishes(MENU["Напої"])`:
+```python
+class Order:
+    def __init__(self, order_id, bill):
+        self.id = order_id
+        self._bill = bill
+        self.__kitchen_note = "без цибулі"
+
+
+order = Order(1, 540.0)
+print(order.__dict__)
+print(order._bill)
+
+try:
+    print(order.__kitchen_note)
+except AttributeError as error:
+    print("AttributeError:", error)
+```
+
+```text
+{'id': 1, '_bill': 540.0, '_Order__kitchen_note': 'без цибулі'}
+540.0
+AttributeError: 'Order' object has no attribute '__kitchen_note'
+```
+
+`_bill` читається без проблем: підкреслення — лише сигнал для людей, IDE й лінтерів. А `__kitchen_note` усередині класу Python записав як `_Order__kitchen_note`. Звернутися до нього все одно можна — `order._Order__kitchen_note`, — тож це не замок, а захист від **випадковостей**.
+
+### Навіщо __: колізія імен у нащадках
+
+Випадковість, від якої захищає `__`, — конфлікт імен між батьком і нащадком:
+
+```python
+class Delivery:
+    def __init__(self, order_id):
+        self.order_id = order_id
+        self._status = "нова"
+
+    def status(self):
+        return self._status
+
+
+class TrackedDelivery(Delivery):
+    def __init__(self, order_id, gps):
+        super().__init__(order_id)
+        self._status = f"GPS {gps}"
+
+
+tracked = TrackedDelivery(7, "50.45,30.52")
+print(tracked.status())
+```
+
+```text
+GPS 50.45,30.52
+```
+
+Автор `TrackedDelivery` не знав, що в батька вже є `_status`, і назвав так своє поле. Він **затер** стан батька, і `status()` повертає нісенітницю. З двома підкресленнями імена не перетинаються:
+
+```python
+class Delivery:
+    def __init__(self, order_id):
+        self.order_id = order_id
+        self.__status = "нова"
+
+    def status(self):
+        return self.__status
+
+
+class TrackedDelivery(Delivery):
+    def __init__(self, order_id, gps):
+        super().__init__(order_id)
+        self.__status = f"GPS {gps}"
+
+
+tracked = TrackedDelivery(7, "50.45,30.52")
+print(tracked.status())
+print(tracked.__dict__)
+```
+
+```text
+нова
+{'order_id': 7, '_Delivery__status': 'нова', '_TrackedDelivery__status': 'GPS 50.45,30.52'}
+```
+
+Два різні атрибути — `_Delivery__status` і `_TrackedDelivery__status`. Кожен клас бачить свій.
+
+!!! tip "Коли яке підкреслення"
+    За замовчуванням — одне: `_bill`. Воно чесно каже «це внутрішнє» і не заважає нащадкам. Два — лише для атрибутів класу, який **задумано** як базовий для чужих нащадків, щоб їхні поля випадково не затерли твої. [PEP 8](https://peps.python.org/pep-0008/#designing-for-inheritance) радить саме так.
+
+## Методи — двері в стан
+
+Сховати `bill` за підкресленням мало: треба дати **правильний спосіб** її змінити. Знижку дає не той, хто викликає, віднімаючи число, а сам об'єкт — методом з перевіркою:
+
+```python
+class Order:
+    MAX_DISCOUNT = 50
+
+    def __init__(self, order_id, bill):
+        if bill <= 0:
+            raise ValueError(f"сума чека має бути більшою за 0, а маємо {bill}")
+        self.id = order_id
+        self._bill = bill
+
+    def bill(self):
+        return self._bill
+
+    def apply_discount(self, percent):
+        if not 0 < percent <= self.MAX_DISCOUNT:
+            raise ValueError(f"знижка має бути від 1 до {self.MAX_DISCOUNT} %, а маємо {percent}")
+        self._bill = round(self._bill * (100 - percent) / 100, 2)
+
+
+order = Order(1, 540.0)
+order.apply_discount(10)
+print(order.bill())
+
+try:
+    order.apply_discount(111)
+except ValueError as error:
+    print(error)
+print(order.bill())
+```
+
+```text
+486.0
+знижка має бути від 1 до 50 %, а маємо 111
+486.0
+```
+
+Зовнішній код більше не **обчислює** нову суму сам — він **просить** об'єкт: «застосуй знижку 10 %». Правило «не більше 50 %» живе в одному місці, і обійти його випадково вже не вийде. Цей принцип називають **«Tell, don't ask»**: кажи об'єкту, що зробити, замість того щоб читати його стан, рахувати й записувати назад.
+
+## Статуси замовлення: скінченний автомат
+
+Статус — найнебезпечніше поле: від нього залежать кухня, водії й звіти. Замовлення проходить чіткий маршрут, і не кожен перехід дозволено:
 
 ```mermaid
-flowchart TD
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
-
-    N["Напої<br>3 + 1 = 4"] --> H["Гарячі<br>1 + 2 = 3"]
-    N --> C["Холодні<br>1"]
-    H --> T["Чай → 1"]
-    H --> K["Кава<br>1 + 1 = 2"]
-    K --> E["Еспресо → 1"]
-    K --> L["Лате → 1"]
-    C --> U["Узвар → 1"]
-
-    class N,H,C,K step
-    class T,E,L,U success
+stateDiagram-v2
+    [*] --> new
+    new --> cooking : cook()
+    new --> cancelled : cancel()
+    cooking --> on_the_way : send()
+    cooking --> cancelled : cancel()
+    on_the_way --> delivered : deliver()
+    delivered --> [*]
+    cancelled --> [*]
 ```
 
-Зелені — базові випадки: там стек перестає рости. Відповіді піднімаються знизу вгору: «Кава» = 2, «Гарячі» = 1 + 2 = 3, «Напої» = 3 + 1 = 4. Найглибше в усьому меню — п'ять кадрів один над одним: Меню → Напої → Гарячі → Кава → Лате.
+Така схема — **скінченний автомат** (finite state machine): є скінченний набір станів і список дозволених переходів між ними. Скасувати можна, поки водій не виїхав. Доставлене замовлення вже нікуди не рухається.
 
-### Рекурсія, що повертає шлях
-
-Де в меню «Узвар»? Функція повертає шлях категорій або `None`, якщо страви немає:
+Автомат переноситься в код майже дослівно: словник «стан → дозволені наступні стани» і один внутрішній метод, через який проходить **кожна** зміна:
 
 ```python
-def find_path(node, dish, path=()):
-    if not isinstance(node, dict):
-        return None
-    for name, child in node.items():
-        if name == dish:
-            return path + (name,)
-        found = find_path(child, dish, path + (name,))
-        if found:
-            return found
-    return None
+class Order:
+    TRANSITIONS = {
+        "new": {"cooking", "cancelled"},
+        "cooking": {"on_the_way", "cancelled"},
+        "on_the_way": {"delivered"},
+        "delivered": set(),
+        "cancelled": set(),
+    }
+
+    def __init__(self, order_id, bill):
+        if bill <= 0:
+            raise ValueError(f"сума чека має бути більшою за 0, а маємо {bill}")
+        self.id = order_id
+        self._bill = bill
+        self._status = "new"
+        self._history = ["new"]
+
+    def _move(self, new_status):
+        if new_status not in self.TRANSITIONS[self._status]:
+            raise ValueError(f"замовлення №{self.id}: не можна {self._status} → {new_status}")
+        self._status = new_status
+        self._history.append(new_status)
+
+    def cook(self):
+        self._move("cooking")
+
+    def send(self):
+        self._move("on_the_way")
+
+    def deliver(self):
+        self._move("delivered")
+
+    def cancel(self):
+        self._move("cancelled")
 
 
-print(find_path(MENU, "Узвар"))
-print(find_path(MENU, "Лате"))
-print(find_path(MENU, "Піца"))
+order = Order(1, 540.0)
+order.cook()
+order.send()
+try:
+    order.cancel()
+except ValueError as error:
+    print(error)
+order.deliver()
+print(order._history)
 ```
 
 ```text
-('Напої', 'Холодні', 'Узвар')
-('Напої', 'Гарячі', 'Кава', 'Лате')
-None
+замовлення №1: не можна on_the_way → cancelled
+['new', 'cooking', 'on_the_way', 'delivered']
 ```
 
-Шлях передається **параметром**: кожен рівень додає своє ім'я до кортежу й передає новий кортеж глибше. Кортеж, а не список, — щоб гілки не псували шлях одна одній (урок 7, змінювані значення за замовчуванням).
+Скасування в дорозі відхилено, і стан лишився правильним. Публічні методи `cook`, `send`, `deliver`, `cancel` — це **інтерфейс** замовлення. `_move`, `_status` і `_history` — внутрішня кухня, про яку зовнішньому коду знати не треба.
 
-### Межа глибини
+## @property: читати можна, писати — лише через правила
 
-Кожен кадр займає пам'ять, тож Python обмежує глибину стеку:
+Методи `bill()` і доступ до `order._history` зсередини — незручно. Хочеться читати стан як звичайний атрибут, `order.status`, але не дозволяти запис. Для цього є **`@property`**: метод, до якого звертаються як до атрибута.
 
 ```python
-import sys
+class Order(Order):
+    @property
+    def status(self):
+        return self._status
+
+    @property
+    def history(self):
+        return tuple(self._history)
 
 
-def countdown(n):
-    if n == 0:
-        return 0
-    return countdown(n - 1)
+order = Order(2, 320.0)
+order.cook()
+print(order.status, order.history)
 
-
-print(sys.getrecursionlimit())
-print(countdown(500))
 try:
-    countdown(100_000)
-except RecursionError as error:
+    order.status = "delivered"
+except AttributeError as error:
     print(type(error).__name__)
 ```
 
 ```text
-1000
-0
-RecursionError
+cooking ('new', 'cooking')
+AttributeError
 ```
 
-Меню, дерево папок, JSON з API — вкладеність там рідко сягає сотні рівнів, і рекурсія доречна. А «пройти список з 100 000 доставок» рекурсією — погана ідея: для лінійних даних є цикл.
+`order.status` виглядає як атрибут, а насправді викликає метод. Сеттера немає — запис дає `AttributeError`. Статус змінюється лише методами автомата. А `history` повертає **кортеж-копію**: якби він повертав сам список `_history`, зовнішній код міг би дописати в нього що завгодно.
 
-## Розділяй і володарюй: сортування злиттям
-
-В П1 ми бачили: алгоритм, що порівнює кожен елемент з кожним, росте як `O(n²)`. Сортування вставкою — саме таке. **Розділяй і володарюй** (divide and conquer) пропонує інше:
-
-1. **розділити** список навпіл;
-2. **відсортувати** кожну половину — рекурсивно, тим самим алгоритмом;
-3. **злити** дві відсортовані половини в одну.
-
-Базовий випадок — список з 0 чи 1 елемента вже відсортований. Уся робота — у злитті:
+Якщо запис дозволений, але з правилами, до `@property` додають **сеттер**. Тоді звичайне присвоєння запускає перевірку:
 
 ```python
-def merge(left, right, counter):
-    result = []
-    i = j = 0
-    while i < len(left) and j < len(right):
-        counter[0] += 1
-        if left[i] <= right[j]:
-            result.append(left[i])
-            i += 1
-        else:
-            result.append(right[j])
-            j += 1
-    return result + left[i:] + right[j:]
+class Order(Order):
+    @property
+    def bill(self):
+        return self._bill
+
+    @bill.setter
+    def bill(self, value):
+        if value <= 0:
+            raise ValueError(f"сума чека має бути більшою за 0, а маємо {value}")
+        self._bill = value
 
 
-def merge_sort(items, counter):
-    if len(items) <= 1:
-        return list(items)
-    middle = len(items) // 2
-    left = merge_sort(items[:middle], counter)
-    right = merge_sort(items[middle:], counter)
-    return merge(left, right, counter)
-
-
-fares = [230, 150, 270, 180, 320, 120, 410, 150]
-counter = [0]
-print(merge_sort(fares, counter), counter[0])
+order = Order(3, 980.0)
+order.bill = 900.0
+try:
+    order.bill = order.bill - 1000
+except ValueError as error:
+    print(error)
+print(order.bill)
 ```
 
 ```text
-[120, 150, 150, 180, 230, 270, 320, 410] 16
+сума чека має бути більшою за 0, а маємо -100.0
+900.0
 ```
 
-`counter` — список з одного числа, бо лічильник треба ділити між усіма рекурсивними викликами. Число всередині `merge` змінити не вийшло б: це локальна змінна (урок 18).
+Той самий рядок, що на початку уроку зламав звіт, тепер зупиняється з поясненням. Зовнішній код не змінився — `order.bill = …`, — а інваріант захищено. Усе про `@property`, сеттери й дескриптори — в уроці 24.
 
-```mermaid
-flowchart TD
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+!!! note "`class Order(Order)`"
+    У прикладах вище ми нарощуємо клас частинами, щоб не повторювати весь код: кожен новий `Order` наслідує попередній. У справжньому проєкті всі ці методи живуть в одному класі.
 
-    A["230 150 270 180 320 120 410 150"] --> B["230 150 270 180"]
-    A --> C["320 120 410 150"]
-    B --> B1["150 230"]
-    B --> B2["180 270"]
-    C --> C1["120 320"]
-    C --> C2["150 410"]
-    B1 --> M1["150 180 230 270"]
-    B2 --> M1
-    C1 --> M2["120 150 320 410"]
-    C2 --> M2
-    M1 --> R["120 150 150 180 230 270 320 410"]
-    M2 --> R
+## Область видимості: чим менше, тим безпечніше
 
-    class A,B,C step
-    class B1,B2,C1,C2,M1,M2 decision
-    class R success
-```
+Інкапсуляція класу — окремий випадок ширшої ідеї: **кожна змінна має бути видимою в найменшій потрібній області**. В уроці 19 ми розібрали LEGB — як Python **шукає** ім'я. Тепер про те, де його **тримати**.
 
-Верхня половина схеми — поділ, нижня — злиття. Рівнів поділу `log₂ n`: для 8 доставок — 3. На кожному рівні злиття разом переглядає всі n елементів. Разом — `n · log n`.
+### global: змінна, яку може змінити будь-хто
 
-Дослід подвоєння з П1, порівняння з сортуванням вставкою:
+Перша версія сервісу рахувала замовлення в глобальній змінній:
 
 ```python
-def insertion_sort(items, counter):
-    result = list(items)
-    for k in range(1, len(result)):
-        j = k
-        while j > 0:
-            counter[0] += 1
-            if result[j - 1] <= result[j]:
-                break
-            result[j - 1], result[j] = result[j], result[j - 1]
-            j -= 1
-    return result
+total_orders = 0
 
 
-for n in [1000, 2000, 4000]:
-    data = list(range(n, 0, -1))
-    slow, fast = [0], [0]
-    insertion_sort(data, slow)
-    merge_sort(data, fast)
-    print(n, slow[0], fast[0])
+def add_order_broken():
+    total_orders += 1
+
+
+try:
+    add_order_broken()
+except UnboundLocalError as error:
+    print(type(error).__name__)
 ```
 
 ```text
-1000 499500 5044
-2000 1999000 11088
-4000 7998000 24176
+UnboundLocalError
 ```
 
-Для списку у зворотному порядку (найгірший випадок вставки) подвоєння дає ×4 для вставки (`O(n²)`) і трохи більше ніж ×2 для злиття (`O(n log n)`). На 4000 доставок — 8 мільйонів порівнянь проти 24 тисяч. Вбудований `sorted()` — це Timsort, нащадок сортування злиттям: у житті сортуй ним, а `merge_sort` пишемо, щоб зрозуміти ідею.
-
-!!! tip "Бінарний пошук — теж «розділяй і володарюй»"
-    Бінарний пошук з П2 ділить задачу навпіл і йде лише в **одну** половину. Рекурсивно: `search(items, target)` → перевір середину → `search(ліва або права половина)`. Сортування злиттям іде в **обидві** половини й потім зливає. Обидва — `log n` рівнів поділу.
-
-
-## Перебір з поверненням: ваучер на будь-яку кількість поїздок
-
-У П3 ваучер покривав **дві** поїздки, і словник знаходив пару за один прохід. Тепер ваучер на 500 грн можна розділити між **скількома завгодно** поїздками зміни. Які набори поїздок дають рівно 500?
-
-Кожна поїздка або входить у набір, або ні. **Перебір з поверненням** (backtracking) будує набір крок за кроком: «беру цю поїздку й дивлюся далі». Потім **повертається** на крок назад — прибирає поїздку — і пробує наступну. Параметр `start` каже, що далі розглядаємо лише поїздки після поточної: так кожен набір з'являється один раз.
+Та сама пастка, що з `nonlocal` в уроці 19: присвоєння робить `total_orders` локальною змінною. «Виправлення» через `global` працює:
 
 ```python
-def voucher_sets(fares, target):
-    found = []
-    calls = [0]
-
-    def explore(start, chosen, total):
-        calls[0] += 1
-        if total == target:
-            found.append(list(chosen))
-            return
-        for i in range(start, len(fares)):
-            chosen.append(fares[i])
-            explore(i + 1, chosen, total + fares[i])
-            chosen.pop()
-
-    explore(0, [], 0)
-    return found, calls[0]
+def add_order():
+    global total_orders
+    total_orders += 1
+    return total_orders
 
 
-trip_fares = [230, 150, 270, 180, 120, 410]
-print(voucher_sets(trip_fares, 500))
+add_order()
+add_order()
+print(total_orders)
 ```
 
 ```text
-([[230, 150, 120], [230, 270]], 56)
+2
 ```
 
-Два набори: три поїздки на 230 + 150 + 120 і дві на 230 + 270. Друга — та сама пара, яку знайшов Two Sum у П3, а перша — те, чого пара знайти не могла.
-
-- `chosen.append` — крок уперед: беремо поїздку;
-- рекурсивний виклик досліджує все, що може піти після неї;
-- `chosen.pop()` — **повернення**: прибираємо поїздку, щоб спробувати іншу на її місці.
-
-Дерево рішень для перших кроків:
-
-```mermaid
-flowchart TD
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
-
-    R["[] 0"] --> A["[230] 230"]
-    R --> B["[150] 150"]
-    A --> A1["[230, 150] 380"]
-    A --> A2["[230, 270] 500"]
-    A --> A3["[230, 410] 640"]
-    A1 --> A11["[230, 150, 120] 500"]
-    A1 --> A12["[230, 150, 410] 790"]
-
-    class R,A,B,A1 step
-    class A2,A11 success
-    class A3,A12 error
-```
-
-Червоні вузли — сума вже більша за 500. Але наша функція не знає, що далі буде лише гірше, і перебирає їхніх нащадків до кінця.
-
-### Відсікання
-
-Якщо відсортувати поїздки за зростанням, то, щойно чергова поїздка перевищує залишок, **усі наступні** перевищать теж. Ці гілки можна не досліджувати зовсім — це **відсікання** (pruning):
+Але тепер **будь-яка** функція будь-якого модуля може змінити `total_orders`. А коли кафе відкриває друге відділення, обидва рахують в одну змінну:
 
 ```python
-def voucher_sets_pruned(fares, target):
-    fares = sorted(fares)
-    found = []
-    calls = [0]
-
-    def explore(start, chosen, total):
-        calls[0] += 1
-        if total == target:
-            found.append(list(chosen))
-            return
-        for i in range(start, len(fares)):
-            if total + fares[i] > target:
-                break
-            chosen.append(fares[i])
-            explore(i + 1, chosen, total + fares[i])
-            chosen.pop()
-
-    explore(0, [], 0)
-    return found, calls[0]
-
-
-print(voucher_sets_pruned(trip_fares, 500))
-
-big_shift = [230, 150, 270, 180, 120, 410, 95, 60, 310, 200, 140, 175]
-print(voucher_sets(big_shift, 500)[1], voucher_sets_pruned(big_shift, 500)[1])
+podil_first = add_order()
+obolon_first = add_order()
+print(podil_first, obolon_first)
 ```
 
 ```text
-([[120, 150, 230], [230, 270]], 19)
-3454 150
+3 4
 ```
 
-На 6 поїздках — 19 викликів замість 56, на 12 — 150 замість 3454. Набори ті самі, лише записані за зростанням. Без відсікання перебір усіх підмножин n поїздок — до `2ⁿ` викликів: кожна поїздка «є» чи «немає». Відсікання не змінює найгіршого випадку, але на реальних даних прибирає більшість гілок.
-
-!!! note "Коли перебір — єдиний вихід"
-    Для пари словник з П3 дає `O(n)`. Для наборів будь-якого розміру швидкого загального алгоритму немає: задача про підмножину із заданою сумою (subset sum) — класична «важка» задача. Перебір з відсіканням — чесне рішення для десятків елементів. Для великих сум з цілими числами є динамічне програмування — тема практикуму П5 (урок 26).
-
-## Коли рекурсія повторює роботу
-
-Рекурсія природна, коли підзадачі **незалежні**: ліва й права половина злиття, різні категорії меню. Але якщо ті самі підзадачі трапляються знову і знову, рекурсія перераховує їх щоразу. Класичний приклад — числа Фібоначчі:
+Перше замовлення Оболоні отримало №4, бо лічильник спільний на весь модуль. Щоб знайти, хто і де змінює глобальну змінну, треба прочитати **весь** код. Лічильник у класі (урок 20) чи в замиканні (урок 19) видно лише там, де він потрібен, і кожне відділення отримує свій:
 
 ```python
-calls = [0]
+class Branch:
+    def __init__(self, name):
+        self.name = name
+        self._next_id = 1
+
+    def add_order(self):
+        order_id = self._next_id
+        self._next_id += 1
+        return order_id
 
 
-def fib(n):
-    calls[0] += 1
-    if n < 2:
-        return n
-    return fib(n - 1) + fib(n - 2)
-
-
-print(fib(20), calls[0])
+podil, obolon = Branch("Поділ"), Branch("Оболонь")
+print(podil.add_order(), podil.add_order(), obolon.add_order())
 ```
 
 ```text
-6765 21891
+1 2 1
 ```
 
-21 891 виклик, щоб отримати 20-те число: `fib(18)` рахується двічі, `fib(17)` — тричі і так далі. `@lru_cache` з уроку 9 запам'ятовує вже пораховані результати:
-
-```python
-from functools import lru_cache
-
-
-@lru_cache(maxsize=None)
-def fib_memo(n):
-    if n < 2:
-        return n
-    return fib_memo(n - 1) + fib_memo(n - 2)
-
-
-print(fib_memo(20), fib_memo.cache_info().misses)
-```
-
-```text
-6765 21
-```
-
-21 справжнє обчислення замість 21 891. Це **мемоізація** — перший крок до динамічного програмування (урок 26).
-
-## Архітектура: рекурсія чи цикл { #architecture }
-
-Кожну рекурсію можна переписати циклом з **явним стеком** — списком, у який кладемо «що ще треба обробити». Той самий підрахунок страв:
-
-```python
-def count_dishes_iterative(menu):
-    stack = [menu]
-    count = 0
-    while stack:
-        node = stack.pop()
-        if isinstance(node, dict):
-            stack.extend(node.values())
-        else:
-            count += 1
-    return count
-
-
-print(count_dishes_iterative(MENU))
-```
-
-```text
-9
-```
-
-| | Рекурсія | Цикл з явним стеком |
+| Де тримати змінну | Хто може змінити | Коли |
 |---|---|---|
-| Читабельність | повторює визначення задачі: «сума по частинах» | стек і цикл видно явно, ідея — менше |
-| Глибина | обмежена ~1000 кадрів (`RecursionError`) | обмежена лише пам'яттю |
-| Повернення з кроку | природне: стек викликів сам пам'ятає, де ми | треба зберігати стан у стеку вручну |
-| Коли | дерева, вкладені структури, «розділяй і володарюй», перебір | лінійні дані, дуже глибокі структури, продакшн-обхід великих дерев |
+| локальна змінна функції | лише ця функція | проміжні обчислення — за замовчуванням |
+| атрибут об'єкта `self._x` | методи об'єкта | стан, що живе між викликами |
+| змінна модуля | будь-який код, що імпортує модуль | константи: `FEES`, `DAYS`, `MAX_DISCOUNT` — **не змінюються** |
+| `global` | будь-хто | майже ніколи |
 
-Як обрати техніку для задачі:
+!!! warning "Константи — так, змінний глобальний стан — ні"
+    `FEES = {...}` на рівні модуля — нормально, якщо його ніхто не змінює. Великими літерами (PEP 8) пишуть саме такі значення. Змінний стан — лічильники, списки замовлень, кеші — тримай в об'єктах.
+
+### Межа модуля: _helper і __all__
+
+Ті самі домовленості діють для модулів з уроку 13. Функція з підкресленням — внутрішня для модуля:
+
+```python title="pricing.py"
+__all__ = ["fare_for"]
+
+FEES = {"Поділ": 60, "Оболонь": 80}
+
+
+def _round_to_ten(value):
+    return round(value / 10) * 10
+
+
+def fare_for(district, night=False):
+    fare = FEES[district]
+    return _round_to_ten(fare * 1.3) if night else fare
+```
+
+- `from pricing import *` імпортує лише імена з `__all__`, тобто `fare_for`. Без `__all__` — усі імена без підкреслення;
+- `_round_to_ten` лишається доступною як `pricing._round_to_ten`, але підкреслення каже: «це не частина інтерфейсу модуля, завтра її можуть перейменувати».
+
+## Архітектура: публічний інтерфейс і внутрішній стан { #architecture }
+
+Інкапсуляція ділить клас на дві частини: **інтерфейс**, на який можуть спиратися інші, і **реалізацію**, яку можна змінювати, нікого не попереджаючи.
 
 ```mermaid
 flowchart TD
@@ -467,140 +465,257 @@ flowchart TD
     classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
     classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
 
-    Q{"задача складається<br>з менших копій себе?"} -- ні --> LOOP["цикл, словник, П1–П3"]
-    Q -- так --> S{"підзадачі<br>повторюються?"}
-    S -- так --> MEMO["мемоізація / ДП<br>урок 26"]
-    S -- ні --> K{"треба перебрати<br>варіанти вибору?"}
-    K -- так --> BT["перебір з поверненням<br>+ відсікання"]
-    K -- ні --> DC["розділяй і володарюй<br>або обхід дерева"]
+    EXT["зовнішній код<br>сервіс, CLI, звіти, тести"] --> API["інтерфейс Order<br>cook, send, deliver, cancel, status, bill"]
+    API --> RULES["правила<br>_move, перевірки в сеттерах"]
+    RULES --> STATE["стан<br>_status, _history, _bill"]
+    EXT -. "order._status = ..." .-> STATE
 
-    class Q,S,K decision
-    class LOOP,MEMO,BT,DC success
+    class EXT step
+    class API success
+    class RULES,STATE warning
 ```
+
+Суцільні стрілки — дозволений шлях: через інтерфейс і правила до стану. Пунктир — обхідний шлях, який Python технічно не забороняє. Домовленість `_` робить його **помітним**: і на рев'ю, і в лінтері, і в IDE.
+
+На діаграмі класів видимість позначають символами: `+` — публічне, `-` — приватне (`__`), `#` — захищене (`_`):
+
+```mermaid
+classDiagram
+    class Order {
+        +id: int
+        #_bill: float
+        #_status: str
+        #_history: list
+        +TRANSITIONS: dict$
+        +bill: float
+        +status: str
+        +history: tuple
+        +cook()
+        +send()
+        +deliver()
+        +cancel()
+        +apply_discount(percent)
+        #_move(new_status)
+    }
+    class DeliveryService {
+        #_orders: dict
+        #_next_id: int
+        +add_order(line) Order
+        +add_delivery(order_id, district, driver)
+    }
+    DeliveryService "1" o-- "*" Order
+```
+
+### Скільки захисту потрібно
+
+| Рівень | Як | Ціна | Коли |
+|---|---|---|---|
+| 1. Відкриті атрибути | `order.bill = …` | нуль коду; правила тримаються на дисципліні | прості контейнери даних без правил: `NamedTuple`, конфіг |
+| 2. `_` + методи | `_bill`, `apply_discount()` | трохи більше коду; явні дії з назвами | стан змінюється **діями**: знижка, статус, оплата |
+| 3. `@property` + сеттер | `order.bill = …` з перевіркою | магія: присвоєння, що може кинути виняток | зовні зручно працювати як з атрибутом, а правило просте |
+
+Не кожен клас потребує рівня 3. `Delivery` з уроку 21 чи `RawOrder` з модуля 1 — прості дані, їм досить рівня 1. Захист окупається там, де є **інваріант**, який дорого порушити.
+
+### Де живе правило: у моделі чи в сервісі
+
+| Правило | Де | Чому |
+|---|---|---|
+| сума чека > 0 | `Order` | стосується лише одного об'єкта — його перевіряє сам об'єкт |
+| переходи статусів | `Order` | стан одного замовлення |
+| одна доставка на замовлення | `DeliveryService` | зв'язок між **різними** об'єктами: замовлення не знає про чужі доставки |
+| номери замовлень унікальні | `DeliveryService` | знає про всі замовлення одразу |
+
+Просте правило: інваріант одного об'єкта — в його класі; правило між об'єктами — в тому, хто тримає їх усіх. Саме так ролі розподілено на схемі шарів з уроку 20.
 
 ## Практика { #practice }
 
-### Розібраний приклад: звіт за вкладеним меню
+### Розібраний приклад: замовлення, яке себе захищає
 
-Три відповіді — три маленькі рекурсії одного шаблону «базовий випадок — страва, рекурсивний — категорія»:
+Зберемо все в один клас:
 
-```python linenums="1" hl_lines="2 3 4 8 9 10 14 15 16 17"
-def total_price(node):
-    if not isinstance(node, dict):
-        return node
-    return sum(total_price(child) for child in node.values())
+```python linenums="1" hl_lines="2 13 17 21 23 26 28 30 32 33 34 35 36"
+class SafeOrder:
+    TRANSITIONS = Order.TRANSITIONS
+    MAX_DISCOUNT = 50
+
+    def __init__(self, order_id, bill):
+        if bill <= 0:
+            raise ValueError(f"сума чека має бути більшою за 0, а маємо {bill}")
+        self.id = order_id
+        self._bill = bill
+        self._status = "new"
+        self._history = ["new"]
+
+    @property
+    def bill(self):
+        return self._bill
+
+    @property
+    def status(self):
+        return self._status
+
+    @property
+    def history(self):
+        return tuple(self._history)
+
+    def apply_discount(self, percent):
+        if self._status != "new":
+            raise ValueError(f"знижку можна дати лише новому замовленню, а статус {self._status}")
+        if not 0 < percent <= self.MAX_DISCOUNT:
+            raise ValueError(f"знижка має бути від 1 до {self.MAX_DISCOUNT} %, а маємо {percent}")
+        self._bill = round(self._bill * (100 - percent) / 100, 2)
+
+    def _move(self, new_status):
+        if new_status not in self.TRANSITIONS[self._status]:
+            raise ValueError(f"замовлення №{self.id}: не можна {self._status} → {new_status}")
+        self._status = new_status
+        self._history.append(new_status)
+
+    def cook(self):
+        self._move("cooking")
+
+    def send(self):
+        self._move("on_the_way")
+
+    def deliver(self):
+        self._move("delivered")
+
+    def cancel(self):
+        self._move("cancelled")
 
 
-def cheapest(node):
-    if not isinstance(node, dict):
-        return node
-    return min(cheapest(child) for child in node.values())
-
-
-def depth(node):
-    if not isinstance(node, dict):
-        return 0
-    return 1 + max(depth(child) for child in node.values())
-
-
-print("Страв:", count_dishes(MENU), "| усе меню:", total_price(MENU), "грн")
-print("Найдешевша страва кухні:", cheapest(MENU["Кухня"]), "грн")
-print("Рівнів вкладеності:", depth(MENU))
+order = SafeOrder(1, 540.0)
+order.apply_discount(10)
+order.cook()
+for action in (lambda: order.apply_discount(5), order.deliver, lambda: setattr(order, "bill", 1.0)):
+    try:
+        action()
+    except (ValueError, AttributeError) as error:
+        print(type(error).__name__, "—", error if isinstance(error, ValueError) else "запис заборонено")
+order.send()
+order.deliver()
+print(order.bill, order.status, order.history)
 ```
 
 ```text
-Страв: 9 | усе меню: 505 грн
-Найдешевша страва кухні: 75 грн
-Рівнів вкладеності: 4
+ValueError — знижку можна дати лише новому замовленню, а статус cooking
+ValueError — замовлення №1: не можна cooking → delivered
+AttributeError — запис заборонено
+486.0 delivered ('new', 'cooking', 'on_the_way', 'delivered')
 ```
 
 Що відбувається в ключових рядках:
 
-- **рядки 2–4, 8–10, 14–16** — однаковий каркас. Базовий випадок повертає значення страви, рекурсивний — **згортку** відповідей частин: `sum`, `min`, `max`. Це reducer з уроку 7, застосований до дерева;
-- **рядок 17** — глибина: категорія на один рівень глибша за свою найглибшу частину. Для меню це Меню → Напої → Гарячі → Кава → страва, 4 рівні категорій;
-- жодна функція не знає, скільки рівнів у меню. Додай категорію «Десерти → Торти → Шоколадні» — код не зміниться.
+- **рядок 2** — правила переходів — дані в атрибуті класу, а не розкидані `if` по методах;
+- **рядки 13–23** — три властивості лише для читання: `bill`, `status`, `history`. Записати напряму не можна, а `history` віддає копію;
+- **рядки 26–30** — знижка перевіряє **два** правила: статус і розмір знижки. Готувати замовлення зі зміненою сумою кухня не повинна;
+- **рядки 32–36, `_move`** — єдине місце, де змінюється статус; кожен публічний метод лише називає потрібний перехід;
+- три спроби порушити правила закінчились винятками, а стан лишився правильним: сума 486.0, чесна історія переходів.
 
-### Зміни приклад: усі страви зі шляхами
+### Зміни приклад: повернення
 
-Напиши **генератор** `dishes(node, path=())` (урок 10), який видає пари `(шлях, ціна)` для кожної страви меню:
+Клієнт може **повернути** доставлене замовлення, якщо щось не так. Додай у `SafeOrder` стан `"returned"`:
+
+- перехід можливий лише з `"delivered"`;
+- метод `return_order(reason)` зберігає причину в `_return_reason`, а властивість `return_reason` її читає;
+- порожня причина → `ValueError`.
 
 ```text
-next(dishes(MENU))              →  (('Кухня', 'Перші страви', 'Борщ'), 95)
-len(list(dishes(MENU)))         →  9
+order.return_order("холодна піца")
+order.status         →  'returned'
+order.return_reason  →  'холодна піца'
+order.history[-2:]   →  ('delivered', 'returned')
 ```
 
 **Критерії перевірки:**
 
-- генератор рекурсивний: для категорії — `yield from dishes(child, path + (name,))`;
-- `count_dishes` можна переписати через нього одним рядком: `sum(1 for _ in dishes(node))`;
-- страви «Кава» мають шлях з чотирьох частин: `('Напої', 'Гарячі', 'Кава', 'Лате')`.
+- новий перехід — рядок у `TRANSITIONS`, а не новий `if` у `_move`;
+- повернути `"cooking"` чи `"cancelled"` не можна;
+- `order.return_reason = "інше"` → `AttributeError`.
 
-??? tip "Підказка"
-    Базовий випадок: якщо `node` — не словник, `yield path, node` і `return`. Інакше для кожної пари `name, child` — `yield from` рекурсивного виклику з довшим шляхом.
+### Спробуй самостійно: захищений промокод
 
-### Спробуй самостійно: обід на рівну суму
+Візьми клас `Promo` з уроку 20 і захисти його стан:
 
-Клієнт хоче обід рівно на **150 грн** зі страв меню, кожна не більше одного разу. Напиши `lunch_sets(menu, budget)`, що повертає всі такі набори назв страв. Для 150 грн їх шість:
+- кількість використань — у `__left` (name mangling);
+- `left` — властивість лише для читання;
+- `apply(bill)` — єдині двері, які зменшують `__left`;
+- `promo.left = 999` → `AttributeError`, а `promo.__dict__` показує `_Promo__left`.
 
-```text
-['Борщ', 'Лате']
-['Юшка', 'Чай', 'Узвар']
-['Юшка', 'Лате', 'Хліб']
-['Вареники', 'Чай', 'Еспресо']
-['Деруни', 'Чай', 'Узвар', 'Хліб']
-['Деруни', 'Еспресо', 'Узвар']
+Потім зроби `VipPromo(Promo)` з власним полем `__left` для VIP-бонусів і переконайся, що батьківський лічильник від цього не постраждав.
+
+### Знайди помилку
+
+```python
+# 1
+DISCOUNT = 10
+def set_discount(value):
+    global DISCOUNT
+    DISCOUNT = value
+
+# 2
+class Order:
+    def __init__(self):
+        self._history = []
+
+    @property
+    def history(self):
+        return self._history
+
+# 3
+order._Order__status = "delivered"
 ```
 
-**Правила:**
+??? success "Відповіді"
 
-- спершу розгорни меню у список `(назва, ціна)` генератором зі «Зміни приклад» — порядок страв як у меню;
-- перебір з поверненням: `chosen.append` → рекурсія → `chosen.pop()`;
-- відсікання: гілку, де сума вже більша за бюджет, не досліджувати;
-- порахуй виклики з відсіканням і без: у скільки разів менше?
+    1. `DISCOUNT` виглядає як константа, але її змінює будь-хто через `set_discount`. Знижка для всіх замовлень залежить від того, хто останнім викликав функцію. Знижка — стан замовлення або параметр виклику, не глобальна змінна.
+    2. Властивість повертає **сам** список: `order.history.append("delivered")` оминає автомат статусів. Треба повертати копію — `tuple(self._history)`.
+    3. Name mangling — не замок: так «зламати» стан можна, але це свідоме порушення, яке видно на рев'ю. Інкапсуляція в Python захищає від **помилок**, а не від зловмисників.
 
 ## Підсумок
 
 | Поняття | Що запам'ятати |
 |---|---|
-| Рекурсія | функція викликає себе для меншої задачі; базовий випадок зупиняє |
-| Стек викликів | кожен виклик — кадр; глибина ~1000 → `RecursionError` |
-| Дерева | вкладені структури природно обходити рекурсією: «значення листа» + «згортка частин» |
-| Розділяй і володарюй | поділити → розв'язати частини → зібрати; сортування злиттям `O(n log n)` |
-| Перебір з поверненням | крок уперед → рекурсія → крок назад (`pop`); до `2ⁿ` варіантів |
-| Відсікання | не досліджувати гілки, що не можуть дати відповідь; сортування допомагає |
-| Мемоізація | підзадачі повторюються → `lru_cache`, далі ДП |
-| Рекурсія чи цикл | дерева й перебір — рекурсія; лінійні й дуже глибокі дані — цикл і явний стек |
+| Інваріант | правило, що завжди правда; `__init__` захищає лише народження об'єкта |
+| `_name` | «внутрішнє, не чіпай» — домовленість |
+| `__name` | name mangling `_Клас__name`; захист від збігу імен у нащадках |
+| Методи-двері | стан змінюють методи з перевірками; «Tell, don't ask» |
+| Скінченний автомат | словник дозволених переходів + один метод `_move` |
+| `@property` | читання як атрибута; без сеттера — лише читання; сеттер перевіряє запис |
+| Область видимості | локальна → атрибут об'єкта → модуль (лише константи); `global` — майже ніколи |
+| Модель чи сервіс | інваріант одного об'єкта — в моделі; правило між об'єктами — в сервісі |
 
 ### Самоперевірка
 
-1. Що буде з функцією без базового випадку? А якщо рекурсивний виклик не зменшує задачу?
-2. Чому `find_path` передає шлях кортежем `path + (name,)`, а не списком з `append`?
-3. Чому сортування злиттям — `O(n log n)`? Звідки `log n`?
-4. Що в переборі з поверненням робить `chosen.pop()`? Що буде без нього?
-5. Чому відсікання `break` правильне лише для **відсортованого** списку?
-6. Чому `fib(20)` робить 21 891 виклик і що змінює `lru_cache`?
-7. Меню з 5 рівнями вкладеності й список з 100 000 доставок: де рекурсія доречна, а де ні?
+1. Чому перевірки в `__init__` недостатньо, щоб сума чека завжди була додатною?
+2. Чим `_bill` відрізняється від `__bill`? Чи можна прочитати `__bill` ззовні?
+3. Навіщо `TrackedDelivery` потрібні два підкреслення?
+4. Навіщо автомату статусів словник `TRANSITIONS` і один метод `_move`?
+5. Чому `history` повертає `tuple(self._history)`, а не сам список?
+6. Чому два відділення з глобальним лічильником отримали номери 3 і 4?
+7. Де має жити правило «одна доставка на замовлення» і чому не в `Order`?
 
 ??? success "Відповіді"
 
-    1. Функція викликатиме себе, доки не впаде з `RecursionError`. Те саме, якщо задача не зменшується: базового випадку не досягнемо.
-    2. Кожен рівень створює **новий** кортеж, і гілки не діляться одним об'єктом. Спільний список, у який усі дописують, накопичував би імена з різних гілок.
-    3. Поділ навпіл дає `log₂ n` рівнів, і на кожному рівні злиття разом проходить усі n елементів.
-    4. Прибирає останню взяту поїздку, щоб на її місці спробувати наступну. Без нього `chosen` накопичував би поїздки з усіх гілок.
-    5. `break` означає «наступні теж не влізуть». Це правда, лише якщо наступні не менші за поточну — тобто список відсортований за зростанням.
-    6. Ті самі `fib(k)` обчислюються знову й знову. `lru_cache` рахує кожне `k` один раз, далі бере з пам'яті: 21 обчислення.
-    7. Меню — дерево з невеликою глибиною: рекурсія природна. 100 000 доставок — лінійні дані: цикл; рекурсія впала б на тисячному рівні.
+    1. `__init__` виконується один раз. Далі відкритий атрибут може змінити будь-який код; захищає лише доступ через методи чи сеттер.
+    2. `_bill` — домовленість, читається як завгодно. `__bill` Python перейменовує в `_Order__bill`; ззовні — лише за цим повним іменем.
+    3. Щоб поле нащадка не затерло однойменне поле батька: `_Delivery__status` і `_TrackedDelivery__status` — різні атрибути.
+    4. Правила — дані в одному місці, перевірка — в одному методі. Новий перехід — рядок у словнику, і жоден метод не може змінити статус в обхід перевірки.
+    5. Список можна змінити ззовні й дописати в історію будь-що. Кортеж — незмінна копія.
+    6. Лічильник у `global` один на весь модуль: обидва відділення рахують у ту саму змінну.
+    7. У сервісі: правило стосується зв'язку між замовленнями й доставками, а замовлення про чужі доставки не знає.
 
 ### Що далі
 
-- Ноутбук заняття: [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_22_practicum_recursion/note_lesson_22_recursion_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_22_practicum_recursion/note_lesson_22_recursion.ipynb){ .solutions-link } — меню, сортування і ваучер: прогнози, лічильники викликів, вправи з перевірками.
-- Наступне заняття — урок 23 «`@property`, декоратори класів, dunder»: як зробити так, щоб `sorted(deliveries)` і `len(menu)` працювали для наших класів.
-- Практикум П5 (урок 26): динамічне програмування — коли підзадачі повторюються.
+- Ноутбук заняття: [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_22_encapsulation_scope/note_lesson_22_encapsulation_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_22_encapsulation_scope/note_lesson_22_encapsulation.ipynb){ .solutions-link } — сервіс доставки: прогнози, вправи з перевірками, автомат статусів.
+- Практикум на реальних даних: [`lab_lesson_22_cars_oop.ipynb`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_22_encapsulation_scope/lab_lesson_22_cars_oop.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_22_encapsulation_scope/lab_lesson_22_cars_oop.ipynb) — «Автомобілі як об'єкти»: інкапсуляція на даних про авто, а заодно поліморфізм (урок 21) і dunder-методи (урок 24).
+- Наступне заняття — урок 23, практикум П4: рекурсія, «розділяй і володарюй», перебір з поверненням.
+- Урок 24 — `@property`, декоратори класів і dunder-методи докладно.
 
 ## Документація і джерела
 
-- Туторіал Python: [Defining Functions](https://docs.python.org/3/tutorial/controlflow.html#defining-functions); [`sys.getrecursionlimit`](https://docs.python.org/3/library/sys.html#sys.getrecursionlimit), [`RecursionError`](https://docs.python.org/3/library/exceptions.html#RecursionError), [`functools.lru_cache`](https://docs.python.org/3/library/functools.html#functools.lru_cache)
-- [Sorting Techniques](https://docs.python.org/3/howto/sorting.html) — чому в житті `sorted()`
-- Для охочих:
-    - MIT 6.0001, [лекція 6 «Recursion and Dictionaries»](https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/resources/lecture-6-recursion-and-dictionaries/);
-    - Harvard CS50x, [тиждень 3 «Algorithms»](https://cs50.harvard.edu/x/weeks/3/) — рекурсія й сортування злиттям.
+- Туторіал Python: [Private Variables](https://docs.python.org/3/tutorial/classes.html#private-variables), [Python Scopes and Namespaces](https://docs.python.org/3/tutorial/classes.html#python-scopes-and-namespaces)
+- [`global`](https://docs.python.org/3/reference/simple_stmts.html#the-global-statement), [`nonlocal`](https://docs.python.org/3/reference/simple_stmts.html#the-nonlocal-statement), [`property`](https://docs.python.org/3/library/functions.html#property)
+- PEP 8: [Designing for Inheritance](https://peps.python.org/pep-0008/#designing-for-inheritance) — коли `_`, коли `__`
+- [Mermaid: State diagrams](https://mermaid.js.org/syntax/stateDiagram.html)
+- Для охочих: Martin Fowler, [TellDontAsk](https://martinfowler.com/bliki/TellDontAsk.html).

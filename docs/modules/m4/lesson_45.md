@@ -1,258 +1,338 @@
-# Урок 45. WebSockets + практика: чат
+# Урок 45. Архітектура застосунків і патерни
 
-У нотатках є групи: «Сім'я» бачить спільні нотатки й списки покупок (урок 40). Сьогодні група отримує **чат** — повідомлення з'являються в усіх учасників одразу, без оновлення сторінки.
+За уроки 34–44 курс виростив два проєкти:
 
-HTTP так не вміє: розмову завжди починає браузер — «запитав → отримав». Щоб дізнатися про нове повідомлення, довелося б питати сервер щосекунди. **WebSocket** — постійний двосторонній канал: відкривається одним HTTP-запитом і лишається відкритим, писати в нього може і браузер, і сервер (урок 32, «WebSocket і SSE»).
+- **нотатки** на Django: сторінки, форми, DRF API, групи й JWT (уроки 34–36, 41);
+- **агрегатор новин** на FastAPI: парсер, база, Redis, тести, LLM (уроки 37–44).
 
-Стартовий код чату — це крок 7B [Django-книги](https://nikoriakviktot.github.io/notes_chat_app/tutorials/07_async_django/): Django Channels, consumer, channel layer, JS-клієнт. Переносячи його в проєкт уроку 44, перевіряємо тим самим правилом: **consumer — ще один транспорт** над тими самими selectors і services. Дві знахідки дорогою:
+Кожен крок додавав можливості. Сьогодні — **жодної нової можливості**: лише те, **як** код розкладено по частинах. Архітектура не видна користувачу, поки не зламається. Тож спершу — дві вади, які жили в нотатках з уроку 41 і яких не бачив жоден із 29 тестів:
 
-- учасник, якого вилучили з групи, з відкритою вкладкою далі **читає й пише** в чат;
-- будь-який сайт, відкритий у браузері учасника, може під'єднатися до чату від його імені.
+- власник списку справ, поділеного з **двома** людьми, отримує `500 Internal Server Error` на сторінці свого списку;
+- учасник групи бачить список покупок групи у своєму переліку, але сторінка цього списку відповідає `404`.
+
+Обидві мають одну причину: правило «хто що бачить» записано в кількох місцях — у selectors і у views, — і ці копії розійшлися.
 
 | Урок | Django-гілка: застосунок нотаток | Проєкт |
 |---|---|---|
-| 33–35 | MVT, форми, DRF API | `crispy_notes_project` |
-| 40 | групи, паролі, JWT | + групи |
-| 44 | архітектура: правила доступу в selectors, CBV, PostgreSQL | + `tests_architecture.py` |
-| **45** | **груповий чат на WebSocket: ASGI, Channels, consumer, channel layer (Redis)** | **+ `consumers.py`, `asgi.py`, `ChatMessage`** |
-| 48–49 | Docker, деплой | — |
+| 33 | MVT, ORM, admin | `hello_project` |
+| 34 | форми, Bootstrap, crispy | `crispy_notes_project` |
+| 35 | REST API на DRF | + `api.py` |
+| 40 | групи, паролі, JWT, налаштування безпеки | + групи, `/api/token/` |
+| **44** | **архітектура: CBV, правила доступу в selectors, PostgreSQL; каталог патернів обох проєктів** | **+ `tests_architecture.py`, `DATABASE_URL`** |
+| 45 | чат на WebSocket | — |
 
-Проєкт: [`crispy_notes_project`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_4/lessons/lesson_45_websocket_chat/crispy_notes_project).
+Проєкт: [`crispy_notes_project`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_4/lessons/lesson_45_architecture_patterns/crispy_notes_project). Друга половина уроку — патерни агрегатора [`news_hub`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_4/lessons/lesson_44_llm_api/news_hub) з уроку 44; його код не змінюється.
 
-**Що потрібно з попередніх уроків:** `asyncio`, `await`, цикл подій (урок 27); WebSocket і SSE серед типів API (32); Redis (30, 39); групи й правило «бачить група, змінює автор» (40); selectors / services і тест архітектури (44).
+Це **крок 3 Django-книги** — [«CRUD і архітектура»](https://nikoriakviktot.github.io/notes_chat_app/tutorials/03_crud_and_architecture/): services і selectors, class-based views, PostgreSQL. Теорію кроку тут не переказуємо: лише зміни в коді, їхні причини і те, що знайшли дорогою.
+
+**Що потрібно з попередніх уроків:** `services` / `selectors` і тонкий view (33–35); групи і правило «змінює лише автор» (40); класи, успадкування, MRO (уроки 20–21); декоратори (урок 10); `Depends`, репозиторій і `LLMClient` у `news_hub` (37–43).
 
 **Після уроку ти зможеш:**
 
-- пояснити, чим WebSocket відрізняється від HTTP-запиту і коли він потрібен;
-- підключити Django Channels: ASGI, `ProtocolTypeRouter`, routing, consumer;
-- написати consumer як тонкий транспорт над selectors і services;
-- розіслати повідомлення всім учасникам через channel layer — у пам'яті або в Redis;
-- захистити WebSocket: автентифікація, права на кожне повідомлення, перевірка `Origin`;
-- тестувати consumer без браузера і сервера — `WebsocketCommunicator`.
+- пояснити, за що відповідає кожен шар (транспорт → service / selector → ORM) і куди класти новий код;
+- переписати function-based view на class-based і пояснити, у якому порядку Django викликає його методи;
+- тримати правило доступу в одному місці й перевірити це автоматичним тестом;
+- підключити PostgreSQL через одну змінну середовища, не ламаючи SQLite для тестів і Colab;
+- впізнати в коді патерни Repository, Service layer, Strategy, Decorator, Factory, Dependency Injection, Unit of Work — і пояснити, яку проблему кожен розв'язує.
 
-**Ноутбук заняття:** [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_45_websocket_chat/note_lesson_45_chat_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_45_websocket_chat/note_lesson_45_chat.ipynb){ .solutions-link } — чат з кількома «браузерами» прямо в ноутбуці, без сервера.
+**Ноутбук заняття:** [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_45_architecture_patterns/note_lesson_45_architecture_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_45_architecture_patterns/note_lesson_45_architecture.ipynb){ .solutions-link } — selectors без HTTP, життєвий цикл CBV, кількість SQL-запитів, патерни `news_hub`.
 
 ## Пригадай
 
-1. Чому `time.sleep(2)` в `async def` зупиняє **всі** запити FastAPI-застосунку, а `await asyncio.sleep(2)` — ні (урок 37)?
-2. Хто в проєкті нотаток відповідає на питання «чи учасник Анна групи 7?» — view, selector чи service (урок 44)?
-3. Як браузер «пам'ятає», що ти увійшов, між запитами до Django (урок 40)?
+1. Чим `selectors.py` відрізняється від `services.py` у проєкті нотаток (урок 34)?
+2. Клас `C(A, B)`, у `A` і `B` є метод `run()`, обидва викликають `super().run()`. У якому порядку вони виконаються (урок 21)?
+3. Як у тестах `news_hub` підмінили справжню модель Gemini на фейкову, не змінюючи коду ендпоінта (урок 44)?
 
 ??? success "Відповіді"
 
-    1. Цикл подій один: `time.sleep` блокує його повністю, і жодна інша корутина не виконується. `await asyncio.sleep` віддає керування циклу — інші запити обробляються, поки ця корутина чекає.
-    2. Selector (`groups_of(user)`, `get_group_with_members`): правило доступу живе в одному місці, views і API лише його викликають.
-    3. Cookie `sessionid`: браузер надсилає його з кожним запитом до нашого сайту, Django за ним знаходить сесію й користувача. Сьогодні важливо: браузер надсилає цей cookie і тоді, коли запит ініціює **чужа** сторінка.
+    1. Selectors лише **читають** (повертають QuerySet чи об'єкт, нічого не змінюють); services **змінюють** дані — створюють, оновлюють, видаляють, часто в `transaction.atomic()`.
+    2. `C.run` → `A.run` → `B.run` → далі по MRO. `super()` — це «наступний клас у MRO цього об'єкта», а не «батько класу, де написано `super()`».
+    3. `app.dependency_overrides[get_llm_client] = lambda: fake` — ендпоінт отримує клієнт через `Depends` і не знає, який саме.
 
 ## Старт: з якого коду починаємо
 
-| Звідки (`notes_chat_app/`) | Що там | Куди в проєкті |
+| Звідки | Що там | Куди в проєкті |
 |---|---|---|
-| `notes_app/consumers.py` | `GroupChatConsumer`: `connect` / `receive` / `disconnect`, розсилка через channel layer | `hello_app/consumers.py` |
-| `notes_project/asgi.py`, `routing.py` | `ProtocolTypeRouter`: HTTP → Django, WebSocket → `AuthMiddlewareStack` → `URLRouter` | `hello_project/asgi.py`, `routing.py` |
-| `notes_app/models.py` — `ChatMessage` | повідомлення: група, автор, текст, час; індекс `(group, timestamp)` | `hello_app/models.py`, міграція `0004` |
-| `group_chat.html`, `static/…/group_chat.js` | сторінка чату; клієнт на чистому JS: статус, перепідключення з backoff, `escapeHtml` | `hello_app/templates/…`, `hello_app/static/hello_app/js/` |
-| `settings.py` | `daphne` першим в `INSTALLED_APPS`, `ASGI_APPLICATION`, `CHANNEL_LAYERS` (Redis за `REDIS_URL`, інакше в пам'яті) | `hello_project/settings.py` |
-| `notes_app/tests/test_consumers.py` | 9 тестів `WebsocketCommunicator` | `hello_app/tests_consumers.py` — без змін, проходять |
+| `notes_project_cbv/hello_app/views.py` | ті самі сторінки нотаток, записників і тегів як class-based views; `UserQuerySetMixin` | `views.py`: `NoteListView` … `TagCreateView` |
+| `notes_project/README.md` | «03 Application layers»: тонкі views, selectors читають, services пишуть; крок 10 — PostgreSQL | правила доступу в `selectors.py`, `hello_project/database.py` |
+| `DJANGO_PROJECT_STRUCTURE.md` | пари «погано / добре»: ORM у view проти selector, логіка в моделі проти service | «Куди класти код» нижче |
+| довідник FastAPI до прототипу `news_dashboard` | §5 Dependency Injection, §7 Repository, §8 Unit of Work | каталог патернів |
+| урок 41 курсу | `crispy_notes_project`: 29 тестів, групи, JWT | основа; жоден тест не змінено |
 
-Теорію кроку — WebSocket-протокол, ASGI-стек, налаштування Channels, consumer, JS-клієнт — книга пояснює посторінково (посилання в кінці кожного розділу). Тут — перенесення в наш проєкт і те, що з'ясувалося при перевірці.
+## Де жили правила доступу { #access-rules }
 
-## HTTP проти WebSocket { #http-vs-ws }
+Відкрий `views.py` уроку 41. Selectors там є, але поруч — власні запити:
 
-```mermaid
-sequenceDiagram
-    participant O as браузер Олени
-    participant S as сервер
-    participant A as браузер Анни
-
-    Note over O,S: HTTP: питати щосекунди (polling)
-    O->>S: GET /messages?after=41
-    S-->>O: [] — нового немає
-    O->>S: GET /messages?after=41
-    S-->>O: [] — нового немає
-    A->>S: POST /messages «Привіт»
-    O->>S: GET /messages?after=41
-    S-->>O: [42: «Привіт»] — із запізненням до секунди
-
-    Note over O,A: WebSocket: одне з'єднання, сервер пише сам
-    O->>S: GET /ws/groups/7/chat/ + Upgrade: websocket
-    S-->>O: 101 Switching Protocols
-    A->>S: {"content": "Привіт"}
-    S-->>O: {"type": "message", "content": "Привіт"} — одразу
-    S-->>A: {"type": "message", "content": "Привіт"}
-```
-
-Polling робить сотні порожніх запитів і все одно запізнюється. WebSocket тримає одне з'єднання на вкладку, а сервер пише в нього, щойно є що сказати. Ціна — сервер тримає тисячі відкритих з'єднань. Потік на кожне (WSGI) цього не витримає; потрібен цикл подій — **ASGI**.
-
-Поглиблено: [WebSocket-протокол і цикл подій](https://nikoriakviktot.github.io/notes_chat_app/tutorials/07_async_django/7b_websocket_protocol/).
-
-## Рефакторинг 1. ASGI і Channels { #refactor-1 }
-
-| Було (урок 44) | Стало (урок 45) | Навіщо |
-|---|---|---|
-| `asgi.py` — лише `get_asgi_application()` | `ProtocolTypeRouter`: `"http"` → Django, `"websocket"` → Channels | один процес обслуговує і сторінки, і WebSocket |
-| `runserver` — WSGI | `daphne` першим в `INSTALLED_APPS` → `runserver` запускає ASGI | чат працює і в розробці, без окремої команди |
-| — | `routing.py`: `ws/groups/<pk>/chat/` → `GroupChatConsumer` | «urls.py для WebSocket» |
-| — | `CHANNEL_LAYERS`: Redis за `REDIS_URL`, інакше в пам'яті | розсилка повідомлень між з'єднаннями |
-
-```python title="hello_project/asgi.py (фрагмент)"
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'hello_project.settings')
-
-# get_asgi_application() ПОВИНЕН бути викликаний ДО будь-якого імпорту з hello_app (consumers, models)
-django_asgi_app = get_asgi_application()
-
-from channels.routing import ProtocolTypeRouter, URLRouter
-from channels.auth import AuthMiddlewareStack
-from channels.security.websocket import AllowedHostsOriginValidator
-from hello_project.routing import websocket_urlpatterns
-
-
-def websocket_application():
+```python title="hello_app/views.py (урок 41, фрагменти)"
+@login_required
+def note_list(request):
     ...
-    return AllowedHostsOriginValidator(
-        AuthMiddlewareStack(
-            URLRouter(websocket_urlpatterns)
-        )
+    tag = Tag.objects.get(id=int(tag_id), user=request.user)
+
+@login_required
+def note_edit(request, pk):
+    user_groups = request.user.groups.all()
+    note = get_object_or_404(
+        Note.objects.filter(Q(user=request.user) | Q(group__in=user_groups)),
+        pk=pk,
     )
 
-
-application = ProtocolTypeRouter({
-    "http": ASGIStaticFilesHandler(django_asgi_app),
-    "websocket": websocket_application(),
-})
+@login_required
+def todo_list_edit(request, pk):
+    todo = get_object_or_404(
+        TodoList.objects.filter(Q(user=request.user) | Q(shared_with=request.user)),
+        pk=pk,
+    )
 ```
 
-Порядок імпортів тут — не стиль, а вимога: `get_asgi_application()` запускає `django.setup()`, і лише після цього можна імпортувати моделі (через routing → consumers → selectors → models). Інакше `AppRegistryNotReady`.
+Правило «нотатку бачить автор і його група» записано **тричі**: у `selectors.get_user_notes`, `selectors.get_note_detail` і двічі у views. Правило для списків покупок — теж кілька разів, і вже по-різному:
 
-Шари WebSocket-стеку — ззовні всередину: `AllowedHostsOriginValidator` (звідки прийшли — рефакторинг 4) → `AuthMiddlewareStack` (хто: `scope['user']` із cookie сесії) → `URLRouter` (куди: consumer і `group_pk`).
+```python title="hello_app/selectors.py (урок 41)"
+def get_user_shopping_lists(user):                 # що показати в переліку
+    user_groups = user.groups.all()
+    return ShoppingList.objects.filter(
+        Q(user=user) | Q(group__in=user_groups)    # ← + списки групи
+    )...
 
-```python title="hello_project/settings.py (фрагмент)"
-INSTALLED_APPS = [
-    # Урок 45: daphne ПЕРШИМ — перевизначає runserver, щоб він запускався через ASGI (інакше WebSocket не працює)
-    "daphne",
-    "django.contrib.admin",
+def get_shopping_list_detail(user, pk):            # що відкрити на сторінці
+    return ShoppingList.objects.prefetch_related(
+        'items', 'shared_with'
+    ).get(Q(user=user) | Q(shared_with=user), pk=pk)   # ← групи немає
+```
+
+Урок 41 додав групи в `get_user_shopping_lists`, а в `get_shopping_list_detail` — ні. Учасник групи бачить список у переліку, клацає — `404`. Кожна копія правила — ще одне місце, яке треба не забути змінити.
+
+## Рефакторинг 1. Одне правило доступу — одна функція { #refactor-1 }
+
+| Було (урок 41) | Стало (урок 45) | Навіщо |
+|---|---|---|
+| `Q(user=…) \| Q(…)` у views, у кількох selectors | `*_visible_to(user)` / `*_owned_by(user)` у `selectors.py` | правило змінюють в одному місці |
+| `get_object_or_404(Модель, pk=pk, user=…)` у views | `get_object_or_404(selectors.todo_lists_owned_by(user), pk=pk)` | view каже, **яке** правило, а не **як** його перевірити |
+| `Tag.objects.get(...)`, `Notebook.objects.filter(...)` у views і `api.py` | `selectors.find_owned(selectors.tags_owned_by, user, id)` | жодного `Model.objects` у транспортному шарі |
+| сума покупок — цикл по пунктах у view | `pending_total` — `SUM` у selector | обчислення над даними — там, де дані |
+
+```python title="hello_app/selectors.py (урок 45, фрагмент)"
+def notes_visible_to(user):
+    """Свої нотатки + нотатки груп користувача (group — FK: дублікатів рядків немає)."""
+    return Note.objects.filter(Q(user=user) | Q(group__in=user.groups.all()))
+
+
+def notes_owned_by(user):
+    """Змінювати й видаляти — лише автор."""
+    return Note.objects.filter(user=user)
+
+
+def todo_lists_visible_to(user):
+    """Свої + ті, якими поділились. shared_with — M2M: без distinct() список, поділений з двома,
+    повернувся б двічі, і .get() кинув би MultipleObjectsReturned."""
+    return TodoList.objects.filter(Q(user=user) | Q(shared_with=user)).distinct()
+
+
+def shopping_lists_visible_to(user):
+    """Свої + поділені + списки груп користувача — те саме правило для списку й сторінки списку."""
+    return ShoppingList.objects.filter(
+        Q(user=user) | Q(shared_with=user) | Q(group__in=user.groups.all())
+    ).distinct()
+```
+
+Чому в `todo_lists_visible_to` є `.distinct()`, а в `notes_visible_to` — ні: покроково, що робить база з фільтром `Q(user=olena) | Q(shared_with=olena)` для списку «Ремонт», яким Олена поділилась з Анною й Бобом:
+
+```mermaid
+flowchart TD
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+
+    subgraph J1["JOIN: список × проміжна таблиця shared_with"]
+        direction LR
+        r1["Ремонт · user=olena<br>shared=ann"] ~~~ r2["Ремонт · user=olena<br>shared=bob"]
+    end
+    subgraph J2["WHERE user = olena OR shared = olena"]
+        direction LR
+        w1["рядок 1: user = olena<br>так"] ~~~ w2["рядок 2: user = olena<br>так"]
+    end
+    subgraph J3[".get(pk=…) без distinct()"]
+        direction LR
+        g1["2 рядки"] --> g2["MultipleObjectsReturned<br>500"]
+    end
+    subgraph J4[".distinct().get(pk=…)"]
+        direction LR
+        d1["однакові рядки → 1"] --> d2["TodoList «Ремонт»"]
+    end
+
+    J1 --> J2 --> J3
+    J2 --> J4
+
+    class r1,r2 step
+    class w1,w2 warning
+    class g1 step
+    class g2 error
+    class d1 step
+    class d2 success
+```
+
+Для Анни правдивий лише рядок з `shared=ann` — вона свій доступ отримує без помилки; падає саме **власник**. У `group` (FK) в кожного рядка одне значення — JOIN не множить рядків, `distinct()` не потрібен.
+
+Функції повертають **QuerySet**, а не список: view чи CBV далі дописує `.get(pk=…)`, `.annotate(…)`, `prefetch_related(…)`, а правило доступу вже вбудоване в SQL. Той самий прийом у книзі — [`UserQuerySetMixin`](https://nikoriakviktot.github.io/notes_chat_app/tutorials/03_crud_and_architecture/cbv/); тут його правило переїхало в selectors, щоб ним користувались і CBV, і функції, і API.
+
+Views тепер лише вибирають правило:
+
+```diff title="hello_app/views.py"
+ @login_required
+ def todo_list_edit(request, pk):
+-    todo = get_object_or_404(
+-        TodoList.objects.filter(Q(user=request.user) | Q(shared_with=request.user)),
+-        pk=pk,
+-    )
++    todo = get_object_or_404(selectors.todo_lists_visible_to(request.user), pk=pk)
+     if todo.user != request.user:
+         messages.error(request, 'Ти не можеш редагувати список іншого користувача.')
+
+ @login_required
+ def todo_item_toggle(request, pk):
+-    item = get_object_or_404(TodoItem, pk=pk)
+-    todo = item.todo_list
+-    if todo.user != request.user and not todo.shared_with.filter(pk=request.user.pk).exists():
+-        raise Http404
++    item = get_object_or_404(selectors.todo_items_visible_to(request.user), pk=pk)
+```
+
+### Тест, що стежить за правилом
+
+Правило «у views немає ORM» легко порушити одним рядком. Тому його перевіряє тест — він читає код як дерево синтаксису (`ast`, урок 13) і шукає `.objects`, `Q(…)` і `get_object_or_404(Модель, …)`:
+
+```python title="hello_app/tests_architecture.py (фрагмент)"
+def orm_in_transport_layer(path: Path) -> list[str]:
+    """Порушення правила «view не робить ORM»: Model.objects.… (крім .none()), Q(…),
+    get_object_or_404(Модель, …) — правило доступу мало б жити в selectors."""
+    tree = ast.parse(path.read_text(encoding="utf-8"))
+    problems = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Attribute) and node.attr == "objects":
+            problems.append(f"{path.name}:{node.lineno} .objects")
+        elif isinstance(node, ast.Name) and node.id == "Q":
+            problems.append(f"{path.name}:{node.lineno} Q(...)")
+        elif (isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
+              and node.func.id == "get_object_or_404" and isinstance(node.args[0], ast.Name)):
+            problems.append(f"{path.name}:{node.lineno} get_object_or_404({node.args[0].id}, ...)")
     ...
-    "channels",                      # урок 45: WebSocket (consumers, channel layer)
-    "hello_app",
-]
 
-ASGI_APPLICATION = "hello_project.asgi.application"   # урок 45: HTTP + WebSocket (hello_project/asgi.py)
 
-REDIS_URL = os.environ.get("REDIS_URL")
-if REDIS_URL:
-    CHANNEL_LAYERS = {"default": {"BACKEND": "channels_redis.core.RedisChannelLayer",
-                                  "CONFIG": {"hosts": [REDIS_URL]}}}
-else:
-    CHANNEL_LAYERS = {"default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}}
+class ThinTransportLayerTests(TestCase):
+    def test_views_and_api_have_no_orm(self):
+        for name in ("views.py", "api.py"):
+            with self.subTest(name):
+                self.assertEqual(orm_in_transport_layer(APP / name), [])
 ```
 
-Поглиблено: [ASGI-стек](https://nikoriakviktot.github.io/notes_chat_app/tutorials/07_async_django/7b_asgi_stack/), [налаштування Channels](https://nikoriakviktot.github.io/notes_chat_app/tutorials/07_async_django/7b_channels_settings/).
+`Model.objects.none()` дозволено: це порожній QuerySet без запиту до бази (поле серіалізатора, схема OpenAPI). Другий тест перевіряє саму перевірку — на фрагменті коду уроку 41 вона знаходить порушення. Тест правила, який нічого не може знайти, нічого й не захищає.
 
-## Рефакторинг 2. Consumer — ще один транспорт { #refactor-2 }
+А щоб копії правила не розходились, тест формулює його як **властивість**: «кожен список, який видно в переліку, відкривається»:
 
-Consumer — «view для WebSocket»: view обробляє один запит і завершується, consumer живе, поки відкрите з'єднання. До рефакторингу він сам ходив у базу — три власні ORM-хелпери:
-
-```python title="notes_app/consumers.py (до рефакторингу, скорочено)"
-    @database_sync_to_async
-    def check_membership(self, group_pk, user):
-        try:
-            group = Group.objects.get(pk=group_pk)
-            return group.user_set.filter(pk=user.pk).exists()
-        except Group.DoesNotExist:
-            return False
-
-    @database_sync_to_async
-    def load_history(self, group_pk): ...          # ChatMessage.objects… [:50]
-
-    @database_sync_to_async
-    def save_message(self, group_pk, user, content):
-        return ChatMessage.objects.create(group_id=group_pk, author=user, content=content)
+```python title="hello_app/tests_architecture.py (фрагмент)"
+    def test_every_listed_shopping_list_opens(self):
+        """Що видно в списку, те відкривається: одне правило доступу для списку й сторінки."""
+        ...
+        listed = [*selectors.get_user_shopping_lists(self.ann), *selectors.get_shared_shopping_lists(self.ann)]
+        self.assertEqual({sl.title for sl in listed}, {"Своє", "На тиждень", "Від Боба"})
+        for sl in listed:
+            with self.subTest(sl.title):
+                self.assertIsNotNone(selectors.get_shopping_list_detail(self.ann, sl.pk))
 ```
 
-Правило «хто учасник групи» — вже вчетверте в проєкті (сторінки групи, нотатки групи, списки групи… і чат), і знову власною копією. За правилом уроку 44 consumer лише **вибирає** правило:
+Поглиблено: [services і selectors — матриця відповідальності](https://nikoriakviktot.github.io/notes_chat_app/tutorials/03_crud_and_architecture/services_and_selectors/), [selectors: мова домену замість мови ORM](https://nikoriakviktot.github.io/notes_chat_app/06_application_architecture/django_selectors_full/).
 
-| Було (consumer до рефакторингу) | Стало | Де |
+## Рефакторинг 2. Class-based views { #refactor-2 }
+
+Нотатки, записники й теги — class-based views зі стартового `notes_project_cbv`. Порівняй редагування нотатки:
+
+```python title="FBV (урок 41) — 30 рядків"
+@login_required
+def note_edit(request, pk):
+    user_groups = request.user.groups.all()
+    note = get_object_or_404(
+        Note.objects.filter(Q(user=request.user) | Q(group__in=user_groups)), pk=pk)
+    if note.user != request.user:
+        messages.error(request, 'Ти не можеш редагувати нотатку іншого користувача.')
+        return redirect('hello_app:note_detail', pk=pk)
+    if request.method == 'POST':
+        form = NoteForm(request.POST, instance=note, user=request.user)
+        if form.is_valid():
+            ...                                   # 10 рядків: поля форми → services.update_note
+            return redirect('hello_app:note_detail', pk=note.pk)
+    else:
+        form = NoteForm(instance=note, user=request.user)
+    return render(request, 'hello_app/note_form.html', {...})
+```
+
+```python title="CBV (урок 45)"
+class NoteUpdateView(LoginRequiredMixin, OwnerRequiredMixin, NoteFormMixin, UpdateView):
+    selector = selectors.notes_visible_to
+    denied_message = 'Ти не можеш редагувати нотатку іншого користувача.'
+    denied_url = 'hello_app:note_detail'
+    denied_url_with_pk = True
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx.update(note=self.object, title=f'Редагувати: {self.object.title}', action='Зберегти зміни')
+        return ctx
+
+    def form_valid(self, form):
+        note = services.update_note(self.object, **self.note_fields(form, tags_default=[]))
+        messages.success(self.request, f'✅ Нотатку "{note.title}" оновлено!')
+        return redirect('hello_app:note_detail', pk=note.pk)
+```
+
+`if request.method == 'POST'`, `form.is_valid()`, «порожня форма чи з `instance`» — усе це робить `UpdateView`. Лишилось те, що унікальне для нотатки: яке правило доступу, що робити з валідною формою, які підписи в шаблоні.
+
+| Було (FBV) | Стало (CBV) | Хто робить |
 |---|---|---|
-| `check_membership` — `Group.objects.get` + `user_set…exists()` | `selectors.is_group_member(user, group_pk)` | те саме правило, що `groups_of(user)` для сторінок |
-| `load_history` — ORM у consumer | `selectors.recent_chat_messages(group_pk)` | повертає **список**, не QuerySet |
-| `save_message` + перевірка довжини в `receive` | `services.post_chat_message(group_pk=…, author=…, content=…)` | правило тексту й членства — для будь-якого транспорту |
+| `@login_required` | `LoginRequiredMixin` — **перший** у списку базових класів | міксин |
+| `get_object_or_404(Note.objects.filter(Q…), pk=pk)` | `selector = selectors.notes_visible_to` | `SelectorQuerySetMixin.get_queryset()` + `SingleObjectMixin.get_object()` |
+| `if note.user != request.user: …` | `OwnerRequiredMixin` | один міксин для нотаток, видалення й будь-чого, що має `user` |
+| `NoteForm(request.POST, instance=note, user=…)` | `NoteFormMixin.get_form_kwargs()` | `FormMixin` |
+| поля форми → `services.update_note(...)` | `form_valid()` → `services.update_note(...)` | view; **не** `super().form_valid()` — той викликав би `form.save()` повз service |
 
-```python title="hello_app/selectors.py (фрагмент)"
-def is_group_member(user, group_pk):
-    """Те саме правило, що для сторінок групи: група є серед груп користувача."""
-    return user.is_authenticated and groups_of(user).filter(pk=group_pk).exists()
+Три міксини проєкту:
+
+```python title="hello_app/views.py (фрагмент)"
+class SelectorQuerySetMixin:
+    """QuerySet для Detail/Update/Delete бере функція selectors — `UserQuerySetMixin` стартового коду."""
+    selector = None
+
+    def get_queryset(self):
+        return type(self).selector(self.request.user)
 
 
-def recent_chat_messages(group_pk, limit=50):
-    """Останні `limit` повідомлень групи, від старих до нових — СПИСОК словників, а не QuerySet.
-
-    Consumer працює в циклі подій, а ORM — синхронний: цю функцію викликають через
-    database_sync_to_async, і SQL мусить виконатися всередині неї (list(...)). Лінивий QuerySet,
-    повернутий у цикл подій, виконався б там — SynchronousOnlyOperation.
-    """
-    newest = (ChatMessage.objects.filter(group_id=group_pk)
-              .order_by('-timestamp', '-id')[:limit]
-              .values('id', 'author__username', 'content', 'timestamp'))
-    return list(reversed(newest))
+class OwnerRequiredMixin(SelectorQuerySetMixin):
+    """Бачити можна (група), змінювати — лише автор: повідомлення й повернення на сторінку об'єкта."""
+    ...
+    def dispatch(self, request, *args, **kwargs):
+        obj = self.get_object()                       # 404, якщо об'єкт навіть не видно
+        if obj.user_id != request.user.id:
+            messages.error(request, self.denied_message)
+            if self.denied_url_with_pk:
+                return redirect(self.denied_url, pk=obj.pk)
+            return redirect(self.denied_url)
+        return super().dispatch(request, *args, **kwargs)
 ```
 
-`.order_by('-timestamp', '-id')` — «найновіші 50», `reversed` — показати від старих до нових. Другий ключ `-id` потрібен, бо два повідомлення можуть отримати однаковий `timestamp`.
+`type(self).selector` — а не `self.selector`: функція, записана як атрибут класу, при зверненні через екземпляр стала б **методом** і отримала б `self` першим аргументом.
 
-```python title="hello_app/services.py (фрагмент)"
-CHAT_MESSAGE_MAX_LENGTH = 2000
+### MRO: хто перевіряє першим
 
+`OwnerRequiredMixin.dispatch()` звертається до бази. Якщо він спрацює раніше за перевірку входу, анонім отримає не редирект на логін, а помилку. Порядок визначає MRO — справжній, з Python:
 
-def post_chat_message(*, group_pk, author, content):
-    """Зберегти повідомлення чату. Одне правило для будь-якого транспорту (WebSocket, API, тест):
-
-    - писати може лише учасник групи — перевірка на КОЖНЕ повідомлення, не лише при підключенні;
-    - текст обрізаємо з країв; порожній або довший за CHAT_MESSAGE_MAX_LENGTH — ValidationError.
-    """
-    text = content.strip() if isinstance(content, str) else ''
-    if not text:
-        raise ValidationError('Порожнє повідомлення.')
-    if len(text) > CHAT_MESSAGE_MAX_LENGTH:
-        raise ValidationError(f'Повідомлення довше за {CHAT_MESSAGE_MAX_LENGTH} символів.')
-    if not selectors.is_group_member(author, group_pk):
-        raise PermissionDenied('Писати в чат може лише учасник групи.')
-    return ChatMessage.objects.create(group_id=group_pk, author=author, content=text)
+```text
+>>> ' → '.join(c.__name__ for c in NoteUpdateView.__mro__)
+NoteUpdateView → LoginRequiredMixin → AccessMixin → OwnerRequiredMixin → SelectorQuerySetMixin → NoteFormMixin
+→ UpdateView → SingleObjectTemplateResponseMixin → TemplateResponseMixin → BaseUpdateView → ModelFormMixin
+→ FormMixin → SingleObjectMixin → ContextMixin → ProcessFormView → View → object
 ```
 
-Consumer тепер — транспорт: розібрати кадр, викликати service, розіслати результат.
-
-```python title="hello_app/consumers.py (фрагмент)"
-    async def receive(self, text_data):
-        try:
-            content = json.loads(text_data).get('content', '')
-        except (json.JSONDecodeError, AttributeError):
-            return
-
-        try:
-            msg = await database_sync_to_async(services.post_chat_message)(
-                group_pk=self.group_pk, author=self.user, content=content)
-        except ValidationError:
-            return                                   # порожнє чи задовге — ігноруємо, як і раніше
-        except PermissionDenied:
-            await self.close(code=CLOSE_NOT_ALLOWED)  # уже не учасник групи
-            return
-
-        await self.channel_layer.group_send(
-            self.room_group_name,
-            {
-                'type': 'chat_message',
-                'message_id': msg.id,
-                'author': self.user.username,
-                'content': msg.content,
-                'timestamp': msg.timestamp.isoformat(),
-            }
-        )
-```
-
-`database_sync_to_async(f)(…)` — виконати синхронну функцію (ORM) у пулі потоків і дочекатися результату, не блокуючи цикл подій. Той самий selector чи service працює і з view (синхронно), і з consumer (через обгортку) — нічого не дублюється. `tests_architecture.py` уроку 44 тепер перевіряє й `consumers.py`: `.objects` у ньому немає.
-
-### Життєвий цикл: два учасники, одне повідомлення
-
-Олена й Анна відкрили чат групи 7. Анна пише «Привіт»:
+Покроково — учасник групи надсилає `POST /notes/7/edit/` для нотатки групи, автор якої інший:
 
 ```mermaid
 flowchart TD
@@ -262,185 +342,174 @@ flowchart TD
     classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
     classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
 
-    subgraph C1["connect(): кожна вкладка — свій consumer"]
+    subgraph S1["as_view(): новий об'єкт NoteUpdateView на кожен запит"]
         direction LR
-        c1{"is_group_member<br>(Олена / Анна, 7)"} -- так --> c2["group_add('chat_group_7',<br>channel_name)"] --> c3["accept()"] --> c4["history:<br>recent_chat_messages(7)"]
+        a1["setup()<br>request, kwargs = {pk: 7}"] --> a2["до перевірки входу!<br>тут не можна ходити в базу"]
     end
-    subgraph C2["receive() у consumer Анни"]
+    subgraph S2["dispatch() по MRO: LoginRequiredMixin"]
         direction LR
-        r1["{'content': 'Привіт'}"] --> r2["services.post_chat_message<br>член? довжина? → INSERT"] --> r3["group_send('chat_group_7',<br>type: chat_message)"]
+        b1{"request.user<br>увійшов?"} -- так --> b2["super().dispatch()"]
+        b1 -- ні --> b3["302 на /accounts/login/"]
     end
-    subgraph C3["channel layer: усім підписникам групи"]
+    subgraph S3["dispatch(): OwnerRequiredMixin"]
         direction LR
-        l1["consumer Олени<br>chat_message()"] ~~~ l2["consumer Анни<br>chat_message()"]
+        c1["get_object():<br>notes_visible_to(ann).get(pk=7)"] --> c2{"note.user_id<br>== ann.id?"}
+        c2 -- ні --> c3["messages.error<br>302 на /notes/7/"]
     end
-    subgraph C4["send() → браузери"]
+    subgraph S4["якби автор: View.dispatch() → post()"]
         direction LR
-        s1["Олена бачить<br>«Привіт»"] ~~~ s2["Анна бачить своє<br>«Привіт»"]
+        d1["get_form() з instance"] --> d2["form_valid()<br>services.update_note"]
     end
 
-    C1 --> C2 --> C3 --> C4
+    S1 --> S2 --> S3 --> S4
 
-    class c1 decision
-    class c2,c3,c4 step
-    class r1 step
-    class r2 warning
-    class r3,l1,l2 step
-    class s1,s2 success
+    class a1 step
+    class a2 warning
+    class b1,c2 decision
+    class b2,c1 step
+    class b3 warning
+    class c3 error
+    class d1,d2 success
 ```
 
-`type: 'chat_message'` у `group_send` — ім'я **методу**, який channel layer викличе в кожному consumer групи (`chat.message` теж стане `chat_message`). Consumer Анни не надсилає своє повідомлення напряму — воно приходить до неї тим самим шляхом, що й до Олени, вже з `id` і часом із бази.
+Перший крок — пастка, на яку ми самі натрапили, переносячи `NoteListView`. У стартовому коді фільтри (`?tag=`, `?notebook=`) розбирав допоміжний метод; зручне місце, щоб зробити це «один раз на запит», здається `setup()`. Але `setup()` виконується **до** `dispatch()`, тобто до `LoginRequiredMixin`: анонім з `/notes/?tag=1` дійшов би до запиту `Tag.objects.get(user=AnonymousUser)` і отримав `TypeError`. Правильно — у `get()`, після всіх перевірок `dispatch()`:
 
-Поглиблено: [consumer: життєвий цикл, `database_sync_to_async`, `group_send`](https://nikoriakviktot.github.io/notes_chat_app/tutorials/07_async_django/7b_consumer/).
+```python title="hello_app/views.py — NoteListView (фрагмент)"
+    def get(self, request, *args, **kwargs):
+        """Фільтри з ?q=&tag=&notebook= — один раз на запит (потрібні і в get_queryset, і в контексті).
 
-## Рефакторинг 3. Права — на кожне повідомлення { #refactor-3 }
+        Саме в get(), а не в setup(): setup() виконується ДО dispatch(), тобто до перевірки
+        LoginRequiredMixin, — анонім дійшов би до запиту в базу з AnonymousUser.
+        """
+```
 
-Consumer до рефакторингу перевіряв членство **один раз** — у `connect()`. Далі з'єднання живе годинами. Що, якщо Анну вилучили з групи, а її вкладка лишилась відкритою? Справжній запуск стартового коду (`WebsocketCommunicator`, про нього — у розділі «Тести»):
+І тест, що анонім не робить **жодного** запиту до бази:
+
+```python title="hello_app/tests_architecture.py (фрагмент)"
+    def test_anonymous_is_redirected_before_any_query(self):
+        """setup() виконується до dispatch(): якби фільтри читались там, анонім дійшов би до бази."""
+        self.client.logout()
+        with self.assertNumQueries(0):
+            response = self.client.get("/notes/", {"tag": 1, "notebook": 1, "q": "план"})
+        self.assertEqual(response.status_code, 302)
+```
+
+Списки справ, покупок, нагадування й групи лишились функціями — тонкими, без ORM. CBV — не мета: вони виграють там, де є типовий CRUD (список / сторінка / створити / змінити / видалити). Для «поділитись списком» з двома діями в одній формі функція читається простіше.
+
+### `?next=` — лише адреса цього сайту
+
+Після створення тегу `TagCreateView` повертає користувача туди, звідки він прийшов, — за адресою з `?next=`. Якщо адресу не перевіряти, посилання `…/tags/new/?next=https://evil.example/login` після створення тегу відправило б людину на чужий сайт, що виглядає як наш, — **відкритий редирект** (OWASP, урок 41). Правильно — пропускати лише адреси цього сайту; перевіряє функція Django:
+
+```python title="hello_app/views.py — TagCreateView (фрагмент)"
+    def next_url(self):
+        """Куди повернутись після створення — лише адреса цього ж сайту (інакше ?next= веде на чужий)."""
+        target = self.request.GET.get('next') or self.request.POST.get('next')
+        if target and url_has_allowed_host_and_scheme(target, allowed_hosts={self.request.get_host()},
+                                                      require_https=self.request.is_secure()):
+            return target
+        return reverse('hello_app:note_create')
+```
+
+Поглиблено: [CBV у Django-книзі — `as_view`, `dispatch`, generic views, `LoginRequiredMixin` і MRO, `UserQuerySetMixin`](https://nikoriakviktot.github.io/notes_chat_app/tutorials/03_crud_and_architecture/cbv/), [типові помилки кроку 3](https://nikoriakviktot.github.io/notes_chat_app/tutorials/03_crud_and_architecture/checkpoint/) (серед них `super().form_valid()` і `reverse()` в атрибуті класу).
+
+## Рефакторинг 3. PostgreSQL через `DATABASE_URL` { #refactor-3 }
+
+Крок 3 книги переводить нотатки на PostgreSQL. Щоб тести, ноутбук і Colab і далі працювали без сервера, база — з однієї змінної середовища, як у `news_hub` (урок 39):
+
+```python title="hello_project/database.py (фрагмент)"
+def database_from_url(url: str | None, *, base_dir: Path) -> dict[str, Any]:
+    """postgres://user:pass@host:port/name?sslmode=require → словник для DATABASES["default"]."""
+    if not url:
+        return {"ENGINE": ENGINES["sqlite"], "NAME": base_dir / "db.sqlite3"}
+    parts = urlsplit(url)
+    if parts.scheme not in ENGINES:
+        raise ValueError(f"DATABASE_URL: невідома схема {parts.scheme!r} (postgres:// або sqlite://)")
+    ...
+    return {
+        "ENGINE": ENGINES[parts.scheme],
+        "NAME": unquote(parts.path.lstrip("/")),
+        "USER": unquote(parts.username or ""),
+        "PASSWORD": unquote(parts.password or ""),   # пароль із @ чи : — закодований (%40, %3A)
+        "HOST": parts.hostname or "",
+        "PORT": str(parts.port or ""),
+        "CONN_MAX_AGE": 60,                       # тримати з'єднання між запитами (сторінка книги postgresql)
+        "OPTIONS": dict(parse_qsl(parts.query)),  # напр. ?sslmode=require
+    }
+```
+
+```diff title="hello_project/settings.py"
+-DATABASES = {
+-    "default": {
+-        "ENGINE": "django.db.backends.sqlite3",
+-        "NAME": BASE_DIR / "db.sqlite3",
+-    }
+-}
++# Урок 45: база — з DATABASE_URL (PostgreSQL у docker compose); без змінної — SQLite, як і раніше
++DATABASES = {"default": database_from_url(os.environ.get("DATABASE_URL"), base_dir=BASE_DIR)}
+```
+
+Книга робить те саме через `python-decouple`; готовий пакет для URL — `dj-database-url`. Тут 30 рядків стандартної бібліотеки: видно, що всередині, і немає ще однієї залежності. Драйвер — `psycopg[binary]` (psycopg 3; Django 5.2 підтримує від 3.1.8), сервер — `docker-compose.yml` з тими самими `notes_db` / `notes_user` / `notes_pass`, що в книзі:
+
+```bash
+docker compose up -d db
+export DATABASE_URL=postgres://notes_user:notes_pass@localhost:5432/notes_db   # Windows: set DATABASE_URL=...
+python manage.py migrate
+python manage.py test
+```
+
+Ті самі 49 тестів проходять на обох базах. На PostgreSQL — справжній запуск (PostgreSQL 16):
 
 ```text
-Анна в групі: False
-Анна отримала: Обговорюємо подарунок для Анни
-збережено від Анни: 1
+$ DATABASE_URL=postgres://notes_user:notes_pass@localhost:5434/notes_db python manage.py test
+Creating test database for alias 'default'...
+System check identified no issues (0 silenced).
+.................................................
+----------------------------------------------------------------------
+Ran 49 tests in 35.592s
+
+OK
 ```
 
-Анна вже не учасниця, але отримує нові повідомлення й пише в чат — і її повідомлення зберігаються. Сторінка групи її вже не пустить (`404`), а відкритий WebSocket — пускає.
+### Кількість запитів — теж контракт
 
-Правильно — дві речі:
+N+1 (сторінка робить по запиту на кожен рядок) у проєкті немає: selectors уже мають `select_related` / `prefetch_related` / `annotate`. Заміряли на сторінках з 5 і з 50 нотатками — кількість запитів однакова:
 
-1. **Service перевіряє членство на кожне повідомлення** (`post_chat_message` вище). Consumer отримує `PermissionDenied` і закриває з'єднання кодом `4403`.
-2. **Вилучення з групи закриває відкриті чати одразу**, не чекаючи, поки людина щось напише. Service вилучення надсилає подію в channel layer — після COMMIT, коли зміна вже в базі:
-
-```python title="hello_app/services.py (фрагмент)"
-def remove_user_from_group(group, user):
-    """Removes user from group. Урок 45: відкритий чат цього користувача в групі закривається."""
-    group.user_set.remove(user)
-    notify_chat(group.pk, {'type': 'member.removed', 'user_id': user.pk})
-
-
-def notify_chat(group_pk, event):
-    """Подія для всіх відкритих чатів групи — після COMMIT (раніше consumer міг би ще бачити старе членство)."""
-    layer = get_channel_layer()
-    if layer is not None:
-        transaction.on_commit(lambda: async_to_sync(layer.group_send)(chat_group_name(group_pk), event))
-```
-
-```python title="hello_app/consumers.py (фрагмент)"
-    async def member_removed(self, event):
-        """services.remove_user_from_group: якщо вилучили саме нас — закрити з'єднання."""
-        if event['user_id'] == self.user.pk:
-            await self.close(code=CLOSE_NOT_ALLOWED)
-
-    async def group_deleted(self, event):
-        """services.delete_group: чату більше немає."""
-        await self.close(code=CLOSE_NOT_ALLOWED)
-```
-
-Покроково — Олена вилучає Анну зі сторінки групи:
-
-```mermaid
-flowchart TD
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
-
-    subgraph R1["HTTP: POST /groups/7/ action=remove"]
-        direction LR
-        h1["group_detail view"] --> h2["services.remove_user_from_group<br>DELETE з auth_user_groups"]
-    end
-    subgraph R2["COMMIT → transaction.on_commit"]
-        direction LR
-        e1["group_send('chat_group_7',<br>type: member.removed, user_id: Анна)"]
-    end
-    subgraph R3["channel layer → member_removed() у кожному consumer групи"]
-        direction LR
-        m1{"consumer Олени:<br>user_id == Олена?"} -- ні --> m2["нічого"]
-        m3{"consumer Анни:<br>user_id == Анна?"} -- так --> m4["close(code=4403)"]
-    end
-    subgraph R4["браузер Анни: onclose, code 4403"]
-        direction LR
-        j1["4000–4999 → не перепідключатися"] --> j2["«Немає доступу<br>до чату цієї групи»"]
-    end
-
-    R1 --> R2 --> R3 --> R4
-
-    class h1,h2,e1 step
-    class m1,m3 decision
-    class m2 success
-    class m4,j2 error
-    class j1 warning
-```
-
-Подія йде **після COMMIT** з тієї ж причини, що інвалідація кешу в уроці 39: якби consumer отримав її до COMMIT і щось перевірив у базі, він побачив би старе членство.
-
-Клієнт теж має знати про відмову. Стартовий JS при будь-якому закритті, крім 1000/1001, перепідключався з backoff до 30 секунд — безкінечно. Відмову в handshake (не учасник) браузер бачить як `1006`, так само як обрив мережі. Тепер коди `4000–4999` («застосунок відмовив») — без перепідключення, а після 5 невдалих спроб поспіль — повідомлення замість нових спроб:
-
-```javascript title="hello_app/static/hello_app/js/group_chat.js (фрагмент)"
-            if (event.code >= 4000 && event.code < 5000) {
-                setStatus('forbidden');
-                return;
-            }
-            if (event.code !== 1000 && event.code !== 1001) {
-                failedAttempts += 1;
-                if (failedAttempts > MAX_FAILED_ATTEMPTS) {
-                    setStatus('gave_up');
-                    return;
-                }
-                const jitter = Math.random() * 1000;
-                setTimeout(connect, reconnectDelay + jitter);
-                reconnectDelay = Math.min(reconnectDelay * 2, 30000);
-            }
-```
-
-Налаштування клієнт бере зі сторінки: `group.pk` і ім'я — у `data-*` атрибутах прихованого `#chat-config`, без inline `<script>`. Пояснення в шаблоні — у `{% comment %} … {% endcomment %}`: коментар `{# … #}` у Django лише **однорядковий**, багаторядковий потрапляє в HTML як текст. У шаблоні чату це не косметика. Слово `<script>` у такому «коментарі» браузер прочитав би як справжній тег, і все до наступного `</script>`, разом з `#chat-config`, стало б кодом JS. Тест `test_template_comments_are_not_rendered` перевіряє, що на сторінці немає `{#`.
-
-Поглиблено: [JS-клієнт: статус, перепідключення, `escapeHtml`](https://nikoriakviktot.github.io/notes_chat_app/tutorials/07_async_django/7b_websocket_client/).
-
-## Рефакторинг 4. Звідки прийшло з'єднання: `Origin` { #refactor-4 }
-
-HTML-форми захищає CSRF-токен (урок 34). У WebSocket-рукостисканні токена немає, а cookie сесії браузер надсилає на наш сайт **з будь-якої сторінки**. Сайт `evil.example`, відкритий у сусідній вкладці, може виконати:
-
-```javascript
-new WebSocket("wss://notes.example/ws/groups/7/chat/")   // cookie Олени піде разом із запитом
-```
-
-…і отримає історію чату від імені Олени. Це **Cross-Site WebSocket Hijacking**. Справжній запуск стартового стеку (`AuthMiddlewareStack(URLRouter(...))`) з cookie Олени і заголовком `Origin: https://evil.example`:
-
-```text
-з evil.example: (True, None)
-```
-
-`(True, None)` — з'єднання прийнято. Браузер не дає сторінці підробити заголовок `Origin` — там завжди адреса сторінки, яка відкриває з'єднання. Тож сервер має його перевірити: `AllowedHostsOriginValidator` пускає лише `Origin` з `ALLOWED_HOSTS` (у `DEBUG` з порожнім списком — `localhost`, `127.0.0.1`, `[::1]`).
-
-```python title="hello_app/tests_chat.py (фрагмент)"
-    async def test_foreign_site_is_rejected(self):
-        """Cookie сесії той самий, але сторінка — чужа: без перевірки Origin чат відкрився б."""
-        self.assertFalse(await self.connect_from(b'https://evil.example'))
-        self.assertFalse(await self.connect_from(b'http://localhost.evil.example'))
-```
-
-`localhost.evil.example` — перевірка того, що порівнюється весь домен, а не початок рядка (урок 41, `fakerbc.ua`).
-
-!!! warning "На сервері — `DJANGO_ALLOWED_HOSTS`"
-    Валідатор бере список з `ALLOWED_HOSTS`. Без `DJANGO_ALLOWED_HOSTS=notes.example` на сервері (`DEBUG=0`) список порожній — і чат не приймає **жодного** з'єднання. Валідатор читає налаштування один раз, при імпорті `asgi.py`; тому тести збирають стек функцією `websocket_application()` під `override_settings(ALLOWED_HOSTS=[...])`.
-
-## Channel layer: пам'ять чи Redis { #channel-layer }
-
-Channel layer — поштова служба між consumers: `group_add` підписує з'єднання на групу, `group_send` доставляє подію всім підписникам.
-
-| | `InMemoryChannelLayer` | `RedisChannelLayer` |
+| Сторінка | 5 рядків | 50 рядків |
 |---|---|---|
-| Де живуть групи | у пам'яті процесу | у Redis |
-| Кілька процесів сервера | ні: Олена на процесі 1 не почує Анну на процесі 2 | так |
-| Коли | розробка, тести, ноутбук | сервер (урок 48: кілька процесів у Docker) |
-| У проєкті | без `REDIS_URL` | `REDIS_URL=redis://…` |
+| `/notes/` | 8 | 8 |
+| `/notebooks/` | 7 | 7 |
+| `/shopping/<pk>/` | 10 | 10 |
+| `/todo/<pk>/` | 10 | 10 |
 
-Ті самі 76 тестів проходять з обома шарами. Це також перевірка, що в подіях немає нічого, чого не можна передати через Redis: там лише JSON-сумісні значення (`user_id`, рядки, ISO-час), а не об'єкти моделей.
+Щоб так і лишилось, тест порівнює кількість запитів на 3 і на 30 рядках. Що він ловить — справжній замір `/notes/`, коли `get_user_notes` забуває `select_related('notebook', 'group').prefetch_related('tags')`:
 
-Поглиблено: [Redis і Channel Layer](https://nikoriakviktot.github.io/notes_chat_app/tutorials/09_deployment/redis/).
+```text
+з select_related / prefetch_related:   3 нотатки →  8 запитів | 30 нотаток →  8 запитів
+без них:                               3 нотатки → 16 запитів | 30 нотаток → 97 запитів
+```
 
-## Архітектура { #architecture }
+Кожна нотатка на сторінці дотягує записник, групу й теги окремими запитами — `3 × кількість нотаток` зверху. На 3 нотатках різниці майже не видно, тому тест і міряє на двох розмірах.
+
+Поглиблено: [PostgreSQL у кроці 3 книги](https://nikoriakviktot.github.io/notes_chat_app/tutorials/03_crud_and_architecture/postgresql/), [N+1, `select_related`, `prefetch_related`, `F()`, `transaction.atomic`](https://nikoriakviktot.github.io/notes_chat_app/tutorials/03_crud_and_architecture/queryset_deep/).
+
+## Каталог патернів: два проєкти, одні ідеї { #patterns }
+
+**Патерн** — назва для рішення, яке повторюється: «проблема такого типу розв'язується такою формою коду». Назва не робить код кращим. Вона допомагає дві речі: швидко пояснити колезі рішення («тут декоратор над клієнтом») і впізнати його в чужому коді. Усі патерни нижче вже є в наших двох проєктах — ми їх лише називаємо.
+
+| Патерн | Яку проблему розв'язує | Нотатки (Django) | Агрегатор `news_hub` (FastAPI) |
+|---|---|---|---|
+| **Шари** (транспорт → логіка → дані) | зміна в одному місці не ламає інші | `views.py` / `api.py` → `services` / `selectors` → ORM | `api.py` → `analysis.py` / `repository.py` → SQLAlchemy |
+| **Service layer** | бізнес-дія (транзакція, кілька таблиць) — одна функція для сторінки, API, фонової задачі | `services.create_note(...)` | `analyze_news(...)`, `run_analyze_job(...)` |
+| **CQRS-light** (читання окремо від запису) | запити для показу оптимізують інакше, ніж зміни | `selectors` читають, `services` пишуть | `NewsRepository.find` / `stats` проти `add_many` / `save_analysis` |
+| **Repository** | увесь доступ до даних за інтерфейсом; тести без SQL | ORM Django уже є репозиторієм (`Note.objects`); selectors — «запити домену» | `BaseRepository` / `NewsRepository` — «увесь SQL в одному місці» |
+| **Dependency Injection** | залежність приходить ззовні → її можна підмінити | `get_queryset()`, `get_form_kwargs()` — CBV питає, а не створює | `Depends(get_repo)`, `Depends(get_llm)`, `dependency_overrides` у тестах |
+| **Strategy** (через `Protocol`) | кілька взаємозамінних реалізацій однієї ролі | `selector = selectors.notes_visible_to` — правило як параметр | `LLMClient`: `GeminiClient`, `AnthropicClient`, `FakeLLM` |
+| **Decorator / Proxy** | додати поведінку, не змінюючи об'єкт і його інтерфейс | `LoginRequiredMixin` загортає `dispatch()` | `GuardedLLM(client, breaker)` — той самий `generate()` + circuit breaker |
+| **Factory** | вибір класу за конфігурацією — в одному місці | `database_from_url(...)` → налаштування потрібної бази | `make_llm()` за `LLM_PROVIDER` |
+| **Template method** | каркас алгоритму фіксований, кроки перевизначають | `UpdateView`: `get_object` → `get_form` → `form_valid` | — |
+| **Unit of Work** | кілька змін — або всі, або жодної | `transaction.atomic()` у services | сесія на запит + `COMMIT` у `get_db` |
+
+Структура `news_hub` — хто від кого залежить і де стоїть кожен патерн:
 
 ```mermaid
 graph LR
@@ -450,241 +519,295 @@ graph LR
     classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
     classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
 
-    BR["браузер<br>сторінка + group_chat.js"] -- "HTTP" --> PT["asgi.py<br>ProtocolTypeRouter"]
-    BR -- "WebSocket" --> PT
-    PT -- http --> DJ["Django: views / api"]
-    PT -- websocket --> OV["AllowedHostsOriginValidator<br>звідки?"]
-    OV --> AM["AuthMiddlewareStack<br>хто?"] --> UR["URLRouter<br>routing.py"] --> CO["GroupChatConsumer<br>транспорт"]
-    DJ --> SEL["selectors<br>is_group_member, recent_chat_messages"]
-    DJ --> SRV["services<br>post_chat_message, remove_user_from_group"]
-    CO --> SEL
-    CO --> SRV
-    SRV -- "on_commit: member.removed" --> CL["channel layer<br>пам'ять / Redis"]
-    CO <-- "group_add / group_send" --> CL
-    SEL --> DB["PostgreSQL / SQLite"]
-    SRV --> DB
+    API["api.py<br>ендпоінти"] -- "Depends — DI" --> REPO["NewsRepository<br>Repository"]
+    API -- "Depends — DI" --> GUARD["GuardedLLM<br>Decorator"]
+    API --> AN["analyze_news<br>Service"]
+    AN --> P["LLMClient (Protocol)<br>Strategy"]
+    GUARD --> P
+    P -.-> G["GeminiClient"]
+    P -.-> A["AnthropicClient"]
+    P -.-> F["FakeLLM"]
+    MK["make_llm()<br>Factory"] --> G
+    MK --> A
+    MK --> F
+    REPO --> DB["get_db<br>сесія + COMMIT — Unit of Work"]
 
-    class BR,PT,DJ,UR step
-    class OV,AM warning
-    class CO step
-    class SEL,SRV success
-    class CL,DB decision
+    class API step
+    class AN,REPO success
+    class P decision
+    class GUARD,MK warning
+    class G,A,F,DB step
 ```
 
-- **Три транспорти — одні правила.** Сторінки, API і WebSocket викликають ті самі selectors і services. Правило «хто учасник групи» — одне, тож вилучення з групи діє скрізь одразу.
-- **Consumer — тонкий.** Розібрати кадр, викликати service, розіслати результат або закрити з'єднання. ORM у ньому немає — це перевіряє `tests_architecture.py`.
-- **Захист у шарах:** звідки (Origin) → хто (сесія) → чи учасник (connect) → чи ще учасник (кожне повідомлення, подія вилучення) → що бачить інший браузер (екранування на клієнті).
+І та сама думка в нотатках — запит `POST /notes/7/edit/` від автора через шари:
+
+```mermaid
+sequenceDiagram
+    participant B as браузер
+    participant V as NoteUpdateView
+    participant S as selectors
+    participant SV as services
+    participant DB as PostgreSQL / SQLite
+
+    B->>V: POST /notes/7/edit/
+    V->>V: LoginRequiredMixin.dispatch — увійшов
+    V->>S: notes_visible_to(user)
+    S-->>V: QuerySet (правило доступу вже в SQL)
+    V->>DB: .get(pk=7)
+    DB-->>V: Note
+    V->>V: OwnerRequiredMixin — автор? так
+    V->>V: form.is_valid()
+    V->>SV: update_note(note, title=…, tag_ids=…)
+    SV->>DB: UPDATE … (update_fields) + теги
+    SV-->>V: Note
+    V-->>B: 302 → /notes/7/
+```
+
+View не знає SQL, selector не знає HTTP, service не знає форм. Тому ту саму `services.update_note` викликають і сторінка, і `api.py`, а в уроці 46 її викличе ще й WebSocket-обробник чату.
+
+### Коли патерн — зайвий
+
+Кожен патерн — ще один рівень, який треба прочитати, щоб зрозуміти код. Він окупається, коли розв'язує **наявну** проблему:
+
+- `LLMClient` з трьома реалізаціями виправданий: провайдерів справді два, а тестам потрібен третій — фейк. Інтерфейс «на майбутнє» з однією реалізацією — лише зайвий файл;
+- окремий `NoteRepository` поверх ORM Django у нотатках нічого не додав би: `Note.objects` і selectors уже дають і інтерфейс, і місце для запитів;
+- CBV для «поділитись списком» заховав би дві гілки форми в перевизначених методах — функція тут читається простіше.
+
+Куди класти новий код:
+
+```mermaid
+flowchart TD
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+
+    Q1{"код знає про HTTP:<br>request, форма, статус?"}
+    Q2{"змінює дані?"}
+    Q3{"вирішує, хто<br>що бачить?"}
+    Q4{"властивість одного<br>об'єкта без запитів?"}
+    V["view / api.py<br>тонкий: розібрати запит, викликати, відповісти"]
+    SV["services.py<br>+ transaction.atomic"]
+    SEL["selectors.py<br>*_visible_to / *_owned_by"]
+    SEL2["selectors.py<br>запит для показу"]
+    M["models.py<br>метод чи property"]
+
+    Q1 -- так --> V
+    Q1 -- ні --> Q2
+    Q2 -- так --> SV
+    Q2 -- ні --> Q3
+    Q3 -- так --> SEL
+    Q3 -- ні --> Q4
+    Q4 -- так --> M
+    Q4 -- ні --> SEL2
+
+    class Q1,Q2,Q3,Q4 decision
+    class V step
+    class SV,SEL,SEL2,M success
+```
+
+Поглиблено: [архітектура застосунку — частина VI Django-книги](https://nikoriakviktot.github.io/notes_chat_app/06_application_architecture/), [services](https://nikoriakviktot.github.io/notes_chat_app/06_application_architecture/django_services_full/), [services, selectors і серіалізатори разом](https://nikoriakviktot.github.io/notes_chat_app/06_application_architecture/services_selectors_full/).
+
+## Архітектура: до і після { #architecture }
+
+```mermaid
+graph LR
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+
+    subgraph B["урок 41"]
+        V40["views.py<br>FBV + Q(...) + objects"] --> R40a["правило доступу<br>копія у view"]
+        S40["selectors.py"] --> R40b["правило доступу<br>копія в selector"]
+        A40["api.py<br>+ Notebook.objects"] --> R40c["ще копія"]
+        V40 --> S40
+        A40 --> S40
+    end
+    subgraph A["урок 45"]
+        V44["views.py<br>CBV + тонкі FBV"] --> S44["selectors.py<br>*_visible_to / *_owned_by"]
+        A44["api.py"] --> S44
+        V44 --> SV44["services.py"]
+        A44 --> SV44
+        S44 --> DB44["DATABASE_URL<br>PostgreSQL / SQLite"]
+        SV44 --> DB44
+        T44["tests_architecture.py"] -. "ast: у views немає ORM" .-> V44
+    end
+    B ~~~ A
+
+    class V40,S40,A40 step
+    class R40a,R40b,R40c error
+    class V44,A44 step
+    class S44,SV44 success
+    class DB44 decision
+    class T44 warning
+```
+
+- **Одне правило — одне місце.** Зміна правила доступу (новий тип спільного доступу) — одна функція в `selectors.py`; views, CBV і API підхоплюють її самі.
+- **Транспорт тонкий.** `views.py` і `api.py` розбирають запит, вибирають правило, викликають service і формують відповідь. ORM у них немає — це перевіряє тест, а не домовленість.
+- **База — конфігурація.** Код не знає, SQLite це чи PostgreSQL: той самий набір тестів на обох.
 
 ### Тести
 
-| Файл | Що перевіряє | Скільки |
-|---|---|---|
-| `tests_consumers.py` | тести стартового проєкту без змін: підключення, відмова анонімові й чужому, розсилка, збереження, історія, ізоляція груп | 9 |
-| `tests_chat.py` | service (межі тексту, членство, історія 50 з 55), сторінка чату, вилучення під час з'єднання, видалення групи, `Origin`, `escapeHtml` у Node.js | 18 |
-| `tests_architecture.py` та інші з уроків 34–44 | + `consumers.py` без ORM | 49 |
-
-`WebsocketCommunicator` — це «браузер» у тесті. Він підключається до consumer напряму, без сервера й мережі, і дає `connect()`, `send_json_to()`, `receive_json_from()`, `receive_nothing()`:
-
-```python title="hello_app/tests_chat.py (фрагмент)"
-    async def test_removed_member_is_disconnected(self):
-        olena, ann = communicator_for(self.group.pk, self.olena), communicator_for(self.group.pk, self.ann)
-        self.assertTrue((await olena.connect())[0])
-        self.assertTrue((await ann.connect())[0])
-        await database_sync_to_async(services.remove_user_from_group)(self.group, self.ann)
-        closed = await ann.receive_output(timeout=1)
-        self.assertEqual(closed, {'type': 'websocket.close', 'code': CLOSE_NOT_ALLOWED})
-        self.assertTrue(await olena.receive_nothing(timeout=0.3))  # Олені — нічого: подія не для неї
-```
-
-Тести consumer — `TransactionTestCase`, а не `TestCase`: consumer ходить у базу з іншого потоку (`database_sync_to_async`), а транзакцію `TestCase` інший потік не бачить. Наприклад, дані з `setUp` для нього «не існують».
-
-Справжній запуск:
-
 ```text
 $ python manage.py test
-............................................................................
+.................................................
 ----------------------------------------------------------------------
-Ran 76 tests in 90.405s
-
-OK
-$ DATABASE_URL=postgres://… REDIS_URL=redis://localhost:6380/3 python manage.py test
-...
-Ran 76 tests in 92.025s
+Ran 49 tests in 32.825s
 
 OK
 ```
 
-`tests_chat.py` на стартовому коді дає 9 червоних тестів: консюмер не реагує на вилучення з групи (два тести), вилученому дозволено писати, `Origin` не перевіряється (три тести), ORM у consumer, JS перепідключається після відмови, багаторядковий `{# … #}` у шаблоні потрапляє на сторінку. 14 навмисних поломок нового коду — кожну ловить хоча б один тест.
+Більшість часу — хешування паролів у `create_user` (PBKDF2 навмисно повільний, урок 41).
 
-Наживо — `runserver` (daphne) і два браузери (Playwright): повідомлення Анни з'являється в Олени без оновлення сторінки. `<b>Хліб</b>` показується як текст, а не жирним — `escapeHtml` працює. Боб (не в групі): сторінка чату — `404`, WebSocket — закрито в рукостисканні. Олена вилучає Анну на сторінці групи — у вкладці Анни статус «Немає доступу до чату цієї групи».
+Було 29 тестів (урок 41), стало 49; старі не змінено — CBV мають ті самі URL і ту саму поведінку. `tests_architecture.py` на коді уроку 41 дає 10 червоних тестів. Сім із них — справжні вади: ORM у `views.py` і `api.py`, `MultipleObjectsReturned` на списку, поділеному з двома, список групи з `404` (два тести), відкритий редирект `?next=` (дві адреси). Решта три падають, бо нових функцій (`OwnerRequiredMixin`, `get_group_member`, `pending_total`) ще немає. Нові тести перевірено мутаціями: 14 навмисних поломок (прибрати `distinct()`, дозволити не-автору змінювати, пропустити `?next=` без перевірки, забути `is_pinned`, прибрати `select_related`…) — кожну ловить хоча б один тест.
 
 ## Мінімальні версії залежностей { #min-versions }
 
-```text title="requirements.txt (нове)"
-channels>=4.0                        # урок 45: WebSocket — consumers, routing, channel layer
-daphne>=4.0                          # урок 45: ASGI-сервер; першим в INSTALLED_APPS — runserver через ASGI
-channels-redis>=4.0                  # урок 45: RedisChannelLayer (REDIS_URL); без Redis — InMemoryChannelLayer
+Прогін на мінімальних версіях `requirements.txt` (Python 3.10) показав, що проєкт з `django-debug-toolbar` 4.0 не запускається:
+
+```text
+ImportError: cannot import name 'get_storage_class' from 'django.core.files.storage'
 ```
 
-Усі 76 тестів проходять на Python 3.10 з `channels` 4.0.0, `daphne` 4.0.0, `channels-redis` 4.0.0 і мінімальними версіями решти залежностей з уроку 44, а також на Python 3.13 з найновішими.
+`get_storage_class` прибрали в Django 5.1, а `debug_toolbar_urls()`, який використовує `urls.py`, з'явився в debug-toolbar 4.4. Нижня межа тепер `django-debug-toolbar>=4.4.3`. З нею й `psycopg` 3.1.8 усі 49 тестів проходять на SQLite і на PostgreSQL 16.
 
 ## Практика { #practice }
 
-### Розібраний приклад: «хто зараз у чаті»
+### Розібраний приклад: нагадування для групи
 
-Задача: при підключенні й відключенні учасника всі в групі отримують `{"type": "presence", "user": "ann", "online": true}`.
+Нагадування до нотатки зараз може створити лише її автор (`notes_owned_by` у `reminder_create`). Нове правило: учасник групи теж додає нагадування до нотатки групи, а видаляє нагадування — як і раніше, лише автор нотатки.
 
-Це подія для **транспорту**, а не бізнес-дія: у базу нічого не пишемо, правило доступу вже перевірено в `connect()`. Тож лише consumer:
+1. Правило «хто додає» вже існує — `notes_visible_to`. У view змінюється одне слово:
 
-```python title="hello_app/consumers.py (розв'язок)"
-    async def connect(self):
-        ...
-        await self.accept()
-        await self.channel_layer.group_send(self.room_group_name, {
-            'type': 'presence', 'user': self.user.username, 'online': True})
-        ...
+    ```diff title="hello_app/views.py"
+     @login_required
+     def reminder_create(request, note_pk):
+    -    note = get_object_or_404(selectors.notes_owned_by(request.user), pk=note_pk)
+    +    note = get_object_or_404(selectors.notes_visible_to(request.user), pk=note_pk)
+    ```
 
-    async def disconnect(self, close_code):
-        if hasattr(self, 'room_group_name'):
-            await self.channel_layer.group_send(self.room_group_name, {
-                'type': 'presence', 'user': self.user.username, 'online': False})
-            await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
+2. Правило «хто видаляє» не змінюється: `reminders_owned_by` (нагадування на нотатках користувача).
 
-    async def presence(self, event):
-        await self.send(text_data=json.dumps(event))
-```
+3. Тест — обидві половини правила:
 
-Тест — Олена підключена, Анна приходить і йде:
+    ```python title="hello_app/tests_architecture.py (розв'язок)"
+    def test_group_member_adds_reminder_but_cannot_delete(self):
+        olena = User.objects.create_user("olena")
+        ann = User.objects.create_user("ann")
+        group = services.create_group(name="Сім'я", creator=olena)
+        services.add_user_to_group(group, "ann")
+        note = services.create_note(user=olena, title="Спільна", group=group)
+        self.client.force_login(ann)
+        when = (timezone.now() + timedelta(days=1)).strftime("%Y-%m-%dT%H:%M")
+        response = self.client.post(f"/notes/{note.pk}/reminders/add/", {"remind_at": when, "repeat_pattern": "none"})
+        self.assertRedirects(response, f"/notes/{note.pk}/")
+        reminder = Reminder.objects.get(note=note)
+        self.assertEqual(self.client.post(f"/reminders/{reminder.pk}/delete/").status_code, 404)
+    ```
 
-```python title="hello_app/tests_chat.py (розв'язок)"
-    async def test_presence(self):
-        olena, ann = communicator_for(self.group.pk, self.olena), communicator_for(self.group.pk, self.ann)
-        await olena.connect()
-        await olena.receive_json_from()                     # своя presence
-        await ann.connect()
-        self.assertEqual(await olena.receive_json_from(), {'type': 'presence', 'user': 'ann', 'online': True})
-        await ann.disconnect()
-        self.assertEqual(await olena.receive_json_from(), {'type': 'presence', 'user': 'ann', 'online': False})
-        await olena.disconnect()
-```
-
-`connect` розсилає presence усій групі, куди consumer уже доданий (`group_add` вище), тож кожен отримує і **власну** presence — звідси перший `receive_json_from()` у тесті. `disconnect` розсилає `online: False` іншим і відписується з групи.
-
-`test_presence` зелений, але разом з ним червоніють 10 наявних тестів. Справжній вивід:
-
-```text
-FAIL: test_message_broadcast_to_other_member (hello_app.tests_consumers.GroupChatConsumerMessagesTest...)
-AssertionError: 'presence' != 'message'
-FAIL: test_message_stays_within_group (hello_app.tests_consumers.GroupChatMultipleGroupsTest...)
-AssertionError: False is not true : Carol не має отримувати повідомлення з іншої групи
-...
-FAILED (failures=9, errors=1)
-```
-
-Ці тести читали «наступний кадр» і чекали `message` або тиші (`receive_nothing`), а тепер першою приходить `presence`. Carol справді не отримала нічого з чужої групи — вона отримала **свою** presence. Це зміна **протоколу**: кожен клієнт, який розраховував на порядок кадрів, мусить знати про новий тип. Тести це показали. Їх оновлюють: пропускають кадри `presence`, де вони не перевіряються. JS-клієнт кадри невідомого типу пропускає (`if (data.type === 'history' || data.type === 'message')`), тож щоб показати «онлайн», йому потрібна окрема гілка в `onmessage`.
+`views.py` змінився на одне слово, `tests_architecture` лишився зеленим: нове правило склали з наявних.
 
 ### Зміни приклад
 
-1. Прибери `AllowedHostsOriginValidator` з `websocket_application()` (лиши `AuthMiddlewareStack(URLRouter(...))`) і запусти `python manage.py test hello_app.tests_chat hello_app.tests_consumers`. Які тести впали?
-2. У `recent_chat_messages` заміни `return list(reversed(newest))` на `return newest` — QuerySet замість списку. Що станеться в consumer і чому тести це бачать?
+1. Прибери `.distinct()` з `todo_lists_visible_to` і запусти `python manage.py test hello_app.tests_architecture`. Який тест впав і з якою помилкою?
+2. Постав `OwnerRequiredMixin` **перед** `LoginRequiredMixin` у `NoteUpdateView` і відкрий `/notes/1/edit/` без входу. Що бачиш і чому?
 
-??? success "Що покаже запуск"
+### Спробуй самостійно: CBV для списків справ
 
-    1. Червоні 3 тести, усі з `ChatOriginTests`. `test_foreign_site_is_rejected` і `test_no_origin_is_rejected`: `AssertionError: True is not false` — чужий сайт і запит без `Origin` підключились. `test_application_uses_the_origin_check`: зовнішній шар стека тепер `CookieMiddleware`, а не `OriginValidator`. Решта 24 зелені: з власної сторінки чат працює як і раніше, тож без цих тестів дірку ніхто б не помітив.
-    2. `FAILED (failures=1, errors=13)`. Лінивий QuerySet повертається з `database_sync_to_async` невиконаним, а `for msg in history` у `connect()` виконує SQL уже в циклі подій — `SynchronousOnlyOperation`. Consumer падає при кожному підключенні, тому червоніють майже всі тести з WebSocket. Тест сервісу ловить ту саму помилку ще до consumer: `<QuerySet [...]> is not an instance of <class 'list'>`. А порядок у ньому від нових до старих — `reversed(...)` теж зник.
+Перепиши `todo_list_list`, `todo_list_detail`, `todo_list_edit`, `todo_list_delete` на `ListView` / `DetailView` / `UpdateView` / `DeleteView` з міксинами проєкту.
 
-### Спробуй самостійно: «друкує…»
-
-Коли учасник набирає текст, інші бачать «Анна друкує…». Клієнт надсилає `{"typing": true}` не частіше ніж раз на 2 секунди; consumer розсилає `{"type": "typing", "user": "ann"}` усім, **крім** автора; у базу нічого не пишеться.
-
-**Критерії перевірки:** тест з двома `WebsocketCommunicator`: Олена отримує `typing` від Анни, Анна свого не отримує (`receive_nothing`); `{"typing": true}` від вилученого з групи учасника закриває його з'єднання кодом 4403; `tests_architecture` зелений.
+**Критерії перевірки:** URL і імена маршрутів ті самі; усі 49 тестів зелені без змін; `tests_architecture` зелений (жодного `TodoList.objects` у `views.py`); учасник, з яким поділено список, бачить його (`200`), але редагування повертає його на сторінку списку з повідомленням.
 
 ### Знайди помилку { #find-bug }
 
-Consumer з тестом — обидва з перенесеного коду, тест зелений:
+Selector і тест з проєкту — обидва правильні на вигляд, тест зелений:
 
 ```python
-class GroupChatConsumer(AsyncWebsocketConsumer):
-    async def connect(self):
-        self.user = self.scope['user']
-        self.group_pk = int(self.scope['url_route']['kwargs']['group_pk'])
-        if not await self.check_membership(self.group_pk, self.user):
-            await self.close()
-            return
-        self.room_group_name = f"chat_group_{self.group_pk}"
-        await self.channel_layer.group_add(self.room_group_name, self.channel_name)
-        await self.accept()
-
-    async def receive(self, text_data):
-        content = json.loads(text_data).get('content', '').strip()
-        if not content or len(content) > 2000:
-            return
-        msg = await self.save_message(self.group_pk, self.user, content)
-        await self.channel_layer.group_send(self.room_group_name, {'type': 'chat_message', ...})
+def get_todo_list_detail(user, pk):
+    try:
+        return TodoList.objects.prefetch_related(
+            'items', 'shared_with'
+        ).get(Q(user=user) | Q(shared_with=user), pk=pk)
+    except TodoList.DoesNotExist:
+        return None
 
 
-async def test_non_member_rejected(self):
-    outsider = await User.objects.acreate_user(username='outsider', password='pass')
-    communicator = _make_communicator(self.group.pk, outsider)
-    connected, _ = await communicator.connect()
-    self.assertFalse(connected)
+def test_shared_user_opens_list(self):
+    todo = services.create_todo_list(user=self.olena, title="Ремонт")
+    services.share_todo_list(todo, "ann")
+    self.assertEqual(selectors.get_todo_list_detail(self.ann, todo.pk), todo)
+    self.assertEqual(selectors.get_todo_list_detail(self.olena, todo.pk), todo)
 ```
 
-Хто може писати в цей чат? Відповідь — справжній вивід на цьому коді:
+Олена ділиться списком ще й з Бобом — і її власна сторінка списку падає з `500`:
 
 ```text
-Анна в групі: False
-Анна отримала: Обговорюємо подарунок для Анни
-збережено від Анни: 1
+поділено з 1: 📋 Ремонт
+MultipleObjectsReturned: get() returned more than one TodoList -- it returned 2!
 ```
+
+Чому? І чому тест цього не побачив?
 
 ??? success "Відповідь"
 
-    Членство перевіряється **один раз** — у `connect()`. WebSocket-з'єднання живе годинами. Хто був учасником у момент підключення, той лишається «учасником» для цього consumer, навіть коли його вже вилучили з групи: він отримує нові повідомлення (його канал досі в групі channel layer) і пише (у `receive` перевірки немає).
+    `shared_with` — зв'язок **багато-до-багатьох**. Щоб перевірити `Q(shared_with=user)`, Django приєднує проміжну таблицю, і кожен, з ким поділено список, дає окремий рядок:
 
-    Тест перевіряв **момент підключення**. У HTTP кожен запит — новий `connect()`, тож «перевірити при вході» достатньо. У WebSocket права треба перевіряти протягом усього з'єднання: на кожне повідомлення (`services.post_chat_message`) і за подією, коли права змінились (`member.removed` → `close(4403)`). Тест на це — `test_removed_member_is_disconnected`: вилучення **під час** відкритого з'єднання.
+    ```text
+    FROM "hello_app_todolist" LEFT OUTER JOIN "hello_app_todolist_shared_with"
+      ON ("hello_app_todolist"."id" = "hello_app_todolist_shared_with"."todolist_id")
+    WHERE ("hello_app_todolist"."user_id" = 1 OR "hello_app_todolist_shared_with"."user_id" = 1)
+    ```
+
+    Для Олени умова `user_id = 1` правдива в **обох** рядках (з Анною і з Бобом) — `.get()` отримує 2 рядки й кидає `MultipleObjectsReturned`. Для Анни правдивий лише один рядок, тож вона список відкриває.
+
+    Тест перевіряв список, поділений з **однією** людиною — там рядок один. Межовий випадок — «поділено з двома». Правильно — `.distinct()` у правилі доступу (`todo_lists_visible_to`), і тест саме на два поділи. FK (`group`) такої проблеми не має: у кожного рядка одна група.
 
 ## Підсумок
 
 | Поняття | Що запам'ятати |
 |---|---|
-| WebSocket | одне з'єднання, писати можуть обидві сторони; відкривається HTTP-запитом з `Upgrade` |
-| ASGI | цикл подій тримає тисячі з'єднань; `ProtocolTypeRouter`: HTTP → Django, WebSocket → Channels |
-| Consumer | «view для WebSocket», живе, поки відкрите з'єднання; тонкий транспорт над selectors/services |
-| `database_sync_to_async` | ORM у пулі потоків; selector повертає список, не QuerySet |
-| Channel layer | `group_add` / `group_send` / `type` → метод; пам'ять — один процес, Redis — кілька |
-| Права | Origin → сесія → членство при `connect` → на кожне повідомлення → подія вилучення (`4403`) |
-| XSS | сервер зберігає текст як є; екранує клієнт перед `innerHTML` (`escapeHtml`) |
-| Тести | `WebsocketCommunicator` + `TransactionTestCase`; ті самі тести з обома channel layers |
+| Шари | транспорт (views, API) → service / selector → ORM; кожен знає лише сусіда нижче |
+| Правило доступу | `*_visible_to` / `*_owned_by` у selectors, повертають QuerySet; одне правило для всіх входів |
+| Тест архітектури | `ast`: у `views.py` / `api.py` немає `.objects`, `Q(…)`, `get_object_or_404(Модель, …)`; властивість «що видно — відкривається» |
+| CBV | `as_view` → `setup` → `dispatch` (міксини по MRO) → `get`/`post`; `LoginRequiredMixin` — першим; до `dispatch` — нічого з базою |
+| `form_valid` | викликає service, а не `super().form_valid()` (той зробив би `form.save()`) |
+| M2M + OR | дублікати рядків → `.distinct()`; `.get()` на них — `MultipleObjectsReturned` |
+| `DATABASE_URL` | одна змінна — PostgreSQL чи SQLite; ті самі тести на обох |
+| Кількість запитів | тест: 3 і 30 рядків — однаково запитів |
+| Патерни | Service layer, CQRS-light, Repository, DI, Strategy, Decorator, Factory, Template method, Unit of Work — у наших двох проєктах; патерн окупається, коли розв'язує наявну проблему |
 
 ### Самоперевірка
 
-1. Чому для WebSocket потрібен ASGI, а не WSGI?
-2. Навіщо `get_asgi_application()` викликати до імпорту `routing`?
-3. Що станеться, якщо `recent_chat_messages` поверне QuerySet?
-4. Чому перевірки членства в `connect()` недостатньо?
-5. Від чого захищає `AllowedHostsOriginValidator` і чому CSRF-токен тут не допоможе?
-6. Олена на процесі сервера 1, Анна — на процесі 2, channel layer у пам'яті. Що побачать вони в чаті?
+1. Чому правило доступу краще повертати як QuerySet, а не як `True`/`False` для одного об'єкта?
+2. Що станеться, якщо поставити `OwnerRequiredMixin` перед `LoginRequiredMixin`?
+3. Чому фільтри `NoteListView` читаються в `get()`, а не в `setup()`?
+4. Де в `news_hub` Strategy, а де Decorator, і чим вони відрізняються?
+5. Навіщо тест, який перевіряє сам тест архітектури?
+6. Чому для нотаток не потрібен окремий клас-репозиторій, а для `news_hub` — корисний?
 
 ??? success "Відповіді"
 
-    1. WSGI — «запит → відповідь → кінець» і потік на запит. WebSocket-з'єднання відкрите годинами; тисяча вкладок — тисяча потоків, що чекають. ASGI обслуговує їх одним циклом подій.
-    2. `get_asgi_application()` виконує `django.setup()`. `routing` імпортує consumers, ті — selectors і моделі; до `setup()` — `AppRegistryNotReady`.
-    3. SQL виконається не в `database_sync_to_async`, а там, де по ньому пройдуть циклом, — у циклі подій. Django кидає `SynchronousOnlyOperation`.
-    4. З'єднання живе довше за права: вилученого з групи учасника consumer і далі вважає своїм. Перевірка потрібна на кожне повідомлення плюс подія, яка закриває з'єднання, коли права змінились.
-    5. Від Cross-Site WebSocket Hijacking: чужа сторінка відкриває WebSocket до нашого сайту, і браузер додає cookie сесії. У рукостисканні немає CSRF-токена, але є `Origin`, який сторінка не може підробити.
-    6. Кожен бачить лише свої повідомлення: групи channel layer у пам'яті — окремі в кожному процесі. Потрібен `RedisChannelLayer` — спільні групи для всіх процесів.
+    1. QuerySet можна доповнити (`.get(pk=…)`, `.annotate`, `prefetch_related`, пагінація), а правило стає частиною SQL: база не віддає чужих рядків узагалі. Перевірка «так/ні» працює з уже завантаженим об'єктом — її легко забути викликати, і вона не допомагає списку.
+    2. Анонім дійде до `OwnerRequiredMixin.dispatch()` раніше за перевірку входу: `get_object()` з `AnonymousUser` у фільтрі — помилка, а не редирект на логін.
+    3. `setup()` виконується до `dispatch()`, тобто до `LoginRequiredMixin`. Запит до бази там — запит від ще не перевіреного користувача (для аноніма — `TypeError`).
+    4. Strategy — `LLMClient`: взаємозамінні реалізації однієї ролі (Gemini, Anthropic, фейк). Decorator — `GuardedLLM`: той самий інтерфейс, обгортає **будь-яку** реалізацію і додає поведінку (breaker). Strategy міняє «хто робить», Decorator додає «що ще відбувається навколо».
+    5. Тест, що не здатний знайти порушення, завжди зелений і нічого не захищає. Перевірка на навмисно поганому фрагменті доводить, що правило справді ловить `.objects`, `Q` і `get_object_or_404(Модель…)`.
+    6. У Django ORM уже є репозиторієм: `Note.objects` — інтерфейс до таблиці, а selectors дають запити мовою домену. У `news_hub` репозиторій ховає SQLAlchemy й діалекти (`ON CONFLICT` для PostgreSQL і SQLite) — без нього цей SQL розповзся б по ендпоінтах.
 
 ### Що далі
 
-- Ноутбук заняття: [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_45_websocket_chat/note_lesson_45_chat_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_45_websocket_chat/note_lesson_45_chat.ipynb){ .solutions-link }.
-- Урок 46 — Security advanced: CSWSH і права на кожне повідомлення — частина ширшої картини.
-- Уроки 48–49 — Docker і деплой: кілька процесів сервера, Redis як channel layer, `DJANGO_ALLOWED_HOSTS`.
+- Ноутбук заняття: [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_45_architecture_patterns/note_lesson_45_architecture_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_45_architecture_patterns/note_lesson_45_architecture.ipynb){ .solutions-link }.
+- Урок 46 — чат на WebSocket: ще один транспорт (consumer) над тими самими services і selectors.
+- Урок 48 — Telegram-бот агрегатора: ще один транспорт над `analyze_news` і `NewsRepository`.
 
 ## Документація і джерела
 
-- Код: [`crispy_notes_project`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_4/lessons/lesson_45_websocket_chat/crispy_notes_project) — проєкт уроку 44 + чат зі стартового `notes_chat_app`.
-- Django-книга, крок 7B: [огляд кроку](https://nikoriakviktot.github.io/notes_chat_app/tutorials/07_async_django/), [WebSocket-протокол](https://nikoriakviktot.github.io/notes_chat_app/tutorials/07_async_django/7b_websocket_protocol/), [ASGI-стек](https://nikoriakviktot.github.io/notes_chat_app/tutorials/07_async_django/7b_asgi_stack/), [налаштування Channels](https://nikoriakviktot.github.io/notes_chat_app/tutorials/07_async_django/7b_channels_settings/), [consumer](https://nikoriakviktot.github.io/notes_chat_app/tutorials/07_async_django/7b_consumer/), [JS-клієнт](https://nikoriakviktot.github.io/notes_chat_app/tutorials/07_async_django/7b_websocket_client/), [чекпоінт](https://nikoriakviktot.github.io/notes_chat_app/tutorials/07_async_django/checkpoint/); [тести consumers](https://nikoriakviktot.github.io/notes_chat_app/tutorials/06_testing/test_consumers/); [Redis і Channel Layer](https://nikoriakviktot.github.io/notes_chat_app/tutorials/09_deployment/redis/).
-- Django Channels: [tutorial](https://channels.readthedocs.io/en/latest/tutorial/index.html), [consumers](https://channels.readthedocs.io/en/latest/topics/consumers.html), [channel layers](https://channels.readthedocs.io/en/latest/topics/channel_layers.html), [security — `AllowedHostsOriginValidator`](https://channels.readthedocs.io/en/latest/topics/security.html), [testing — `WebsocketCommunicator`](https://channels.readthedocs.io/en/latest/topics/testing.html), [database access](https://channels.readthedocs.io/en/latest/topics/databases.html).
-- Протокол: [RFC 6455 — The WebSocket Protocol](https://www.rfc-editor.org/rfc/rfc6455) (коди закриття — §7.4; 4000–4999 — для застосунків); [MDN — WebSocket API](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket); [OWASP — Cross-Site WebSocket Hijacking](https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/11-Client-side_Testing/10-Testing_WebSockets).
-- Урок 27 курсу — [asyncio](../m2/lesson_27.md); урок 32 — [типи API: WebSocket і SSE](lesson_32.md); урок 44 — [архітектура](lesson_44.md).
+- Код: [`crispy_notes_project`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_4/lessons/lesson_45_architecture_patterns/crispy_notes_project) — проєкт уроку 41 + CBV зі стартового `notes_project_cbv`; [`news_hub`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_4/lessons/lesson_44_llm_api/news_hub) уроку 44.
+- Django-книга, крок 3: [огляд](https://nikoriakviktot.github.io/notes_chat_app/tutorials/03_crud_and_architecture/), [services і selectors](https://nikoriakviktot.github.io/notes_chat_app/tutorials/03_crud_and_architecture/services_and_selectors/), [CBV](https://nikoriakviktot.github.io/notes_chat_app/tutorials/03_crud_and_architecture/cbv/), [QuerySet глибше](https://nikoriakviktot.github.io/notes_chat_app/tutorials/03_crud_and_architecture/queryset_deep/), [PostgreSQL](https://nikoriakviktot.github.io/notes_chat_app/tutorials/03_crud_and_architecture/postgresql/), [типові помилки](https://nikoriakviktot.github.io/notes_chat_app/tutorials/03_crud_and_architecture/checkpoint/); частина VI — [архітектура застосунку](https://nikoriakviktot.github.io/notes_chat_app/06_application_architecture/).
+- Django: [class-based views](https://docs.djangoproject.com/en/5.2/topics/class-based-views/), [generic editing views](https://docs.djangoproject.com/en/5.2/ref/class-based-views/generic-editing/), [`LoginRequiredMixin`](https://docs.djangoproject.com/en/5.2/topics/auth/default/#the-loginrequiredmixin-mixin), [`distinct()`](https://docs.djangoproject.com/en/5.2/ref/models/querysets/#distinct), [`assertNumQueries`](https://docs.djangoproject.com/en/5.2/topics/testing/tools/#django.test.TransactionTestCase.assertNumQueries), [PostgreSQL notes](https://docs.djangoproject.com/en/5.2/ref/databases/#postgresql-notes); [`url_has_allowed_host_and_scheme`](https://github.com/django/django/blob/stable/5.2.x/django/utils/http.py).
+- Python: [`ast`](https://docs.python.org/3/library/ast.html), [`urllib.parse.urlsplit`](https://docs.python.org/3/library/urllib.parse.html#urllib.parse.urlsplit), [MRO](https://docs.python.org/3/howto/mro.html).
+- Патерни: Martin Fowler — [Service Layer](https://martinfowler.com/eaaCatalog/serviceLayer.html), [Repository](https://martinfowler.com/eaaCatalog/repository.html), [Unit of Work](https://martinfowler.com/eaaCatalog/unitOfWork.html), [CQRS](https://martinfowler.com/bliki/CQRS.html); [refactoring.guru — Strategy, Decorator, Factory Method, Template Method](https://refactoring.guru/uk/design-patterns/catalog).
+- [Довідник: FastAPI — архітектура, async і production-патерни](fastapi/fastapi_documentation.md): §5 DI, §7 Repository, §8 Unit of Work.

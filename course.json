@@ -23,7 +23,6 @@
         4,
         5,
         6,
-        7,
         8,
         9,
         10,
@@ -33,7 +32,8 @@
         14,
         15,
         16,
-        17
+        17,
+        18
       ]
     },
     {
@@ -42,7 +42,6 @@
       "title": "Module 2 — Python Advanced",
       "path": "module_2/lessons",
       "lessons": [
-        18,
         19,
         20,
         21,
@@ -52,7 +51,8 @@
         25,
         26,
         27,
-        28
+        28,
+        29
       ]
     },
     {
@@ -61,8 +61,8 @@
       "title": "Module 3 — Databases",
       "path": "module_3/lessons",
       "lessons": [
-        29,
-        30
+        30,
+        31
       ]
     },
     {
@@ -71,7 +71,6 @@
       "title": "Module 4 — Web (incl. Web Advanced)",
       "path": "module_4/lessons",
       "lessons": [
-        31,
         32,
         33,
         34,
@@ -87,7 +86,8 @@
         44,
         45,
         46,
-        47
+        47,
+        48
       ]
     },
     {
@@ -96,9 +96,9 @@
       "title": "Module 5 — Production",
       "path": "module_5/lessons",
       "lessons": [
-        48,
         49,
-        50
+        50,
+        51
       ]
     },
     {
@@ -107,8 +107,8 @@
       "title": "Module 6 — Capstone",
       "path": "module_6/lessons",
       "lessons": [
-        51,
-        52
+        52,
+        53
       ]
     }
   ]

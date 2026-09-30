@@ -41,39 +41,39 @@ PY-Course-Victor-Nikoriak-22-09-2026/
 │
 ├── module_1/                   ← М1. Python Core
 │   ├── docs/                   ← Module 1 reference notebooks (separate from the top-level docs/ book)
-│   └── lessons/                ← lesson_01_… through lesson_17_… (v5.0 lessons 1–17)
+│   └── lessons/                ← lesson_01_… through lesson_18_… (v5.0 lessons 1–17)
 ├── module_2/
-│   └── lessons/                ← lesson_18_functions_first_class/ … lesson_28_practicum_data_structures/ (all of М2)
+│   └── lessons/                ← lesson_19_functions_first_class/ … lesson_29_practicum_data_structures/ (all of М2)
 ├── module_3/
-│   ├── lessons/                ← lesson_29_sql_basics/, lesson_30_redis_overview/ (all of М3)
+│   ├── lessons/                ← lesson_30_sql_basics/, lesson_31_redis_overview/ (all of М3)
 │   └── bonus/pandas_data_analysis/ ← bonus lesson (before 29): 3 old-course notebooks + note_bonus_extra_datasets.ipynb, dash_API/ (Dash, 7 tabs), data/ (instructor's WFP/HDX/data.gov.ua files); book page docs/modules/m3/bonus_pandas.md + reference pages docs/modules/m3/pandas/
 ├── module_4/
-│   └── lessons/                ← lesson_31_http_requests/ (+ smachno_api.py — local training HTTP API, stdlib only),
-│                                 lesson_32_rest_api_design/ (meteo_api/ FastAPI v2 + all API types + gRPC, weather_map/ Streamlit, tests/, docker-compose.yml),
-│                                 lesson_33_django_intro/ (hello_project/ — Django 5.2 notes app, step 1–2 of the Django book),
-│                                 lesson_34_django_forms/ (old-course django_bootstrap_project/ → crispy_notes_project/, taught as two refactorings of lesson 33; tests added),
-│                                 lesson_35_drf_fastapi/ (crispy_notes_project/ from 34 + DRF api.py over services/selectors, tests_api; fastapi_notes.py),
-│                                 lesson_36_typing_pydantic/ (news_hub/ — news aggregator step 1: typed parse_rbc_news from the old course, NewsItem (Pydantic), rbc.ua snapshot, pytest + mypy),
-│                                 lesson_37_fastapi_basics/ (news_hub/ step 2: FastAPI api.py from old news_dashboard/app/main.py, NewsStore via Depends, aiohttp scraper, postman/ collection, TestClient tests; fastapi_demo/ from old course — async vs blocking + load_test.py),
-│                                 lesson_38_fastapi_sqlalchemy/ (news_hub/ step 3: db.py/tables.py/repository.py from old production_bot — async SQLAlchemy 2, NewsRepository replaces NewsStore, full CRUD, Alembic migrations/, docker-compose.yml with PostgreSQL; tests run on SQLite or PostgreSQL via TEST_DATABASE_URL),
-│                                 lesson_39_middleware_redis/ (news_hub/ step 4: cache.py (Redis client from old production_bot, NewsCache with version key), middleware.py (request id/timing, rate limit from old ai_bot → 429, cache invalidation after COMMIT), jobs.py (202 background scrape, status in Redis); REDIS_URL=fakeredis:// for tests/notebook),
-│                                 lesson_40_auth_security/ (crispy_notes_project/ from 35 + old-course lesson_Django_authentication_and_security code: Group sharing, password change/reset, security settings; + simplejwt /api/token/ with throttle, SECRET_KEY/DEBUG from env, tests_auth.py; fixed: API let group members edit/delete others' notes → 403),
-│                                 lesson_41_api_testing/ (news_hub/ step 5: tests of lesson 39 rebuilt — tests/unit + tests/integration with markers, tests/fixtures/*.html from the old web-scraping notebook, factories.py, mock network (patch where used) + aiohttp TestServer fake, httpx.AsyncClient aclient, real get_db test, .coveragerc (branch, greenlet); fixed: ISO time rejected by NewsItem, undecodable page killed whole scrape, endswith("rbc.ua") let fakerbc.ua through → is_rbc_host, parser crash on bs4 4.12),
-│                                 lesson_42_ai_dev_tools/ (news_hub/ step 6: CLAUDE.md, .claude/settings.json + hooks/unit_tests.py + skills/add-news-source, rss.py (Ukrainska Pravda RSS written by headless Claude Code against spec tests/unit/test_pravda.py; reviewer fixes + tests/unit/test_pravda_review.py, tzdata); depression_dashboard/ — AI-generated Flask+Streamlit+sklearn project from old module_5/lesson_53_claude_code with prompts/, tests/test_review.py (17 tests, 10 defects fixed); book page + reference docs/modules/m4/ai/claude_code.md from old CLAUDE_DOC.md, verified against docs),
-│                                 lesson_43_llm_api/ (news_hub/ step 7: llm.py from old ai_bot ai_service.py — LLMClient Protocol, GeminiClient (client.aio, model pool by error code), AnthropicClient (model from ANTHROPIC_MODEL env), FakeLLM, Redis CircuitBreaker + GuardedLLM; analysis.py — NewsAnalysis (Pydantic), prompt with data in <news>, 1 retry, cache by text hash + PROMPT_VERSION; POST /api/news/{id}/analyze (db → cache → llm, 502/503), /api/analyze/jobs, migration 0002; tests with FakeLLM, tests/live (-m llm, contract test works without a key); no API key in the session yet — model output on the page is marked «Приклад виводу»),
-│                                 lesson_44_architecture_patterns/ (crispy_notes_project/ from 40, Django book step 3: notes/notebooks/tags as CBV from old notes_project_cbv (LoginRequiredMixin, OwnerRequiredMixin, SelectorQuerySetMixin), access rules only in selectors (*_visible_to / *_owned_by, distinct for M2M), no ORM in views/api — enforced by tests_architecture.py (ast), DATABASE_URL → PostgreSQL 16 (docker-compose.yml, psycopg 3) or SQLite; fixed: list shared with 2 users → 500, group shopping list 404, ?next= open redirect; book page = patterns catalog over notes + news_hub),
-│                                 lesson_45_websocket_chat/ (crispy_notes_project/ from 44, Django book step 7B: group chat from old module_5/lesson_Django_Async/notes_chat_app — Channels 4 + daphne, asgi.py (websocket_application(): AllowedHostsOriginValidator → AuthMiddlewareStack → URLRouter), routing.py, consumers.GroupChatConsumer as a thin transport over selectors.is_group_member/recent_chat_messages + services.post_chat_message (membership checked per message; member.removed/group.deleted events after COMMIT → close 4403), ChatMessage + migration 0004, group_chat page + static js/group_chat.js (no reconnect on 4xxx), CHANNEL_LAYERS InMemory or Redis via REDIS_URL, docker-compose redis; tests_consumers.py (old 9) + tests_chat.py, consumers.py in tests_architecture),
-│                                 lesson_46_security_advanced/ (news_hub/ step 8: security.py from old production_bot core/security.py + api/deps.py + admin/auth.py — bcrypt directly (passlib 1.7.4 breaks on bcrypt 5), JWT HS256 with required exp/sub/role, AdminSettings from env (no "change-me" defaults: unset → 503, short secret → startup fails), require_admin/AdminDep on every write endpoint, POST /api/admin/token + login rate limit; safe_fetch.py (SSRF: PolicyResolver checks IP after DNS, manual redirects re-checked, ports 80/443, size/type limits) + sources table (migration 0003) + /api/sources; webhooks.py — HMAC(timestamp + raw body), 5-min window, SET NX replay → 409, from old api/webhook.py; tests_admin_api walks all routes vs PUBLIC; 279 tests),
-│                                 lesson_47_telegram_bot/ (news_hub/ step 9: bot/ — aiogram 3 bot from old ai_bot + echo_bot: factory.py (create_bot with TELEGRAM_API_URL, create_dispatcher, build_router() per dispatcher), handlers.py (/news, /digest via analyze_news, /subscribe /unsubscribe /subscriptions, admin /scrape by user_id), middlewares.py (RateLimiter from lesson 39, DB session per update + COMMIT), formatting.py (esc/link, split_message between lines ≤ 4096, keyword prefix match); notify.py from old workers/notifications.py (only new news via insert_new RETURNING, 403 → remove chat subscriptions, 429 → retry_after); subscriptions table (BigInteger chat_id, migration 0004); POST /api/telegram/webhook (secret header via verify_secret_token), setWebhook in lifespan, webhook kept on shutdown; polling: python -m news_hub.bot; tests/telegram_twin.py — local Telegram Bot API twin (records calls, HTML rules, 401/403/429); 335 tests)
+│   └── lessons/                ← lesson_32_http_requests/ (+ smachno_api.py — local training HTTP API, stdlib only),
+│                                 lesson_33_rest_api_design/ (meteo_api/ FastAPI v2 + all API types + gRPC, weather_map/ Streamlit, tests/, docker-compose.yml),
+│                                 lesson_34_django_intro/ (hello_project/ — Django 5.2 notes app, step 1–2 of the Django book),
+│                                 lesson_35_django_forms/ (old-course django_bootstrap_project/ → crispy_notes_project/, taught as two refactorings of lesson 33; tests added),
+│                                 lesson_36_drf_fastapi/ (crispy_notes_project/ from 34 + DRF api.py over services/selectors, tests_api; fastapi_notes.py),
+│                                 lesson_37_typing_pydantic/ (news_hub/ — news aggregator step 1: typed parse_rbc_news from the old course, NewsItem (Pydantic), rbc.ua snapshot, pytest + mypy),
+│                                 lesson_38_fastapi_basics/ (news_hub/ step 2: FastAPI api.py from old news_dashboard/app/main.py, NewsStore via Depends, aiohttp scraper, postman/ collection, TestClient tests; fastapi_demo/ from old course — async vs blocking + load_test.py),
+│                                 lesson_39_fastapi_sqlalchemy/ (news_hub/ step 3: db.py/tables.py/repository.py from old production_bot — async SQLAlchemy 2, NewsRepository replaces NewsStore, full CRUD, Alembic migrations/, docker-compose.yml with PostgreSQL; tests run on SQLite or PostgreSQL via TEST_DATABASE_URL),
+│                                 lesson_40_middleware_redis/ (news_hub/ step 4: cache.py (Redis client from old production_bot, NewsCache with version key), middleware.py (request id/timing, rate limit from old ai_bot → 429, cache invalidation after COMMIT), jobs.py (202 background scrape, status in Redis); REDIS_URL=fakeredis:// for tests/notebook),
+│                                 lesson_41_auth_security/ (crispy_notes_project/ from 35 + old-course lesson_Django_authentication_and_security code: Group sharing, password change/reset, security settings; + simplejwt /api/token/ with throttle, SECRET_KEY/DEBUG from env, tests_auth.py; fixed: API let group members edit/delete others' notes → 403),
+│                                 lesson_42_api_testing/ (news_hub/ step 5: tests of lesson 39 rebuilt — tests/unit + tests/integration with markers, tests/fixtures/*.html from the old web-scraping notebook, factories.py, mock network (patch where used) + aiohttp TestServer fake, httpx.AsyncClient aclient, real get_db test, .coveragerc (branch, greenlet); fixed: ISO time rejected by NewsItem, undecodable page killed whole scrape, endswith("rbc.ua") let fakerbc.ua through → is_rbc_host, parser crash on bs4 4.12),
+│                                 lesson_43_ai_dev_tools/ (news_hub/ step 6: CLAUDE.md, .claude/settings.json + hooks/unit_tests.py + skills/add-news-source, rss.py (Ukrainska Pravda RSS written by headless Claude Code against spec tests/unit/test_pravda.py; reviewer fixes + tests/unit/test_pravda_review.py, tzdata); depression_dashboard/ — AI-generated Flask+Streamlit+sklearn project from old module_5/lesson_53_claude_code with prompts/, tests/test_review.py (17 tests, 10 defects fixed); book page + reference docs/modules/m4/ai/claude_code.md from old CLAUDE_DOC.md, verified against docs),
+│                                 lesson_44_llm_api/ (news_hub/ step 7: llm.py from old ai_bot ai_service.py — LLMClient Protocol, GeminiClient (client.aio, model pool by error code), AnthropicClient (model from ANTHROPIC_MODEL env), FakeLLM, Redis CircuitBreaker + GuardedLLM; analysis.py — NewsAnalysis (Pydantic), prompt with data in <news>, 1 retry, cache by text hash + PROMPT_VERSION; POST /api/news/{id}/analyze (db → cache → llm, 502/503), /api/analyze/jobs, migration 0002; tests with FakeLLM, tests/live (-m llm, contract test works without a key); no API key in the session yet — model output on the page is marked «Приклад виводу»),
+│                                 lesson_45_architecture_patterns/ (crispy_notes_project/ from 40, Django book step 3: notes/notebooks/tags as CBV from old notes_project_cbv (LoginRequiredMixin, OwnerRequiredMixin, SelectorQuerySetMixin), access rules only in selectors (*_visible_to / *_owned_by, distinct for M2M), no ORM in views/api — enforced by tests_architecture.py (ast), DATABASE_URL → PostgreSQL 16 (docker-compose.yml, psycopg 3) or SQLite; fixed: list shared with 2 users → 500, group shopping list 404, ?next= open redirect; book page = patterns catalog over notes + news_hub),
+│                                 lesson_46_websocket_chat/ (crispy_notes_project/ from 44, Django book step 7B: group chat from old module_5/lesson_Django_Async/notes_chat_app — Channels 4 + daphne, asgi.py (websocket_application(): AllowedHostsOriginValidator → AuthMiddlewareStack → URLRouter), routing.py, consumers.GroupChatConsumer as a thin transport over selectors.is_group_member/recent_chat_messages + services.post_chat_message (membership checked per message; member.removed/group.deleted events after COMMIT → close 4403), ChatMessage + migration 0004, group_chat page + static js/group_chat.js (no reconnect on 4xxx), CHANNEL_LAYERS InMemory or Redis via REDIS_URL, docker-compose redis; tests_consumers.py (old 9) + tests_chat.py, consumers.py in tests_architecture),
+│                                 lesson_47_security_advanced/ (news_hub/ step 8: security.py from old production_bot core/security.py + api/deps.py + admin/auth.py — bcrypt directly (passlib 1.7.4 breaks on bcrypt 5), JWT HS256 with required exp/sub/role, AdminSettings from env (no "change-me" defaults: unset → 503, short secret → startup fails), require_admin/AdminDep on every write endpoint, POST /api/admin/token + login rate limit; safe_fetch.py (SSRF: PolicyResolver checks IP after DNS, manual redirects re-checked, ports 80/443, size/type limits) + sources table (migration 0003) + /api/sources; webhooks.py — HMAC(timestamp + raw body), 5-min window, SET NX replay → 409, from old api/webhook.py; tests_admin_api walks all routes vs PUBLIC; 279 tests),
+│                                 lesson_48_telegram_bot/ (news_hub/ step 9: bot/ — aiogram 3 bot from old ai_bot + echo_bot: factory.py (create_bot with TELEGRAM_API_URL, create_dispatcher, build_router() per dispatcher), handlers.py (/news, /digest via analyze_news, /subscribe /unsubscribe /subscriptions, admin /scrape by user_id), middlewares.py (RateLimiter from lesson 39, DB session per update + COMMIT), formatting.py (esc/link, split_message between lines ≤ 4096, keyword prefix match); notify.py from old workers/notifications.py (only new news via insert_new RETURNING, 403 → remove chat subscriptions, 429 → retry_after); subscriptions table (BigInteger chat_id, migration 0004); POST /api/telegram/webhook (secret header via verify_secret_token), setWebhook in lifespan, webhook kept on shutdown; polling: python -m news_hub.bot; tests/telegram_twin.py — local Telegram Bot API twin (records calls, HTML rules, 401/403/429); 335 tests)
 ├── module_5/                   ← М5. Production
 │   ├── bonus/linux_devops/     ← bonus lesson (after 47): note_bonus_linux_devops.ipynb — 9 shell exercises that run in Colab (pipes, exit codes, permissions via runuser, signals/trap, 127.0.0.1 vs 0.0.0.0, env vars and `$`, set -euo pipefail, empty-backup find-bug); book page docs/modules/m5/bonus_linux.md + reference docs/modules/m5/linux/ (18 old-course sections + index, every command re-run in containers)
-│   └── lessons/                ← lesson_48_docker/ (news_hub/ step 10: Dockerfile from old production_bot — deps layer first, user app UID 10001, SQLite on /data volume, HEALTHCHECK via python (no curl in slim), exec-form CMD; .dockerignore with **/ patterns; requirements.txt (runtime) / requirements-dev.txt; GET /health/ready (db + Redis, 503); `python -m news_hub.security --env-file` (docker run --env-file keeps quotes); tests/docker/test_image.py — pytest -m docker (6 tests: no .env/.venv/__pycache__ in image, no dev deps, non-root, healthy, docker stop < 8 s exit 0, alembic on a volume); twin --host; 340 tests + 6 docker),
-│                                 lesson_49_compose_deploy/ (news_hub/ step 11: docker-compose.yml from old production_bot — postgres/redis healthchecks, one-shot migrate (service_completed_successfully), api healthcheck /health/ready, nginx after api healthy; networks backend + edge with nginx fixed at 172.28.0.10 and FORWARDED_ALLOW_IPS (real client IP for the login rate limit; nginx overwrites X-Forwarded-For), profiles polling (bot) and twin; .env.example (values with $ in single quotes), docker-compose.dev.yml (ports on 127.0.0.1), scripts/backup.sh + restore.sh; bcrypt hash validated in full; bot registration in Telegram as a background task with retries; 343 tests. crispy_notes_project/ from 45 + Django book steps 8–9: Dockerfile (daphne, user app, HEALTHCHECK), one-shot release service (migrate + collectstatic) instead of the book's entrypoint, nginx ($http_host, static volume, WebSocket), STATIC_ROOT, DEBUG=0 requires DJANGO_SECRET_KEY, DJANGO_HTTPS / DJANGO_CSRF_TRUSTED_ORIGINS, CACHES → Redis when REDIS_URL (DRF login throttle shared across replicas; added in lesson 51 audit, same in lesson 50), /health/, tests_deploy.py; 81 tests),
-│                                 lesson_50_ci_cd/ (news_hub/ step 12 + crispy_notes_project/ from 49 with scripts/make_env.py and scripts/smoke.sh (stack through nginx, cleanup via trap; same in CI and locally); simplejwt floor → 5.3.1; workflows at repo root: .github/workflows/news_hub.yml (tests matrix 3.10/3.13, min-versions via uv --resolution lowest-direct, PostgreSQL + Redis + alembic check, mypy --strict, docker: pytest -m docker + smoke, publish to ghcr.io only on push to main) and crispy_notes.yml (tests matrix + PostgreSQL + makemigrations --check, min-versions, check --deploy, docker smoke, publish); pull_request without branches, push only main, paths, concurrency, permissions contents: read)
+│   └── lessons/                ← lesson_49_docker/ (news_hub/ step 10: Dockerfile from old production_bot — deps layer first, user app UID 10001, SQLite on /data volume, HEALTHCHECK via python (no curl in slim), exec-form CMD; .dockerignore with **/ patterns; requirements.txt (runtime) / requirements-dev.txt; GET /health/ready (db + Redis, 503); `python -m news_hub.security --env-file` (docker run --env-file keeps quotes); tests/docker/test_image.py — pytest -m docker (6 tests: no .env/.venv/__pycache__ in image, no dev deps, non-root, healthy, docker stop < 8 s exit 0, alembic on a volume); twin --host; 340 tests + 6 docker),
+│                                 lesson_50_compose_deploy/ (news_hub/ step 11: docker-compose.yml from old production_bot — postgres/redis healthchecks, one-shot migrate (service_completed_successfully), api healthcheck /health/ready, nginx after api healthy; networks backend + edge with nginx fixed at 172.28.0.10 and FORWARDED_ALLOW_IPS (real client IP for the login rate limit; nginx overwrites X-Forwarded-For), profiles polling (bot) and twin; .env.example (values with $ in single quotes), docker-compose.dev.yml (ports on 127.0.0.1), scripts/backup.sh + restore.sh; bcrypt hash validated in full; bot registration in Telegram as a background task with retries; 343 tests. crispy_notes_project/ from 45 + Django book steps 8–9: Dockerfile (daphne, user app, HEALTHCHECK), one-shot release service (migrate + collectstatic) instead of the book's entrypoint, nginx ($http_host, static volume, WebSocket), STATIC_ROOT, DEBUG=0 requires DJANGO_SECRET_KEY, DJANGO_HTTPS / DJANGO_CSRF_TRUSTED_ORIGINS, CACHES → Redis when REDIS_URL (DRF login throttle shared across replicas; added in lesson 51 audit, same in lesson 50), /health/, tests_deploy.py; 81 tests),
+│                                 lesson_51_ci_cd/ (news_hub/ step 12 + crispy_notes_project/ from 49 with scripts/make_env.py and scripts/smoke.sh (stack through nginx, cleanup via trap; same in CI and locally); simplejwt floor → 5.3.1; workflows at repo root: .github/workflows/news_hub.yml (tests matrix 3.10/3.13, min-versions via uv --resolution lowest-direct, PostgreSQL + Redis + alembic check, mypy --strict, docker: pytest -m docker + smoke, publish to ghcr.io only on push to main) and crispy_notes.yml (tests matrix + PostgreSQL + makemigrations --check, min-versions, check --deploy, docker smoke, publish); pull_request without branches, push only main, paths, concurrency, permissions contents: read)
 │
 ├── module_6/                   ← М6. Капстоун (lessons 51–52 + CV bonus)
-│   ├── lessons/lesson_51_final_project/ ← course slice + audit of both projects (lesson 50 copies): architecture_audit.py (ast import graph, fan-in/out, Tarjan cycles, --mermaid) + test_architecture_audit.py, db_audit.sql (PostgreSQL: table sizes, redundant indexes incl. opclass check, unused indexes), query_count.py (Django N+1 check), patches/news_hub_search_index.patch (migration 0005: pg_trgm GIN on lower(title), drop redundant ix_subscriptions_chat_id; verified: 343 tests on SQLite + PostgreSQL, alembic check), note_lesson_51_final_project.ipynb; book page docs/modules/m6/lesson_51.md (ER diagrams, EXPLAIN evidence, Redis key map, state vs replicas, final-project requirements/plan)
-│   ├── lessons/lesson_52_graduation_pitch/ ← graduation as a pitch deck (investor / client / hiring tech lead): pitch_deck_template.md (Marp, 10 slides, speaker notes in <!-- -->), example_news_digest_deck.md + .pdf («Тема дня» on news_hub, full speech), pitch_check.py (8–12 slides, ≤ 45 words/slide, 4–7 min of speech at 130 wpm, required sections, leftover [placeholders]/TODO) + test_pitch_check.py, note_lesson_52_pitch.ipynb; book page docs/modules/m6/lesson_52.md (5 Whys from Toyota + Minoura's critique, The Mom Test, Sequoia / YC / Kawasaki 10/20/30 structures, TAM/SAM/SOM bottom-up, demo, Q&A, grading rubric); sources found via web search (sites themselves blocked by the egress proxy)
+│   ├── lessons/lesson_52_final_project/ ← course slice + audit of both projects (lesson 50 copies): architecture_audit.py (ast import graph, fan-in/out, Tarjan cycles, --mermaid) + test_architecture_audit.py, db_audit.sql (PostgreSQL: table sizes, redundant indexes incl. opclass check, unused indexes), query_count.py (Django N+1 check), patches/news_hub_search_index.patch (migration 0005: pg_trgm GIN on lower(title), drop redundant ix_subscriptions_chat_id; verified: 343 tests on SQLite + PostgreSQL, alembic check), note_lesson_52_final_project.ipynb; book page docs/modules/m6/lesson_52.md (ER diagrams, EXPLAIN evidence, Redis key map, state vs replicas, final-project requirements/plan)
+│   ├── lessons/lesson_53_graduation_pitch/ ← graduation as a pitch deck (investor / client / hiring tech lead): pitch_deck_template.md (Marp, 10 slides, speaker notes in <!-- -->), example_news_digest_deck.md + .pdf («Тема дня» on news_hub, full speech), pitch_check.py (8–12 slides, ≤ 45 words/slide, 4–7 min of speech at 130 wpm, required sections, leftover [placeholders]/TODO) + test_pitch_check.py, note_lesson_53_pitch.ipynb; book page docs/modules/m6/lesson_53.md (5 Whys from Toyota + Minoura's critique, The Mom Test, Sequoia / YC / Kawasaki 10/20/30 structures, TAM/SAM/SOM bottom-up, demo, Q&A, grading rubric); sources found via web search (sites themselves blocked by the egress proxy)
 │   └── bonus/cv_maker/         ← bonus lesson (after 52): old course's module_5/CV_maker as is (README, CV_mini_tutorial_UA.md, instructor's HTML CV + PDF, generate_cv_pdf.py with optional html/pdf args) + cv_template.html, generate_cv_pdf_chromium.py (Playwright), note_bonus_cv_maker.ipynb; book page docs/modules/m6/bonus_cv.md + reference docs/modules/m6/cv/cv_tutorial.md
 │
 ├── tools/
@@ -94,11 +94,11 @@ PY-Course-Victor-Nikoriak-22-09-2026/
 └── .github/workflows/
     ├── docs.yml                ← builds/publishes docs/ to GitHub Pages on push
     ├── notebooks.yml           ← runs tools/sync_notebook_metadata.py --check on push/PR
-    ├── news_hub.yml            ← lesson 50: CI/CD for module_5/lessons/lesson_50_ci_cd/news_hub
-    └── crispy_notes.yml        ← lesson 50: CI/CD for module_5/lessons/lesson_50_ci_cd/crispy_notes_project
+    ├── news_hub.yml            ← lesson 50: CI/CD for module_5/lessons/lesson_51_ci_cd/news_hub
+    └── crispy_notes.yml        ← lesson 50: CI/CD for module_5/lessons/lesson_51_ci_cd/crispy_notes_project
 ```
 
-**Not yet migrated from the old repo** (planned, not present): `SETUP.md`, `install_course.*`/`start_course.*`, `dashboard.ipynb`, the old `tools/` scripts (`qa_suite.py`, `client.py`, `config.json` — `tools/` holds the notebook-metadata sync and the student-notebook generator), `generator/`, `run_data/`, `docker-compose.yml`. The old `module_5` (Django/DevOps content) is not migrated as a module — it isn't part of the v5.0 navigation table (see `.claude/plan_md/migration_plan.md` §0), but it is the **source material** for М4 lessons: `lesson_Django_Network_Architecture/network_foundation.md` + `network_mermaid.md` (URL/DNS/ports/TCP/TLS → lesson 31, REST → 32). Lesson 32 is built on the instructor's meteo API: repo `NikoriakViktot/ogimet` → `ogimet-main/` in the old course (`module_4/lessons/lesson_31_http_requests/`) → client `meteo_parser/telegram_filter.py` in `NikoriakViktot/Data_Science_Course_SSWU`; its data snapshot comes from ogimet.com via `meteo_api/fetch_snapshot.py`, the `Django_*` / `DJANGO_*` files (→ 33–35), `lesson_Django_Async/` (async HTTP → 31, async views → later), `lesson_Django_Testing/` (→ 41), `lesson_46_Telegram_API/` (→ 47) — see `.claude/plan_md/module_4_audit.md`. **Django lessons (33+) follow the instructor's Django book** — repo `NikoriakViktot/notes_chat_app`, published at https://nikoriakviktot.github.io/notes_chat_app/ (MkDocs, «Zero to Hero» steps 0–9 ending in Notes Chat App). Mapping: 33 = steps 1–2 (`hello_project`, `Note`), 34 = steps 2 + 4 (`django_bootstrap_project` → `crispy_notes_project`), 35 = API for notes, 38/44 = step 3, 40 = step 5, 41 = step 6, 45 = step 7, 48–49 = steps 8–9. **Instructor's rule (2026-09-27): don't rewrite what exists.** Each Django lesson takes the code from the old course (`module_5/...` projects, copied into the lesson folder with their README) and is written as a **refactoring** of the previous lesson's project: a table «what changed / why», diffs of key files, architecture before/after, real output, and «Поглиблено» links to the book — no retelling of the book's theory. Fixes to old code (bugs found while verifying) are made in the course copy and logged in `instructor_notes/old_course_fixes.md` (instructor-only, outside the book) — **never** on book pages or project READMEs: no «Що виправлено» sections, no «виправлено в копії курсу» wording (instructor's rule 2026-09-27); pages show the correct code and why it is correct. **Instructor's rule (2026-09-28): never mention the old course on student-facing material** — book pages (`docs/`), notebooks and project READMEs don't say «старий курс», «23_02» or give paths into the old repo; the starting code is called «стартовий код» / «прототип `news_dashboard`» etc. Provenance lives only here, in `.claude/plan_md/` and in `instructor_notes/`. **FastAPI track (36–39, 41–43, 46–50) = one «news aggregator» project** grown lesson by lesson from the old course's `module_4/lessons/lesson_34_asyncio/news_dashboard/` (rbc.ua parser) + Telegram bots from `module_5/lesson_46_Telegram_API/` (LLM = Gemini, `ai_bot`). **Linux** goes into the book as a bonus lesson in М5 before 48 (from `module_5/lesson_Linux_DevOps_Basics/`). Full lesson-by-lesson plan: `.claude/plan_md/module_4_audit.md`. Keep model/field names aligned with the final `notes_app` (`is_pinned`, `priority` 1–4, `Notebook`). Do not assume any of these exist without checking.
+**Not yet migrated from the old repo** (planned, not present): `SETUP.md`, `install_course.*`/`start_course.*`, `dashboard.ipynb`, the old `tools/` scripts (`qa_suite.py`, `client.py`, `config.json` — `tools/` holds the notebook-metadata sync and the student-notebook generator), `generator/`, `run_data/`, `docker-compose.yml`. The old `module_5` (Django/DevOps content) is not migrated as a module — it isn't part of the v5.0 navigation table (see `.claude/plan_md/migration_plan.md` §0), but it is the **source material** for М4 lessons: `lesson_Django_Network_Architecture/network_foundation.md` + `network_mermaid.md` (URL/DNS/ports/TCP/TLS → lesson 31, REST → 32). Lesson 32 is built on the instructor's meteo API: repo `NikoriakViktot/ogimet` → `ogimet-main/` in the old course (`module_4/lessons/lesson_32_http_requests/`) → client `meteo_parser/telegram_filter.py` in `NikoriakViktot/Data_Science_Course_SSWU`; its data snapshot comes from ogimet.com via `meteo_api/fetch_snapshot.py`, the `Django_*` / `DJANGO_*` files (→ 33–35), `lesson_Django_Async/` (async HTTP → 31, async views → later), `lesson_Django_Testing/` (→ 41), `lesson_47_Telegram_API/` (→ 47) — see `.claude/plan_md/module_4_audit.md`. **Django lessons (33+) follow the instructor's Django book** — repo `NikoriakViktot/notes_chat_app`, published at https://nikoriakviktot.github.io/notes_chat_app/ (MkDocs, «Zero to Hero» steps 0–9 ending in Notes Chat App). Mapping: 33 = steps 1–2 (`hello_project`, `Note`), 34 = steps 2 + 4 (`django_bootstrap_project` → `crispy_notes_project`), 35 = API for notes, 38/44 = step 3, 40 = step 5, 41 = step 6, 45 = step 7, 48–49 = steps 8–9. **Instructor's rule (2026-09-27): don't rewrite what exists.** Each Django lesson takes the code from the old course (`module_5/...` projects, copied into the lesson folder with their README) and is written as a **refactoring** of the previous lesson's project: a table «what changed / why», diffs of key files, architecture before/after, real output, and «Поглиблено» links to the book — no retelling of the book's theory. Fixes to old code (bugs found while verifying) are made in the course copy and logged in `instructor_notes/old_course_fixes.md` (instructor-only, outside the book) — **never** on book pages or project READMEs: no «Що виправлено» sections, no «виправлено в копії курсу» wording (instructor's rule 2026-09-27); pages show the correct code and why it is correct. **Instructor's rule (2026-09-28): never mention the old course on student-facing material** — book pages (`docs/`), notebooks and project READMEs don't say «старий курс», «23_02» or give paths into the old repo; the starting code is called «стартовий код» / «прототип `news_dashboard`» etc. Provenance lives only here, in `.claude/plan_md/` and in `instructor_notes/`. **FastAPI track (36–39, 41–43, 46–50) = one «news aggregator» project** grown lesson by lesson from the old course's `module_4/lessons/lesson_35_asyncio/news_dashboard/` (rbc.ua parser) + Telegram bots from `module_5/lesson_47_Telegram_API/` (LLM = Gemini, `ai_bot`). **Linux** goes into the book as a bonus lesson in М5 before 48 (from `module_5/lesson_Linux_DevOps_Basics/`). Full lesson-by-lesson plan: `.claude/plan_md/module_4_audit.md`. Keep model/field names aligned with the final `notes_app` (`is_pinned`, `priority` 1–4, `Notebook`). Do not assume any of these exist without checking.
 
 ---
 
@@ -109,7 +109,7 @@ PY-Course-Victor-Nikoriak-22-09-2026/
 module_<N>/lessons/lesson_<NN>_<topic_slug>/
 ```
 `NN` is the **v5.0 lesson number** from the navigation table — numbering runs through the whole course (1–52) and does not restart per module.
-Examples: `module_1/lessons/lesson_05_lists_tuples_sets/`, `module_2/lessons/lesson_18_functions_first_class/`.
+Examples: `module_1/lessons/lesson_05_lists_tuples_sets/`, `module_2/lessons/lesson_19_functions_first_class/`.
 `<topic_slug>` becomes the notebook's `metadata.lms.lesson_slug` (see LMS Metadata), so renaming a folder changes the slug.
 
 Materials from the old 23_02 course live in the folder of the v5.0 lesson they belong to (mapping and rationale: `.claude/plan_md/module_1_audit.md`).
@@ -303,7 +303,7 @@ jupyter notebook
 
 ## Pedagogical Philosophy (for content generation)
 
-### 5 Core Python Mental Model Concepts (from `module_1/docs/00_python_mental_model.md`)
+### 5 Core Python Mental Model Concepts (from `docs/00_python_mental_model.md`)
 1. **Interpreter** — Python is a program that runs `.py` files
 2. **pip** — package manager; installs into the active environment
 3. **venv** — isolated environment; always activate before installing
@@ -312,7 +312,7 @@ jupyter notebook
 
 **Golden Rule for students:** Activate env → Install → Run
 
-### Zen of Python (from `module_1/docs/01_zen_of_python.md`)
+### Zen of Python (from `docs/01_zen_of_python.md`)
 Integrate these principles in all new lesson content:
 - Beautiful > ugly · Explicit > implicit · Simple > complex
 - Readability counts · One obvious way · Errors should never pass silently
@@ -399,52 +399,52 @@ Reference notebooks in `module_N/docs/` get `lesson_number: null` and keep their
 | 4 | `module_1/lessons/lesson_04_conditions_and_control` | `conditions_and_control` | `boolean_logic_and_control` |
 | 5 | `module_1/lessons/lesson_05_lists_tuples_sets` | `lists_tuples_sets` | `lists_tuples_sets` (same, was lesson 06) |
 | 6 | `module_1/lessons/lesson_06_dicts_loops_comprehensions` | `dicts_loops_comprehensions` | `loops_dicts_comprehensions` |
-| 7 | `module_1/lessons/lesson_07_functions` | `functions` | `functions` (same, was lesson 08) |
-| 8 | `module_1/lessons/lesson_08_practicum_big_o` | `practicum_big_o` | — |
-| 9 | `module_1/lessons/lesson_09_decorators` | `decorators` | — |
-| 10 | `module_1/lessons/lesson_10_iterators_generators` | `iterators_generators` | — |
-| 11 | `module_1/lessons/lesson_11_practicum_search` | `practicum_search` | — |
-| 12 | `module_1/lessons/lesson_12_modules_stdlib` | `modules_stdlib` | `modules_standard_library`, `modules_imports_cli` |
-| 13 | `module_1/lessons/lesson_13_exceptions` | `exceptions` | `exceptions_error_handling` |
-| 14 | `module_1/lessons/lesson_14_file_io_json` | `file_io_json` | `file_io_json` (same, was lesson 11) |
-| 15 | `module_1/lessons/lesson_15_git_github_system` | `git_github_system` | — |
-| 16 | `module_1/lessons/lesson_16_practicum_hashing` | `practicum_hashing` | — |
-| 17 | `module_1/lessons/lesson_17_module1_review` | `module1_review` | `module_01_final_exam` |
-| 18 | `module_2/lessons/lesson_18_functions_first_class` | `functions_first_class` | — |
-| 19 | `module_2/lessons/lesson_19_classes_namespace` | `classes_namespace` | — |
-| 20 | `module_2/lessons/lesson_20_inheritance_polymorphism` | `inheritance_polymorphism` | — |
-| 21 | `module_2/lessons/lesson_21_encapsulation_scope` | `encapsulation_scope` | — |
-| 22 | `module_2/lessons/lesson_22_practicum_recursion` | `practicum_recursion` | — |
-| 23 | `module_2/lessons/lesson_23_property_decorators_dunder` | `property_decorators_dunder` | — |
-| 24 | `module_2/lessons/lesson_24_iterators_advanced` | `iterators_advanced` | — |
-| 25 | `module_2/lessons/lesson_25_pytest_testing` | `pytest_testing` | — |
-| 26 | `module_2/lessons/lesson_26_practicum_dp_greedy` | `practicum_dp_greedy` | — |
-| 27 | `module_2/lessons/lesson_27_concurrency_intro` | `concurrency_intro` | — |
-| 28 | `module_2/lessons/lesson_28_practicum_data_structures` | `practicum_data_structures` | — |
-| 29 | `module_3/lessons/lesson_29_sql_basics` | `sql_basics` | — |
-| 30 | `module_3/lessons/lesson_30_redis_overview` | `redis_overview` | — |
-| 31 | `module_4/lessons/lesson_31_http_requests` | `http_requests` | — |
-| 32 | `module_4/lessons/lesson_32_rest_api_design` | `rest_api_design` | — |
-| 33 | `module_4/lessons/lesson_33_django_intro` | `django_intro` | — |
-| 34 | `module_4/lessons/lesson_34_django_forms` | `django_forms` | — |
-| 35 | `module_4/lessons/lesson_35_drf_fastapi` | `drf_fastapi` | — |
-| 36 | `module_4/lessons/lesson_36_typing_pydantic` | `typing_pydantic` | — |
-| 37 | `module_4/lessons/lesson_37_fastapi_basics` | `fastapi_basics` | — |
-| 38 | `module_4/lessons/lesson_38_fastapi_sqlalchemy` | `fastapi_sqlalchemy` | — |
-| 39 | `module_4/lessons/lesson_39_middleware_redis` | `middleware_redis` | — |
-| 40 | `module_4/lessons/lesson_40_auth_security` | `auth_security` | — |
-| 41 | `module_4/lessons/lesson_41_api_testing` | `api_testing` | — |
-| 42 | `module_4/lessons/lesson_42_ai_dev_tools` | `ai_dev_tools` | — |
-| 43 | `module_4/lessons/lesson_43_llm_api` | `llm_api` | — |
-| 44 | `module_4/lessons/lesson_44_architecture_patterns` | `architecture_patterns` | — |
-| 45 | `module_4/lessons/lesson_45_websocket_chat` | `websocket_chat` | — |
-| 46 | `module_4/lessons/lesson_46_security_advanced` | `security_advanced` | — |
-| 47 | `module_4/lessons/lesson_47_telegram_bot` | `telegram_bot` | — |
-| 48 | `module_5/lessons/lesson_48_docker` | `docker` | — |
-| 49 | `module_5/lessons/lesson_49_compose_deploy` | `compose_deploy` | — |
-| 50 | `module_5/lessons/lesson_50_ci_cd` | `ci_cd` | — |
-| 51 | `module_6/lessons/lesson_51_final_project` | `final_project` | — |
-| 52 | `module_6/lessons/lesson_52_graduation_pitch` | `graduation_pitch` | — |
+| 7 | `module_1/lessons/lesson_08_functions` | `functions` | `functions` (same, was lesson 08) |
+| 8 | `module_1/lessons/lesson_09_practicum_big_o` | `practicum_big_o` | — |
+| 9 | `module_1/lessons/lesson_10_decorators` | `decorators` | — |
+| 10 | `module_1/lessons/lesson_11_iterators_generators` | `iterators_generators` | — |
+| 11 | `module_1/lessons/lesson_12_practicum_search` | `practicum_search` | — |
+| 12 | `module_1/lessons/lesson_13_modules_stdlib` | `modules_stdlib` | `modules_standard_library`, `modules_imports_cli` |
+| 13 | `module_1/lessons/lesson_14_exceptions` | `exceptions` | `exceptions_error_handling` |
+| 14 | `module_1/lessons/lesson_15_file_io_json` | `file_io_json` | `file_io_json` (same, was lesson 11) |
+| 15 | `module_1/lessons/lesson_16_git_github_system` | `git_github_system` | — |
+| 16 | `module_1/lessons/lesson_17_practicum_hashing` | `practicum_hashing` | — |
+| 17 | `module_1/lessons/lesson_18_module1_review` | `module1_review` | `module_01_final_exam` |
+| 18 | `module_2/lessons/lesson_19_functions_first_class` | `functions_first_class` | — |
+| 19 | `module_2/lessons/lesson_20_classes_namespace` | `classes_namespace` | — |
+| 20 | `module_2/lessons/lesson_21_inheritance_polymorphism` | `inheritance_polymorphism` | — |
+| 21 | `module_2/lessons/lesson_22_encapsulation_scope` | `encapsulation_scope` | — |
+| 22 | `module_2/lessons/lesson_23_practicum_recursion` | `practicum_recursion` | — |
+| 23 | `module_2/lessons/lesson_24_property_decorators_dunder` | `property_decorators_dunder` | — |
+| 24 | `module_2/lessons/lesson_25_iterators_advanced` | `iterators_advanced` | — |
+| 25 | `module_2/lessons/lesson_26_pytest_testing` | `pytest_testing` | — |
+| 26 | `module_2/lessons/lesson_27_practicum_dp_greedy` | `practicum_dp_greedy` | — |
+| 27 | `module_2/lessons/lesson_28_concurrency_intro` | `concurrency_intro` | — |
+| 28 | `module_2/lessons/lesson_29_practicum_data_structures` | `practicum_data_structures` | — |
+| 29 | `module_3/lessons/lesson_30_sql_basics` | `sql_basics` | — |
+| 30 | `module_3/lessons/lesson_31_redis_overview` | `redis_overview` | — |
+| 31 | `module_4/lessons/lesson_32_http_requests` | `http_requests` | — |
+| 32 | `module_4/lessons/lesson_33_rest_api_design` | `rest_api_design` | — |
+| 33 | `module_4/lessons/lesson_34_django_intro` | `django_intro` | — |
+| 34 | `module_4/lessons/lesson_35_django_forms` | `django_forms` | — |
+| 35 | `module_4/lessons/lesson_36_drf_fastapi` | `drf_fastapi` | — |
+| 36 | `module_4/lessons/lesson_37_typing_pydantic` | `typing_pydantic` | — |
+| 37 | `module_4/lessons/lesson_38_fastapi_basics` | `fastapi_basics` | — |
+| 38 | `module_4/lessons/lesson_39_fastapi_sqlalchemy` | `fastapi_sqlalchemy` | — |
+| 39 | `module_4/lessons/lesson_40_middleware_redis` | `middleware_redis` | — |
+| 40 | `module_4/lessons/lesson_41_auth_security` | `auth_security` | — |
+| 41 | `module_4/lessons/lesson_42_api_testing` | `api_testing` | — |
+| 42 | `module_4/lessons/lesson_43_ai_dev_tools` | `ai_dev_tools` | — |
+| 43 | `module_4/lessons/lesson_44_llm_api` | `llm_api` | — |
+| 44 | `module_4/lessons/lesson_45_architecture_patterns` | `architecture_patterns` | — |
+| 45 | `module_4/lessons/lesson_46_websocket_chat` | `websocket_chat` | — |
+| 46 | `module_4/lessons/lesson_47_security_advanced` | `security_advanced` | — |
+| 47 | `module_4/lessons/lesson_48_telegram_bot` | `telegram_bot` | — |
+| 48 | `module_5/lessons/lesson_49_docker` | `docker` | — |
+| 49 | `module_5/lessons/lesson_50_compose_deploy` | `compose_deploy` | — |
+| 50 | `module_5/lessons/lesson_51_ci_cd` | `ci_cd` | — |
+| 51 | `module_6/lessons/lesson_52_final_project` | `final_project` | — |
+| 52 | `module_6/lessons/lesson_53_graduation_pitch` | `graduation_pitch` | — |
 
 > ⚠️ When the LMS is switched to this repo, server-side exam JSONs from 23_02 whose `lesson_id` differs
 > from the new slug (last column) must be renamed to the new slug, otherwise `sync_exams` reports
@@ -506,7 +506,7 @@ Students remember an algorithm when they **see it run**. So diagrams are not dec
    - layout for traces: `flowchart TD` with `direction LR` inside each `subgraph`, and link **the subgraphs** (`P1 --> P2 --> P3`), not nodes inside them — Mermaid ignores a subgraph's `direction` when an edge crosses its border; a long single-row `flowchart LR` shrinks to unreadable on the page. Stack unlinked subgraphs with `A ~~~ B`.
 2. **Several approaches in one lesson** (e.g. greedy vs DP, linear vs binary search) → end with a `flowchart TD` «як обрати».
 3. **Architecture** — every M2+ `## Архітектура … { #architecture }` section, and later lessons on projects/Django/DB, gets a diagram of the architectural decision: components, who depends on whom, data flow; `classDiagram` / `graph LR` for structure, `sequenceDiagram` for calls over time.
-4. **Reference for the style**: the old course `PY-Course-Victor-Nikoriak-23_02`, `module_3/lessons/lesson_27_sorting/diagrams_lesson_27_sorting.md` (a section per algorithm, a `subgraph` per pass, a final «how to choose» flowchart); also `lesson_25_search_hashing`, `lesson_26_trees`, `lesson_28_graphs`.
+4. **Reference for the style**: the old course `PY-Course-Victor-Nikoriak-23_02`, `module_3/lessons/lesson_28_sorting/diagrams_lesson_28_sorting.md` (a section per algorithm, a `subgraph` per pass, a final «how to choose» flowchart); also `lesson_26_search_hashing`, `lesson_27_trees`, `lesson_29_graphs`.
 5. **Verify rendering**: `mkdocs build --strict` plus opening the page in a browser (Playwright) — no "Syntax error in text". A diagram that doesn't render is worse than none.
 
 When editing an existing lesson, add a missing step-by-step diagram for the algorithm it teaches (status per lesson: `.claude/plan_md/diagram_audit.md`).
@@ -603,8 +603,8 @@ flowchart TD
 | View student progress | `dashboard.ipynb` (run in Jupyter) |
 | Explain an algorithm / control flow / architecture | Mermaid step-by-step diagram — see «Algorithm & architecture diagrams — mandatory»; status in `.claude/plan_md/diagram_audit.md` |
 | Update repo/GitHub workflow docs | `architecture.md` |
-| Update Python mental model doc | `module_1/docs/00_python_mental_model.md` |
-| Add reference doc for a topic | `module_1/docs/<topic>_docs.ipynb` |
+| Update Python mental model doc | `docs/00_python_mental_model.md` |
+| Add reference doc for a topic | `module_1/bonus/<topic>_docs.ipynb` |
 | Fix submission client | `tools/client.py` |
 | Change launcher behavior | `start_course.py` |
 | Update instructor bio | `instructor.md` |

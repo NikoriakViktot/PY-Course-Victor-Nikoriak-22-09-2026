@@ -1,117 +1,284 @@
-# Урок 19. Класи, простір імен
+# Урок 19. Функції як об'єкти першого класу
 
-Сервіс «Смачно + Таксі» з фінального проєкту модуля 1 тримає дані окремо від дій. Є список `orders` з `NamedTuple` і десяток функцій, які цей список приймають: `add_order(orders, …)`, `cafe_stats(orders)`, `find_order(orders, …)`. Працює, поки код пише одна людина, яка пам'ятає правила. А нова розробниця додала замовлення напряму — `orders.append(Order(7, …))` — і в системі з'явилися два замовлення №7. Хоча `add_order` сама рахувала номери, ніщо не змушувало нею користуватися.
+Карантин 2020-го минув, а доставка лишилася. Система «Смачно + Таксі» з фінального проєкту модуля 1 працює щодня, і власниця щотижня просить щось нове. Нова команда `drivers`. Промокод `SUMMER10` на літо, `STUDENT15` для студентів, `NIGHT5` для нічних замовлень. Сортувати доставки то за вартістю, то за районом. Надсилати клієнтові SMS, коли водій виїхав, а тепер ще й у Telegram.
 
-В уроці 18 лічильник `make_counter` уже тримав **стан** (`count`) і **поведінку** (`next_id`) разом, у замиканні. Сьогодні зробимо це явно й для всього сервісу. **Клас** описує, які дані має об'єкт і що з ними можна робити, а правила — наприклад, «номери замовлень видає лише сам сервіс» — живуть поруч із даними.
+Кожне таке прохання в коді модуля 1 означає ще один `elif` в `app.py`, ще одну майже однакову функцію `apply_summer10`, ще один `if channel == "sms"`. Код росте не від нових ідей, а від копіювання.
 
-А ще з цього уроку в кожному розділі модуля 2 з'являється **архітектура**: схема з блоків і стрілок, кілька можливих рішень однієї задачі та чесне порівняння їхніх переваг і ціни.
+Усе це розв'язує одна ідея, з якої починається модуль 2: **функція — це такий самий об'єкт, як число чи рядок**. Її можна покласти у змінну, у словник, передати в іншу функцію, повернути з функції. Декоратори з [уроку 10](../m1/lesson_10.md) вже спиралися на цю ідею — сьогодні розберемо її повністю.
 
-**Що потрібно з попередніх уроків:** `NamedTuple` (урок 5), функції (урок 7), модулі (урок 12), фінальний проєкт (урок 17), замикання й LEGB (урок 18).
+**Що потрібно з попередніх уроків:** функції й `return` (урок 8), декоратори (урок 10), генератори (урок 11), словники й `Counter` (уроки 6, 13, 17), фінальний проєкт модуля 1 (урок 18).
 
 **Після уроку ти зможеш:**
 
-- пояснити, що все в Python — об'єкти, і що клас — це теж об'єкт, який створює інші об'єкти;
-- оголошувати клас з `__init__`, атрибутами й методами, пояснювати, що таке `self`;
-- розрізняти атрибути екземпляра й атрибути класу, передбачати, де Python шукає атрибут;
-- писати `__repr__`, `@classmethod` як альтернативний конструктор і `@staticmethod`;
-- порівнювати три архітектури одного сервісу — функції над даними, замикання, класи — і малювати схему класів.
+- зберігати функції в змінних, списках і словниках, будувати словник команд замість ланцюжка `if`;
+- передавати функцію як аргумент: `key=` для `sorted` і `max`, зворотні виклики (callback);
+- створювати функції іншою функцією — фабрики й замикання, змінювати захоплену змінну через `nonlocal`;
+- писати `lambda` і обирати між `map` / `filter` і comprehension;
+- збирати конвеєр з функцій і пояснювати, чому його кроки мають бути чистими.
 
-**Задача розділу.** Клас `DeliveryService`, який сам видає номери замовлень, не дає додати доставку до неіснуючого замовлення й будує звіт. Повний код — у розділі [«Практика»](#practice).
+**Задача розділу.** Оформлення замовлення: промокод із реєстру, вартість доставки за районом і округлення — як конвеєр з функцій, а команди системи — як словник. Повний код — у розділі [«Практика»](#practice).
 
-**Ноутбук заняття:** [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_19_classes_namespace/note_lesson_19_classes_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_19_classes_namespace/note_lesson_19_classes.ipynb){ .solutions-link }
+**Ноутбук заняття:** [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_19_functions_first_class/note_lesson_19_functions_first_class_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_19_functions_first_class/note_lesson_19_functions_first_class.ipynb){ .solutions-link }
 
 ## Пригадай
 
-Дай відповідь подумки:
+Дай відповідь подумки, нічого не запускаючи:
 
-1. Що надрукує `b = a; b.append(4); print(a)` для списку `a = [1, 2, 3]`?
-2. Що зберігає замикання `next_id`, створене `make_counter()` в уроці 18?
-3. Чим `Order(1, …)` з `NamedTuple` відрізняється від словника `{"id": 1, …}`?
+1. Що отримує на вхід і що повертає декоратор `require_role` з уроку 10?
+2. Що робить `max(revenue, key=revenue.get)` з уроку 15?
+3. Як `app.py` фінального проєкту вирішує, яку команду виконати?
 
 ??? success "Відповіді"
 
-    1. `[1, 2, 3, 4]`: `a` і `b` — ярлики одного об'єкта.
-    2. Змінну `count` з оточуючої функції; кожен виклик `make_counter` створює свій лічильник.
-    3. Поля фіксовані й доступні через крапку (`order.bill`), кортеж незмінний; у словнику ключі можна додавати й міняти як завгодно.
+    1. Отримує функцію, повертає нову функцію-обгортку. Уже тоді функція була даними.
+    2. Повертає ключ словника з найбільшим значенням: `max` викликає `revenue.get` для кожного ключа і порівнює результати.
+    3. Ланцюжком `if command == "add-order" …`, `if command == "import" …` — по одному на кожну команду.
 
-## Усе — об'єкти, і в кожного є клас
+## Функція — це об'єкт
 
-Число, рядок, список, функція — усе це **об'єкти**. У кожного об'єкта є **тип**, або **клас**: він визначає, що з об'єктом можна робити.
+Ім'я функції **без дужок** — це сама функція. **З дужками** — її виклик і результат:
 
 ```python
-print(type(540), type("Поділ"), type([540, 320]))
-print(isinstance(540, object), isinstance(len, object))
+def fee_for(district):
+    """Вартість доставки за районом."""
+    return {"Поділ": 60, "Оболонь": 80}.get(district, 100)
+
+
+print(type(fee_for))
+print(fee_for.__name__)
+print(fee_for("Поділ"))
 ```
 
 ```text
-<class 'int'> <class 'str'> <class 'list'>
-True True
+<class 'function'>
+fee_for
+60
 ```
 
-`"Поділ".upper()` працює, бо в класу `str` є метод `upper`. `[540].append(320)` — бо в класу `list` є `append`. Клас — це креслення, а об'єкти (**екземпляри**) — конкретні речі, зроблені за ним: `"Поділ"` і `"Оболонь"` — два екземпляри одного класу `str`.
-
-І сам клас — теж об'єкт. Його клас — `type`:
+`fee_for` — об'єкт типу `function` з іменем і докстрінгом, як `540` — об'єкт типу `int`. А раз це об'єкт, з ним можна робити те саме, що з будь-яким значенням. Покласти в іншу змінну:
 
 ```python
-print(type(int), type(str))
+delivery_fee = fee_for
+print(delivery_fee("Оболонь"), delivery_fee is fee_for)
 ```
 
 ```text
-<class 'type'> <class 'type'>
+80 True
 ```
 
-Досі ми користувалися чужими класами. Тепер напишемо свій.
+Нової функції не створилося: `delivery_fee` і `fee_for` — два ярлики одного об'єкта, як `b = a` для списку в уроці 3.
 
-## Перший клас: Order
+Покласти в список і пройти циклом:
 
 ```python
-from datetime import datetime
-
-
-class Order:
-    """Замовлення кафе."""
-
-    def __init__(self, order_id, time, bill, tip, guests):
-        self.id = order_id
-        self.time = time
-        self.bill = bill
-        self.tip = tip
-        self.guests = guests
-
-    def total(self):
-        """Чек разом з чайовими."""
-        return self.bill + self.tip
-
-    def per_guest(self):
-        return round(self.bill / self.guests, 2)
-
-
-order = Order(1, datetime(2024, 7, 19, 18, 30), 540.0, 50.0, 2)
-print(order.bill, order.total(), order.per_guest())
+bills = [540.0, 320.0, 980.0]
+for summary in [len, sum, max]:
+    print(summary.__name__, summary(bills))
 ```
 
 ```text
-540.0 590.0 270.0
+len 3
+sum 1840.0
+max 980.0
 ```
 
-- **`class Order:`** оголошує клас — новий тип, як `int` чи `list`;
-- **`Order(1, …)`** створює екземпляр: Python робить порожній об'єкт і викликає `__init__`, щоб його заповнити;
-- **`__init__`** — метод-ініціалізатор. Він присвоює **атрибути екземпляра**: `self.bill = bill` кладе значення в конкретний об'єкт;
-- **метод** — функція, оголошена в класі. `order.total()` — виклик методу конкретного замовлення.
+Функції, які об'єкт мови дозволяє зберігати, передавати й повертати так само, як будь-яке значення, називають **об'єктами першого класу** (first-class objects). У Python функції саме такі.
 
-### Що таке self
+## Словник команд замість ланцюжка if
 
-`self` — це **той самий об'єкт**, у якого викликали метод. Коли ти пишеш `order.total()`, Python насправді викликає `Order.total(order)`:
+У фінальному проєкті `app.py` вибирав команду ланцюжком `if`. Кожна нова команда — ще одна гілка, і функція `run` росте без кінця. Але якщо функції — дані, то «яку функцію викликати для якої команди» — це просто **словник**:
 
 ```python
-print(Order.total(order) == order.total())
+def cmd_report(orders):
+    return f"Замовлень: {len(orders)}, виторг: {sum(orders):.2f} грн"
+
+
+def cmd_top(orders):
+    return f"Найбільший чек: {max(orders):.2f} грн"
+
+
+COMMANDS = {
+    "report": cmd_report,
+    "top": cmd_top,
+}
+
+
+def run(command, orders):
+    handler = COMMANDS.get(command)
+    if handler is None:
+        return f"Помилка: невідома команда {command}. Є: {', '.join(COMMANDS)}"
+    return handler(orders)
+
+
+orders = [540.0, 320.0, 980.0]
+print(run("report", orders))
+print(run("top", orders))
+print(run("fly", orders))
 ```
 
 ```text
-True
+Замовлень: 3, виторг: 1840.00 грн
+Найбільший чек: 980.00 грн
+Помилка: невідома команда fly. Є: report, top
 ```
 
-Метод — звичайна функція з уроку 7, перший параметр якої — об'єкт. Назва `self` — домовленість, а не ключове слово, але так пишуть усі.
+Нова команда — нова функція і **один рядок** у словнику. `run` не змінюється. Такий словник називають **таблицею диспетчеризації** (dispatch table). Бонус: список доступних команд для підказки береться з того самого словника й ніколи не застаріє.
+
+## Функція як аргумент
+
+Функцію, яка приймає або повертає іншу функцію, називають **функцією вищого порядку**. Ти вже користувався ними: `sorted`, `max`, `min` приймають параметр `key` — функцію, яку викликають для кожного елемента, щоб отримати значення для порівняння.
+
+```python
+from typing import NamedTuple
+
+
+class Delivery(NamedTuple):
+    order_id: int
+    district: str
+    fare: int
+    driver: str
+
+
+deliveries = [
+    Delivery(1, "Оболонь", 230, "D-3"),
+    Delivery(2, "Поділ", 180, "D-1"),
+    Delivery(3, "Оболонь", 270, "D-3"),
+    Delivery(4, "Печерськ", 150, "D-2"),
+]
+
+
+def by_fare(delivery):
+    return delivery.fare
+
+
+print([d.order_id for d in sorted(deliveries, key=by_fare)])
+print(max(deliveries, key=by_fare).order_id)
+```
+
+```text
+[4, 2, 1, 3]
+3
+```
+
+`sorted` нічого не знає про доставки. Він лише викликає `by_fare(d)` для кожного елемента й сортує за результатом. Зміни `key` — зміниться порядок, а сам `sorted` той самий.
+
+Ключ може повертати кортеж — тоді порівняння йде по черзі: спершу район, у межах району — вартість:
+
+```python
+def by_district_then_fare(delivery):
+    return (delivery.district, delivery.fare)
+
+
+for d in sorted(deliveries, key=by_district_then_fare):
+    print(d.district, d.fare)
+```
+
+```text
+Оболонь 230
+Оболонь 270
+Печерськ 150
+Поділ 180
+```
+
+!!! warning "Функція, а не її результат"
+    `key=by_fare` — передаємо **функцію**. `key=by_fare(d)` — передали б **результат** одного виклику, число. `sorted` спробує викликати число як функцію й впаде з `TypeError: 'int' object is not callable`. Та сама пастка — `if word.isupper:` без дужок: це завжди правда, бо функція-об'єкт істинна.
+
+### Callback: що робити, вирішує той, хто викликає
+
+Водій виїхав — клієнта треба повідомити. Як саме — SMS, Telegram чи просто запис у журнал — функція доставки знати не повинна. Вона отримує функцію повідомлення аргументом і **викликає її у потрібний момент**. Таку функцію називають **зворотним викликом** (callback):
+
+```python
+def dispatch(delivery, notify):
+    """Відправляє водія і повідомляє клієнта через notify(текст)."""
+    notify(f"Замовлення №{delivery.order_id}: водій {delivery.driver} виїхав, {delivery.fare} грн")
+
+
+def notify_sms(text):
+    print("SMS:", text)
+
+
+def notify_telegram(text):
+    print("Telegram:", text)
+
+
+dispatch(deliveries[0], notify_sms)
+dispatch(deliveries[1], notify_telegram)
+```
+
+```text
+SMS: Замовлення №1: водій D-3 виїхав, 230 грн
+Telegram: Замовлення №2: водій D-1 виїхав, 180 грн
+```
+
+Новий канал — нова функція, `dispatch` не змінюється. А в тестах замість справжнього SMS можна передати `sent.append` і перевірити, що саме пішло б клієнтові:
+
+```python
+sent = []
+dispatch(deliveries[2], sent.append)
+print(sent)
+```
+
+```text
+['Замовлення №3: водій D-3 виїхав, 270 грн']
+```
+
+`sent.append` — теж функція: метод конкретного списку. Передаємо його без дужок, і `dispatch` викликає його як будь-який інший `notify`.
+
+## Функція, що створює функції
+
+Промокоди. Наївно — функція на кожен:
+
+```python
+def apply_summer10(bill):
+    return bill * 0.9
+
+
+def apply_student15(bill):
+    return bill * 0.85
+```
+
+Функції-близнюки відрізняються одним числом. Можна додати параметр — `apply_discount(bill, percent)`, — але тоді кожне місце виклику має знати відсоток, а реєстр «код → знижка» знову стає ланцюжком `if`. Краще **функція, яка створює** функцію-знижку з потрібним відсотком:
+
+```python
+def make_discount(percent):
+    """Фабрика: повертає функцію, що знижує чек на percent відсотків."""
+    def apply(bill):
+        return round(bill * (100 - percent) / 100, 2)
+    return apply
+
+
+summer10 = make_discount(10)
+student15 = make_discount(15)
+print(summer10(540.0), student15(540.0))
+print(summer10.__name__)
+```
+
+```text
+486.0 459.0
+apply
+```
+
+`make_discount` — **фабрика функцій**: кожен виклик створює нову функцію `apply`. І кожна `apply` **пам'ятає** свій `percent`, хоча `make_discount` давно завершилась. Функцію разом із запам'ятованими змінними зовнішньої функції називають **замиканням** (closure).
+
+Тепер реєстр промокодів — словник, як таблиця команд:
+
+```python
+PROMO = {
+    "SUMMER10": make_discount(10),
+    "STUDENT15": make_discount(15),
+    "NIGHT5": make_discount(5),
+}
+
+print(PROMO["NIGHT5"](980.0))
+```
+
+```text
+931.0
+```
+
+### Де функція шукає змінні: LEGB
+
+Коли `apply` бачить `percent`, Python шукає ім'я в чотирьох місцях по черзі — правило **LEGB**:
 
 ```mermaid
 flowchart TD
@@ -121,289 +288,159 @@ flowchart TD
     classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
     classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
 
-    C["class Order<br>креслення: __init__, total, per_guest"] -- "Order(1, ..., 540.0, ...)" --> A["order №1<br>bill = 540.0, guests = 2"]
-    C -- "Order(2, ..., 320.0, ...)" --> B["order №2<br>bill = 320.0, guests = 1"]
-    A -- "order.total()" --> T["Order.total(self=order №1)<br>590.0"]
+    L["L — Local<br>змінні самої apply: bill"] --> E["E — Enclosing<br>змінні make_discount: percent"]
+    E --> G["G — Global<br>імена модуля: PROMO"]
+    G --> B["B — Built-in<br>round, len, print"]
+    B --> X["не знайшли<br>NameError"]
 
-    class C warning
-    class A,B step
-    class T success
+    class L,E,G,B step
+    class X error
 ```
 
-Два екземпляри — два окремі набори атрибутів, але методи в них спільні: вони живуть у класі.
+`percent` знайшовся на рівні **E** — у функції, що оточує `apply`. Саме тому `apply` бачить його й після того, як `make_discount` повернула результат.
 
-### __repr__: як об'єкт себе показує
+### nonlocal: змінити захоплену змінну
+
+Читати змінну з оточення можна вільно. А **змінити**? Лічильник номерів замовлень:
 
 ```python
-print(order)
-```
+def make_counter_broken():
+    count = 0
 
-Вивід — щось на кшталт:
+    def next_id():
+        count += 1
+        return count
 
-```text
-<__main__.Order object at 0x7f3a2c1b9d50>
-```
-
-Шістнадцяткове число — адреса об'єкта в пам'яті, і вона щоразу інша. Для людини це марно. Метод `__repr__` каже Python, як показувати об'єкт — у `print`, у списках, у налагоджувачі:
-
-```python
-class Order:
-    """Замовлення кафе."""
-
-    def __init__(self, order_id, time, bill, tip, guests):
-        self.id = order_id
-        self.time = time
-        self.bill = bill
-        self.tip = tip
-        self.guests = guests
-
-    def __repr__(self):
-        return f"Order(№{self.id}, {self.time:%Y-%m-%d %H:%M}, {self.bill:.2f} грн)"
-
-    def total(self):
-        return self.bill + self.tip
+    return next_id
 
 
-orders = [Order(1, datetime(2024, 7, 19, 18, 30), 540.0, 50.0, 2),
-          Order(2, datetime(2024, 7, 19, 12, 10), 320.0, 30.0, 1)]
-print(orders[0])
-print(orders)
+try:
+    make_counter_broken()()
+except UnboundLocalError as error:
+    print(type(error).__name__)
 ```
 
 ```text
-Order(№1, 2024-07-19 18:30, 540.00 грн)
-[Order(№1, 2024-07-19 18:30, 540.00 грн), Order(№2, 2024-07-19 12:10, 320.00 грн)]
+UnboundLocalError
 ```
 
-Імена з двома підкресленнями з обох боків — `__init__`, `__repr__` — **спеціальні методи** (dunder methods). Python викликає їх сам у певні моменти. Їм присвячено урок 23.
-
-## Атрибути класу й простір імен
-
-Атрибут можна покласти не лише в екземпляр, а й у **сам клас**. Такий атрибут один на всіх — наприклад, вартість доставки за районами, однакова для всіх доставок:
+Присвоєння `count += 1` робить `count` **локальною** змінною `next_id`, і Python не шукає її в оточенні. А локальна `count` ще не має значення. `nonlocal` каже: це змінна з оточуючої функції, змінюй її там:
 
 ```python
-class Delivery:
-    FEES = {"Поділ": 60, "Оболонь": 80, "Печерськ": 90}
+def make_counter(start=0):
+    count = start
 
-    def __init__(self, order_id, district, driver):
-        self.order_id = order_id
-        self.district = district
-        self.driver = driver
+    def next_id():
+        nonlocal count
+        count += 1
+        return count
 
-    def fare(self):
-        return self.FEES[self.district]
+    return next_id
 
 
-first = Delivery(1, "Оболонь", "D-3")
-second = Delivery(2, "Поділ", "D-1")
-print(first.fare(), second.fare())
-print(first.FEES is second.FEES is Delivery.FEES)
+new_order_id = make_counter()
+print(new_order_id(), new_order_id(), new_order_id())
+
+other = make_counter(100)
+print(other(), new_order_id())
 ```
 
 ```text
-80 60
-True
+1 2 3
+101 4
 ```
 
-У кожного об'єкта свій **простір імен** — словник атрибутів `__dict__`. У класу теж:
+Кожен виклик `make_counter` створює **свій** лічильник: `other` і `new_order_id` не заважають один одному. Функція, що носить із собою власний стан, — це вже майже об'єкт. Саме туди приведе урок 20 про класи.
 
-```python
-print(first.__dict__)
-print("FEES" in Delivery.__dict__, "FEES" in first.__dict__)
-```
-
-```text
-{'order_id': 1, 'district': 'Оболонь', 'driver': 'D-3'}
-True False
-```
-
-У `first` немає `FEES`, але `first.FEES` працює. Бо атрибут через крапку Python шукає **спершу в екземплярі, потім у класі**:
-
-```mermaid
-flowchart TD
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
-
-    Q["first.FEES"] --> I{"є в first.__dict__?"}
-    I -- так --> R1["беремо з екземпляра"]
-    I -- ні --> K{"є в Delivery.__dict__?"}
-    K -- так --> R2["беремо з класу"]
-    K -- ні --> E["AttributeError"]
-
-    class Q step
-    class I,K decision
-    class R1,R2 success
-    class E error
-```
-
-### Пастка: присвоєння через self
-
-Лічильник доставок у класі:
-
-```python
-class Courier:
-    trips = 0
-
-    def __init__(self, name):
-        self.name = name
-
-    def deliver(self):
-        self.trips += 1
-
-
-courier = Courier("D-3")
-courier.deliver()
-courier.deliver()
-print(courier.trips, Courier.trips)
-print(courier.__dict__)
-```
-
-```text
-2 0
-{'name': 'D-3', 'trips': 2}
-```
-
-`self.trips += 1` — це `self.trips = self.trips + 1`. **Читання** `self.trips` знайшло 0 у класі. А **присвоєння** `self.trips = …` завжди пише в екземпляр і створює там власний атрибут, який далі **затінює** класовий. Для особистого лічильника водія це саме те, що треба. А щоб рахувати поїздки **всіх** водіїв разом, пиши в клас явно: `Courier.trips += 1`.
-
-!!! warning "Змінюваний атрибут класу — спільний для всіх"
+!!! warning "Пастка: функції в циклі"
     ```python
-    class Cart:
-        items = []
-
-        def add(self, dish):
-            self.items.append(dish)
-
-
-    oksana, taras = Cart(), Cart()
-    oksana.add("борщ")
-    print(taras.items)
+    fees = [lambda bill: bill + fee for fee in (60, 80, 100)]
+    print([f(500) for f in fees])
     ```
 
     ```text
-    ['борщ']
+    [600, 600, 600]
     ```
 
-    `self.items.append` — не присвоєння, а зміна **того самого** списку в класі. Кошик Тараса «отримав» борщ Оксани. Власні змінювані дані створюй у `__init__`: `self.items = []`.
+    Усі три функції бачать **ту саму** змінну `fee` — і вона вже дорівнює 100, коли функції викликають. Замикання пам'ятає змінну, а не її значення в момент створення. Рішення — фабрика: `[make_fee(fee) for fee in (60, 80, 100)]`, де кожен виклик `make_fee` має свій `fee`.
 
-### Клас — не оточення для методів
+## lambda, map і filter
 
-В уроці 18 внутрішня функція бачила змінні зовнішньої — правило LEGB, рівень E. Клас так **не** працює: метод не бачить атрибути класу просто за іменем.
+Для короткої функції, яка потрібна один раз — зазвичай як `key` — є **lambda**: анонімна функція з одного виразу.
 
 ```python
-class Menu:
-    VAT = 0.2
-
-    def price_with_vat(self, price):
-        return price * (1 + VAT)
-
-
-try:
-    Menu().price_with_vat(100)
-except NameError as error:
-    print(error)
+print([d.order_id for d in sorted(deliveries, key=lambda d: d.fare)])
+print(max(deliveries, key=lambda d: d.fare).driver)
 ```
 
 ```text
-name 'VAT' is not defined
+[4, 2, 1, 3]
+D-3
 ```
 
-Метод шукає `VAT` за LEGB: локально, в оточуючих **функціях**, у модулі, серед вбудованих. Простору імен класу серед них немає. До атрибутів класу — лише через крапку: `self.VAT` або `Menu.VAT`.
+`lambda d: d.fare` — те саме, що `by_fare`, тільки без імені й без `return`: результат виразу повертається автоматично. Якщо функції потрібне ім'я, докстрінг чи більше одного рядка — пиши звичайний `def`.
 
-## Методи класу й статичні методи
-
-Замовлення часто приходять рядком каси (уроки 13–14). Хочеться створювати `Order` одразу з рядка — **альтернативний конструктор**. Для цього є `@classmethod`: метод отримує не екземпляр, а **сам клас** (`cls`) і повертає новий об'єкт. А правило, якому не потрібні ні екземпляр, ні клас — наприклад, «яка година — який прийом їжі», — оформлюють `@staticmethod`:
+`map(функція, дані)` застосовує функцію до кожного елемента, `filter(функція, дані)` лишає елементи, для яких вона повернула `True`. Обидві **ліниві**, як генератори з уроку 11:
 
 ```python
-class Order:
-    """Замовлення кафе."""
-
-    def __init__(self, order_id, time, bill, tip, guests):
-        if bill <= 0:
-            raise ValueError(f"сума чека має бути більшою за 0, а маємо {bill}")
-        if guests < 1:
-            raise ValueError(f"гостей має бути хоча б один, а маємо {guests}")
-        self.id = order_id
-        self.time = time
-        self.bill = bill
-        self.tip = tip
-        self.guests = guests
-
-    def __repr__(self):
-        return f"Order(№{self.id}, {self.time:%Y-%m-%d %H:%M}, {self.bill:.2f} грн)"
-
-    @classmethod
-    def from_line(cls, line, order_id):
-        """Рядок каси "2024-07-19 18:30;540.00;50;2" → Order."""
-        fields = line.split(";")
-        if len(fields) != 4:
-            raise ValueError(f"очікували 4 поля, а маємо {len(fields)}")
-        time_text, bill, tip, guests = fields
-        return cls(order_id, datetime.strptime(time_text, "%Y-%m-%d %H:%M"),
-                   float(bill), float(tip), int(guests))
-
-    @staticmethod
-    def meal_type(hour):
-        if 11 <= hour <= 15:
-            return "обід"
-        if 17 <= hour <= 23:
-            return "вечеря"
-        return "інше"
-
-    def meal(self):
-        return self.meal_type(self.time.hour)
-
-
-order = Order.from_line("2024-07-21 21:30;1200.00;150;6", 7)
-print(order, order.meal())
-print(Order.meal_type(12))
+fares = [230, 180, 270, 150]
+with_fee = map(lambda fare: fare + 20, fares)
+print(type(with_fee).__name__)
+print(list(with_fee))
+print(list(filter(lambda fare: fare >= 200, fares)))
 ```
 
 ```text
-Order(№7, 2024-07-21 21:30, 1200.00 грн) вечеря
-обід
+map
+[250, 200, 290, 170]
+[230, 270]
 ```
 
-| Вид методу | Перший параметр | Коли |
-|---|---|---|
-| звичайний | `self` — екземпляр | працює з даними конкретного об'єкта: `order.meal()` |
-| `@classmethod` | `cls` — клас | створює об'єкти іншим способом: `Order.from_line(...)` |
-| `@staticmethod` | немає | правило, що стосується теми класу, але не потребує його даних |
-
-Перевірки з уроку 13 тепер живуть у `__init__`: неправильне замовлення **неможливо створити**, хоч би звідки воно прийшло — з каси, з CLI чи з тесту.
+Те саме через comprehension з уроку 6 — зазвичай читається легше:
 
 ```python
-try:
-    Order.from_line("2024-07-21 14:20;610.00;60;0", 8)
-except ValueError as error:
-    print(error)
+print([fare + 20 for fare in fares])
+print([fare for fare in fares if fare >= 200])
 ```
 
 ```text
-гостей має бути хоча б один, а маємо 0
+[250, 200, 290, 170]
+[230, 270]
 ```
 
-## isinstance і type
+!!! tip "Коли що"
+    Comprehension — коли пишеш вираз прямо тут. `map` / `filter` — коли функція **вже є** й має ім'я: `list(map(str.upper, districts))`, `list(filter(str.isdigit, codes))`. `lambda` — для коротких `key=`.
 
-`type(obj)` повертає **точний** клас, `isinstance(obj, клас)` питає, чи є об'єкт екземпляром цього класу **або його нащадка** (урок 20):
+## Конвеєр з функцій
+
+Ціна замовлення проходить кілька кроків: знижка за промокодом, вартість доставки за районом, округлення до гривні. Кожен крок — функція «число → число». А раз функції — дані, **список кроків** — теж дані:
 
 ```python
-print(type(order) is Order, isinstance(order, Order))
-print(isinstance(True, int), type(True) is int)
+def add_fee(bill):
+    return bill + 80
+
+
+def to_uah(bill):
+    return round(bill)
+
+
+def run_pipeline(value, steps):
+    for step in steps:
+        value = step(value)
+    return value
+
+
+checkout = [PROMO["SUMMER10"], add_fee, to_uah]
+print(run_pipeline(540.0, checkout))
+print(run_pipeline(540.0, [add_fee, PROMO["SUMMER10"], to_uah]))
 ```
 
 ```text
-True True
-True False
+566
+558
 ```
 
-`bool` — нащадок `int`, тож `True` — теж ціле число. Для перевірок у коді зазвичай беруть `isinstance`: він не зламається, коли з'являться класи-нащадки.
-
-## Архітектура: де живе стан сервісу { #architecture }
-
-Сервіс доставки можна організувати щонайменше трьома способами. Усі три правильні — різниться ціна змін і захищеність правил.
+Той самий чек, ті самі кроки — різний результат. У другому варіанті знижку отримала й доставка. **Порядок кроків — це бізнес-правило**, і тепер воно записане в одному місці: у списку `checkout`, а не розмазане по коду.
 
 ```mermaid
 flowchart TD
@@ -413,235 +450,241 @@ flowchart TD
     classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
     classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
 
-    Q{"де живе стан:<br>замовлення, доставки, лічильник?"}
-    Q --> A["А. Функції над даними<br>orders — список, функції приймають його"]
-    Q --> B["Б. Замикання<br>стан у змінних фабрики"]
-    Q --> C["В. Клас<br>стан в атрибутах, дії — методи"]
-    A --> A1["просто й прозоро<br>але правила можна оминути"]
-    B --> B1["стан схований<br>але важко розширювати й перевіряти"]
-    C --> C1["стан і правила разом<br>ціна — більше коду"]
+    A["540.0<br>чек кафе"] --> B["SUMMER10<br>486.0"]
+    B --> C["add_fee<br>566.0"]
+    C --> D["to_uah<br>566"]
 
-    class Q decision
     class A,B,C step
-    class A1,B1 warning
-    class C1 success
+    class D success
 ```
 
-| | А. Функції над даними (модуль 1) | Б. Замикання (урок 18) | В. Клас (сьогодні) |
-|---|---|---|---|
-| Де стан | списки, які передають у функції | змінні фабрики | атрибути об'єкта |
-| Хто стежить за правилами | кожен, хто викликає, має сам пам'ятати | функції фабрики | методи класу |
-| Кілька незалежних сервісів | окремі списки | окремі виклики фабрики | окремі екземпляри |
-| Додати нову дію | нова функція з тими самими параметрами | змінити фабрику, повернути ще одну функцію | новий метод |
-| Коли доречно | скрипт, аналіз даних, одна людина | маленький стан + 1–2 дії: лічильник, промокод | стан + багато дій + правила, які не можна порушити |
+### Кроки мають бути чистими
 
-Варіант А — не «неправильний». Для звіту за один файл каси функції над списком — найпростіше рішення, і модуль 1 недарма ним користувався. Клас окупається, коли з'являються **правила стану**: номери видає лише сервіс, доставка лише до існуючого замовлення, одна доставка на замовлення.
+Конвеєр працює, лише якщо кожен крок **чистий** (урок 8): отримує значення, повертає нове й нічого не змінює навколо. Крок, який змінює вхідний список, ламає все, що йде після нього — і все, що використовує той самий список:
 
-### Схема класів
+```python
+def add_packaging_bad(items):
+    items.append("пакет")
+    return items
 
-Архітектуру зі класів малюють **діаграмою класів**: у кожному блоці — назва, атрибути, методи; стрілки — зв'язки.
 
-```mermaid
-classDiagram
-    class DeliveryService {
-        orders: dict
-        deliveries: dict
-        next_id: int
-        add_order(line) Order
-        add_delivery(order_id, district, driver) Delivery
-        find(order_id) Order
-        report() str
-    }
-    class Order {
-        id: int
-        time: datetime
-        bill: float
-        tip: float
-        guests: int
-        from_line(line, order_id)$ Order
-        meal() str
-    }
-    class Delivery {
-        FEES: dict$
-        order_id: int
-        district: str
-        driver: str
-        fare() int
-    }
-    DeliveryService "1" o-- "*" Order : зберігає
-    DeliveryService "1" o-- "*" Delivery : зберігає
-    Delivery ..> Order : order_id
+def add_packaging(items):
+    return items + ["пакет"]
+
+
+cart = ["борщ", "вареники"]
+print(add_packaging(cart), cart)
+print(add_packaging_bad(cart), cart)
 ```
 
-- `$` після члена — атрибут чи метод **класу**, а не екземпляра;
-- `o--` — **агрегація**: сервіс зберігає багато (`*`) замовлень і доставок;
-- пунктир `..>` — **залежність**: доставка посилається на замовлення за номером.
-
-А так виглядає вся система шарами — від людини до файлу:
-
-```mermaid
-flowchart TD
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
-
-    UI["інтерфейс<br>app.py: sys.argv, print, «Помилка: …»"] --> SVC["сервіс<br>DeliveryService: правила, звіти"]
-    SVC --> MOD["моделі<br>Order, Delivery: дані й перевірки"]
-    SVC --> ST["сховище<br>data.json"]
-
-    class UI warning
-    class SVC success
-    class MOD,ST step
+```text
+['борщ', 'вареники', 'пакет'] ['борщ', 'вареники']
+['борщ', 'вареники', 'пакет'] ['борщ', 'вареники', 'пакет']
 ```
 
-Стрілки йдуть **в один бік**: інтерфейс знає про сервіс, сервіс — про моделі й сховище, але моделі нічого не знають ні про `print`, ні про `sys.argv`. Тому ті самі класи можна підключити до веб-сайту чи Telegram-бота, не змінивши в них жодного рядка. До цієї думки — **залежності спрямовані від зовнішнього до внутрішнього** — ми повертатимемося весь модуль 2.
+Чиста версія повернула новий список і не зачепила `cart`. Нечиста змінила кошик клієнта: після другого виклику «пакет» опиниться там двічі.
+
+### Декоратор — це теж фабрика
+
+Декоратор з уроку 10 тепер розкладається на знайомі частини: функція, яка **приймає** функцію (вищого порядку), **створює** нову (фабрика) і **пам'ятає** оригінал (замикання):
+
+```python
+from functools import wraps
+
+
+def log_calls(func):
+    @wraps(func)
+    def wrapper(*args):
+        result = func(*args)
+        print(f"{func.__name__}{args} -> {result}")
+        return result
+    return wrapper
+
+
+@log_calls
+def add_fee_logged(bill):
+    return bill + 80
+
+
+add_fee_logged(486.0)
+```
+
+```text
+add_fee_logged(486.0,) -> 566.0
+```
 
 ## Практика { #practice }
 
-### Розібраний приклад: DeliveryService
+### Розібраний приклад: оформлення замовлення
 
-```python linenums="1" hl_lines="2 3 4 5 8 10 11 14 16 18 19 24"
-class DeliveryService:
-    def __init__(self):
-        self.orders = {}
-        self.deliveries = {}
-        self.next_id = 1
+Зберемо все разом: реєстр промокодів, вартість доставки за районом, конвеєр і команди.
 
-    def add_order(self, line):
-        order = Order.from_line(line, self.next_id)
-        self.orders[order.id] = order
-        self.next_id += 1
-        return order
-
-    def add_delivery(self, order_id, district, driver):
-        if order_id not in self.orders:
-            raise ValueError(f"замовлення №{order_id} немає")
-        if order_id in self.deliveries:
-            raise ValueError(f"замовлення №{order_id} вже має доставку")
-        delivery = Delivery(order_id, district, driver)
-        self.deliveries[order_id] = delivery
-        return delivery
-
-    def report(self):
-        cafe = sum(order.bill for order in self.orders.values())
-        taxi = sum(delivery.fare() for delivery in self.deliveries.values())
-        return (f"Замовлень: {len(self.orders)}, з доставкою: {len(self.deliveries)}; "
-                f"кафе {cafe:.2f} грн, таксі {taxi} грн")
+```python linenums="1" hl_lines="2 6 7 8 12 13 22 25 31 32 33"
+FEES = {"Поділ": 60, "Оболонь": 80, "Печерськ": 90}
 
 
-smachno = DeliveryService()
-smachno.add_order("2024-07-19 18:30;540.00;50;2")
-smachno.add_order("2024-07-20 20:15;980.00;120;4")
-smachno.add_delivery(1, "Оболонь", "D-3")
+def make_fee(district):
+    """Фабрика: крок конвеєра, що додає вартість доставки в район."""
+    if district not in FEES:
+        raise ValueError(f"не доставляємо в район {district}")
+    fee = FEES[district]
 
-for attempt in [(1, "Поділ", "D-1"), (5, "Поділ", "D-1")]:
+    def add(bill):
+        return bill + fee
+    return add
+
+
+def checkout_steps(promo_code, district):
+    """Кроки для замовлення: знижка (якщо є промокод) → доставка → гривні."""
+    steps = []
+    if promo_code:
+        if promo_code not in PROMO:
+            raise ValueError(f"промокод {promo_code} не дійсний")
+        steps.append(PROMO[promo_code])
+    steps.append(make_fee(district))
+    steps.append(to_uah)
+    return steps
+
+
+def checkout(bill, promo_code, district):
+    return run_pipeline(bill, checkout_steps(promo_code, district))
+
+
+CHECKOUT_CASES = [(540.0, "SUMMER10", "Оболонь"), (320.0, None, "Поділ"),
+                  (980.0, "STUDENT15", "Печерськ"), (540.0, "FREE100", "Поділ"),
+                  (540.0, None, "Троєщина")]
+
+for bill, code, district in CHECKOUT_CASES:
     try:
-        smachno.add_delivery(*attempt)
+        print(bill, code, district, "->", checkout(bill, code, district))
     except ValueError as error:
-        print("Помилка:", error)
-
-print(smachno.orders)
-print(smachno.report())
+        print(bill, code, district, "-> помилка:", error)
 ```
 
 ```text
-Помилка: замовлення №1 вже має доставку
-Помилка: замовлення №5 немає
-{1: Order(№1, 2024-07-19 18:30, 540.00 грн), 2: Order(№2, 2024-07-20 20:15, 980.00 грн)}
-Замовлень: 2, з доставкою: 1; кафе 1520.00 грн, таксі 80 грн
+540.0 SUMMER10 Оболонь -> 566
+320.0 None Поділ -> 380
+980.0 STUDENT15 Печерськ -> 923
+540.0 FREE100 Поділ -> помилка: промокод FREE100 не дійсний
+540.0 None Троєщина -> помилка: не доставляємо в район Троєщина
 ```
 
 Що відбувається в ключових рядках:
 
-- **рядки 2–5** — стан сервісу: словники замовлень і доставок за номером (швидкий пошук, урок 16) і лічильник номерів. Кожен сервіс має свій стан;
-- **рядки 8, 10** — номер видає сам сервіс: `next_id` більше ніхто не рахує;
-- **рядок 11** — метод повертає створений об'єкт, а не друкує: друкує лише той, хто викликав, як і в модулі 1;
-- **рядки 14–19** — правила «замовлення існує» і «одна доставка на замовлення» живуть у **єдиному** місці, через яке проходить кожна доставка;
-- **рядок 24** — `fare()` доставки бере ціну з атрибута класу `Delivery.FEES`.
+- **рядок 2** — вартість доставки — дані, а не `if` для кожного району;
+- **рядки 6–8, 12–13** — фабрика `make_fee` перевіряє район один раз, а функція `add` пам'ятає `fee` через замикання;
+- **рядки 22, 25** — список кроків збирається з функцій: промокод береться з реєстру `PROMO`, доставка — з фабрики, округлення — готова `to_uah`;
+- **рядки 31–33** — `checkout` не знає, які саме кроки виконує. Новий крок — рядок у `checkout_steps`, а не переписаний `checkout`;
+- помилки — `ValueError` з поясненням, як у модулі 1: промокод і район перевіряються **до** обчислень.
 
-### Зміни приклад: звіт водіїв
+### Зміни приклад: команда drivers
 
-Додай у `DeliveryService` метод `drivers()`, який повертає словник «водій → виторг» від більшого до меншого. Для двох доставок D-3 на Оболонь і однієї D-1 на Поділ:
+Додай у таблицю `COMMANDS` з розділу про словник команд нову команду `drivers`. Вона отримує список доставок і повертає рядок з водіями за виторгом, від більшого до меншого:
 
 ```text
-{'D-3': 160, 'D-1': 60}
+D-3 500, D-1 180, D-2 150
 ```
 
 **Критерії перевірки:**
 
-- метод нічого не друкує, лише повертає словник;
-- `DeliveryService()` без доставок повертає `{}`;
-- `add_delivery` і `report` не змінюються.
+- `run` не змінюється — лише нова функція і рядок у `COMMANDS`;
+- виторг рахується за один прохід (`Counter` або словник з `get`);
+- сортування — `sorted(..., key=…, reverse=True)` з `lambda` або `dict.get` як ключем;
+- `run("fly", deliveries)` у підказці показує й нову команду.
 
 ??? tip "Підказка"
-    `Counter` з уроку 12: `totals[delivery.driver] += delivery.fare()` для кожної доставки з `self.deliveries.values()`, потім `dict(totals.most_common())`.
+    `Counter` уміє додавати: `totals[d.driver] += d.fare`. Потім `sorted(totals, key=totals.get, reverse=True)` дає водіїв у потрібному порядку, а `", ".join(f"{name} {totals[name]}" for name in …)` — рядок.
 
-### Спробуй самостійно: промокод як клас
+### Спробуй самостійно: промокод з обмеженням
 
-В уроці 18 обмежений промокод був замиканням `make_limited_discount(percent, uses)`. Перепиши його класом `Promo`:
+Маркетинг роздає **обмежені** промокоди: `LUCKY20` діє лише для перших трьох замовлень. Напиши фабрику `make_limited_discount(percent, uses)`:
+
+- повертає функцію `apply(bill)` зі знижкою `percent`, як `make_discount`;
+- кожен виклик зменшує кількість використань, що лишилися;
+- коли використань не лишилося — `apply` піднімає `ValueError("промокод вичерпано")`.
 
 ```text
-lucky = Promo("LUCKY20", percent=20, uses=3)
-lucky.apply(500.0)  →  400.0
-lucky.left          →  2
-lucky               →  Promo(LUCKY20, 20%, лишилось 2)
-після трьох apply   →  ValueError: промокод LUCKY20 вичерпано
+lucky = make_limited_discount(20, 3)
+lucky(500.0)  →  400.0
+lucky(500.0)  →  400.0
+lucky(250.0)  →  200.0
+lucky(500.0)  →  ValueError: промокод вичерпано
 ```
 
 **Правила:**
 
-- `code`, `percent`, `left` — атрибути екземпляра; `__repr__` — як у прикладі;
-- `Promo.from_text("SUMMER10:10:100")` — `@classmethod`, що створює промокод з рядка «код:відсоток:використань»;
-- `percent` поза межами 1–100 → `ValueError` уже в `__init__`;
-- два промокоди мають незалежні лічильники.
+- лічильник живе в замиканні, `nonlocal` — без глобальних змінних;
+- два промокоди, створені окремими викликами фабрики, мають незалежні лічильники;
+- `apply` можна покласти в `PROMO` і використати в `checkout` без змін.
 
-Порівняй з версією-замиканням: що стало простішим, а що — довшим? Яку версію легше перевірити тестом і чому?
+### Знайди помилку
+
+Кожен фрагмент — справжня помилка початківця. Що піде не так?
+
+```python
+# 1
+sum = sum([540.0, 320.0])
+total_fares = sum([230, 180])
+
+# 2
+code = "summer10"
+if code.isupper:
+    print("код у верхньому регістрі")
+
+# 3
+districts = ["Оболонь", "Поділ", "Печерськ"]
+print(sorted(districts, key=len(districts)))
+```
+
+??? success "Відповіді"
+
+    1. Перший рядок **перезаписав** вбудовану функцію `sum` числом `860.0`. Другий рядок пробує викликати число: `TypeError: 'float' object is not callable`. Не називай змінні іменами вбудованих функцій: `total_bills = sum(...)`.
+    2. `code.isupper` без дужок — сама функція, а функція завжди істинна. Умова виконається для будь-якого рядка. Потрібен виклик: `code.isupper()`.
+    3. `len(districts)` — це `3`, число, а не функція. `sorted` спробує викликати `3(...)` і впаде з `TypeError`. Треба передати саму функцію: `key=len`.
 
 ## Підсумок
 
 | Поняття | Що запам'ятати |
 |---|---|
-| Клас і екземпляр | клас — креслення й тип; `Order(...)` створює екземпляр і викликає `__init__` |
-| `self` | об'єкт, у якого викликали метод: `order.total()` = `Order.total(order)` |
-| Атрибут екземпляра / класу | `self.bill` — у кожного свій; `Delivery.FEES` — один на всіх |
-| Пошук атрибута | спершу екземпляр, потім клас; присвоєння через `self` пише в екземпляр |
-| Простір імен класу | не входить у LEGB методів — до атрибутів класу лише через `self.` / `Клас.` |
-| `__repr__` | як об'єкт показується в `print` і списках |
-| `@classmethod`, `@staticmethod` | альтернативний конструктор з `cls`; правило без `self` і `cls` |
-| Архітектура | функції над даними, замикання чи клас — за тим, чи є правила стану |
+| Функція — об'єкт | `f` — функція, `f()` — її результат; можна в змінну, список, словник |
+| Словник команд | `COMMANDS[name](...)` замість ланцюжка `if`; нова команда — рядок |
+| Функція вищого порядку | приймає чи повертає функцію: `sorted(key=…)`, `max(key=…)`, декоратори |
+| Callback | функція-аргумент, яку викликають у потрібний момент |
+| Фабрика й замикання | функція створює функцію, а та пам'ятає змінні оточення |
+| LEGB, `nonlocal` | порядок пошуку імен; `nonlocal`, щоб змінити змінну оточення |
+| `lambda`, `map`, `filter` | коротка анонімна функція; ліниві `map` / `filter` чи comprehension |
+| Конвеєр | список функцій-кроків; порядок — правило; кроки — чисті |
 
 ### Самоперевірка
 
-1. Що відбувається, коли пишеш `Order(1, …)`? Навіщо `__init__`?
-2. Що таке `self` і чому `order.total()` і `Order.total(order)` — одне й те саме?
-3. Чому `courier.trips` після двох `deliver()` дорівнює 2, а `Courier.trips` — 0?
-4. Чому кошик Тараса отримав борщ Оксани? Як виправити?
-5. Чому метод не бачить `VAT`, оголошений у класі, без `self.`?
-6. Коли потрібен `@classmethod`, а коли `@staticmethod`?
-7. Сервіс доставки для одного разового звіту з файлу — клас чи функції? А для системи, в яку додають дані роками?
+1. Чим `fee_for` відрізняється від `fee_for("Поділ")`?
+2. Що дає словник команд порівняно з ланцюжком `if`?
+3. Навіщо `dispatch` приймає `notify` аргументом, а не викликає SMS сама?
+4. Чому `summer10` пам'ятає `percent = 10`, хоча `make_discount` вже завершилась?
+5. Чому без `nonlocal` лічильник падає з `UnboundLocalError`?
+6. Чому всі функції з `[lambda bill: bill + fee for fee in (60, 80, 100)]` додають 100?
+7. Чому порядок кроків у конвеєрі змінює ціну? Що буде, якщо крок змінює вхідний список?
 
 ??? success "Відповіді"
 
-    1. Python створює порожній об'єкт і викликає `__init__`, щоб записати в нього атрибути. Там же зручно перевіряти дані: неправильний об'єкт не з'явиться.
-    2. `self` — сам екземпляр. Запис `order.total()` Python перетворює на виклик функції з класу, передаючи `order` першим аргументом.
-    3. Присвоєння `self.trips = self.trips + 1` створило атрибут в екземплярі, який затінив класовий. Атрибут класу лишився 0.
-    4. `items = []` в класі — один список на всіх, а `append` змінює його, а не створює новий. Список треба створювати в `__init__`: `self.items = []`.
-    5. Методи шукають імена за LEGB, а простір імен класу не є оточенням для методів. Потрібно `self.VAT` або `Menu.VAT`.
-    6. `@classmethod` — коли метод створює об'єкт класу чи працює з класом (`cls`). `@staticmethod` — правило на тему класу, якому не потрібні ні екземпляр, ні клас.
-    7. Для разового звіту — функції над списком: простіше. Для системи, що живе роками, — клас: правила стану зібрані в одному місці, їх не оминути.
+    1. `fee_for` — сама функція, об'єкт. `fee_for("Поділ")` — результат виклику, число `60`.
+    2. Нова команда — функція й один рядок у словнику, `run` не змінюється; перелік команд для підказки береться з того самого словника.
+    3. Щоб спосіб повідомлення обирав той, хто викликає: SMS, Telegram, журнал чи список у тесті. `dispatch` від цього не змінюється.
+    4. `apply` — замикання: разом із функцією зберігаються змінні оточуючої функції, які вона використовує.
+    5. Присвоєння `count += 1` робить `count` локальною змінною `next_id`, а локальна ще не має значення. `nonlocal` каже шукати й змінювати її в оточуючій функції.
+    6. Замикання пам'ятає **змінну** `fee`, а не її значення в момент створення. Коли функції викликають, цикл уже завершився, і `fee` дорівнює 100.
+    7. Кожен крок працює з результатом попереднього: знижка до доставки і після — різні суми. Крок, що змінює вхідний список, змінює дані для всіх наступних кроків і для всього коду, який тримає той самий список.
 
 ### Що далі
 
-- Ноутбук заняття: [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_19_classes_namespace/note_lesson_19_classes_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_19_classes_namespace/note_lesson_19_classes.ipynb){ .solutions-link } — сервіс доставки: прогнози, вправи з перевірками, баги з атрибутами класу.
-- Практикум на реальних даних: [`lab_lesson_19_titanic_oop.ipynb`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_19_classes_namespace/lab_lesson_19_titanic_oop.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_19_classes_namespace/lab_lesson_19_titanic_oop.ipynb) — клас `Passenger` для пасажирів «Титаніка», `@classmethod` з рядка таблиці, аналіз виживання; 5 завдань.
-- Довідник-схема: [ментальна модель класів](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_19_classes_namespace/classes_mental_model.md).
-- Наступне заняття — урок 20 «Наслідування, поліморфізм»: доставка таксі, кур'єром-пішоходом і самовивіз — різні класи з однаковим методом `fare()`.
+- Ноутбук заняття: [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_19_functions_first_class/note_lesson_19_functions_first_class_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_19_functions_first_class/note_lesson_19_functions_first_class.ipynb){ .solutions-link } — сервіс доставки: прогнози, вправи з перевірками, три баги і міні-проєкт — конвеєр для промокодів.
+- Поглиблення — п'ять патернів покроково, «від проблеми до рішення»: [Callback](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_19_functions_first_class/pattern_01_callback.md), [Function Factory](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_19_functions_first_class/pattern_02_factory.md), [Decorator](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_19_functions_first_class/pattern_03_decorator.md), [Pipeline](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_19_functions_first_class/pattern_04_pipeline.md), [Pure Functions](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_19_functions_first_class/pattern_05_pure_functions.md).
+- Наступне заняття — урок 20 «Класи, простір імен». Лічильник `make_counter` — це дані й функція разом. Клас зробить це явно: дані — атрибути, функції — методи.
 
 ## Документація і джерела
 
-- Туторіал Python: [Classes](https://docs.python.org/3/tutorial/classes.html) — простори імен, класи й екземпляри, атрибути класу, «Random Remarks» про `self`
-- [`@classmethod`](https://docs.python.org/3/library/functions.html#classmethod), [`@staticmethod`](https://docs.python.org/3/library/functions.html#staticmethod), [`object.__repr__`](https://docs.python.org/3/reference/datamodel.html#object.__repr__), [`isinstance`](https://docs.python.org/3/library/functions.html#isinstance)
-- [Mermaid: Class diagrams](https://mermaid.js.org/syntax/classDiagram.html) — нотація діаграм класів
-- Для охочих: MIT 6.0001, [лекція 8 «Object Oriented Programming»](https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/resources/lecture-8-object-oriented-programming/); CS50P, [тиждень 8 «Object-Oriented Programming»](https://cs50.harvard.edu/python/weeks/8/).
+- [Functional Programming HOWTO](https://docs.python.org/3/howto/functional.html) — функції вищого порядку, `map`, `filter`, `lambda`
+- [Sorting Techniques: Key Functions](https://docs.python.org/3/howto/sorting.html#key-functions)
+- Туторіал: [Lambda Expressions](https://docs.python.org/3/tutorial/controlflow.html#lambda-expressions); довідник: [`nonlocal`](https://docs.python.org/3/reference/simple_stmts.html#the-nonlocal-statement), [правила пошуку імен](https://docs.python.org/3/reference/executionmodel.html#resolution-of-names)
+- [`map`](https://docs.python.org/3/library/functions.html#map), [`filter`](https://docs.python.org/3/library/functions.html#filter), [`functools.wraps`](https://docs.python.org/3/library/functools.html#functools.wraps)
+- Для охочих: MIT 6.0001, [лекція 4 «Decomposition, Abstraction, Functions»](https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/resources/lecture-4-decomposition-abstraction-and-functions/) — функції, специфікації, область видимості, функції як аргументи.

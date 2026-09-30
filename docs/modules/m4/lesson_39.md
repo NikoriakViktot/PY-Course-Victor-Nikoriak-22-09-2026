@@ -1,92 +1,210 @@
-# Урок 39. Middleware і кешування (Redis на практиці)
+# Урок 39. FastAPI + SQLAlchemy: повний CRUD
 
-Після уроку 38 агрегатор зберігає новини в базі, але має три проблеми живого сервісу:
+В уроці 38 агрегатор став HTTP-сервісом, але новини лежать у `NewsStore` — словнику в пам'яті процесу. Зупинили сервер — новин немає; запустили два процеси uvicorn — у кожного свої новини. Сьогодні агрегатор отримує **базу даних**: новини переживають перезапуск, унікальність `url` гарантує сама база, а API вміє повний CRUD окремої новини.
 
-- кожен `GET /api/news` — запит до бази, навіть якщо стрічка не змінювалась;
-- `POST /api/scrape` можна смикати без обмежень, і кожен виклик — сім сторінок rbc.ua (урок 37);
-- збір триває секунди, а клієнт увесь цей час чекає відповіді.
-
-Сьогодні чотири рефакторинги `news_hub`: **middleware** (код навколо кожного запиту), **кеш** у Redis, **rate limit** і **фоновий збір**. Redis ти вже знаєш з уроку 30 — там були cache-aside, `INCR`/`EXPIRE` і черга. Тепер вони працюють у справжньому API.
+Знову не з нуля: є готовий шар бази — стартовий `production_bot` (Telegram-бот з адмін-API): async SQLAlchemy 2.0, репозиторії, Alembic-міграції. Беремо його і робимо три рефакторинги `news_hub` з уроку 38.
 
 | Урок | Крок агрегатора |
 |---|---|
 | 36 | парсер з типами; `NewsItem` на Pydantic |
 | 37 | FastAPI: `GET /api/news`, `POST /api/scrape`, `/docs`, Postman |
-| 38 | SQLAlchemy: новини в базі, повний CRUD, Alembic |
-| **39** | **middleware, кеш і rate limit на Redis, фоновий збір** |
+| **38** | **SQLAlchemy: новини в базі, унікальний `url`, повний CRUD, Alembic** |
+| 39 | middleware, кеш і rate limit на Redis |
 | 41 | тести API |
 | 43 | Gemini: підсумок, категорія, тональність |
 | 47 | Telegram-бот |
 | 48–50 | Docker, Compose, CI/CD |
 
-Проєкт: [`news_hub`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_4/lessons/lesson_39_middleware_redis/news_hub).
+Проєкт: [`news_hub`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_4/lessons/lesson_39_fastapi_sqlalchemy/news_hub).
 
-**Що потрібно з попередніх уроків:** Redis — ключі, `INCR`, `EXPIRE`/`TTL`, hash, pipeline, cache-aside (урок 30); декоратори й функції як значення (9, 18); FastAPI, `Depends`, `lifespan` (37); `get_db` і COMMIT до відповіді (38).
+**Що потрібно з попередніх уроків:** SQL — таблиці, `UNIQUE`, `GROUP BY`, транзакції, параметри замість f-рядків (урок 30); `async`/`await` (27); FastAPI, `Depends`, `lifespan`, `TestClient` (37); `NewsItem` (36).
 
 **Після уроку ти зможеш:**
 
-- написати HTTP-middleware і пояснити, в якому порядку вони виконуються;
-- закешувати відповідь API в Redis і правильно скидати кеш після запису;
-- обмежити частоту запитів (`429 Too Many Requests`, `Retry-After`) атомарно;
-- винести довгу роботу у фон (`202 Accepted` + статус задачі) і не загубити дані;
-- відрізнити фіксоване вікно rate limit від ковзного.
+- описати таблицю моделлю SQLAlchemy 2.0 (`Mapped`, `mapped_column`) і відрізнити її від Pydantic-моделі;
+- підключити async-engine і дати кожному HTTP-запиту свою сесію й транзакцію;
+- винести SQL у репозиторій і прочитати SQL, який генерує SQLAlchemy;
+- написати повний CRUD з правильними кодами: `201`, `404`, `409`, `204`;
+- створити й застосувати міграцію Alembic;
+- пояснити, чому «перевір, а потім встав» ламається під навантаженням.
 
-**Ноутбук заняття:** [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_39_middleware_redis/note_lesson_39_redis_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_39_middleware_redis/note_lesson_39_redis.ipynb){ .solutions-link } — без сервера Redis: `fakeredis` у пам'яті.
+**Ноутбук заняття:** [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_39_fastapi_sqlalchemy/note_lesson_39_sqlalchemy_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_39_fastapi_sqlalchemy/note_lesson_39_sqlalchemy.ipynb){ .solutions-link } — база й CRUD на SQLite, без встановлення PostgreSQL.
+
+**Довідник:** [FastAPI: архітектура, async і production-патерни](fastapi/fastapi_documentation.md) — розділи 6–8: пул з'єднань, Repository, Unit of Work.
 
 ## Пригадай
 
-1. Що поверне `INCR` для ключа, якого немає, і чи зникне цей ключ сам (урок 30)?
-2. Що таке cache-aside і чому кеш завжди має TTL?
-3. У який момент `get_db` робить COMMIT — до відповіді клієнту чи після (урок 38)?
+1. Що зробить PostgreSQL з `INSERT`, який порушує `UNIQUE` (урок 30)?
+2. Що буде з уже виконаними змінами транзакції, якщо в ній стався виняток?
+3. Навіщо в уроці 38 сховище отримували через `Depends`, а не глобальною змінною?
 
 ??? success "Відповіді"
 
-    1. `1` — Redis створить ключ зі значенням 0 і збільшить. Сам не зникне: TTL треба поставити окремо (`EXPIRE`).
-    2. Спершу шукаємо в кеші (hit — віддаємо), немає (miss) — рахуємо, кладемо з TTL, віддаємо. Кеш — копія, вона застаріває; TTL обмежує, наскільки.
-    3. До відповіді — завдяки `Depends(get_db, scope="function")`. Сьогодні це знадобиться для кешу.
+    1. Відхилить рядок з помилкою `duplicate key value violates unique constraint`. Обмеження перевіряє сама база — для будь-якої програми, що в неї пише.
+    2. `ROLLBACK` скасує всі зміни транзакції: або все, або нічого.
+    3. Щоб замінити реалізацію, не чіпаючи ендпоінтів. Сьогодні саме це й зробимо: `NewsStore` → `NewsRepository`.
 
 ## Старт: з якого коду починаємо
 
-| Звідки | Що там | Куди в `news_hub` |
+`production_bot` — Telegram-бот з адмін-API на FastAPI. Нам потрібен його **шар бази**, а не бот:
+
+| Файл `production_bot` | Що в ньому | Куди в `news_hub` |
 |---|---|---|
-| `production_bot/backend/core/redis.py` | `get_redis()` — глобальний клієнт `redis.asyncio`, `close_redis()` | `cache.py`: клієнт у `app.state`, створюється в `lifespan` |
-| `ai_bot/app/middlewares/rate_limit.py`, `repositories/rate_limit_repo.py` | middleware aiogram: `INCR`, `EXPIRE` при `count == 1`, відповідь «Забагато запитів» | `middleware.py`: `RateLimiter` + HTTP-middleware → `429` |
-| `news_dashboard/app/main.py`, `POST /api/scrape/archive` | `BackgroundTasks`, uuid задачі, статус у MongoDB `scrape_jobs` | `jobs.py`: статус у Redis-hash, `202 Accepted` |
-| урок 30 курсу | cache-aside, `INCR`/`EXPIRE`, pipeline | `NewsCache` |
+| `backend/core/database.py` | `create_async_engine` з пулом, `async_sessionmaker`, `Base`, `get_db` з COMMIT/ROLLBACK | `news_hub/db.py` |
+| `backend/models/user.py` | модель таблиці: `Mapped[...]`, `mapped_column(...)` | `news_hub/tables.py` — `NewsRow` |
+| `backend/repositories/base.py` | `BaseRepository[ModelT]`: `get`, `create`, `delete`, `count` | `news_hub/repository.py` |
+| `alembic.ini`, `migrations/env.py` | async-міграції | `alembic.ini`, `migrations/` |
+| `docker-compose.yml`, сервіс `postgres` | PostgreSQL 16 з volume і healthcheck | `docker-compose.yml` |
+| бот, JWT, Redis, платежі | — | уроки 40, 41, 48 |
 
-## Рефакторинг 1. Middleware: код навколо кожного запиту { #refactor-1 }
+## Рефакторинг 1. Engine, сесії й таблиця { #refactor-1 }
 
-**Middleware** — функція, через яку проходить **кожен** запит до ендпоінта і **кожна** відповідь після нього. Туди виносять те, що стосується всіх ендпоінтів одразу: журнал, час обробки, обмеження частоти, заголовки безпеки. Ендпоінти про це не знають.
+### `db.py`: підключення
 
-```python title="news_hub/middleware.py (фрагмент)"
-async def request_context(request: Request, call_next: CallNext) -> Response:
-    """Найзовнішній шар: бачить увесь час обробки, зокрема інших middleware."""
-    request_id = request.headers.get("X-Request-ID") or uuid.uuid4().hex[:8]
-    start = time.perf_counter()
-    response = await call_next(request)                 # ← далі: інші middleware і ендпоінт
-    elapsed_ms = (time.perf_counter() - start) * 1000
-    response.headers["X-Request-ID"] = request_id
-    response.headers["X-Process-Time"] = f"{elapsed_ms:.1f}ms"
-    logger.info("%s %s %s → %s %.1f ms", request_id, request.method, request.url.path,
-                response.status_code, elapsed_ms)
-    return response
+```python title="news_hub/db.py (скорочено)"
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite+aiosqlite:///news_hub.db")
+
+
+def make_engine(url: str = DATABASE_URL, echo: bool = False, **options: Any) -> AsyncEngine:
+    if url.startswith("postgresql"):
+        return create_async_engine(url, pool_size=10, max_overflow=20, pool_pre_ping=True, echo=echo, **options)
+    ...                                            # SQLite: без пулу на 10 з'єднань
+
+
+engine = make_engine()
+SessionFactory = async_sessionmaker(engine, expire_on_commit=False, autoflush=False)
+
+
+class Base(DeclarativeBase):
+    """Базовий клас моделей; Base.metadata — реєстр таблиць для Alembic і тестів."""
 ```
 
-- До `await call_next(request)` — код **до** ендпоінта, після — код **після**, коли відповідь уже є.
-- Middleware може й не викликати `call_next` — тоді ендпоінт не виконається (так працює rate limit нижче).
-- **X-Request-ID** — позначка запиту: клієнт може передати свою, інакше генеруємо. За нею в журналі знаходять усе, що стосується одного запиту (урок 49).
+- **`DATABASE_URL`** — адреса бази в одному рядку: `postgresql+asyncpg://news:news@localhost:5432/news_hub` — діалект (`postgresql`), драйвер (`asyncpg`), користувач, пароль, хост, порт, база. Береться зі змінної середовища, тож код однаковий для ноутбука, тестів і сервера.
+- **Без `DATABASE_URL`** — файл SQLite `news_hub.db` поруч із проєктом: урок і ноутбук працюють без PostgreSQL. У `production_bot` адреса була лише PostgreSQL.
+- **`engine`** — пул з'єднань: 10 постійно відкритих, до 20 тимчасових на піку, `pool_pre_ping` перевіряє з'єднання перед видачею. Чому пул — розділ 6 [довідника](fastapi/fastapi_documentation.md#s6).
+- **`SessionFactory`** — фабрика сесій. **Сесія** — робоче місце одного запиту: у ній накопичуються зміни, а `commit()` відправляє їх однією транзакцією.
 
-Реєстрація в `api.py` — порядок має значення:
+### `tables.py`: таблиця як клас
 
-```python title="news_hub/api.py (фрагмент)"
-# Middleware: останній зареєстрований — зовнішній. Запит іде request_context → rate_limit → invalidate_cache
-# → ендпоінт, відповідь — у зворотному порядку.
-app.middleware("http")(invalidate_cache)
-app.middleware("http")(rate_limit)
-app.middleware("http")(request_context)
+```python title="news_hub/tables.py"
+class NewsRow(Base):
+    __tablename__ = "news"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    url: Mapped[str] = mapped_column(String(500), unique=True)    # унікальність гарантує база, а не код
+    title: Mapped[str] = mapped_column(String(300))
+    source: Mapped[str] = mapped_column(String(100), index=True)
+    lang: Mapped[str] = mapped_column(String(2), index=True)
+    category: Mapped[str] = mapped_column(String(100), index=True)
+    published_time: Mapped[time | None] = mapped_column(Time)
+    scraped_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 ```
 
-Покроково — один `POST /api/news` через три шари («цибуля»; id, час і номер версії — приклад значень):
+`Mapped[str]` — стовпець `NOT NULL`, `Mapped[time | None]` — може бути `NULL`: ті самі анотації типів з уроку 37 описують і таблицю. Який SQL з цього вийде в PostgreSQL (у папці `news_hub`):
+
+```python
+from sqlalchemy.dialects import postgresql
+from sqlalchemy.schema import CreateIndex, CreateTable
+
+from news_hub.tables import NewsRow
+
+print(CreateTable(NewsRow.__table__).compile(dialect=postgresql.dialect()))
+for index in sorted(NewsRow.__table__.indexes, key=lambda i: i.name):
+    print(CreateIndex(index).compile(dialect=postgresql.dialect()))
+```
+
+```text
+
+CREATE TABLE news (
+	id SERIAL NOT NULL,
+	url VARCHAR(500) NOT NULL,
+	title VARCHAR(300) NOT NULL,
+	source VARCHAR(100) NOT NULL,
+	lang VARCHAR(2) NOT NULL,
+	category VARCHAR(100) NOT NULL,
+	published_time TIME WITHOUT TIME ZONE,
+	scraped_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
+	PRIMARY KEY (id),
+	UNIQUE (url)
+)
+
+
+CREATE INDEX ix_news_category ON news (category)
+CREATE INDEX ix_news_lang ON news (lang)
+CREATE INDEX ix_news_source ON news (source)
+```
+
+### Дві моделі однієї новини
+
+| | `NewsItem` (Pydantic, `models.py`) | `NewsRow` (SQLAlchemy, `tables.py`) |
+|---|---|---|
+| Навіщо | **перевірити** дані з парсера чи тіла запиту | **зберегти** рядок таблиці |
+| Звідки поля | з HTML і URL | з бази: `id`, `scraped_at` дає PostgreSQL |
+| Правила | довжина заголовка, домен rbc.ua, `Literal["uk", "ru"]` | типи стовпців, `UNIQUE`, `NOT NULL`, індекси |
+| Коли працює | до запису | під час запису й читання |
+
+Відповідь API — `NewsOut(NewsItem)` з полями `id` і `scraped_at` та `from_attributes=True`: Pydantic будує її прямо з об'єкта `NewsRow`.
+
+## Рефакторинг 2. Репозиторій замість `NewsStore` { #refactor-2 }
+
+`NewsRepository` має **ті самі методи**, що `NewsStore` з уроку 38: `add_many`, `find`, `count`, `stats`, `clear`. Тому ендпоінти майже не змінилися:
+
+```diff title="news_hub/api.py: було (37) → стало (38)"
+-StoreDep = Annotated[NewsStore, Depends(get_store)]
++SessionDep = Annotated[AsyncSession, Depends(get_db, scope="function")]
++
++def get_repo(session: SessionDep) -> NewsRepository:
++    return NewsRepository(session)
++
++RepoDep = Annotated[NewsRepository, Depends(get_repo)]
+
+-@app.get("/api/news", response_model=list[NewsItem], ...)
+-async def list_news(store: StoreDep, ...) -> list[NewsItem]:
+-    return store.find(skip=skip, limit=limit, category=category, source=source, lang=lang or "")
++@app.get("/api/news", response_model=list[NewsOut], ...)
++async def list_news(repo: RepoDep, ...) -> list[NewsRow]:
++    return await repo.find(skip=skip, limit=limit, category=category, source=source, lang=lang or "")
+```
+
+Було: словник і list comprehension у пам'яті. Стало: SQL-запит. Подивимось, який SQL будує SQLAlchemy для трьох методів репозиторію:
+
+```python
+from sqlalchemy import func, select
+
+pg = postgresql.dialect()
+
+find = select(NewsRow).where(NewsRow.lang == "uk").order_by(NewsRow.id).offset(0).limit(5)
+print(find.compile(dialect=pg), "\n")
+
+stats = select(NewsRow.lang, func.count()).group_by(NewsRow.lang).order_by(func.count().desc(), NewsRow.lang)
+print(stats.compile(dialect=pg), "\n")
+
+add_many = (postgresql.insert(NewsRow)
+            .values(url="https://www.rbc.ua/ukr/news/x.html", title="Заголовок новини", source="rbc.ua",
+                    lang="uk", category="Новини", published_time=None)
+            .on_conflict_do_nothing(index_elements=["url"]).returning(NewsRow.id))
+print(add_many.compile(dialect=pg))
+```
+
+```text
+SELECT news.id, news.url, news.title, news.source, news.lang, news.category, news.published_time, news.scraped_at
+FROM news
+WHERE news.lang = %(lang_1)s::VARCHAR ORDER BY news.id
+ LIMIT %(param_1)s::INTEGER OFFSET %(param_2)s::INTEGER
+
+SELECT news.lang, count(*) AS count_1
+FROM news GROUP BY news.lang ORDER BY count(*) DESC, news.lang
+
+INSERT INTO news (url, title, source, lang, category, published_time) VALUES (%(url)s::VARCHAR, %(title)s::VARCHAR, %(source)s::VARCHAR, %(lang)s::VARCHAR, %(category)s::VARCHAR, %(published_time)s::TIME WITHOUT TIME ZONE) ON CONFLICT (url) DO NOTHING RETURNING news.id
+```
+
+- `%(lang_1)s`, `%(param_1)s` — **параметри**: значення йдуть окремо від SQL, як в уроці 30. SQL-ін'єкція через фільтр `?lang=` неможлива.
+- `stats` рахує в базі (`GROUP BY`), а не тягне всі рядки в Python.
+- `add_many` — один `INSERT` на весь збір: `ON CONFLICT (url) DO NOTHING` — дублікат **пропускає база**, `RETURNING news.id` повертає id лише вставлених рядків, тож `len(...)` — «скільки нових».
+
+### Покроково: повторний збір з `ON CONFLICT`
+
+Той самий знімок збираємо вдруге. Для кожного рядка PostgreSQL бере наступне значення лічильника `id` **до** перевірки `UNIQUE`:
 
 ```mermaid
 flowchart TD
@@ -96,343 +214,255 @@ flowchart TD
     classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
     classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
 
-    subgraph M1 ["1. request_context — вхід"]
+    subgraph S0 ["перший збір: 168 новин"]
         direction LR
-        a1["X-Request-ID = 7f3a9c21<br>start = 0 ms"]
+        a0["id 1 … 168<br>вставлено 168"] ~~~ a1["лічильник id = 168"]
     end
-    subgraph M2 ["2. rate_limit"]
+    subgraph S1 ["другий збір, рядок 1: url уже є"]
         direction LR
-        b1{"POST /api/scrape*?"} -- ні --> b2["пропустити<br>call_next"]
+        b0["nextval → 169"] --> b1{"url у news?"} -- так --> b2["DO NOTHING<br>id 169 пропав"]
     end
-    subgraph M3 ["3. invalidate_cache — вхід"]
+    subgraph S2 ["рядки 2–168: те саме"]
         direction LR
-        c1["нічого до ендпоінта<br>call_next"]
+        c0["nextval → 170 … 336"] --> c1["усі url є<br>вставлено 0"]
     end
-    subgraph E ["4. ендпоінт create_news + get_db"]
+    subgraph S3 ["POST /api/news: новий url"]
         direction LR
-        e1["INSERT"] --> e2["COMMIT<br>до відповіді"] --> e3["201"]
+        d0["nextval → 337"] --> d1{"url у news?"} -- ні --> d2["INSERT<br>id = 337"]
     end
-    subgraph M3b ["5. invalidate_cache — вихід"]
-        direction LR
-        d1{"запис і статус < 400?"} -- так --> d2["INCR news:version<br>1 → 2"]
-    end
-    subgraph M1b ["6. request_context — вихід"]
-        direction LR
-        f1["X-Process-Time = 9.8ms<br>рядок журналу"]
-    end
-    M1 --> M2 --> M3 --> E --> M3b --> M1b
+    S0 --> S1 --> S2 --> S3
 
-    class a1,c1,f1 step
+    class a0,a1 step
+    class b0,c0,d0 warning
     class b1,d1 decision
-    class b2 step
-    class e1,e3 step
-    class e2 warning
+    class b2,c1 error
     class d2 success
 ```
 
-Запит пішов через шари всередину, відповідь — назовні у зворотному порядку. Тому `request_context` — найзовнішній: його час включає всі інші шари.
+Перевіримо на справжній базі (PostgreSQL, сервер з кроку нижче) — таблиця чиста:
 
 ```python
 import httpx
 
 api = httpx.Client(base_url="http://127.0.0.1:8000")
-for headers in ({}, {"X-Request-ID": "lesson-39"}):
-    response = api.get("/health", headers=headers)
-    print(response.status_code, response.headers["X-Request-ID"], response.headers["X-Process-Time"].endswith("ms"))
+for attempt in (1, 2):
+    report = api.post("/api/scrape", json={"source": "snapshot"}).json()
+    print(f"збір {attempt}:", {key: report[key] for key in ("news_found", "news_saved", "news_total")})
+
+created = api.post("/api/news", json={"title": "Гривня зміцнилася до долара на міжбанку",
+                                      "url": "https://www.rbc.ua/ukr/news/hryvnia-777.html"}).json()
+print("нова новина: id =", created["id"])
 ```
 
 ```text
-200 1a1e32f4 True
-200 lesson-39 True
+збір 1: {'news_found': 168, 'news_saved': 168, 'news_total': 168}
+збір 2: {'news_found': 168, 'news_saved': 0, 'news_total': 168}
+нова новина: id = 337
 ```
 
-## Рефакторинг 2. Кеш стрічки в Redis { #refactor-2 }
+Дірки в id — нормальні: **id — ідентифікатор, а не лічильник новин**. Скільки новин — питай `count(*)` (`/api/news/count`), а не найбільший id. На SQLite (ноутбук заняття) та сама послідовність дає id = 169: там `INTEGER PRIMARY KEY` бере найбільший id + 1 і пропущені рядки номерів не забирають. Одна програма — різні id на різних базах; ще одна причина не рахувати новини за id.
 
-`GET /api/news` і `/api/news/stats` читають однакові дані сотні разів, а змінюються вони лише під час збору. Це cache-aside з уроку 30:
+## Сесія на запит і COMMIT до відповіді { #session }
 
-```diff title="news_hub/api.py: GET /api/news, було (38) → стало (39)"
--async def list_news(repo: RepoDep, skip: int = ..., ...) -> list[NewsRow]:
--    return await repo.find(skip=skip, limit=limit, category=category, source=source, lang=lang or "")
-+async def list_news(repo: RepoDep, cache: CacheDep, skip: int = ..., ...) -> Response:
-+    key = await cache.key("list", {"skip": skip, "limit": limit, "category": category,
-+                                   "source": source, "lang": lang or ""})
-+    if (cached := await cache.get(key)) is not None:
-+        return cached_json(cached, "HIT")                       # база не потрібна
-+    rows = await repo.find(skip=skip, limit=limit, category=category, source=source, lang=lang or "")
-+    payload = NEWS_LIST.dump_json([NewsOut.model_validate(row) for row in rows]).decode()
-+    await cache.set(key, payload)
-+    return cached_json(payload, "MISS")
+`get_db` — зі стартового `database.py` майже без змін:
+
+```python title="news_hub/db.py"
+async def get_db() -> AsyncIterator[AsyncSession]:
+    """FastAPI Depends: одна сесія (і одна транзакція) на HTTP-запит."""
+    async with SessionFactory() as session:
+        try:
+            yield session                # тут виконується ендпоінт
+            await session.commit()       # ендпоінт без винятку → COMMIT
+        except Exception:
+            await session.rollback()     # виняток → ROLLBACK
+            raise
 ```
 
-- **Ключ залежить від параметрів**: `?lang=uk&limit=3` і `?lang=ru&limit=3` — різні записи кешу. Параметри перетворюємо на JSON з відсортованими ключами й беремо короткий хеш (SHA-1): порядок параметрів у URL не має значення.
-- **У кеші — готовий JSON.** При hit повертаємо `Response` з цим рядком: ні бази, ні Pydantic.
-- **`X-Cache: HIT | MISS`** — заголовок для людей і тестів: видно, звідки відповідь.
-
-Сервер з кроку уроку 38 (PostgreSQL) + Redis (`REDIS_URL`), база й кеш порожні:
-
-```python
-import time
-
-api.post("/api/scrape", json={"source": "snapshot"})
-for attempt in (1, 2, 3):
-    response = api.get("/api/news", params={"lang": "uk", "limit": 3})
-    print(attempt, response.headers["X-Cache"], len(response.json()), "новини")
-print("інші параметри:", api.get("/api/news", params={"lang": "ru", "limit": 3}).headers["X-Cache"])
-```
-
-```text
-1 MISS 3 новини
-2 HIT 3 новини
-3 HIT 3 новини
-інші параметри: MISS
-```
-
-Що лежить у Redis:
-
-```python
-import asyncio
-
-from redis.asyncio import Redis
-
-
-async def show_cache_keys() -> None:
-    redis = Redis.from_url("redis://localhost:6379/0", decode_responses=True)
-    print("news:version =", await redis.get("news:version"))
-    for key in sorted(await redis.keys("news:v[0-9]*")):
-        print(key, "TTL", await redis.ttl(key), "с")
-    await redis.aclose()
-
-
-asyncio.run(show_cache_keys())
-```
-
-```text
-news:version = 1
-news:v1:list:c2e167a04a88 TTL 60 с
-news:v1:list:f0f06916a656 TTL 60 с
-```
-
-`KEYS` — лише для навчання: на великій базі Redis вона блокує сервер, поки перебирає всі ключі.
-
-### Інвалідація: версія кешу і COMMIT
-
-Після запису кеш має «забути» стару стрічку. Можна видаляти ключі за шаблоном (`KEYS news:*` → `DEL`), але це повільно й небезпечно. Натомість ключ містить **версію**: `news:v1:list:…`. Запис → `INCR news:version` → нові запити будують ключі `news:v2:…`, старі просто ніхто не читає, і TTL їх прибере.
-
-Але **коли** збільшувати версію? Інтуїтивно — в ендпоінті, одразу після запису. Проблема: COMMIT робить `get_db` **після** ендпоінта (урок 38). Між «версія +1» і COMMIT паралельний `GET` встигне прочитати ще **старі** дані з бази й покласти їх у кеш під **новою** версією — і 60 секунд усі отримуватимуть застарілу стрічку:
+Одна сесія на запит — усі зміни запиту однією транзакцією: або все, або нічого. Якщо ендпоінт отримує і `RepoDep`, і `RowDep`, FastAPI викличе `get_db` **один раз** на запит і дасть обом ту саму сесію.
 
 ```mermaid
 sequenceDiagram
-    participant W as POST /api/news
-    participant R as GET /api/news
-    participant C as Redis
+    participant C as Клієнт
+    participant F as FastAPI
+    participant G as get_db
+    participant R as NewsRepository
     participant DB as PostgreSQL
 
-    Note over W,DB: ❌ версія в ендпоінті — до COMMIT
-    W->>DB: INSERT (ще не видно іншим)
-    W->>C: INCR news:version → 2
-    R->>C: GET news:v2:list → miss
-    R->>DB: SELECT → стара стрічка
-    R->>C: SET news:v2:list = стара стрічка, 60 с
-    W->>DB: COMMIT
-    Note over W,DB: ✅ версія в middleware — після COMMIT
-    W->>DB: INSERT
-    W->>DB: COMMIT (get_db, scope=function)
-    W->>C: INCR news:version → 3 (invalidate_cache)
-    R->>C: GET news:v3:list → miss
-    R->>DB: SELECT → нова стрічка
+    C->>F: PATCH /api/news/7 {"category": "Економіка"}
+    F->>G: відкрити сесію
+    F->>R: get(7)
+    R->>DB: SELECT … WHERE id = 7
+    DB-->>R: рядок
+    F->>F: row.category = "Економіка"
+    F->>G: ендпоінт завершився без винятку
+    G->>DB: UPDATE news SET category=…, потім COMMIT
+    DB-->>G: OK
+    G-->>F: сесію закрито
+    F-->>C: 200 {"id": 7, "category": "Економіка", …}
 ```
 
-Тому версію збільшує middleware `invalidate_cache`: він отримує відповідь, коли COMMIT уже відбувся. Правило: **успішний** запит `POST`/`PATCH`/`DELETE` до `/api/news…` чи `/api/scrape` → нова версія; `409` чи `422` кеш не чіпають.
+!!! danger "З FastAPI 0.118 COMMIT за замовчуванням іде вже після відповіді"
+    До FastAPI 0.118 код після `yield` виконувався **до** відповіді. З версії 0.118 за замовчуванням — **після**: клієнт отримує `200`/`201` ще до COMMIT. Якщо COMMIT не вдасться (обрив з'єднання, обмеження бази, що перевіряється при COMMIT), клієнт уже почув «збережено», а даних немає.
 
-```python
-print("до:   ", api.get("/api/news/stats").headers["X-Cache"], api.get("/api/news/stats").headers["X-Cache"])
-created = api.post("/api/news", json={"title": "НБУ залишив облікову ставку без змін",
-                                      "url": "https://www.rbc.ua/ukr/news/nbu-rate-778.html"})
-stats = api.get("/api/news/stats")
-print("після:", created.status_code, stats.headers["X-Cache"], "total =", stats.json()["total"])
-again = api.post("/api/news", json={"title": "НБУ залишив облікову ставку без змін",
-                                    "url": "https://www.rbc.ua/ukr/news/nbu-rate-778.html"})
-print("409:  ", again.status_code, api.get("/api/news/stats").headers["X-Cache"])
-```
+    Перевірили однією залежністю, що падає після `yield` (`raise` замість COMMIT):
 
-```text
-до:    MISS HIT
-після: 201 MISS total = 169
-409:   409 HIT
-```
+    ```text
+    FastAPI 0.115.0 → 500 Internal Server Error
+    FastAPI 0.117.1 → 500 Internal Server Error
+    FastAPI 0.118.0 → 200 {"ok":true}
+    FastAPI 0.141.1 → 200 {"ok":true}
+    FastAPI 0.141.1, Depends(dep, scope="function") → 500 Internal Server Error
+    ```
 
-## Рефакторинг 3. Rate limit: 429 і `Retry-After` { #refactor-3 }
+    Тому — `Depends(get_db, scope="function")` (є з FastAPI 0.121): залежність завершується **до** відправлення відповіді. Тест `test_failed_commit_is_500_not_200` закріплює це: без `scope="function"` він падає.
 
-`RateLimitMiddleware` з `ai_bot` рахував повідомлення користувача Telegram. Переносимо ту саму ідею на HTTP: не більше 5 `POST /api/scrape*` за 60 секунд з однієї адреси.
+## Рефакторинг 3. Повний CRUD { #refactor-3 }
 
-```diff title="rate limit: ai_bot (було) → news_hub (стало)"
--count = await self._redis.incr(key)
--if count == 1:
--    await self._redis.expire(key, config.RATE_LIMIT_WINDOW)
--is_allowed = count <= config.RATE_LIMIT_REQUESTS
-+async with self._redis.pipeline(transaction=True) as pipe:      # MULTI … EXEC: разом або ніяк
-+    pipe.incr(key)
-+    pipe.expire(key, self.window, nx=True)                        # TTL лише новому ключу
-+    pipe.ttl(key)
-+    count, _, ttl = await pipe.execute()
-+return count <= self.limit, count, max(ttl, 0)
-```
-
-Навіщо: якщо `INCR` і `EXPIRE` — **два окремі** запити, і процес упаде (перезапуск, обрив з'єднання) між ними, ключ залишиться **без TTL**: наступні `INCR` дадуть 2, 3, 4… — і умова `count == 1` більше ніколи не спрацює. Користувача заблоковано назавжди. Перевіримо — «падіння» імітуємо, просто не викликаючи `EXPIRE`:
-
-```python
-from news_hub.middleware import RateLimiter
-
-
-async def old_vs_new() -> None:
-    redis = Redis.from_url("redis://localhost:6379/0", decode_responses=True)
-    await redis.delete("rate:old", "rate:scrape:crashed")
-
-    await redis.incr("rate:old")                   # INCR… і процес «упав» до EXPIRE
-    for _ in range(3):
-        count = await redis.incr("rate:old")
-        if count == 1:                             # ніколи не виконається
-            await redis.expire("rate:old", 60)
-    print("окремо:     count =", await redis.get("rate:old"), "| TTL =", await redis.ttl("rate:old"))
-
-    await redis.set("rate:scrape:crashed", 99)     # той самий «залишок» без TTL
-    allowed, count, ttl = await RateLimiter(redis).hit("crashed", "scrape")
-    print("транзакція: count =", count, "| дозволено:", allowed, "| TTL =", ttl)
-    await redis.aclose()
-
-
-asyncio.run(old_vs_new())
-```
-
-```text
-окремо:     count = 4 | TTL = -1
-транзакція: count = 100 | дозволено: False | TTL = 60
-```
-
-`TTL = -1` — ключ без часу життя: блокування назавжди. `EXPIRE … NX` ставить TTL, **якщо його немає**, і робить це в тій самій транзакції, що `INCR`, — навіть «залишок» після збою сам зникне за хвилину.
-
-Відповідь при перевищенні — `429 Too Many Requests` з `Retry-After` (скільки секунд чекати) і `X-RateLimit-*`:
-
-```python
-for attempt in range(1, 7):
-    response = api.post("/api/scrape", json={"source": "snapshot"})
-    print(attempt, response.status_code, "залишилось:", response.headers.get("X-RateLimit-Remaining"),
-          "| Retry-After:", response.headers.get("Retry-After"))
-print(response.json()["detail"])
-print("GET не обмежується:", api.get("/api/news/count").status_code)
-```
-
-Приклад виводу (`Retry-After` залежить від того, скільки секунд минуло від першого запиту у вікні):
-
-```text
-1 200 залишилось: 3 | Retry-After: None
-2 200 залишилось: 2 | Retry-After: None
-3 200 залишилось: 1 | Retry-After: None
-4 200 залишилось: 0 | Retry-After: None
-5 429 залишилось: 0 | Retry-After: 59
-6 429 залишилось: 0 | Retry-After: 59
-забагато запитів: 5 за 60 с; спробуй через 59 с
-GET не обмежується: 200
-```
-
-Перший `POST /api/scrape` був ще в рефакторингу 2 — тому `Remaining` уже на старті 3.
-
-### Фіксоване вікно: межа
-
-У docstring `ai_bot` алгоритм названо «Sliding Window Counter», але це **фіксоване вікно**: лічильник живе, поки живе ключ, і обнуляється разом із ним. На межі двох вікон можна пройти майже вдвічі більше запитів. Ліміт 3 за 2 секунди:
-
-```python
-async def window_edge() -> None:
-    redis = Redis.from_url("redis://localhost:6379/0", decode_responses=True)
-    await redis.delete("rate:edge:demo")
-    limiter = RateLimiter(redis, limit=3, window=2)
-    await limiter.hit("demo", "edge")                                  # 1-й запит відкрив вікно
-    while await redis.pttl("rate:edge:demo") > 150:                    # чекаємо кінця вікна
-        await asyncio.sleep(0.05)
-    start, allowed = time.perf_counter(), 0
-    while time.perf_counter() - start < 0.5:                           # пів секунди — запит кожні 50 мс
-        allowed += (await limiter.hit("demo", "edge"))[0]
-        await asyncio.sleep(0.05)
-    print(f"за 0.5 с пройшло {allowed} запитів при ліміті 3 за 2 с")
-    await redis.aclose()
-
-
-asyncio.run(window_edge())
-```
-
-```text
-за 0.5 с пройшло 5 запитів при ліміті 3 за 2 с
-```
-
-Для захисту від спаму зборами цього досить — простота важить більше. Де потрібна точність (платне API), беруть **ковзне вікно** — див. «Спробуй самостійно».
-
-## Рефакторинг 4. Фоновий збір: 202 і статус задачі { #refactor-4 }
-
-Живий збір — сім сторінок rbc.ua з тайм-аутом 15 с кожна (урок 37). Тримати HTTP-запит відкритим стільки часу погано: клієнт може відвалитись за тайм-аутом, проксі — обірвати з'єднання. Рішення з прототипу `news_dashboard` (`/api/scrape/archive`): відповісти **одразу** і працювати у фоні.
+| Дія | Метод і шлях | Успіх | Помилки |
+|---|---|---|---|
+| створити | `POST /api/news` | `201` + новина з `id` | `422` — не пройшла `NewsItem`; `409` — такий url уже є |
+| прочитати | `GET /api/news/{news_id}` | `200` | `404` |
+| змінити | `PATCH /api/news/{news_id}` | `200` | `404`, `422` |
+| видалити | `DELETE /api/news/{news_id}` | `204`, без тіла | `404` |
+| список, пошук | `GET /api/news`, `GET /api/news/search?q=` | `200` | `422` |
 
 ```python title="news_hub/api.py (фрагмент)"
-@app.post("/api/scrape/jobs", response_model=JobStatus, status_code=status.HTTP_202_ACCEPTED, ...)
-async def start_scrape_job(request: ScrapeRequest, background: BackgroundTasks, redis: RedisDep,
-                           scrapers: ScrapersDep, session_factory: ...) -> JobStatus:
-    job = await JobStore(redis).create(request.source, request.mode)            # status = queued
-    background.add_task(run_scrape_job, job.job_id, lambda: collect(request, scrapers), redis, session_factory)
-    return job                                                                  # 202 — одразу
-```
+async def get_news_or_404(news_id: int, repo: RepoDep) -> NewsRow:
+    row = await repo.get(news_id)
+    if row is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, detail=f"новини {news_id} немає")
+    return row
 
-```python title="news_hub/jobs.py (фрагмент)"
-async def run_scrape_job(job_id, collect, redis, session_factory) -> None:
-    """Виконується ПІСЛЯ відповіді клієнту (BackgroundTasks)."""
-    jobs = JobStore(redis)
-    await jobs.update(job_id, status="running")
+
+RowDep = Annotated[NewsRow, Depends(get_news_or_404)]
+
+
+@app.post("/api/news", response_model=NewsOut, status_code=status.HTTP_201_CREATED, ...)
+async def create_news(body: NewsCreate, repo: RepoDep) -> NewsRow:
+    item = NewsItem.from_raw({...})                   # та сама перевірка, що для парсера (урок 37)
     try:
-        outcome = await collect()
-        valid, _ = validate_news(outcome.news)
-        async with session_factory() as session:          # своя сесія: сесія запиту вже закрита
-            saved = await NewsRepository(session).add_many(valid)
-            await session.commit()
-        await NewsCache(redis).invalidate()                # після COMMIT
-        await jobs.update(job_id, status="done", news_found=len(outcome.news), news_saved=saved, ...)
-    except Exception as error:                             # задачу ніхто не чекає — фіксуємо помилку в статусі
-        await jobs.update(job_id, status="failed", error=f"{type(error).__name__}: {error}", ...)
+        return await repo.create(item)                # INSERT + flush: помилку UNIQUE видно одразу
+    except IntegrityError as error:
+        raise HTTPException(status.HTTP_409_CONFLICT, detail=f"новина з url {item.url} уже є") from error
+
+
+@app.patch("/api/news/{news_id}", response_model=NewsOut, ...)
+async def update_news(body: NewsPatch, row: RowDep) -> NewsRow:
+    for field, value in body.model_dump(exclude_unset=True).items():   # лише передані поля
+        setattr(row, field, value)                                     # UPDATE зробить COMMIT у get_db
+    return row
 ```
 
-- **`202 Accepted`** — «прийнято до роботи», а не «готово» (урок 32). У відповіді — `job_id`; стан — `GET /api/scrape/jobs/{job_id}`.
-- **Статус — hash у Redis** `job:<id>` з TTL на добу: `status`, `news_found`, `news_saved`, `error`, час. Старий код тримав його в MongoDB поруч із новинами.
-- **Своя сесія бази.** Сесія запиту (`get_db`) закривається до того, як почнеться фонова задача, — див. «Знайди помилку».
-- **Помилка не губиться**: у фоні її ніхто не побачить, тож вона стає статусом `failed` з текстом.
-
-Клієнт **опитує** статус (polling), поки задача не завершиться:
-
-Ліміт з рефакторингу 3 ще діє (ми вичерпали 5 запитів за хвилину), тож для демонстрації скинемо лічильник цієї адреси:
+- **`RowDep`** — «знайди новину або `404`» один раз для `GET`, `PATCH`, `DELETE`.
+- **`flush()` у `repo.create`** відправляє `INSERT` одразу, в межах транзакції: помилку `UNIQUE` ловимо в ендпоінті й перетворюємо на `409`, а не на `500` при COMMIT.
+- **`exclude_unset=True`** — `PATCH {"category": …}` не затре заголовок.
 
 ```python
-import redis as redis_sync
+row = api.post("/api/news", json={"title": "НБУ залишив облікову ставку без змін",
+                                  "url": "https://www.rbc.ua/ukr/news/nbu-rate-778.html",
+                                  "published_time": "14:00"})
+news_id = row.json()["id"]
+print("POST  ", row.status_code, {key: row.json()[key] for key in ("id", "lang", "category", "published_time")})
 
-redis_sync.Redis(decode_responses=True).delete("rate:scrape:127.0.0.1")
-api.delete("/api/news")
-job = api.post("/api/scrape/jobs", json={"source": "snapshot"})
-print(job.status_code, {key: job.json()[key] for key in ("status", "news_saved")})
-job_id = job.json()["job_id"]
+again = api.post("/api/news", json={"title": "НБУ залишив облікову ставку без змін",
+                                    "url": "https://www.rbc.ua/ukr/news/nbu-rate-778.html"})
+print("POST  ", again.status_code, again.json())
 
-seen = []
-while (state := api.get(f"/api/scrape/jobs/{job_id}").json())["status"] in ("queued", "running"):
-    seen.append(state["status"])
-    time.sleep(0.05)
-print("поки чекали:", sorted(set(seen)))
-print({key: state[key] for key in ("status", "news_found", "news_saved", "error")})
-print("у базі:", api.get("/api/news/count").json())
+patched = api.patch(f"/api/news/{news_id}", json={"category": "Економіка"})
+print("PATCH ", patched.status_code, patched.json()["category"], "|", patched.json()["title"])
+print("GET   ", api.get(f"/api/news/{news_id}").json()["category"])
+
+deleted = api.delete(f"/api/news/{news_id}")
+print("DELETE", deleted.status_code, repr(deleted.text))
+missing = api.get(f"/api/news/{news_id}")
+print("GET   ", missing.status_code, missing.json())
 ```
-
-Приклад виводу (що встигнемо побачити до завершення — `queued`, `running` чи нічого — залежить від швидкості машини):
 
 ```text
-202 {'status': 'queued', 'news_saved': 0}
-поки чекали: ['running']
-{'status': 'done', 'news_found': 168, 'news_saved': 168, 'error': None}
-у базі: {'count': 168}
+POST   201 {'id': 338, 'lang': 'uk', 'category': 'Новини', 'published_time': '14:00:00'}
+POST   409 {'detail': 'новина з url https://www.rbc.ua/ukr/news/nbu-rate-778.html уже є'}
+PATCH  200 Економіка | НБУ залишив облікову ставку без змін
+GET    Економіка
+DELETE 204 ''
+GET    404 {'detail': 'новини 338 немає'}
 ```
 
-`BackgroundTasks` виконуються в тому самому процесі після відповіді: задача пропаде, якщо процес перезапуститься. Для надійних черг — окремий worker і черга в Redis (Celery, RQ, arq; довідник уроку 48–49). Для кроку «зібрати зараз» агрегатору цього досить.
+### Дані переживають перезапуск
+
+Новини тепер у PostgreSQL, а не в процесі сервера. Порахуємо їх **окремою програмою** — без FastAPI, лише через репозиторій:
+
+```text
+$ python -c "import asyncio; from news_hub.db import SessionFactory; from news_hub.repository import NewsRepository; print(asyncio.run(NewsRepository(SessionFactory()).count()))"
+169
+```
+
+Зупини uvicorn (`Ctrl+C`), запусти знову — `GET /api/news/count` поверне те саме число. Два процеси uvicorn бачать ті самі новини.
+
+## Міграції Alembic { #alembic }
+
+`Base.metadata.create_all()` створює таблиці, яких немає, — але не змінює наявні. Коли в уроці 44 у таблиці з'явиться стовпець `summary`, база з тисячами новин має отримати його **без втрати даних**. Для цього — **міграції**: версії схеми як код, у git поруч із програмою (як `makemigrations`/`migrate` у Django, урок 34).
+
+```bash
+alembic revision --autogenerate --rev-id 0001 -m "news table"   # порівняти NewsRow з базою → файл міграції
+alembic upgrade head                                            # застосувати всі нові міграції
+alembic downgrade -1                                            # відкотити останню
+```
+
+Історія й поточна версія бази:
+
+```text
+$ alembic history
+<base> -> 0001 (head), news table — таблиця новин агрегатора (урок 39)
+$ alembic current
+0001 (head)
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+```
+
+SQL, який виконує міграція, можна подивитись, не чіпаючи бази (`--sql` — «офлайн»-режим):
+
+```text
+$ alembic upgrade head --sql
+BEGIN;
+
+CREATE TABLE alembic_version (
+    version_num VARCHAR(32) NOT NULL,
+    CONSTRAINT alembic_version_pkc PRIMARY KEY (version_num)
+);
+
+-- Running upgrade  -> 0001
+
+CREATE TABLE news (
+    id SERIAL NOT NULL,
+    url VARCHAR(500) NOT NULL,
+    title VARCHAR(300) NOT NULL,
+    source VARCHAR(100) NOT NULL,
+    lang VARCHAR(2) NOT NULL,
+    category VARCHAR(100) NOT NULL,
+    published_time TIME WITHOUT TIME ZONE,
+    scraped_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
+    PRIMARY KEY (id),
+    UNIQUE (url)
+);
+
+CREATE INDEX ix_news_category ON news (category);
+
+CREATE INDEX ix_news_lang ON news (lang);
+
+CREATE INDEX ix_news_source ON news (source);
+
+INSERT INTO alembic_version (version_num) VALUES ('0001') RETURNING alembic_version.version_num;
+
+COMMIT;
+
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Generating static SQL
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001, news table — таблиця новин агрегатора (урок 39)
+```
+
+!!! warning "Autogenerate — чернетка, а не готова міграція"
+    Alembic записав `server_default=sa.text('now()')`: текст функції PostgreSQL. На SQLite такої функції немає — міграція там падала. Тому в міграції — `sa.func.now()`: SQLAlchemy підставляє правильний SQL для кожної бази (`now()` для PostgreSQL, `CURRENT_TIMESTAMP` для SQLite). Правило: **кожну автоміграцію читай перед комітом**, а `alembic check` покаже, чи збігаються моделі з базою.
 
 ## Архітектура: було → стало { #architecture }
 
@@ -444,39 +474,39 @@ flowchart TD
     classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
     classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
 
-    subgraph OLD ["урок 38"]
+    subgraph OLD ["урок 38: у пам'яті процесу"]
         direction LR
-        C0["клієнт"] --> A0["ендпоінт"] --> R0["NewsRepository"] --> D0[("PostgreSQL")]
-        A0 -.-> S0["збір 7 сторінок<br>клієнт чекає"]
+        A0["api.py"] -- "Depends" --> S0["NewsStore<br>dict url → NewsItem"]
+        S0 --> L0["зникає при<br>перезапуску"]
     end
-    subgraph NEW ["урок 39"]
+    subgraph NEW ["урок 39: база даних"]
         direction LR
-        C1["клієнт"] --> MW["middleware<br>id, час, 429, версія кешу"]
-        MW --> A1["ендпоінт"]
-        A1 -- "hit" --> K[("Redis<br>кеш, ліміти, задачі")]
-        A1 -- "miss" --> R1["NewsRepository"] --> D1[("PostgreSQL")]
-        A1 -- "202" --> BG["BackgroundTasks<br>run_scrape_job"]
-        BG --> R1
-        BG --> K
+        A1["api.py<br>CRUD, 201/404/409/204"] -- "Depends" --> R1["NewsRepository<br>увесь SQL"]
+        A1 -- "Depends, scope=function" --> G1["get_db<br>сесія й транзакція"]
+        R1 --> G1
+        G1 --> DB[("PostgreSQL<br>або SQLite")]
+        M1["Alembic<br>migrations/"] --> DB
+        T1["tables.py<br>NewsRow"] -.-> R1
+        T1 -.-> M1
     end
     subgraph NEXT ["далі"]
         direction LR
-        N1["урок 41: тести API"] ~~~ N2["урок 46: rate limit і проксі,<br>X-Forwarded-For"] ~~~ N3["урок 49: worker і черга"]
+        N1["урок 40: кеш Redis<br>перед репозиторієм"] ~~~ N2["урок 42: тести API<br>на тестовій базі"] ~~~ N3["урок 44: стовпець summary<br>міграція 0002"]
     end
     OLD --> NEW --> NEXT
 
-    class C0,A0,R0,C1,A1,R1 step
-    class S0 error
-    class D0,D1 success
-    class MW,BG warning
-    class K success
+    class A0,S0 step
+    class L0 error
+    class A1,R1,T1 step
+    class G1 warning
+    class DB,M1 success
     class N1,N2,N3 success
 ```
 
-- **Middleware — наскрізне.** Журнал, час, ліміт, інвалідація кешу стосуються всіх ендпоінтів — їх не копіюють у кожен.
-- **Redis — не основне сховище.** Кеш, лічильники лімітів, статуси задач можна втратити без шкоди: кеш перерахується, ліміт почнеться з нуля, статус задачі — лише для зручності. Новини — лише в PostgreSQL.
-- **Порядок подій важливий.** Інвалідація кешу — після COMMIT; фонова задача — після відповіді й зі своєю сесією.
-- **Адреса клієнта.** `request.client.host` — адреса того, хто підключився. За проксі (nginx, урок 49) це буде адреса проксі, і всі клієнти ділитимуть один ліміт; тоді адресу беруть з `X-Forwarded-For`, але лише від довіреного проксі — урок 46.
+- **Репозиторій — єдине місце з SQL.** Ендпоінти не знають, PostgreSQL це чи SQLite; тести ганяють ті самі 32 тести на обох (`TEST_DATABASE_URL`). Детальніше про патерн — розділ 7 [довідника](fastapi/fastapi_documentation.md#s7).
+- **Транзакція = запит.** `get_db` відкриває сесію, ендпоінт працює, COMMIT — до відповіді (`scope="function"`). Розділ 8 довідника — Unit of Work, той самий принцип для кількох репозиторіїв.
+- **Правила даних — у базі.** `UNIQUE (url)` тримає і API, і міграції, і будь-яку іншу програму, що пише в `news`; код лише перетворює помилку на зрозумілий `409`.
+- **Схема — у git.** `tables.py` описує, якою таблиця має бути; `migrations/` — як до цього дійти з будь-якої попередньої версії.
 
 ### Тести і mypy
 
@@ -484,149 +514,157 @@ flowchart TD
 
 ```text
 $ pytest -q -p no:cacheprovider
-.........................................                                                    [100%]
-41 passed in 1.93s
+................................                                                             [100%]
+32 passed in 0.93s
+$ TEST_DATABASE_URL=postgresql+asyncpg://news:news@localhost:5432/news_hub_test pytest -q -p no:cacheprovider
+................................                                                             [100%]
+32 passed in 2.46s
 $ mypy --strict news_hub
-Success: no issues found in 12 source files
+Success: no issues found in 9 source files
 ```
 
-Додалось 9 тестів у `tests/test_redis.py`: hit/miss, інвалідація після запису і її відсутність після `409`, заголовки middleware, `429` з `Retry-After`, «ключ без TTL лікується» (зі старою логікою `ai_bot` цей тест падає), фоновий збір — `done`, `failed` з текстом помилки, `404` невідомої задачі. Redis у тестах — `fakeredis`; ті самі тести на справжніх серверах: `TEST_DATABASE_URL=… TEST_REDIS_URL=redis://localhost:6379/15 pytest`.
+`tests/conftest.py` створює для кожного тесту окремий engine і порожні таблиці (`Base.metadata.create_all`) і підміняє `get_db`; за замовчуванням — SQLite у пам'яті, з `TEST_DATABASE_URL` — PostgreSQL. Додалось 9 тестів CRUD: `201`, `409`, `422`, `404`, `PATCH` і збереження змін, `204`, `GROUP BY`, пошук, «COMMIT не вдався → `500`».
 
 ## Практика { #practice }
 
-### Розібраний приклад: кеш для `GET /api/news/{news_id}`
+### Розібраний приклад: пошук `GET /api/news/search?q=`
 
-Картку новини відкривають частіше, ніж стрічку. Закешуємо і її:
+В уроці 38 пошук був завданням «спробуй самостійно». У прототипі `news_dashboard` він виглядав так: `{"title": {"$regex": keyword, "$options": "i"}}` — рядок користувача ставав **регулярним виразом** у MongoDB. Тепер — SQL:
 
-1. **Ключ** — `await cache.key("item", {"id": news_id})`: версія спільна, тож будь-який запис у новини скидає й картки.
-2. **Hit** — `cached_json(cached, "HIT")`.
-3. **Miss** — прочитати з репозиторію; **немає — `404`, і `404` не кешуємо**: інакше новина, створена за секунду, 60 секунд виглядатиме відсутньою.
-4. **Запис** — `NewsOut.model_validate(row).model_dump_json()` → `cache.set`.
-
-```python title="news_hub/api.py (розв'язок)"
-@app.get("/api/news/{news_id}", response_model=NewsOut, ...)
-async def get_news(news_id: int, repo: RepoDep, cache: CacheDep) -> Response:
-    key = await cache.key("item", {"id": news_id})
-    if (cached := await cache.get(key)) is not None:
-        return cached_json(cached, "HIT")
-    row = await repo.get(news_id)
-    if row is None:
-        raise HTTPException(404, detail=f"новини {news_id} немає")
-    payload = NewsOut.model_validate(row).model_dump_json()
-    await cache.set(key, payload)
-    return cached_json(payload, "MISS")
-```
-
-`RowDep` тут не підходить: він читає базу **до** перевірки кешу.
-
-### Зміни приклад
-
-1. Зроби TTL налаштовуваним: `NEWS_CACHE_TTL` зі змінної середовища, за замовчуванням 60.
-2. Додай ліміт для `POST /api/news`: 30 за хвилину, дія `"create"` — окремий лічильник від `"scrape"`.
-
-### Спробуй самостійно: ковзне вікно
-
-Напиши `SlidingRateLimiter.hit(client, action)` на **sorted set** (урок 30):
-
-- ключ `rate:sliding:<action>:<client>`, елемент — унікальний id запиту, бал — час у мілісекундах;
-- в одній транзакції: `ZREMRANGEBYSCORE` (прибрати старші за `now - window`), `ZADD` (додати поточний), `ZCARD` (скільки у вікні), `PEXPIRE` (ключ зникне, коли все застаріє);
-- дозволено, якщо `ZCARD <= limit`.
-
-**Критерії перевірки:** демонстрація «межі вікна» з рефакторингу 3 пропускає не більше 3 запитів за будь-які 2 секунди; тест з `fakeredis`; `mypy --strict` чистий.
-
-### Знайди помилку { #find-bug }
-
-Колега вирішив, що окрема `session_factory` для фону — зайве ускладнення, і передав у задачу **репозиторій запиту**, як прототип `news_dashboard` передавав `db`. Перевіримо в процесі, через `TestClient`:
+1. **Репозиторій.** `NewsRow.title.icontains(q, autoescape=True)` → `title ILIKE '%' || :q || '%'` у PostgreSQL. `q` — параметр; `autoescape=True` — символи `%` і `_` у запиті шукаються буквально, а не як «будь-що».
+2. **Ендпоінт.** `q: str = Query(min_length=2, max_length=60)` — порожній чи надто довгий пошук відсічено до SQL.
+3. **Порядок маршрутів.** `/api/news/search` оголошено **до** `/api/news/{news_id}`: інакше FastAPI спробував би прочитати `"search"` як `news_id: int` і відповів би `422` (урок 38, розібраний приклад).
 
 ```python
-from fastapi import BackgroundTasks
-
-from news_hub.api import JobStore, RedisDep, RepoDep, app
-from news_hub.models import validate_news
-from news_hub.repository import NewsRepository
-from news_hub.snapshot import load_snapshot
-from fastapi.testclient import TestClient
-
-
-async def scrape_in_background(repo: NewsRepository, jobs: JobStore, job_id: str) -> None:
-    valid, _ = validate_news(load_snapshot())
-    saved = await repo.add_many(valid)
-    await jobs.update(job_id, status="done", news_saved=saved)
-
-
-@app.post("/api/scrape/jobs-buggy", status_code=202)
-async def start_buggy(background: BackgroundTasks, repo: RepoDep, redis: RedisDep) -> dict[str, str]:
-    job = await JobStore(redis).create("snapshot", "async")
-    background.add_task(scrape_in_background, repo, JobStore(redis), job.job_id)
-    return {"job_id": job.job_id}
-
-
-with TestClient(app) as client:
-    client.delete("/api/news")
-    job_id = client.post("/api/scrape/jobs-buggy").json()["job_id"]
-    job = client.get(f"/api/scrape/jobs/{job_id}").json()
-    print("задача:", {key: job[key] for key in ("status", "news_saved")})
-    print("у базі:", client.get("/api/news/count").json())
+for q in ("зеленськ", "ЗЕЛЕНСЬК", "%%"):
+    found = api.get("/api/news/search", params={"q": q, "limit": 100}).json()
+    print(repr(q), "→", len(found), [news["title"][:40] for news in found[:2]])
+print(api.get("/api/news/search", params={"q": "а"}).status_code)
 ```
 
 ```text
-задача: {'status': 'done', 'news_saved': 168}
-у базі: {'count': 0}
+'зеленськ' → 11 ['У Путіна образилися на дозвіл Зеленськог', 'Зеленський дозволив проведення параду в ']
+'ЗЕЛЕНСЬК' → 11 ['У Путіна образилися на дозвіл Зеленськог', 'Зеленський дозволив проведення параду в ']
+'%%' → 0 []
+422
 ```
 
-Задача звітує «збережено 168», а в базі порожньо. Чому, і чому це найгірший вид помилки?
+### Зміни приклад
+
+1. Додай до пошуку фільтр `lang: Literal["uk", "ru"] | None` — у репозиторії це ще одна умова `.where(...)`.
+2. Додай у `NewsRepository` метод `latest(limit)` — найновіші за `scraped_at` (`order_by(NewsRow.scraped_at.desc())`), і ендпоінт `GET /api/news/latest`. Не забудь про порядок маршрутів.
+
+### Спробуй самостійно: міграція 0002
+
+Підготуй таблицю до уроку 44 (підсумки від Gemini):
+
+- у `NewsRow` — стовпець `summary: Mapped[str | None] = mapped_column(Text)`;
+- `alembic revision --autogenerate --rev-id 0002 -m "news summary"` → **прочитай** файл міграції;
+- `alembic upgrade head` на базі, де вже є новини; `alembic downgrade -1` і знову `upgrade head`;
+- `summary` — у `NewsOut` і в `NewsPatch`.
+
+**Критерії перевірки:** новини, зібрані до міграції, лишились на місці з `summary: null`; `PATCH {"summary": "…"}` зберігає підсумок; `alembic check` — «No new upgrade operations detected»; тести проходять на SQLite і PostgreSQL.
+
+### Знайди помилку { #find-bug }
+
+Студент вирішив, що `ON CONFLICT` — це складно, і написав збір «по-простому»: для кожної новини перевірити, чи є такий url, і лише тоді додати. Запускаємо **два збори одночасно** — як два користувачі натиснули «Зібрати» або бот і планувальник спрацювали разом:
+
+```python
+import asyncio
+
+from sqlalchemy import delete, select
+
+from news_hub.db import SessionFactory
+from news_hub.models import validate_news
+from news_hub.repository import news_values
+from news_hub.snapshot import load_snapshot
+
+news, _ = validate_news(load_snapshot()[:20])
+
+
+async def naive_add_many(items):
+    async with SessionFactory() as session:
+        saved = 0
+        for item in items:
+            exists = await session.scalar(select(NewsRow.id).where(NewsRow.url == str(item.url)))
+            if exists is None:                     # «такого url ще немає — додаю»
+                session.add(NewsRow(**news_values(item)))
+                saved += 1
+        await session.commit()
+        return saved
+
+
+async def two_scrapes_at_once():
+    async with SessionFactory() as session:
+        await session.execute(delete(NewsRow))
+        await session.commit()
+    results = await asyncio.gather(naive_add_many(news), naive_add_many(news), return_exceptions=True)
+    for result in results:
+        print(type(result).__name__, str(result).splitlines()[0].split(") ", 1)[-1])
+
+
+asyncio.run(two_scrapes_at_once())
+```
+
+```text
+int 20
+IntegrityError duplicate key value violates unique constraint "news_url_key"
+```
+
+Кожен збір «перевірив» усі 20 url, і кожен вирішив, що новин немає. Чому, і що з цим робити?
 
 ??? success "Відповідь"
 
-    Фонова задача виконується **після** відповіді. На той момент `get_db` уже зробив COMMIT своєї транзакції і закрив сесію. `AsyncSession` після закриття можна використати знову: вона тихо відкриває **нову** транзакцію, `INSERT` виконується, `RETURNING` повертає 168 id… але COMMIT цієї нової транзакції ніхто не робить — `get_db` уже завершився. Поки збирач сміття не прибере сесію, її з'єднання висить з **відкритою транзакцією**: у PostgreSQL — «idle in transaction» з блокуваннями рядків, у SQLite — блокування всієї бази на запис (у ноутбуці заняття наступний `INSERT` падав з `database is locked`). Потім транзакція відкочується.
+    **Гонка «перевір, потім зроби» (check-then-act).** Між `SELECT` і `COMMIT` є проміжок, і на кожному `await` цикл подій перемикається на інший збір. Обидва встигли виконати `SELECT` раніше, ніж хтось зробив `COMMIT`, тож обидва «побачили» порожню таблицю. Перший COMMIT пройшов, другий упав на `UNIQUE`: у справжньому ендпоінті це був би `500`.
 
-    Найгірший вид помилки: **жодного винятку**, статус `done`, `news_saved: 168` — а даних немає. Помилку побачать лише користувачі, коли стрічка лишиться порожньою.
+    У тестах з одним користувачем цей код працює завжди — помилка проявляється лише під паралельними запитами. Найгірший вид помилок: у розробці її не видно.
 
-    Правило: фонова задача живе довше за запит, тож не бере в нього **нічого з часом життя запиту** — сесію бази, відкриті файли, об'єкт `Request`. Вона створює свої ресурси (`session_factory()`) і сама робить COMMIT — як `run_scrape_job`. Незмінні дані (id, параметри, JSON) передавати можна.
+    Виправлення — не перевіряти в Python, а **віддати рішення базі одним оператором**: `INSERT … ON CONFLICT (url) DO NOTHING` у `NewsRepository.add_many`. База перевіряє унікальність атомарно, тому два одночасні збори просто вставлять кожну новину рівно один раз. Для одиничного `POST /api/news` — те саме правило з іншого боку: `UNIQUE` у таблиці + `IntegrityError` → `409`.
 
 ## Підсумок
 
 | Поняття | Що запам'ятати |
 |---|---|
-| Middleware | код до й після кожного запиту; `call_next` — далі по ланцюгу; можна не викликати й відповісти самому |
-| Порядок middleware | останній зареєстрований — зовнішній; запит — всередину, відповідь — назовні |
-| `X-Request-ID`, `X-Process-Time` | позначка запиту і час обробки — для журналу й пошуку проблем |
-| Cache-aside в API | ключ з параметрів запиту; у кеші — готовий JSON; `X-Cache: HIT/MISS` |
-| Версія кешу | `INCR news:version` замість видалення ключів за шаблоном; збільшувати **після COMMIT** |
-| Rate limit | `INCR` + `EXPIRE … NX` однією транзакцією; `429`, `Retry-After`, `X-RateLimit-*` |
-| Фіксоване vs ковзне вікно | фіксоване — простіше, на межі пропускає до 2× ліміту; ковзне — точніше, sorted set |
-| `202 Accepted` + `BackgroundTasks` | відповісти одразу, працювати після відповіді; статус — polling |
-| Фонова задача | своя сесія бази й свій COMMIT; помилку — у статус |
-| Redis vs PostgreSQL | Redis — те, що можна втратити (кеш, ліміти, статуси); дані — в базі |
+| `DATABASE_URL` | діалект+драйвер://користувач:пароль@хост:порт/база; зі змінної середовища |
+| `create_async_engine` | пул з'єднань; для PostgreSQL — `asyncpg`, для SQLite — `aiosqlite` |
+| `Mapped` / `mapped_column` | таблиця як клас; `X \| None` — `NULL` дозволено |
+| Pydantic vs SQLAlchemy модель | перевірка даних vs рядок таблиці; `from_attributes=True` з'єднує їх у відповіді |
+| Сесія | робоче місце запиту: зміни → `flush` (SQL у транзакції) → `commit` |
+| `get_db` + `scope="function"` | одна сесія й транзакція на запит, COMMIT до відповіді |
+| Репозиторій | увесь SQL в одному місці; ендпоінти не знають, яка база |
+| `ON CONFLICT DO NOTHING` | дублікати відсіює база атомарно; id при цьому можуть «перескакувати» |
+| CRUD-коди | `201` створено, `404` немає, `409` конфлікт, `204` видалено без тіла |
+| Alembic | версії схеми в git; autogenerate — чернетка, читай перед комітом |
+| Check-then-act | «перевір, потім встав» ламається під паралельними запитами — правило даних віддай базі |
 
 ### Самоперевірка
 
-1. У якому порядку виконаються три middleware з `api.py` для запиту і для відповіді?
-2. Чому в кеші зберігаємо готовий JSON, а не об'єкти `NewsRow`?
-3. Чому версію кешу збільшує middleware, а не ендпоінт?
-4. Що станеться зі старим rate limit, якщо процес упаде між `INCR` і `EXPIRE`?
-5. Скільки запитів може пройти фіксоване вікно «3 за 2 с» за пів секунди на межі?
-6. Чому фонова задача не може використати сесію бази з запиту?
+1. Чим `NewsRow` відрізняється від `NewsItem` і чому не одна модель на все?
+2. Навіщо `flush()` у `repo.create`, якщо COMMIT однаково буде в `get_db`?
+3. Що станеться з клієнтом, якщо COMMIT не вдасться, з `scope="function"` і без нього (FastAPI ≥ 0.118)?
+4. Чому id новин ідуть з дірками і чи це проблема?
+5. Навіщо міграції, якщо є `Base.metadata.create_all()`?
+6. Чому два одночасні `naive_add_many` зламались, а два `add_many` — ні?
 
 ??? success "Відповіді"
 
-    1. Запит: `request_context` → `rate_limit` → `invalidate_cache` → ендпоінт. Відповідь — навпаки: `invalidate_cache` → `rate_limit` → `request_context`.
-    2. Redis зберігає рядки; об'єкти SQLAlchemy прив'язані до сесії й не серіалізуються. Готовий JSON при hit віддаємо як є — ні бази, ні Pydantic.
-    3. COMMIT робить `get_db` після ендпоінта. Версія, збільшена до COMMIT, дозволяє паралельному GET закешувати старі дані під новою версією. Middleware бачить відповідь уже після COMMIT.
-    4. Ключ лишиться без TTL, `count == 1` більше не трапиться — клієнта заблоковано назавжди.
-    5. До 5: залишок старого вікна (2) + нове вікно (3). На сторінці виміряли саме це.
-    6. Задача виконується після відповіді, коли `get_db` уже зробив COMMIT і закрив сесію. Записи у «воскреслій» сесії ніхто не закомітить — дані тихо пропадуть.
+    1. `NewsItem` перевіряє дані ззовні (довжина, домен, мова); `NewsRow` описує рядок таблиці (типи стовпців, `UNIQUE`, `id` і `scraped_at` від бази). У них різні задачі й різний час роботи; змішування тягне SQL у перевірку або правила перевірки в таблицю.
+    2. Щоб `INSERT` пішов у базу зараз і помилка `UNIQUE` виникла в ендпоінті — там її перетворюємо на `409`. Без `flush` вона вилетіла б при COMMIT у `get_db` як `500`.
+    3. З `scope="function"` — `500`: залежність завершується до відповіді. Без нього — клієнт уже отримав `200`/`201`, а дані не збережено.
+    4. PostgreSQL бере значення лічильника до перевірки `UNIQUE`, і пропущені рядки його «з'їдають». Не проблема: id лише ідентифікує рядок; кількість — `count(*)`.
+    5. `create_all` лише створює відсутні таблиці. Міграції змінюють наявну схему (додати стовпець, індекс) без втрати даних, у контрольованому порядку, з можливістю відкату — і зберігаються в git.
+    6. `naive_add_many` вирішує в Python між `SELECT` і `COMMIT` — інший збір встигає втрутитись. `add_many` робить один `INSERT … ON CONFLICT DO NOTHING`: унікальність перевіряє база атомарно.
 
 ### Що далі
 
-- Ноутбук заняття: [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_39_middleware_redis/note_lesson_39_redis_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_39_middleware_redis/note_lesson_39_redis.ipynb){ .solutions-link }.
-- Урок 40 — автентифікація й безпека (Django-гілка, нотатки). Агрегатор повернеться в уроці 41: тести API на тестовій базі й з підміною мережі.
+- Ноутбук заняття: [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_39_fastapi_sqlalchemy/note_lesson_39_sqlalchemy_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_39_fastapi_sqlalchemy/note_lesson_39_sqlalchemy.ipynb){ .solutions-link }.
+- Урок 40 — middleware і Redis: кеш `GET /api/news` перед репозиторієм, rate limit на `POST /api/scrape`, фоновий збір.
 
 ## Документація і джерела
 
-- Код: [`news_hub`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_4/lessons/lesson_39_middleware_redis/news_hub) — Redis-клієнт з `production_bot/backend/core/redis.py`, rate limit з `ai_bot/app/middlewares/rate_limit.py` і `repositories/rate_limit_repo.py` (стартовий код), фоновий збір — з `news_dashboard/app/main.py`.
-- Урок 30 курсу — [Redis overview](../m3/lesson_30.md): cache-aside, `INCR`/`EXPIRE`, pipeline, sorted set.
-- FastAPI: [Middleware](https://fastapi.tiangolo.com/tutorial/middleware/), [Background Tasks](https://fastapi.tiangolo.com/tutorial/background-tasks/), [Custom Response](https://fastapi.tiangolo.com/advanced/custom-response/)
-- Redis: [INCR — pattern: rate limiter](https://redis.io/docs/latest/commands/incr/), [EXPIRE (опції NX/XX/GT/LT)](https://redis.io/docs/latest/commands/expire/), [Transactions](https://redis.io/docs/latest/develop/interact/transactions/), [KEYS — не для продакшену](https://redis.io/docs/latest/commands/keys/)
-- redis-py: [asyncio](https://redis.readthedocs.io/en/stable/examples/asyncio_examples.html); [fakeredis](https://fakeredis.readthedocs.io/)
-- HTTP: [429 Too Many Requests](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429), [Retry-After](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Retry-After), [202 Accepted](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/202)
+- Код: [`news_hub`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_4/lessons/lesson_39_fastapi_sqlalchemy/news_hub) — шар бази зі стартового `production_bot` (`backend/core/database.py`, `backend/repositories/base.py`, `migrations/`, `docker-compose.yml`), API — з уроку 38.
+- Довідник курсу: [FastAPI: архітектура, async і production-патерни](fastapi/fastapi_documentation.md), розділи 6–8.
+- SQLAlchemy 2.0: [ORM Quick Start](https://docs.sqlalchemy.org/en/20/orm/quickstart.html), [Declarative Mapping](https://docs.sqlalchemy.org/en/20/orm/declarative_tables.html), [Asynchronous I/O](https://docs.sqlalchemy.org/en/20/orm/extensions/asyncio.html), [Session Basics](https://docs.sqlalchemy.org/en/20/orm/session_basics.html), [INSERT…ON CONFLICT (PostgreSQL)](https://docs.sqlalchemy.org/en/20/dialects/postgresql.html#insert-on-conflict-upsert)
+- FastAPI: [SQL (Relational) Databases](https://fastapi.tiangolo.com/tutorial/sql-databases/), [Dependencies with yield](https://fastapi.tiangolo.com/tutorial/dependencies/dependencies-with-yield/)
+- Alembic: [Tutorial](https://alembic.sqlalchemy.org/en/latest/tutorial.html), [Auto Generating Migrations](https://alembic.sqlalchemy.org/en/latest/autogenerate.html)
+- PostgreSQL: [INSERT … ON CONFLICT](https://www.postgresql.org/docs/current/sql-insert.html#SQL-ON-CONFLICT), [Sequence functions](https://www.postgresql.org/docs/current/functions-sequence.html)

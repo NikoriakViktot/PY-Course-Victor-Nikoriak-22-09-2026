@@ -1,43 +1,46 @@
-# Урок 30. Redis overview
+# Урок 30. Основи SQL (PostgreSQL)
 
-База PostgreSQL з уроку 29 стала для диспетчерської «Смачно + Таксі» **джерелом правди**: замовлення, кур'єри й гроші не загубляться. Але сервіс росте, і з'являються питання, для яких реляційна база — не найкращий інструмент:
+У модулі 2 диспетчерська «Смачно + Таксі» тримала замовлення в пам'яті програми (пакет `dispatch`, урок 29), а звіти — у JSON-файлах (урок 15). Поки сервіс маленький, цього досить. Але вже зараз:
 
-- лічильник «скільки замовлень за останню хвилину» оновлюється сотні разів на секунду — і нікому не потрібен завтра;
-- тижневий звіт власниці рахується 2 секунди, а його відкривають десять разів на хвилину;
-- SMS клієнтам треба відправляти **у фоні**: програма, що приймає замовлення, не повинна чекати SMS-шлюз;
-- рейтинг кур'єрів має оновлюватися миттєво після кожної доставки.
+- програма перезапустилася — черга замовлень **зникла**;
+- три оператори одночасно записують у той самий JSON-файл — хтось **перезаписує** зміни іншого;
+- власниця питає «скільки заробив кожен кур'єр у Поділ за тиждень» — і доводиться писати новий цикл на Python;
+- у файлі опинилося замовлення з сумою `-120` і кур'єром, якого не існує, — **ніхто не перевірив**.
 
-Для таких задач поруч із PostgreSQL ставлять **Redis** — сховище «ключ → значення», яке тримає дані **в оперативній пам'яті** і відповідає за мікросекунди. Сьогодні — що вміє Redis, які в ньому структури даних (знайомі з уроку 28!) і як працювати з ним з Python.
+Усе це — задачі **бази даних**. Сьогодні — реляційна база **PostgreSQL** і мова запитів до неї **SQL**: як описати таблиці, записати й змінити дані, поставити запитання до даних і працювати з базою з Python.
 
-**Що потрібно з попередніх уроків:** словник (урок 6), стан гонитви (урок 27), черга, стек, купа й LRU-кеш (урок 28), PostgreSQL і клієнт-сервер (урок 29).
+**Що потрібно з попередніх уроків:** словники й підрахунок за ключем (урок 6), файли й JSON (урок 15), винятки (урок 14), `eval` і небезпека виконання чужого тексту (довідник «eval()»), класи й композиція (уроки 20–21), `with` (урок 15), пакет `dispatch` (урок 29).
 
 **Після уроку ти зможеш:**
 
-- пояснити, чим Redis відрізняється від PostgreSQL і для чого його ставлять поруч;
-- працювати з ключами, лічильниками й часом життя (`SET`, `GET`, `INCR`, `EXPIRE`, `TTL`);
-- обрати структуру Redis під задачу: список, хеш, множина, відсортована множина;
-- працювати з Redis з Python через `redis-py`;
-- реалізувати кеш **cache-aside**, чергу задач і обмеження частоти запитів (rate limit).
+- пояснити, що дає база даних порівняно з файлами, і як влаштована пара «клієнт — сервер PostgreSQL»;
+- спроєктувати таблиці з первинними й зовнішніми ключами та обмеженнями (`NOT NULL`, `UNIQUE`, `CHECK`);
+- створювати таблиці (`CREATE TABLE`) і змінювати дані (`INSERT`, `UPDATE`, `DELETE`);
+- писати запити `SELECT` з фільтрами, сортуванням, агрегатами, `GROUP BY`, `JOIN` і підзапитами;
+- пояснити, що таке транзакція, і користуватися `COMMIT` / `ROLLBACK`;
+- працювати з PostgreSQL з Python через `psycopg`, передаючи дані **параметрами**, а не f-рядками.
 
-**Задача розділу.** Лічильники, кеш звітів, черга SMS і рейтинг кур'єрів для диспетчерської. Повний приклад — у розділі [«Практика»](#practice).
+**Задача розділу.** База диспетчерської: ресторани, кур'єри, замовлення — і звіти для власниці. Повний приклад — у розділі [«Практика»](#practice).
 
-**Ноутбук заняття:** [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_3/lessons/lesson_30_redis_overview/note_lesson_30_redis_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_3/lessons/lesson_30_redis_overview/note_lesson_30_redis.ipynb){ .solutions-link } — зі встановленням Redis прямо в Colab.
+**Ноутбук заняття:** [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_3/lessons/lesson_30_sql_basics/note_lesson_30_sql_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_3/lessons/lesson_30_sql_basics/note_lesson_30_sql.ipynb){ .solutions-link } — з кліткою, що встановлює PostgreSQL прямо в Colab.
 
 ## Пригадай
 
-1. Чому `balance = balance + 1` з кількох потоків губить оплати (урок 27)?
-2. Що викидає LRU-кеш, коли місця немає (урок 28)?
-3. Що гарантує `COMMIT` у PostgreSQL (урок 29)?
+1. Як порахувати кількість чеків за кожен день списку `orders` у Python (урок 6)?
+2. Чому `eval(input())` небезпечний?
+3. Що гарантує `with open(...) as f:`?
 
 ??? success "Відповіді"
 
-    1. «Прочитати» і «записати» — два кроки, між якими інший потік встигає своє. Сьогодні побачимо, як Redis робить «прочитати-додати-записати» однією неподільною командою.
-    2. Запис, до якого найдовше не зверталися. Redis уміє працювати саме так, коли закінчується пам'ять.
-    3. Що зміни записані на диск і переживуть навіть вимкнення сервера. Redis за замовчуванням дає слабшу гарантію — і це свідомий компроміс заради швидкості.
+    1. Словник-лічильник: для кожного чека `counts[order.day] = counts.get(order.day, 0) + 1`. Сьогодні той самий звіт — одним рядком SQL: `GROUP BY`.
+    2. Він виконує будь-який код, який ввів користувач. Сьогодні побачимо ту саму діру в базах даних — SQL-ін'єкцію — і як її закрити.
+    3. Файл закриється, навіть якщо всередині блоку станеться виняток. Так само працюватиме з'єднання з базою.
 
-## Redis і PostgreSQL: навіщо двоє
+## База даних і сервер
 
-**Redis** (REmote DIctionary Server) — сервер, який тримає **великий словник** в оперативній пам'яті: ключ — рядок, значення — рядок, список, хеш, множина… Клієнти підключаються до нього мережею, як до PostgreSQL, і надсилають короткі команди.
+**База даних** — організоване сховище, яке саме стежить за правилами даних. **Система керування базами даних** (СКБД) — програма, що цим сховищем керує. **PostgreSQL** — одна з найпоширеніших вільних реляційних СКБД.
+
+PostgreSQL працює як **сервер**: окрема програма, що постійно запущена, тримає дані на диску й приймає запити від **клієнтів** — консолі `psql`, програм на Python, графічних інструментів.
 
 ```mermaid
 flowchart LR
@@ -47,379 +50,340 @@ flowchart LR
     classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
     classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
 
-    APP["сервіс диспетчерської<br>Python"] -- "лічильники, кеш,<br>черги, рейтинг" --> R[("Redis<br>пам'ять, порт 6379")]
-    APP -- "замовлення, кур'єри,<br>гроші" --> PG[("PostgreSQL<br>диск, порт 5432")]
-    W["воркер SMS<br>Python"] -- "бере задачі з черги" --> R
+    P["psql<br>консоль"] -- "SQL-запит" --> S["сервер PostgreSQL<br>порт 5432"]
+    A["Python<br>psycopg"] -- "SQL-запит" --> S
+    O["оператор 2<br>psql"] -- "SQL-запит" --> S
+    S -- "рядки результату" --> A
+    S <--> D[("диск<br>таблиці, журнал")]
 
-    class APP,W step
-    class R warning
-    class PG success
+    class P,A,O step
+    class S success
+    class D decision
 ```
 
-| | PostgreSQL | Redis |
-|---|---|---|
-| Де дані | на диску | в оперативній пам'яті (з копією на диск за бажанням) |
-| Модель | таблиці, зв'язки, SQL | ключ → значення різних типів |
-| Швидкість | мілісекунди | мікросекунди |
-| Запити | будь-які: `JOIN`, `GROUP BY` | лише за ключем і командами структури |
-| Обмеження, транзакції | сильні: `CHECK`, `FOREIGN KEY`, ACID | мінімальні |
-| Для чого | **джерело правди** | швидкі тимчасові дані: кеш, лічильники, черги, сесії |
+Що дає сервер порівняно з JSON-файлом:
 
-Правило просте: усе, що не можна втратити, — у PostgreSQL. Redis тримає те, що можна **відновити** (кеш) або що **живе недовго** (лічильник за хвилину, задача в черзі).
+| Проблема з файлами | Що робить база |
+|---|---|
+| програма впала — дані в пам'яті зникли | дані на диску; після `COMMIT` не губляться |
+| кілька програм пишуть одночасно | сервер упорядковує паралельні зміни |
+| кожен звіт — новий цикл на Python | запит мовою SQL: кажемо **що** потрібно, а не **як** шукати |
+| сума `-120`, неіснуючий кур'єр | **обмеження** (`CHECK`, `FOREIGN KEY`) не пустять такі дані |
+| пошук серед мільйонів записів | **індекси** — як словник з уроку 17, але на диску |
 
 ### Встановлення і підключення
 
+Потрібен запущений сервер PostgreSQL і клієнт `psql`. Обери один спосіб:
+
 === "Docker (рекомендовано)"
 
+    Якщо встановлено Docker (урок 49 розбере його докладно), сервер запускається однією командою:
+
     ```bash
-    docker run --name smachno-redis -p 6379:6379 -d redis:7
-    docker exec -it smachno-redis redis-cli
+    docker run --name smachno-db -e POSTGRES_PASSWORD=postgres -p 5432:5432 -d postgres:16
+    docker exec -it smachno-db psql -U postgres
     ```
+
+    `-e POSTGRES_PASSWORD` задає пароль користувача `postgres`, `-p 5432:5432` відкриває порт для Python.
+
+=== "Windows / macOS"
+
+    Завантаж інсталятор з [postgresql.org/download](https://www.postgresql.org/download/) (для Windows і macOS — інсталятор EDB, для macOS також [Postgres.app](https://postgresapp.com/)). Під час встановлення запам'ятай пароль користувача `postgres`. Консоль `psql` — у меню «Пуск» як **SQL Shell (psql)** або в терміналі.
 
 === "Linux (Ubuntu)"
 
     ```bash
-    sudo apt install redis-server
-    redis-cli
+    sudo apt install postgresql
+    sudo -u postgres psql
     ```
-
-=== "Windows / macOS"
-
-    На Windows Redis офіційно запускають через Docker або WSL (Ubuntu всередині Windows). На macOS — Docker або `brew install redis`, потім `brew services start redis`.
 
 === "Google Colab"
 
-    Colab — Ubuntu, тож Redis ставиться командою `apt-get install redis-server` і запускається `redis-server --daemonize yes`. Готова клітинка — на початку ноутбука заняття.
+    Colab — це віртуальна машина з Ubuntu, тож PostgreSQL ставиться в неї так само. Готова клітинка — на початку ноутбука заняття; сервер живе, доки працює сесія Colab.
 
-`redis-cli` — консольний клієнт, як `psql` для PostgreSQL. Перевірка зв'язку:
+Перевірка — запит до сервера:
 
-```text
-$ redis-cli
-127.0.0.1:6379> PING
-PONG
+```sql
+SELECT version();
 ```
 
-## Ключі, рядки, лічильники
-
-Найпростіше значення — рядок. `SET` записує, `GET` читає, `DEL` видаляє, `EXISTS` перевіряє:
-
 ```text
-$ redis-cli --raw
-127.0.0.1:6379> SET courier:1:name "Оксана"
-OK
-127.0.0.1:6379> GET courier:1:name
-Оксана
-127.0.0.1:6379> GET courier:99:name
-
-127.0.0.1:6379> EXISTS courier:1:name courier:99:name
-1
+                                                                 version
+------------------------------------------------------------------------------------------------------------------------------------------
+ PostgreSQL 16.13 (Ubuntu 16.13-0ubuntu0.24.04.1) on x86_64-pc-linux-gnu, compiled by gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0, 64-bit
+(1 row)
 ```
 
-Redis зберігає байти й не знає про кодування. Звичайний `redis-cli` показує не-ASCII символи кодами — `GET courier:1:name` дасть `"\xd0\x9e\xd0\xba…"`. Ключ `--raw` виводить їх як є, тому далі в уроці консоль запущена саме так. У режимі `--raw` відповідь «значення немає» (nil) — порожній рядок, а числа — без позначки `(integer)`.
+Команди самого `psql` (не SQL) починаються зі зворотної скісної риски: `\l` — список баз, `\dt` — список таблиць, `\d назва` — будова таблиці, `\q` — вийти. SQL-команди закінчуються **крапкою з комою** — без неї `psql` чекає продовження.
 
-Назви ключів у Redis — просто рядки. Двокрапки — домовленість, а не синтаксис: `courier:1:name` читається як «кур'єр 1, ім'я». Такі «простори імен» допомагають не плутати ключі різних частин сервісу. `EXISTS` повертає, **скільки** з переданих ключів існує; `GET` неіснуючого ключа повертає nil — «немає значення», як `None` у Python.
+## Таблиці, рядки, ключі
 
-### INCR: лічильник однією командою
+Реляційна база зберігає дані в **таблицях**. Таблиця — як список `NamedTuple` з уроку 5: **рядок** — один запис (одне замовлення), **стовпець** — поле з фіксованим типом.
 
-```text
-127.0.0.1:6379> INCR orders:today
-1
-127.0.0.1:6379> INCR orders:today
-2
-127.0.0.1:6379> INCRBY orders:today 5
-7
-127.0.0.1:6379> GET orders:today
-7
-```
-
-`INCR` створює ключ зі значенням 0, якщо його не було, і додає 1. Головне: `INCR` — **одна атомарна команда**. Redis виконує команди по одній, тож «прочитати-додати-записати» не може перерватися іншим клієнтом — стан гонитви з уроку 27 тут неможливий.
+Для диспетчерської — три таблиці:
 
 ```mermaid
-flowchart TD
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
-
-    subgraph B["GET + SET з двох кас: гонитва"]
-        direction LR
-        B1["каса 1: GET → 7"] --> B2["каса 2: GET → 7"] --> B3["каса 1: SET 8"] --> B4["каса 2: SET 8<br>одне замовлення втрачено"]
-    end
-    subgraph G["INCR з двох кас: черга команд у Redis"]
-        direction LR
-        G1["каса 1: INCR<br>7 → 8"] --> G2["каса 2: INCR<br>8 → 9"] --> G3["9 — обидва враховано"]
-    end
-    B ~~~ G
-
-    class B1,B2,B3 step
-    class B4 error
-    class G1,G2 warning
-    class G3 success
+erDiagram
+    RESTAURANTS ||--o{ ORDERS : "готує"
+    COURIERS |o--o{ ORDERS : "везе"
+    RESTAURANTS {
+        int id PK
+        text name UK
+        text district
+    }
+    COURIERS {
+        int id PK
+        text name
+        text phone UK
+        boolean is_active
+    }
+    ORDERS {
+        int id PK
+        int restaurant_id FK
+        int courier_id FK "NULL - ще не призначено"
+        text customer
+        numeric total "CHECK > 0"
+        text status
+        timestamp created_at
+    }
 ```
 
-### Час життя: EXPIRE і TTL
+- **Первинний ключ** (`PRIMARY KEY`, PK) — стовпець, що однозначно визначає рядок: номер замовлення. Двох рядків з однаковим ключем бути не може.
+- **Зовнішній ключ** (`FOREIGN KEY`, FK) — стовпець, що посилається на первинний ключ іншої таблиці: `orders.restaurant_id` → `restaurants.id`. База не дасть записати замовлення від ресторану, якого немає.
+- **Один-до-багатьох**: один ресторан — багато замовлень. Тому ресторан не зберігають у кожному замовленні повністю (назва, район…), а лише його `id`. Змінилась назва — змінюємо один рядок у `restaurants`, а не сотні замовлень. Прибирати такі повтори — суть **нормалізації** схеми.
 
-Лічильник «замовлень за цю хвилину» має зникнути сам. Кожному ключу можна задати **час життя** (TTL, time to live):
+### CREATE TABLE
 
-```text
-127.0.0.1:6379> SET promo:SUMMER10 "active"
-OK
-127.0.0.1:6379> EXPIRE promo:SUMMER10 60
-1
-127.0.0.1:6379> TTL promo:SUMMER10
-60
-127.0.0.1:6379> SET report:week "..." EX 300
-OK
-127.0.0.1:6379> TTL report:week
-300
-127.0.0.1:6379> TTL courier:1:name
--1
-127.0.0.1:6379> TTL no:such:key
--2
-```
+Мова опису структури — **DDL** (Data Definition Language):
 
-`TTL` показує, скільки секунд ключ ще житиме: `-1` — вічно (TTL не задано), `-2` — ключа немає. `SET ... EX 300` — записати й одразу задати час життя. Коли час мине, Redis видалить ключ сам — саме те, що потрібно для кешу й тимчасових лічильників.
+```sql
+CREATE TABLE restaurants (
+    id       integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    name     text NOT NULL UNIQUE,
+    district text NOT NULL
+);
 
-## Структури даних Redis
+CREATE TABLE couriers (
+    id        integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    name      text NOT NULL,
+    phone     text UNIQUE,
+    is_active boolean NOT NULL DEFAULT true
+);
 
-Значенням ключа може бути не лише рядок. П'ять основних типів — старі знайомі з уроку 28:
-
-| Урок 28 | Redis | Команди | Для диспетчерської |
-|---|---|---|---|
-| `Queue` / `Stack` | **list** — список | `LPUSH`, `RPUSH`, `LPOP`, `RPOP`, `BRPOP`, `LRANGE` | черга SMS, історія дій |
-| `dict` | **hash** — словник у ключі | `HSET`, `HGET`, `HGETALL`, `HINCRBY` | картка кур'єра |
-| `set` | **set** — множина | `SADD`, `SISMEMBER`, `SCARD`, `SINTER` | унікальні клієнти дня |
-| `MinHeap` | **sorted set** — множина з балами | `ZADD`, `ZINCRBY`, `ZRANGE`, `ZPOPMIN` | рейтинг, черга за дедлайном |
-| `LRUCache` | увесь Redis з `maxmemory-policy allkeys-lru` | налаштування сервера | кеш |
-
-### List: черга і стек
-
-```text
-127.0.0.1:6379> RPUSH sms:queue "Анна: замовлення #101 прийнято"
-1
-127.0.0.1:6379> RPUSH sms:queue "Богдан: кур'єр виїхав"
-2
-127.0.0.1:6379> RPUSH sms:queue "Віра: замовлення доставлено"
-3
-127.0.0.1:6379> LRANGE sms:queue 0 -1
-Анна: замовлення #101 прийнято
-Богдан: кур'єр виїхав
-Віра: замовлення доставлено
-127.0.0.1:6379> LPOP sms:queue
-Анна: замовлення #101 прийнято
-127.0.0.1:6379> LLEN sms:queue
-2
-```
-
-`RPUSH` додає в хвіст, `LPOP` бере з голови — черга FIFO, як `Queue` з уроку 28. `LRANGE 0 -1` — усі елементи (від першого до останнього). Для стеку беруть з того самого кінця, куди додають: `RPUSH` + `RPOP`.
-
-### Hash: картка кур'єра
-
-```text
-127.0.0.1:6379> HSET courier:1 name "Оксана" district "Поділ" delivered 3
-3
-127.0.0.1:6379> HGET courier:1 district
-Поділ
-127.0.0.1:6379> HINCRBY courier:1 delivered 1
-4
-127.0.0.1:6379> HGETALL courier:1
-name
-Оксана
-district
-Поділ
-delivered
-4
-```
-
-Hash — словник усередині одного ключа. `HSET` повертає, скільки **нових** полів додано; `HINCRBY` — атомарний `+=` для поля.
-
-### Set: унікальні клієнти
-
-```text
-127.0.0.1:6379> SADD customers:2026-09-21 "Анна" "Богдан" "Віра" "Анна"
-3
-127.0.0.1:6379> SADD customers:2026-09-22 "Анна" "Галина"
-2
-127.0.0.1:6379> SCARD customers:2026-09-21
-3
-127.0.0.1:6379> SISMEMBER customers:2026-09-21 "Галина"
-0
-127.0.0.1:6379> SINTER customers:2026-09-21 customers:2026-09-22
-Анна
-```
-
-Друга «Анна» не додалась — множина тримає лише унікальні значення (`SADD` повернув 3, а не 4). `SINTER` — перетин, як `&` для `set` у Python (урок 5): хто замовляв обидва дні.
-
-### Sorted set: рейтинг кур'єрів
-
-**Відсортована множина** — множина, де в кожного елемента є **бал** (score), і Redis тримає елементи впорядкованими за ним. Ідеально для рейтингів і черг з пріоритетом.
-
-```text
-127.0.0.1:6379> ZADD rating 2130 "Оксана" 1570 "Тарас" 1040 "Ігор" 0 "Марія"
-4
-127.0.0.1:6379> ZINCRBY rating 390 "Марія"
-390
-127.0.0.1:6379> ZREVRANGE rating 0 2 WITHSCORES
-Оксана
-2130
-Тарас
-1570
-Ігор
-1040
-127.0.0.1:6379> ZRANK rating "Марія"
-0
-```
-
-Виторг кур'єрів з уроку 29 став балами. `ZINCRBY` додає до балу, `ZREVRANGE 0 2` — трійка найкращих (від більшого до меншого), `ZRANK` — місце за зростанням, починаючи з 0. Кожна зміна — `O(log n)`, як у купі з уроку 28.
-
-## Redis з Python
-
-Клієнт — пакет `redis` (redis-py): `pip install redis`.
-
-```python
-import redis
-
-r = redis.Redis(host="localhost", port=6379, decode_responses=True)
-
-print(r.ping())
-r.set("courier:2:name", "Тарас")
-print(r.get("courier:2:name"))
-print(r.incr("orders:today"))
-print(r.hgetall("courier:1"))
-print(r.zrevrange("rating", 0, 2, withscores=True))
+CREATE TABLE orders (
+    id            integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    restaurant_id integer NOT NULL REFERENCES restaurants (id),
+    courier_id    integer REFERENCES couriers (id),
+    customer      text NOT NULL,
+    total         numeric(8, 2) NOT NULL CHECK (total > 0),
+    status        text NOT NULL DEFAULT 'new'
+                  CHECK (status IN ('new', 'delivering', 'delivered', 'cancelled')),
+    created_at    timestamp NOT NULL DEFAULT now()
+);
 ```
 
 ```text
-True
-Тарас
-8
-{'name': 'Оксана', 'district': 'Поділ', 'delivered': '4'}
-[('Оксана', 2130.0), ('Тарас', 1570.0), ('Ігор', 1040.0)]
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
 ```
 
-Кожна команда Redis — метод з тією самою назвою в нижньому регістрі. `decode_responses=True` перетворює відповіді з `bytes` на `str`; без нього `get` повертав би `b'...'`. Числа Redis зберігає як рядки, тож `get("orders:today")` поверне `'9'`, а не `9` — перетворюй через `int()`.
+| Запис | Що означає |
+|---|---|
+| `integer`, `text`, `boolean`, `timestamp` | тип стовпця: ціле, рядок, логічне, дата-час |
+| `numeric(8, 2)` | точне десяткове число: до 8 цифр, 2 після коми. Для грошей — не `float` (урок 3: `0.1 + 0.2`) |
+| `GENERATED ALWAYS AS IDENTITY` | номер генерує база: 1, 2, 3… |
+| `NOT NULL` | значення обов'язкове. `NULL` у SQL — як `None`: «значення немає» |
+| `UNIQUE` | повтори заборонені |
+| `DEFAULT` | значення, якщо його не вказали |
+| `CHECK (умова)` | рядок, для якого умова хибна, не буде записано |
+| `REFERENCES restaurants (id)` | зовнішній ключ |
 
-### Pipeline: кілька команд за один раз
+`courier_id` без `NOT NULL`: нове замовлення ще не має кур'єра. У `psql` будову таблиці покаже `\d orders`.
 
-Кожна команда — запит мережею й очікування відповіді. `pipeline` збирає кілька команд і відправляє їх разом:
+## Змінюємо дані: INSERT, UPDATE, DELETE
 
-```python
-pipe = r.pipeline()
-pipe.hset("courier:2", mapping={"name": "Тарас", "district": "Центр", "delivered": 2})
-pipe.zincrby("rating", 450, "Тарас")
-pipe.incr("orders:today")
-print(pipe.execute())
-```
+Мова зміни даних — **DML** (Data Manipulation Language). Додамо ресторани й кур'єрів:
 
-```text
-[3, 2020.0, 9]
-```
+```sql
+INSERT INTO restaurants (name, district) VALUES
+    ('Борщ і Ко', 'Поділ'),
+    ('Піца Поділ', 'Поділ'),
+    ('Суші Оболонь', 'Оболонь'),
+    ('Вареники 24/7', 'Центр');
 
-`execute()` повертає відповіді всіх команд списком. За замовчуванням pipeline в redis-py ще й **транзакційний** (`MULTI` / `EXEC`): команди виконаються разом, і жоден інший клієнт не вклиниться між ними.
-
-## Кеш: cache-aside
-
-Звіт власниці з уроку 29 рахується довго. Замість того щоб щоразу питати PostgreSQL, результат зберігають у Redis на кілька хвилин. Найпоширеніша схема — **cache-aside** («кеш збоку»):
-
-1. спершу шукаємо в Redis;
-2. є (**hit**) — віддаємо одразу;
-3. немає (**miss**) — рахуємо в базі, кладемо в Redis з TTL і віддаємо.
-
-```python
-import json
-import time
-
-database_calls = 0
-
-
-def weekly_report_from_db():
-    """Замість справжнього SQL-запиту з уроку 29 — повільна функція з лічильником."""
-    global database_calls
-    database_calls += 1
-    time.sleep(0.5)
-    return {"Поділ": 2730.0, "Оболонь": 2010.0}
-
-
-def weekly_report():
-    cached = r.get("cache:weekly_report")
-    if cached is not None:                       # hit
-        return json.loads(cached)
-    report = weekly_report_from_db()             # miss
-    r.set("cache:weekly_report", json.dumps(report, ensure_ascii=False), ex=300)
-    return report
-
-
-for attempt in range(1, 4):
-    start = time.perf_counter()
-    report = weekly_report()
-    print(attempt, report, f"{time.perf_counter() - start:.1f} с")
-print("звернень до бази:", database_calls, "| TTL кешу:", r.ttl("cache:weekly_report"))
+INSERT INTO couriers (name, phone) VALUES
+    ('Оксана', '+380501112233'),
+    ('Тарас', '+380672223344'),
+    ('Ігор', '+380633334455'),
+    ('Марія', '+380994445566');
 ```
 
 ```text
-1 {'Поділ': 2730.0, 'Оболонь': 2010.0} 0.5 с
-2 {'Поділ': 2730.0, 'Оболонь': 2010.0} 0.0 с
-3 {'Поділ': 2730.0, 'Оболонь': 2010.0} 0.0 с
-звернень до бази: 1 | TTL кешу: 300
+INSERT 0 4
+INSERT 0 4
 ```
 
-Redis зберігає лише рядки, тому словник звіту перетворюємо на JSON (урок 14) і назад. Перше звернення — повільне (miss), наступні — миттєві (hit), а база працювала один раз.
+`INSERT 0 4` — додано 4 рядки (перше число історичне, завжди 0). Стовпці `id` і `is_active` ми не вказували: їх заповнили `IDENTITY` і `DEFAULT`.
 
-```mermaid
-sequenceDiagram
-    participant S as сервіс
-    participant R as Redis
-    participant P as PostgreSQL
-    S->>R: GET cache:weekly_report
-    R-->>S: (nil) — miss
-    S->>P: SELECT … GROUP BY … (0.5 с)
-    P-->>S: звіт
-    S->>R: SET cache:weekly_report … EX 300
-    Note over S,R: наступні 300 секунд
-    S->>R: GET cache:weekly_report
-    R-->>S: JSON звіту — hit, база не потрібна
-```
+`RETURNING` одразу повертає те, що записала база, — зокрема новий `id`:
 
-!!! warning "Кеш — це копія, і вона застаріває"
-    Поки кеш живий, нове замовлення в PostgreSQL у звіті не з'явиться. Тому кеш **завжди** має TTL, а коли дані змінюються — старий запис видаляють (`DEL cache:weekly_report`), щоб наступний запит порахував свіжий звіт. Скільки секунд «застарілості» допустимо — бізнес-рішення: для звіту за тиждень 5 хвилин — нормально, для балансу рахунку — ні.
-
-## Черга задач: producer і consumer
-
-Приймання замовлення не повинно чекати SMS-шлюз. Сервіс-**producer** кладе задачу в список Redis і одразу відповідає клієнтові; окремий процес-**consumer** (воркер) забирає задачі й відправляє SMS.
-
-```python
-def send_sms_later(phone, text):
-    """Producer: покласти задачу в чергу й повернутися одразу."""
-    r.rpush("queue:sms", json.dumps({"phone": phone, "text": text}, ensure_ascii=False))
-
-
-def sms_worker(max_tasks):
-    """Consumer: брати задачі з голови черги; чекати, якщо черга порожня."""
-    for _ in range(max_tasks):
-        item = r.blpop("queue:sms", timeout=1)
-        if item is None:
-            print("черга порожня — воркер чекав 1 с і зупинився")
-            return
-        _queue_name, payload = item
-        task = json.loads(payload)
-        print("відправлено:", task["phone"], "—", task["text"])
-
-
-send_sms_later("+380501112233", "Замовлення #101 прийнято")
-send_sms_later("+380672223344", "Кур'єр уже їде")
-print("у черзі:", r.llen("queue:sms"))
-sms_worker(max_tasks=3)
+```sql
+INSERT INTO orders (restaurant_id, courier_id, customer, total, status, created_at) VALUES
+    (1, 1, 'Анна',   540.00, 'delivered',  '2026-09-21 12:10'),
+    (1, 2, 'Богдан', 320.00, 'delivered',  '2026-09-21 13:05'),
+    (2, 1, 'Віра',   980.00, 'delivered',  '2026-09-21 19:40'),
+    (3, 3, 'Галина', 760.00, 'delivered',  '2026-09-22 18:15'),
+    (4, 2, 'Дмитро', 450.00, 'cancelled',  '2026-09-22 20:30'),
+    (2, 1, 'Анна',   610.00, 'delivered',  '2026-09-23 12:45'),
+    (3, 2, 'Євген',  1250.00, 'delivered', '2026-09-23 19:20'),
+    (1, 3, 'Жанна',  280.00, 'delivering', '2026-09-24 13:00'),
+    (4, NULL, 'Зоя', 390.00, 'new',        '2026-09-24 13:10')
+RETURNING id, customer, total;
 ```
 
 ```text
-у черзі: 2
-відправлено: +380501112233 — Замовлення #101 прийнято
-відправлено: +380672223344 — Кур'єр уже їде
-черга порожня — воркер чекав 1 с і зупинився
+ id | customer |  total
+----+----------+---------
+  1 | Анна     |  540.00
+  2 | Богдан   |  320.00
+  3 | Віра     |  980.00
+  4 | Галина   |  760.00
+  5 | Дмитро   |  450.00
+  6 | Анна     |  610.00
+  7 | Євген    | 1250.00
+  8 | Жанна    |  280.00
+  9 | Зоя      |  390.00
+(9 rows)
+
+INSERT 0 9
 ```
 
-`BLPOP` — «блокуючий» `LPOP`: якщо черга порожня, воркер **чекає**, доки задача з'явиться (або мине `timeout`). Producer і consumer можуть бути різними програмами на різних комп'ютерах — Redis між ними як поштова скринька. Так працює Celery (урок 48+): Redis — брокер, воркери — окремі процеси.
+### Обмеження не пустять погані дані
+
+```sql
+INSERT INTO orders (restaurant_id, customer, total) VALUES (1, 'Ірина', -120);
+```
+
+```text
+ERROR:  new row for relation "orders" violates check constraint "orders_total_check"
+DETAIL:  Failing row contains (10, 1, null, Ірина, -120.00, new, 2026-09-26 15:43:02.52544).
+```
+
+```sql
+INSERT INTO orders (restaurant_id, customer, total) VALUES (99, 'Ірина', 300);
+```
+
+```text
+ERROR:  insert or update on table "orders" violates foreign key constraint "orders_restaurant_id_fkey"
+DETAIL:  Key (restaurant_id)=(99) is not present in table "restaurants".
+```
+
+```sql
+INSERT INTO couriers (name, phone) VALUES ('Оксана-2', '+380501112233');
+```
+
+```text
+ERROR:  duplicate key value violates unique constraint "couriers_phone_key"
+DETAIL:  Key (phone)=(+380501112233) already exists.
+```
+
+Кожна помилка називає порушене правило, а рядок **не записано**. У Python ми б писали ці перевірки вручну в кожному місці, де змінюються дані; тут вони в одному місці — у схемі.
+
+### UPDATE і DELETE
+
+```sql
+UPDATE orders SET status = 'delivered' WHERE id = 8;
+DELETE FROM orders WHERE status = 'cancelled';
+```
+
+```text
+UPDATE 1
+DELETE 1
+```
+
+`UPDATE 1` / `DELETE 1` — скільки рядків змінено.
+
+!!! danger "`WHERE` — не забувай"
+    `UPDATE orders SET status = 'cancelled';` без `WHERE` скасує **всі** замовлення, а `DELETE FROM orders;` — видалить усі. База не перепитує. Перед небезпечним `UPDATE` / `DELETE` спершу виконай `SELECT` з тим самим `WHERE` і подивись, що зачепиш, — або працюй у транзакції (розділ [«Транзакції»](#transactions)).
+
+## SELECT: питаємо дані
+
+Мова запитів — **DQL** (Data Query Language), а весь SQL будується навколо однієї команди: `SELECT`. Вона **описує результат**, а як його знайти — вирішує база.
+
+```sql
+SELECT id, customer, total, status
+FROM orders
+WHERE total >= 500
+ORDER BY total DESC;
+```
+
+```text
+ id | customer |  total  |  status
+----+----------+---------+-----------
+  7 | Євген    | 1250.00 | delivered
+  3 | Віра     |  980.00 | delivered
+  4 | Галина   |  760.00 | delivered
+  6 | Анна     |  610.00 | delivered
+  1 | Анна     |  540.00 | delivered
+(5 rows)
+```
+
+| Частина | Що робить |
+|---|---|
+| `SELECT стовпці` | які стовпці показати (`*` — усі) |
+| `FROM таблиця` | звідки брати рядки |
+| `WHERE умова` | лишити рядки, для яких умова істинна |
+| `ORDER BY стовпець [DESC]` | сортування (`DESC` — за спаданням) |
+| `LIMIT n` | не більше `n` рядків |
+
+Без `ORDER BY` база повертає рядки в будь-якому зручному їй порядку — і він може змінитися після `UPDATE`. Якщо порядок важливий, завжди пиши `ORDER BY`.
+
+Умови в `WHERE` — як в `if` (урок 4), але з власним синтаксисом:
+
+```sql
+SELECT id, customer, status, courier_id
+FROM orders
+WHERE status IN ('new', 'delivering')
+   OR customer LIKE 'А%'
+ORDER BY id;
+```
+
+```text
+ id | customer |  status   | courier_id
+----+----------+-----------+------------
+  1 | Анна     | delivered |          1
+  6 | Анна     | delivered |          1
+  9 | Зоя      | new       |
+(3 rows)
+```
+
+- `=` і `<>` — рівність і нерівність (у SQL одне `=`, не `==`);
+- `AND`, `OR`, `NOT` — як в уроці 4, і так само варто ставити дужки;
+- `IN (...)` — значення зі списку; `BETWEEN a AND b` — діапазон включно;
+- `LIKE 'А%'` — рядок за шаблоном: `%` — будь-які символи, `_` — один символ. `ILIKE` — без урахування регістру;
+- `IS NULL` / `IS NOT NULL` — перевірка «немає значення». `courier_id = NULL` **не працює**: порівняння з `NULL` дає не `true`, а `NULL`.
+
+```sql
+SELECT count(*) AS by_equals FROM orders WHERE courier_id = NULL;
+SELECT count(*) AS by_is FROM orders WHERE courier_id IS NULL;
+```
+
+```text
+ by_equals
+-----------
+         0
+(1 row)
+
+ by_is
+-------
+     1
+(1 row)
+```
+
+### У якому порядку виконується SELECT
+
+Ми **пишемо** `SELECT` першим, але база **виконує** його частини в іншому порядку:
 
 ```mermaid
 flowchart LR
@@ -429,42 +393,75 @@ flowchart LR
     classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
     classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
 
-    A["сервіс замовлень<br>producer"] -- "RPUSH" --> Q[("queue:sms<br>список у Redis")]
-    Q -- "BLPOP" --> W1["воркер 1<br>consumer"]
-    Q -- "BLPOP" --> W2["воркер 2<br>consumer"]
-    W1 --> G["SMS-шлюз"]
-    W2 --> G
+    F["1. FROM / JOIN<br>усі рядки таблиць"] --> W["2. WHERE<br>відкинути рядки"]
+    W --> G["3. GROUP BY<br>зібрати в групи"]
+    G --> H["4. HAVING<br>відкинути групи"]
+    H --> S["5. SELECT<br>обчислити стовпці"]
+    S --> O["6. ORDER BY<br>відсортувати"]
+    O --> L["7. LIMIT<br>обрізати"]
 
-    class A step
-    class Q warning
-    class W1,W2 success
-    class G step
+    class F,G,S,O step
+    class W,H warning
+    class L success
 ```
 
-Кожну задачу отримає **рівно один** воркер: `BLPOP` атомарно знімає елемент. Більше воркерів — більше SMS за секунду.
+Звідси два правила, які пояснюють більшість помилок новачків:
 
-### Pub/Sub: сповіщення «всім, хто слухає»
+- у `WHERE` не можна використати псевдонім з `SELECT` (`AS ...`): на кроці 2 його ще не існує;
+- `WHERE` фільтрує **рядки** до групування, `HAVING` — **групи** після.
 
-Черга — «одна задача одному воркеру». **Pub/Sub** — навпаки: повідомлення отримують **усі** підписники каналу, а хто не слухав — не отримає нічого.
+## Агрегати і GROUP BY
 
-```python
-listener = r.pubsub()
-listener.subscribe("dispatch:events")
-listener.get_message(timeout=1)                 # підтвердження підписки
+**Агрегатні функції** згортають багато рядків в одне значення: `count`, `sum`, `avg`, `min`, `max`.
 
-r.publish("dispatch:events", "нове термінове замовлення #104")
-message = listener.get_message(timeout=1)
-print(message["channel"], "→", message["data"])
-listener.close()
+```sql
+SELECT count(*) AS orders, sum(total) AS revenue, round(avg(total), 2) AS avg_check
+FROM orders
+WHERE status = 'delivered';
 ```
 
 ```text
-dispatch:events → нове термінове замовлення #104
+ orders | revenue | avg_check
+--------+---------+-----------
+      7 | 4740.00 |    677.14
+(1 row)
 ```
 
-Pub/Sub підходить для «живих» сповіщень: екран диспетчера, чат (урок 45). Повідомлення ніде не зберігаються — для задач, які не можна загубити, беруть чергу.
+`GROUP BY` рахує агрегати **для кожної групи** — це патерн «підрахунок за ключем» з уроку 6 одним рядком:
 
-## Архітектура: що класти в Redis { #architecture }
+```sql
+SELECT courier_id, count(*) AS orders, sum(total) AS revenue
+FROM orders
+WHERE status = 'delivered'
+GROUP BY courier_id
+ORDER BY revenue DESC;
+```
+
+```text
+ courier_id | orders | revenue
+------------+--------+---------
+          1 |      3 | 2130.00
+          2 |      2 | 1570.00
+          3 |      2 | 1040.00
+(3 rows)
+```
+
+Те саме на Python — для порівняння:
+
+```python
+delivered = [(1, 540.00), (2, 320.00), (1, 980.00), (3, 760.00), (1, 610.00), (2, 1250.00), (3, 280.00)]
+
+revenue = {}
+for courier_id, total in delivered:
+    revenue[courier_id] = revenue.get(courier_id, 0) + total
+print(sorted(revenue.items(), key=lambda item: item[1], reverse=True))
+```
+
+```text
+[(1, 2130.0), (2, 1570.0), (3, 1040.0)]
+```
+
+Покроково, що робить база з `GROUP BY courier_id`:
 
 ```mermaid
 flowchart TD
@@ -474,206 +471,645 @@ flowchart TD
     classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
     classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
 
-    Q["нові дані"] --> L{"втрата — катастрофа?<br>гроші, замовлення"}
-    L -- так --> PG["PostgreSQL<br>джерело правди"]
-    L -- ні --> R{"можна відновити<br>або живе недовго?"}
-    R -- "так: копія з бази" --> C["Redis-кеш<br>з TTL"]
-    R -- "так: лічильник, сесія" --> T["Redis з TTL"]
-    R -- "задача у фоні" --> QU["Redis-черга<br>list / Celery"]
+    subgraph W["WHERE status = 'delivered' — 7 рядків"]
+        direction LR
+        R["540 к1 · 320 к2 · 980 к1 · 760 к3<br>610 к1 · 1250 к2 · 280 к3"]
+    end
+    subgraph G["GROUP BY courier_id — 3 групи"]
+        direction LR
+        G1["к1: 540, 980, 610"] ~~~ G2["к2: 320, 1250"] ~~~ G3["к3: 760, 280"]
+    end
+    subgraph A["count, sum — один рядок на групу"]
+        direction LR
+        A1["к1: 3 · 2130"] ~~~ A2["к2: 2 · 1570"] ~~~ A3["к3: 2 · 1040"]
+    end
+    W --> G --> A
 
-    class Q step
-    class L,R decision
-    class PG success
-    class C,T,QU warning
+    class R step
+    class G1,G2,G3 warning
+    class A1,A2,A3 success
 ```
 
-**Чи зберігає Redis дані на диск?** Може, двома способами:
+**HAVING** — фільтр по групах: кур'єри з виторгом понад 1500 грн.
 
-- **RDB** — знімок усієї пам'яті на диск раз на кілька хвилин. Після падіння втрачається все, що змінилося після останнього знімка;
-- **AOF** — журнал кожної команди. Втрати менші, але файл більший і повільніше відновлення.
-
-Навіть з AOF Redis не дає гарантій PostgreSQL: немає обмежень, зовнішніх ключів, складних транзакцій. Тому гроші й замовлення — у PostgreSQL.
-
-**Що буде, коли закінчиться пам'ять?** Це вирішує налаштування `maxmemory-policy`:
+```sql
+SELECT courier_id, sum(total) AS revenue
+FROM orders
+WHERE status = 'delivered'
+GROUP BY courier_id
+HAVING sum(total) > 1500
+ORDER BY courier_id;
+```
 
 ```text
-127.0.0.1:6379> CONFIG GET maxmemory-policy
-maxmemory-policy
-noeviction
-127.0.0.1:6379> CONFIG SET maxmemory-policy allkeys-lru
-OK
-127.0.0.1:6379> CONFIG GET maxmemory-policy
-maxmemory-policy
-allkeys-lru
+ courier_id | revenue
+------------+---------
+          1 | 2130.00
+          2 | 1570.00
+(2 rows)
 ```
 
-За замовчуванням `noeviction`: коли пам'ять заповнена, нові записи отримують помилку. `allkeys-lru` робить з усього Redis **LRU-кеш з уроку 28**: викидає ключі, до яких найдовше не зверталися. Для сервера-кешу — саме те; для черги задач — небезпечно (зникнуть задачі). Тому кеш і черги часто тримають у **різних** екземплярах Redis.
-
-**Коли Redis не потрібен?** Коли PostgreSQL справляється: один звіт на годину, сотня замовлень на день. Кожен додатковий сервер — це ще одна річ, яка може впасти, і питання «а чи свіжий кеш?». Спершу виміряй (урок 8), потім додавай кеш.
-
-??? note "Для допитливих: як Redis говорить мережею"
-    Redis спілкується через TCP простим текстовим протоколом **RESP**. Команду можна надіслати звичайним сокетом, без бібліотеки:
-
-    ```python
-    import socket
-
-    with socket.create_connection(("localhost", 6379)) as sock:
-        sock.sendall(b"*1\r\n$4\r\nPING\r\n")
-        print(sock.recv(64))
-        sock.sendall(b"*2\r\n$3\r\nGET\r\n$12\r\norders:today\r\n")
-        print(sock.recv(64))
+!!! warning "Кожен стовпець — або в GROUP BY, або в агрегаті"
+    ```sql
+    SELECT courier_id, customer, sum(total) FROM orders GROUP BY courier_id;
     ```
 
     ```text
-    b'+PONG\r\n'
-    b'$1\r\n9\r\n'
+    ERROR:  column "orders.customer" must appear in the GROUP BY clause or be used in an aggregate function
+    LINE 1: SELECT courier_id, customer, sum(total) FROM orders GROUP BY...
+                               ^
     ```
 
-    `*1` — масив з одного елемента, `$4` — рядок довжиною 4 байти, `\r\n` — розділювач. Відповідь `+PONG` — простий рядок, `$1\r\n9` — рядок з одного байта: значення лічильника `orders:today`. Саме це робить redis-py за тебе. Сокети й TCP докладно — в уроці 31.
+    У групі кур'єра 1 — кілька клієнтів. Якого з них показати в одному рядку групи? База не вгадує, а відмовляє.
+
+## JOIN: з'єднуємо таблиці
+
+У `orders` лише номери кур'єрів. Щоб побачити імена, треба **з'єднати** таблиці: для кожного замовлення знайти рядок кур'єра, у якого `couriers.id = orders.courier_id`.
+
+```sql
+SELECT o.id, o.customer, c.name AS courier, o.total
+FROM orders AS o
+JOIN couriers AS c ON c.id = o.courier_id
+ORDER BY o.id;
+```
+
+```text
+ id | customer | courier |  total
+----+----------+---------+---------
+  1 | Анна     | Оксана  |  540.00
+  2 | Богдан   | Тарас   |  320.00
+  3 | Віра     | Оксана  |  980.00
+  4 | Галина   | Ігор    |  760.00
+  6 | Анна     | Оксана  |  610.00
+  7 | Євген    | Тарас   | 1250.00
+  8 | Жанна    | Ігор    |  280.00
+(7 rows)
+```
+
+`orders AS o` — короткий псевдонім таблиці. `JOIN` (повністю — `INNER JOIN`) лишає лише пари, для яких умова `ON` істинна. Покроково для перших замовлень:
+
+```mermaid
+flowchart TD
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+
+    subgraph J1["замовлення 1 · courier_id = 1"]
+        direction LR
+        Q1{"шукаємо couriers.id = 1"} --> R1["Оксана<br>рядок у результаті"]
+    end
+    subgraph J2["замовлення 2 · courier_id = 2"]
+        direction LR
+        Q2{"шукаємо couriers.id = 2"} --> R2["Тарас<br>рядок у результаті"]
+    end
+    subgraph J3["замовлення без кур'єра · courier_id = NULL"]
+        direction LR
+        Q3{"NULL = будь-що?"} --> R3["пари немає<br>INNER JOIN відкидає"]
+    end
+    J1 --> J2 --> J3
+
+    class Q1,Q2,Q3 decision
+    class R1,R2 success
+    class R3 error
+```
+
+Кур'єр без замовлень теж зникає з `INNER JOIN`: для нього немає пари. Щоб побачити **всіх** кур'єрів — `LEFT JOIN`: усі рядки лівої таблиці, а де пари немає — `NULL`.
+
+```sql
+SELECT c.name, count(o.id) AS orders, coalesce(sum(o.total), 0) AS revenue
+FROM couriers AS c
+LEFT JOIN orders AS o ON o.courier_id = c.id AND o.status = 'delivered'
+GROUP BY c.id, c.name
+ORDER BY revenue DESC;
+```
+
+```text
+  name  | orders | revenue
+--------+--------+---------
+ Оксана |      3 | 2130.00
+ Тарас  |      2 | 1570.00
+ Ігор   |      2 | 1040.00
+ Марія  |      0 |       0
+(4 rows)
+```
+
+- `count(o.id)` рахує лише не-`NULL`, тому у Марії — 0, а не 1;
+- `coalesce(x, 0)` — «перше не-`NULL`»: як `x if x is not None else 0`;
+- умова `o.status = 'delivered'` стоїть в `ON`, а не у `WHERE`. Чому це важливо — у розділі [«Знайди помилку»](#find-bug).
+
+JOIN кількох таблиць — ланцюжком: виторг за районами ресторанів.
+
+```sql
+SELECT r.district, count(*) AS orders, sum(o.total) AS revenue
+FROM orders AS o
+JOIN restaurants AS r ON r.id = o.restaurant_id
+WHERE o.status = 'delivered'
+GROUP BY r.district
+ORDER BY revenue DESC;
+```
+
+```text
+ district | orders | revenue
+----------+--------+---------
+ Поділ    |      5 | 2730.00
+ Оболонь  |      2 | 2010.00
+(2 rows)
+```
+
+## Підзапити і WITH
+
+**Підзапит** — `SELECT` усередині іншого запиту. Замовлення, дорожчі за середнє:
+
+```sql
+SELECT id, customer, total
+FROM orders
+WHERE total > (SELECT avg(total) FROM orders)
+ORDER BY total DESC;
+```
+
+```text
+ id | customer |  total
+----+----------+---------
+  7 | Євген    | 1250.00
+  3 | Віра     |  980.00
+  4 | Галина   |  760.00
+(3 rows)
+```
+
+Кур'єри, які хоч раз возили від «Суші Оболонь»:
+
+```sql
+SELECT name
+FROM couriers
+WHERE id IN (
+    SELECT o.courier_id
+    FROM orders AS o
+    JOIN restaurants AS r ON r.id = o.restaurant_id
+    WHERE r.name = 'Суші Оболонь'
+)
+ORDER BY name;
+```
+
+```text
+ name
+-------
+ Ігор
+ Тарас
+(2 rows)
+```
+
+Довгий запит легше читати, якщо дати проміжному результату ім'я — **CTE** (`WITH`): як змінна з результатом запиту.
+
+```sql
+WITH courier_revenue AS (
+    SELECT courier_id, sum(total) AS revenue
+    FROM orders
+    WHERE status = 'delivered'
+    GROUP BY courier_id
+)
+SELECT c.name, cr.revenue
+FROM courier_revenue AS cr
+JOIN couriers AS c ON c.id = cr.courier_id
+WHERE cr.revenue > (SELECT avg(revenue) FROM courier_revenue)
+ORDER BY cr.revenue DESC;
+```
+
+```text
+  name  | revenue
+--------+---------
+ Оксана | 2130.00
+(1 row)
+```
+
+## Транзакції { #transactions }
+
+Власниця виплачує кур'єрові бонус із загального фонду: **зняти** гроші з фонду і **додати** кур'єрові — дві зміни. Якщо програма впаде між ними, гроші зникнуть або задвояться. **Транзакція** — група команд, яка виконується **повністю або ніяк**.
+
+```sql
+CREATE TABLE balances (owner text PRIMARY KEY, amount numeric(10, 2) NOT NULL CHECK (amount >= 0));
+INSERT INTO balances VALUES ('фонд', 1000), ('Оксана', 0);
+
+BEGIN;
+UPDATE balances SET amount = amount - 300 WHERE owner = 'фонд';
+UPDATE balances SET amount = amount + 300 WHERE owner = 'Оксана';
+COMMIT;
+
+SELECT * FROM balances ORDER BY owner;
+```
+
+```text
+CREATE TABLE
+INSERT 0 2
+BEGIN
+UPDATE 1
+UPDATE 1
+COMMIT
+ owner  | amount
+--------+--------
+ Оксана | 300.00
+ фонд   | 700.00
+(2 rows)
+```
+
+Тепер бонус у 900 грн — більше, ніж лишилось у фонді:
+
+```sql
+BEGIN;
+UPDATE balances SET amount = amount + 900 WHERE owner = 'Оксана';
+UPDATE balances SET amount = amount - 900 WHERE owner = 'фонд';
+SELECT * FROM balances;
+ROLLBACK;
+
+SELECT * FROM balances ORDER BY owner;
+```
+
+```text
+BEGIN
+UPDATE 1
+ERROR:  new row for relation "balances" violates check constraint "balances_amount_check"
+DETAIL:  Failing row contains (фонд, -200.00).
+ERROR:  current transaction is aborted, commands ignored until end of transaction block
+ROLLBACK
+ owner  | amount
+--------+--------
+ Оксана | 300.00
+ фонд   | 700.00
+(2 rows)
+```
+
+Другий `UPDATE` порушив `CHECK (amount >= 0)`. Після помилки транзакція «зламана»: навіть звичайний `SELECT` у ній PostgreSQL відмовляється виконувати (`current transaction is aborted`), доки не буде `ROLLBACK`. Перший `UPDATE` — додавання Оксані — теж скасовано: баланси як до `BEGIN`.
+
+Властивості транзакцій скорочують як **ACID**:
+
+- **Atomicity** (атомарність) — усе або нічого;
+- **Consistency** (узгодженість) — після транзакції всі обмеження виконані;
+- **Isolation** (ізольованість) — паралельні транзакції не бачать незавершених змін одна одної;
+- **Durability** (довговічність) — після `COMMIT` зміни переживуть навіть вимкнення сервера.
+
+Без `BEGIN` кожна команда `psql` — окрема транзакція, яка підтверджується одразу.
+
+## PostgreSQL з Python
+
+Популярний драйвер PostgreSQL для Python — **psycopg** (версія 3): `pip install "psycopg[binary]"`.
+
+```python
+import psycopg
+
+DATABASE_URL = "postgresql://postgres:postgres@localhost:5432/smachno"
+
+with psycopg.connect(DATABASE_URL) as conn:
+    rows = conn.execute(
+        "SELECT c.name, count(o.id) FROM couriers AS c "
+        "LEFT JOIN orders AS o ON o.courier_id = c.id "
+        "GROUP BY c.id, c.name ORDER BY c.id"
+    ).fetchall()
+
+print(rows)
+```
+
+```text
+[('Оксана', 3), ('Тарас', 2), ('Ігор', 2), ('Марія', 0)]
+```
+
+Кожен рядок результату — кортеж. `with psycopg.connect(...)` наприкінці блоку робить `COMMIT`, а якщо стався виняток — `ROLLBACK`, і закриває з'єднання (урок 15: `with` прибирає за собою).
+
+### Параметри, а не f-рядки
+
+Оператор шукає замовлення клієнта за ім'ям з форми. Спокуса — підставити текст у запит f-рядком:
+
+```python
+def find_orders_unsafe(conn, customer):
+    query = f"SELECT id, customer, total FROM orders WHERE customer = '{customer}'"
+    return conn.execute(query).fetchall()
+
+
+with psycopg.connect(DATABASE_URL) as conn:
+    print(find_orders_unsafe(conn, "Анна"))
+    print(find_orders_unsafe(conn, "x' OR '1'='1"))
+```
+
+```text
+[(1, 'Анна', Decimal('540.00')), (6, 'Анна', Decimal('610.00'))]
+[(1, 'Анна', Decimal('540.00')), (2, 'Богдан', Decimal('320.00')), (3, 'Віра', Decimal('980.00')), (4, 'Галина', Decimal('760.00')), (6, 'Анна', Decimal('610.00')), (7, 'Євген', Decimal('1250.00')), (9, 'Зоя', Decimal('390.00')), (8, 'Жанна', Decimal('280.00'))]
+```
+
+Другий виклик повернув **усі** замовлення. «Ім'я» `x' OR '1'='1` закрило лапки й дописало умову, яка завжди істинна: запит став `WHERE customer = 'x' OR '1'='1'`. Це **SQL-ін'єкція** — та сама проблема, що `eval(input())`: дані користувача стали кодом. Замість `OR '1'='1'` зловмисник може дописати й `; DROP TABLE orders`.
+
+Правильно — **параметри**: у запиті `%s`, а значення — окремим аргументом. Драйвер передає їх серверу як дані, а не як частину SQL.
+
+```python
+def find_orders(conn, customer):
+    return conn.execute(
+        "SELECT id, customer, total FROM orders WHERE customer = %s",
+        (customer,),
+    ).fetchall()
+
+
+with psycopg.connect(DATABASE_URL) as conn:
+    print(find_orders(conn, "Анна"))
+    print(find_orders(conn, "x' OR '1'='1"))
+```
+
+```text
+[(1, 'Анна', Decimal('540.00')), (6, 'Анна', Decimal('610.00'))]
+[]
+```
+
+!!! danger "Правило без винятків"
+    Дані від користувача — **лише параметрами** (`%s` + кортеж). Ніколи не будуй SQL через f-рядок, `+` чи `.format()`, навіть «для швидкої перевірки». `%s` у psycopg — не форматування рядка Python: не став навколо нього лапок.
+
+### Запис з Python і транзакція
+
+```python
+with psycopg.connect(DATABASE_URL) as conn:
+    new_id = conn.execute(
+        "INSERT INTO orders (restaurant_id, customer, total) VALUES (%s, %s, %s) RETURNING id",
+        (3, "Ірина", 430),
+    ).fetchone()[0]
+    print("нове замовлення:", new_id)
+
+try:
+    with psycopg.connect(DATABASE_URL) as conn:
+        conn.execute("UPDATE orders SET status = 'cancelled' WHERE id = %s", (new_id,))
+        conn.execute("INSERT INTO orders (restaurant_id, customer, total) VALUES (%s, %s, %s)", (3, "Ірина", -1))
+except psycopg.errors.CheckViolation as error:
+    print("помилка:", error.diag.message_primary)
+
+with psycopg.connect(DATABASE_URL) as conn:
+    print(conn.execute("SELECT status FROM orders WHERE id = %s", (new_id,)).fetchone())
+```
+
+```text
+нове замовлення: 12
+помилка: new row for relation "orders" violates check constraint "orders_total_check"
+('new',)
+```
+
+Номер 12, а не 10: невдалі вставки з розділу про обмеження теж «витратили» номери — лічильник `IDENTITY` не повертається назад, тому в номерах бувають пропуски. Перший блок підтвердив вставку. У другому скасування (`UPDATE`) і помилкова вставка — одна транзакція: вставка впала, `with` зробив `ROLLBACK`, і скасування теж не збереглося — статус лишився `new`. Помилки PostgreSQL приходять у Python як винятки (урок 14): `psycopg.errors.CheckViolation`, `UniqueViolation`, `ForeignKeyViolation`.
+
+## Архітектура: SQL в одному місці { #architecture }
+
+Якщо SQL розкидано по всій програмі, зміна однієї таблиці ламає десятки місць. Звичайне рішення — **репозиторій**: клас, який знає SQL і таблиці, а назовні дає методи мовою предметної області.
+
+```python
+from dataclasses import dataclass
+from decimal import Decimal
+
+
+@dataclass(frozen=True)
+class OrderRow:
+    id: int
+    customer: str
+    total: Decimal
+    status: str
+
+
+class OrderRepository:
+    """Уся робота з таблицею orders — тут і лише тут."""
+
+    def __init__(self, conn):
+        self._conn = conn
+
+    def add(self, restaurant_id, customer, total):
+        row = self._conn.execute(
+            "INSERT INTO orders (restaurant_id, customer, total) VALUES (%s, %s, %s) "
+            "RETURNING id, customer, total, status",
+            (restaurant_id, customer, total),
+        ).fetchone()
+        return OrderRow(*row)
+
+    def waiting(self):
+        rows = self._conn.execute(
+            "SELECT id, customer, total, status FROM orders "
+            "WHERE status = 'new' ORDER BY created_at, id"
+        ).fetchall()
+        return [OrderRow(*row) for row in rows]
+
+    def assign(self, order_id, courier_id):
+        self._conn.execute(
+            "UPDATE orders SET courier_id = %s, status = 'delivering' WHERE id = %s AND status = 'new'",
+            (courier_id, order_id),
+        )
+
+
+with psycopg.connect(DATABASE_URL) as conn:
+    repo = OrderRepository(conn)
+    print(repo.waiting())
+    repo.assign(repo.waiting()[0].id, 4)
+    print(repo.waiting())
+```
+
+```text
+[OrderRow(id=9, customer='Зоя', total=Decimal('390.00'), status='new'), OrderRow(id=12, customer='Ірина', total=Decimal('430.00'), status='new')]
+[OrderRow(id=12, customer='Ірина', total=Decimal('430.00'), status='new')]
+```
+
+`numeric` приходить у Python як `Decimal` — точне десяткове число: гроші не отримують похибки `float`.
+
+```mermaid
+flowchart LR
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+
+    UI["інтерфейс<br>CLI, веб (модуль 4)"] --> SVC["сервіс<br>Dispatcher: правила"]
+    SVC --> REPO["репозиторій<br>OrderRepository: SQL"]
+    REPO --> DB[("PostgreSQL<br>таблиці, обмеження")]
+
+    class UI,SVC step
+    class REPO warning
+    class DB success
+```
+
+- **Правила даних** (сума > 0, кур'єр існує) — у схемі бази: їх не обійде жоден клієнт.
+- **Правила бізнесу** (хто отримує наступне замовлення) — у сервісі, як `Dispatcher` з уроку 29.
+- **SQL** — у репозиторії. Сервіс не знає назв стовпців; тести сервісу можуть підставити замість репозиторію підробку (урок 26).
+
+### Індекси: словник для таблиці
+
+`WHERE customer = 'Анна'` без підготовки змушує базу переглянути **всю** таблицю — лінійний пошук з уроку 12. **Індекс** — окрема структура (у PostgreSQL за замовчуванням — B-дерево), яка знаходить рядки за значенням стовпця за `O(log n)`. Первинний ключ і `UNIQUE` отримують індекс автоматично.
+
+Як база збирається виконувати запит, показує `EXPLAIN`. Додамо 100 000 тестових замовлень:
+
+```sql
+INSERT INTO orders (restaurant_id, customer, total, status)
+SELECT 1 + n % 4, 'клієнт ' || n, 100 + n % 900, 'delivered'
+FROM generate_series(1, 100000) AS n;
+ANALYZE orders;
+
+EXPLAIN SELECT * FROM orders WHERE customer = 'клієнт 777';
+```
+
+```text
+INSERT 0 100000
+ANALYZE
+                        QUERY PLAN
+----------------------------------------------------------
+ Seq Scan on orders  (cost=0.00..2281.11 rows=1 width=53)
+   Filter: (customer = 'клієнт 777'::text)
+(2 rows)
+```
+
+`Seq Scan` — послідовний перегляд усієї таблиці. Створимо індекс:
+
+```sql
+CREATE INDEX orders_customer_idx ON orders (customer);
+
+EXPLAIN SELECT * FROM orders WHERE customer = 'клієнт 777';
+```
+
+```text
+CREATE INDEX
+                                    QUERY PLAN
+-----------------------------------------------------------------------------------
+ Index Scan using orders_customer_idx on orders  (cost=0.42..8.44 rows=1 width=53)
+   Index Cond: (customer = 'клієнт 777'::text)
+(2 rows)
+```
+
+`Index Scan` — база знайшла рядок через індекс. Ціна індексу — місце на диску і повільніші `INSERT`/`UPDATE` (індекс теж треба оновити), тому його створюють для стовпців, за якими справді шукають. `EXPLAIN ANALYZE` виконає запит і покаже реальний час.
 
 ## Практика { #practice }
 
-### Розібраний приклад: не більше трьох замовлень за хвилину
+### Розібраний приклад: тижневий звіт власниці
 
-Хтось скриптом надсилає сотні фейкових замовлень. Обмежимо: **не більше 3 замовлень за хвилину з одного номера телефону** (rate limit). Ключ — номер плюс поточна хвилина; значення — лічильник; TTL — 60 секунд.
+«Для кожного району: скільки доставлених замовлень, виторг і найбільший чек; лише райони з виторгом понад 1000 грн». Спершу приберемо тестові 100 000 замовлень:
 
-```python
-def allow_order(phone, minute):
-    key = f"rate:{phone}:{minute}"
-    count = r.incr(key)          # атомарно: +1 і повернути нове значення
-    if count == 1:
-        r.expire(key, 60)        # перше замовлення хвилини — ключ зникне сам
-    return count <= 3
+```sql
+DELETE FROM orders WHERE customer LIKE 'клієнт %';
 
-
-for attempt in range(1, 6):
-    print(attempt, allow_order("+380501112233", "2026-09-26T12:05"))
-print("інша хвилина:", allow_order("+380501112233", "2026-09-26T12:06"))
-print("інший номер:", allow_order("+380672223344", "2026-09-26T12:05"))
-print("TTL:", r.ttl("rate:+380501112233:2026-09-26T12:05"))
+SELECT r.district,
+       count(*)     AS orders,
+       sum(o.total) AS revenue,
+       max(o.total) AS max_check
+FROM orders AS o
+JOIN restaurants AS r ON r.id = o.restaurant_id
+WHERE o.status = 'delivered'
+GROUP BY r.district
+HAVING sum(o.total) > 1000
+ORDER BY revenue DESC;
 ```
 
 ```text
-1 True
-2 True
-3 True
-4 False
-5 False
-інша хвилина: True
-інший номер: True
-TTL: 60
+DELETE 100000
+ district | orders | revenue | max_check
+----------+--------+---------+-----------
+ Поділ    |      5 | 2730.00 |    980.00
+ Оболонь  |      2 | 2010.00 |   1250.00
+(2 rows)
 ```
 
-- Хвилина — частина ключа: нова хвилина — новий лічильник з нуля. У справжньому сервісі її беруть з `datetime.now()` (урок 12), тут вона передається параметром, щоб результат можна було перевірити.
-- `INCR` атомарний: навіть якщо п'ять запитів прийдуть одночасно з різних серверів, кожен отримає своє число 1, 2, 3, 4, 5.
-- Старі лічильники прибере TTL — пам'ять не забивається вчорашніми хвилинами.
+Порядок думання — той самий, що порядок виконання:
 
-### Зміни приклад: ліміт для різних дій
+1. **звідки** дані: `orders` + `restaurants` (район живе в ресторані);
+2. **які рядки**: лише доставлені — `WHERE`;
+3. **групи**: за районом — `GROUP BY`;
+4. **що порахувати** в кожній групі: `count`, `sum`, `max`;
+5. **які групи лишити**: `HAVING`;
+6. **порядок**: `ORDER BY`.
 
-Узагальни `allow_order` до `allow(action, user, minute, limit)`: для `action="order"` ліміт 3, для `action="promo"` (перевірка промокоду) — 5 за хвилину. Ключ має містити дію, щоб лічильники не змішувались.
+### Зміни приклад: звіт по ресторанах
 
-**Критерії перевірки:**
-
-- 6 перевірок промокоду: `True` ×5, потім `False`;
-- лічильники замовлень і промокодів одного користувача не впливають один на одного;
-- у кожного ключа є TTL.
-
-### Спробуй самостійно: рейтинг кур'єрів
-
-Напиши три функції на sorted set `rating:week`:
-
-- `add_delivery(courier, amount)` — додати суму доставки до балу кур'єра;
-- `top(n)` — список `(кур'єр, сума)` від найбільшої суми;
-- `place(courier)` — місце кур'єра в рейтингу **з одиниці** (перший — 1).
+Перероби звіт: групуй за **назвою ресторану**, покажи ще середній чек (`round(avg(...), 2)`) і лиши лише ресторани з принаймні двома доставленими замовленнями.
 
 **Критерії перевірки:**
 
-- після доставок Оксана 540 + 980, Тарас 1250, Ігор 760: `top(2) == [("Оксана", 1520.0), ("Тарас", 1250.0)]`;
-- `place("Ігор") == 3`;
-- повторна доставка Тараса на 300 піднімає його на перше місце.
+- 3 рядки: «Суші Оболонь», «Піца Поділ», «Борщ і Ко»;
+- у «Суші Оболонь» середній чек `1005.00`;
+- фільтр кількості — у `HAVING`, а не у `WHERE`.
 
 ??? tip "Підказка"
-    `ZINCRBY`, `ZREVRANGE … WITHSCORES` і `ZREVRANK` (місце за спаданням, з нуля — додай 1).
+    `GROUP BY r.name`, `HAVING count(*) >= 2`. Кількість рахується після групування — тому не `WHERE`.
 
-### Знайди помилку
+### Спробуй самостійно: таблиця відгуків
 
-Колега рахує замовлення за день так:
+Спроєктуй і створи таблицю `reviews`: відгук належить замовленню, має оцінку від 1 до 5 і необов'язковий текст; на одне замовлення — щонайбільше один відгук.
 
-```python
-def count_order_buggy():
-    current = int(r.get("orders:buggy") or 0)
-    r.set("orders:buggy", current + 1)
+**Критерії перевірки:**
+
+- `reviews.order_id` — зовнішній ключ на `orders (id)`, `NOT NULL` і `UNIQUE`;
+- `rating` — `CHECK (rating BETWEEN 1 AND 5)`;
+- вставка з `rating = 6`, з неіснуючим `order_id` і другий відгук на те саме замовлення — усі три дають помилку;
+- запит: середня оцінка для кожного ресторану (`JOIN` трьох таблиць).
+
+### Знайди помилку { #find-bug }
+
+Колега переписав звіт «усі кур'єри та їхні доставлені замовлення» — і Марія з нулем замовлень зникла:
+
+```sql
+SELECT c.name, count(o.id) AS orders
+FROM couriers AS c
+LEFT JOIN orders AS o ON o.courier_id = c.id
+WHERE o.status = 'delivered'
+GROUP BY c.id, c.name
+ORDER BY c.name;
 ```
-
-Чотири сервери приймають по 500 замовлень одночасно:
-
-```python
-import threading
-
-r.delete("orders:buggy")
-threads = [threading.Thread(target=lambda: [count_order_buggy() for _ in range(500)]) for _ in range(4)]
-for thread in threads:
-    thread.start()
-for thread in threads:
-    thread.join()
-print("очікували 2000, маємо:", r.get("orders:buggy"))
-```
-
-Приклад виводу (у тебе число буде іншим):
 
 ```text
-очікували 2000, маємо: 698
+  name  | orders
+--------+--------
+ Ігор   |      2
+ Оксана |      3
+ Тарас  |      2
+(3 rows)
 ```
 
 ??? success "Відповідь"
-    `GET`, а потім `SET` — два окремі запити до Redis, і між ними інші сервери встигають прочитати те саме старе значення: стан гонитви з уроку 27, тільки між процесами, а не потоками. `Lock` з уроку 27 тут не допоможе — сервери різні. Правильно — одна атомарна команда: `r.incr("orders:today")`.
+    `LEFT JOIN` дав Марії рядок з `NULL` у всіх стовпцях `orders`. Потім `WHERE o.status = 'delivered'` порівняв `NULL` з `'delivered'` — результат не `true`, і рядок відкинуто. Фільтр, що стосується правої таблиці `LEFT JOIN`, треба ставити в `ON` (як у розділі про JOIN) — тоді він обирає **пари**, а не викидає кур'єрів.
 
 ## Підсумок
 
 | Поняття | Що запам'ятати |
 |---|---|
-| Redis | сервер «ключ → значення» в пам'яті; мікросекунди; поруч із PostgreSQL, а не замість |
-| `SET` / `GET` / `DEL` / `EXISTS` | базові операції з ключем; nil — немає (`None` у Python) |
-| `INCR` / `INCRBY` / `HINCRBY` | атомарні лічильники — без стану гонитви |
-| `EXPIRE` / `TTL` / `SET … EX` | час життя ключа: `-1` вічно, `-2` немає |
-| list | черга й стек: `RPUSH` / `LPOP` / `BLPOP` |
-| hash | словник у ключі: `HSET` / `HGETALL` |
-| set | унікальні значення: `SADD` / `SCARD` / `SINTER` |
-| sorted set | впорядковано за балом: рейтинги, черги з пріоритетом |
-| redis-py | `redis.Redis(decode_responses=True)`; команди — методи; `pipeline` |
-| cache-aside | GET → miss → база → SET з TTL; кеш застаріває — TTL і `DEL` |
-| Черга задач | producer `RPUSH`, consumer `BLPOP`; кожна задача — одному воркеру |
-| Pub/Sub | повідомлення всім підписникам, без збереження |
-| Персистентність | RDB-знімки, AOF-журнал; джерело правди — PostgreSQL |
+| База даних / сервер | дані на диску, спільні для всіх клієнтів; правила — у схемі |
+| Таблиця, рядок, стовпець | стовпці мають типи; `numeric` для грошей |
+| `PRIMARY KEY` / `FOREIGN KEY` | унікальний номер рядка / посилання на рядок іншої таблиці |
+| `NOT NULL`, `UNIQUE`, `CHECK`, `DEFAULT` | обмеження не пускають погані дані |
+| `INSERT … RETURNING`, `UPDATE`, `DELETE` | зміни; `UPDATE`/`DELETE` без `WHERE` — усі рядки |
+| `SELECT … FROM … WHERE … ORDER BY … LIMIT` | запит описує результат; `NULL` перевіряють `IS NULL` |
+| Порядок виконання | FROM → WHERE → GROUP BY → HAVING → SELECT → ORDER BY → LIMIT |
+| Агрегати, `GROUP BY`, `HAVING` | згорнути рядки; фільтр груп — `HAVING` |
+| `JOIN` / `LEFT JOIN` | лише пари / усі з лівої, решта `NULL` |
+| Підзапит, `WITH` | запит у запиті; іменований проміжний результат |
+| Транзакція | `BEGIN` … `COMMIT` / `ROLLBACK`; ACID |
+| psycopg | `with psycopg.connect(...)`; дані — лише параметрами `%s` |
+| Індекс | `O(log n)` пошук за стовпцем; `EXPLAIN` показує план |
 
 ### Самоперевірка
 
-1. Чому Redis відповідає швидше за PostgreSQL і чим за це платимо?
-2. Чому `INCR` не має стану гонитви, а `GET` + `SET` має?
-3. Що повернуть `TTL` для ключа без часу життя і для ключа, якого немає?
-4. Яку структуру Redis взяти для: черги SMS; рейтингу кур'єрів; картки кур'єра; унікальних клієнтів за день?
-5. Опиши cache-aside. Чому кеш без TTL — погана ідея?
-6. Чим черга на list відрізняється від Pub/Sub?
-7. Що станеться із заповненим Redis за `noeviction` і за `allkeys-lru`?
+1. Чим база даних краща за JSON-файл, коли в сервісу три оператори?
+2. Навіщо в `orders` зберігати `restaurant_id`, а не назву й район ресторану?
+3. Чому `WHERE courier_id = NULL` не знаходить нічого?
+4. Чим `WHERE` відрізняється від `HAVING`? Чому в `WHERE` не можна написати `sum(total) > 1000`?
+5. Чим `LEFT JOIN` відрізняється від `JOIN`? Коли потрібен саме `LEFT`?
+6. Що станеться з першою командою транзакції, якщо друга впаде?
+7. Чому `f"... WHERE customer = '{name}'"` небезпечний і як правильно?
+8. Коли індекс допомагає, а коли шкодить?
 
 ??? success "Відповіді"
 
-    1. Дані в оперативній пам'яті, команди прості й виконуються по одній. Платимо обсягом пам'яті та слабшими гарантіями збереження, немає SQL і обмежень.
-    2. `INCR` — одна команда, а Redis виконує команди по черзі; між двома командами `GET` і `SET` встигають команди інших клієнтів.
-    3. `-1` і `-2`.
-    4. List; sorted set; hash; set.
-    5. Шукаємо в Redis; немає — рахуємо в базі й кладемо в Redis з TTL. Без TTL копія житиме вічно й показуватиме застарілі дані, доки хтось не видалить її вручну.
-    6. У черзі кожну задачу бере один воркер, і вона чекає в Redis, доки її заберуть. Pub/Sub розсилає повідомлення всім підписникам одразу й ніде його не зберігає.
-    7. `noeviction` — нові записи отримають помилку; `allkeys-lru` — Redis викине ключі, до яких найдовше не зверталися.
+    1. Сервер упорядковує одночасні зміни, перевіряє обмеження для всіх клієнтів, дає запити SQL і транзакції; дані не зникають після падіння програми.
+    2. Щоб не дублювати дані ресторану в кожному замовленні: зміна назви — один рядок, а не сотні (нормалізація). Назву отримують через `JOIN`.
+    3. Порівняння з `NULL` дає `NULL`, а не `true`. Для «немає значення» — `IS NULL`.
+    4. `WHERE` фільтрує рядки до групування, `HAVING` — групи після. На кроці `WHERE` груп ще немає, тож і суми по них — теж.
+    5. `JOIN` лишає лише пари; `LEFT JOIN` — усі рядки лівої таблиці, навіть без пари (з `NULL`). Потрібен, коли в звіті мають бути й «нульові» записи: кур'єр без замовлень.
+    6. Буде скасована разом з усією транзакцією: або всі команди, або жодна.
+    7. Текст користувача стає частиною SQL (ін'єкція: `x' OR '1'='1`). Правильно — `%s` у запиті й значення окремим кортежем.
+    8. Допомагає, коли часто шукаємо за стовпцем серед багатьох рядків. Шкодить, коли таблицю переважно змінюють, а за стовпцем майже не шукають: кожен `INSERT`/`UPDATE` оновлює і індекс.
 
 ### Що далі
 
-- Ноутбук заняття: [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_3/lessons/lesson_30_redis_overview/note_lesson_30_redis_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_3/lessons/lesson_30_redis_overview/note_lesson_30_redis.ipynb){ .solutions-link } — встановлення Redis у Colab, лічильники, структури, кеш, черга й rate limit з перевірками.
-- Наступний урок — 31, HTTP: `requests`, `httpx`, `aiohttp` — як програми говорять мережею.
-- Redis на практиці у веб-застосунку — урок 39 «Middlewares і кешування»; Celery з Redis-брокером і Docker — уроки 48–49; Pub/Sub для чату — урок 45.
+- Ноутбук заняття: [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_3/lessons/lesson_30_sql_basics/note_lesson_30_sql_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_3/lessons/lesson_30_sql_basics/note_lesson_30_sql.ipynb){ .solutions-link } — встановлення PostgreSQL у Colab, запити з перевірками, ін'єкція і параметри, репозиторій.
+- Наступний урок — 31, Redis: база в пам'яті для кешу, черг і лічильників — ті самі структури з уроку 29, але спільні для багатьох програм.
+- У модулі 4 до бази під'єднаються веб-застосунки: ORM у Django (урок 34) і SQLAlchemy / SQLModel у FastAPI (урок 39) пишуть SQL за тебе — але читати й перевіряти його доведеться самому.
 
 ## Документація і джерела
 
-- Redis: [Get started](https://redis.io/docs/latest/get-started/), [Data types](https://redis.io/docs/latest/develop/data-types/) (strings, lists, hashes, sets, sorted sets), [Commands](https://redis.io/docs/latest/commands/), [Key eviction](https://redis.io/docs/latest/develop/reference/eviction/), [Persistence](https://redis.io/docs/latest/operate/oss_and_stack/management/persistence/), [Pub/Sub](https://redis.io/docs/latest/develop/pubsub/), [RESP](https://redis.io/docs/latest/develop/reference/protocol-spec/)
-- Python: [redis-py](https://redis.readthedocs.io/en/stable/) — [Pipelines](https://redis.readthedocs.io/en/stable/advanced_features.html) і Pub/Sub
-- Встановлення: образ [redis на Docker Hub](https://hub.docker.com/_/redis)
+- PostgreSQL: [Tutorial](https://www.postgresql.org/docs/current/tutorial.html) — розділи «The SQL Language» і «Advanced Features» (зовнішні ключі, транзакції); [Data Types](https://www.postgresql.org/docs/current/datatype.html); [Constraints](https://www.postgresql.org/docs/current/ddl-constraints.html); [Queries](https://www.postgresql.org/docs/current/queries.html) (JOIN, GROUP BY, `WITH`); [Using EXPLAIN](https://www.postgresql.org/docs/current/using-explain.html); [psql](https://www.postgresql.org/docs/current/app-psql.html)
+- Встановлення: [postgresql.org/download](https://www.postgresql.org/download/); образ [postgres на Docker Hub](https://hub.docker.com/_/postgres)
+- Python: [psycopg 3 — Basic module usage](https://www.psycopg.org/psycopg3/docs/basic/usage.html), [Passing parameters to SQL queries](https://www.psycopg.org/psycopg3/docs/basic/params.html) — чому не f-рядки; [Transactions management](https://www.psycopg.org/psycopg3/docs/basic/transactions.html)
+- [OWASP: SQL Injection](https://owasp.org/www-community/attacks/SQL_Injection)

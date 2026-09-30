@@ -1,338 +1,240 @@
-# Урок 10. Ітератори й генератори
+# Урок 10. Декоратори
 
-Уяви брокерську компанію. Щодня біржа надсилає їй мільйони угод: хто купив акції «Розетки», за якою ціною, скільки штук. Колега пише звіт найпростішим способом:
+Уяви блог, де є гості, звичайні користувачі й адміністратори. Гість може лише читати, користувач — ще й писати пости, адміністратор — усе, включно з видаленням. Кожна функція блогу має спершу перевірити роль, а вже потім робити свою справу.
 
-```python
-with open("transactions.ndjson") as file:
-    trades = file.readlines()
-```
+Якщо писати цю перевірку в кожній функції, одна й та сама логіка опиниться в шести місцях. А коли з'явиться нова роль, доведеться правити всі шість. У цьому уроці ми навчимося виносити таку спільну поведінку в **декоратор** — функцію, яка «загортає» іншу функцію і додає до неї поведінку, не змінюючи її коду.
 
-Для тестового файлу все працює. Але справжній файл важить 5 ГБ, і о третій ночі сервер падає з `MemoryError`: `readlines()` намагається покласти в пам'ять **усі** рядки одразу. Помилка не в алгоритмі, а в способі мислення. Дані сприйняли як **склад**: спершу завезти все, потім обробляти. У цьому уроці ми навчимося бачити дані як **конвеєр**: брати по одній угоді, обробляти й відпускати.
-
-(Читання файлів ми розберемо в уроці 14; тут файл — лише приклад проблеми.)
-
-**Що потрібно з попередніх уроків:** цикл `for`, словники й comprehensions (урок 6), функції з `return` (урок 7), підрахунок роботи (урок 8), функції, що повертають функції (урок 9).
+**Що потрібно з попередніх уроків:** функції, параметри, `return`, локальні змінні (урок 8), словники (урок 6), підрахунок кроків (урок 9).
 
 **Після уроку ти зможеш:**
 
-- пояснити, що насправді робить `for`: `iter()`, `next()` і `StopIteration`;
-- відрізняти ітерабельний об'єкт від ітератора і пам'ятати, що ітератор вичерпується;
-- писати генераторні функції з `yield` і генераторні вирази `(… for …)`;
-- описувати нескінченний потік даних через `while True` і брати з нього скільки треба через `islice`;
-- будувати конвеєр з генераторів: джерело → фільтр → перетворення → підсумок;
-- обирати між списком і генератором: пам'ять, кількість проходів, доступ за індексом.
+- передавати функцію як значення і повертати функцію з іншої функції;
+- пояснювати, що таке замикання, і змінювати зовнішню змінну через `nonlocal`;
+- писати декоратор з обгорткою `wrapper`, яка приймає будь-які аргументи й повертає результат;
+- розуміти запис `@decorator` і порядок кількох декораторів над однією функцією;
+- писати декоратор з параметрами, наприклад `@require_role("admin")`;
+- зберігати ім'я й опис функції через `functools.wraps` і кешувати результати через `functools.lru_cache`.
 
-**Задача розділу.** Потік біржових угод українських компаній: відфільтрувати угоди однієї компанії, порахувати суму кожної угоди й середньозважену ціну (VWAP), не зберігаючи потік у пам'яті. Повний звіт — у розділі [«Практика»](#practice).
+**Задача розділу.** Блог із ролями: перевірка прав має жити в одному місці, а функції блогу — лише робити свою справу. Повний рефакторинг — у розділі [«Практика»](#practice).
 
-**Ноутбук заняття:** [`lesson_10_transactions_streaming.ipynb`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_10_iterators_generators/lesson_10_transactions_streaming.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_10_iterators_generators/lesson_10_transactions_streaming.ipynb)
+**Ноутбук заняття:** [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_10_decorators/note_lesson_10_decorators_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_10_decorators/note_lesson_10_decorators.ipynb){ .solutions-link }
 
 ## Пригадай
 
 Дай відповідь подумки, нічого не запускаючи:
 
-1. Що надрукує `print([n * n for n in range(4)])`?
-2. Функція виконала `return`. Чи виконаються рядки під ним?
-3. Декоратор з уроку 9 отримує функцію і повертає нову. Коли виконується код усередині `wrapper` — при `@` чи при виклику?
+1. Що поверне функція, у якої немає `return`?
+2. Змінна створена всередині функції. Чи можна прочитати її після виклику, ззовні?
+3. Що надрукує `print(greet_guest)` без дужок, якщо `greet_guest` — функція?
 
 ??? success "Відповіді"
 
-    1. `[0, 1, 4, 9]` — comprehension одразу будує весь список.
-    2. Ні: `return` завершує функцію, решта тіла не виконується.
-    3. При виклику. `@` лише готує обгортку; її тіло працює, коли функцію викликають. Сьогодні побачимо функцію, тіло якої виконується **частинами**, між викликами.
+    1. `None`.
+    2. Ні: локальні змінні зникають, коли функція завершується. Ззовні це `NameError`.
+    3. Щось на зразок `<function greet_guest at 0x7f...>`: без дужок це сама функція, а не її виклик. Саме ця властивість — функція як значення — стане основою уроку.
 
-## Що насправді робить for
+## Одна перевірка в шести місцях
 
-Цикл `for` уміє проходити список, рядок, словник, `range`. Як він це робить, якщо в них зовсім різна будова? Він звертається до кожного з них однаково — через дві вбудовані функції:
-
-- `iter(об'єкт)` — просить в об'єкта **ітератор**: «курсор», що пам'ятає, де ми зупинилися;
-- `next(ітератор)` — просить у курсора наступний елемент.
+Поточний користувач блогу зберігається у словнику, а кожна функція перевіряє його роль:
 
 ```python
-companies = ["Нафтогаз", "ПриватБанк", "Розетка"]
-cursor = iter(companies)
-print(next(cursor))
-print(next(cursor))
-print(next(cursor))
+current_user = {"name": "Іван", "role": "guest"}
+
+
+def view_post(post_id):
+    if current_user["role"] not in ["guest", "user", "admin"]:
+        print("Доступ заборонено")
+        return
+    print(current_user["name"], "переглядає пост", post_id)
+
+
+def create_post(title):
+    if current_user["role"] not in ["user", "admin"]:
+        print("Доступ заборонено")
+        return
+    print(current_user["name"], "створює пост:", title)
+
+
+def delete_post(post_id):
+    if current_user["role"] not in ["admin"]:
+        print("Доступ заборонено")
+        return
+    print(current_user["name"], "видаляє пост", post_id)
+
+
+view_post(1)
+create_post("Мій перший пост")
+delete_post(1)
+
+current_user = {"name": "Оля", "role": "admin"}
+delete_post(1)
 ```
 
 ```text
-Нафтогаз
-ПриватБанк
-Розетка
+Іван переглядає пост 1
+Доступ заборонено
+Доступ заборонено
+Оля видаляє пост 1
 ```
 
-Елементи закінчилися. Ще один `next(cursor)` зупинить програму з помилкою `StopIteration` — сигналом «далі нічого немає». Цикл `for` робить те саме, що ми вручну, і сам перехоплює `StopIteration`, щоб тихо завершитися.
+У справжньому блозі функцій шість: ще `edit_post`, `publish_post`, `archive_post`.
 
-Ось `for` без `for`. Другий аргумент `next(…, None)` — значення, яке повернеться замість помилки, коли елементи скінчаться:
+| Функція | Хто має доступ |
+|---|---|
+| `view_post` | guest, user, admin |
+| `create_post`, `edit_post` | user, admin |
+| `publish_post`, `delete_post`, `archive_post` | admin |
+
+Тепер менеджер просить: «Додайте роль `moderator` — може редагувати й публікувати, але не видаляти». Треба зайти в кожну функцію, знайти рядок з перевіркою і дописати роль. Шість правок, і в кожній можна помилитися. Перевірка прав — не справа функції «видалити пост», але вона займає половину її тіла.
+
+Хотілося б записати так: «ось функція `delete_post`, а перевірку для неї зроби окремо». Для цього знадобляться дві властивості функцій, якими ми ще не користувалися.
+
+## Функція — теж значення
+
+Функцію можна присвоїти іншому імені, передати в іншу функцію як аргумент і повернути з функції — так само, як число чи список.
 
 ```python
-cursor = iter(companies)
-while True:
-    name = next(cursor, None)
-    if name is None:
-        break
-    print(name)
+def say_hello(name):
+    return "Привіт, " + name
+
+
+greet = say_hello
+print(greet("Оля"))
+
+
+def run_twice(func, value):
+    return func(value) + " / " + func(value)
+
+
+print(run_twice(say_hello, "Тарас"))
 ```
 
 ```text
-Нафтогаз
-ПриватБанк
-Розетка
+Привіт, Оля
+Привіт, Тарас / Привіт, Тарас
 ```
 
-```mermaid
-flowchart TD
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+`greet = say_hello` — без дужок: ми не викликаємо функцію, а даємо їй друге ім'я. `run_twice` отримує функцію як звичайний аргумент і викликає її всередині.
 
-    A["for name in companies"] --> B["cursor = iter(companies)<br>один раз"]
-    B --> C["next(cursor)"]
-    C --> D{"є ще елемент?"}
-    D -- так --> E["name = елемент<br>виконати тіло циклу"]
-    E --> C
-    D -- ні --> F["StopIteration<br>for тихо завершується"]
-
-    class A,B,C step
-    class D decision
-    class E success
-    class F warning
-```
-
-### Ітерабельне й ітератор
-
-Список — **ітерабельний** об'єкт: з нього можна отримати ітератор, і щоразу новий. Тому список можна пройти скільки завгодно разів. А сам ітератор — одноразовий: він пам'ятає позицію і назад не повертається.
+Функція може також **створити** нову функцію і повернути її:
 
 ```python
-cursor = iter(companies)
-for name in cursor:
-    print(name)
-print(list(cursor))
+def make_greeter(greeting):
+    def greeter(name):
+        return greeting + ", " + name
+    return greeter
+
+
+morning = make_greeter("Доброго ранку")
+evening = make_greeter("Доброго вечора")
+print(morning("Оля"))
+print(evening("Тарас"))
 ```
 
 ```text
-Нафтогаз
-ПриватБанк
-Розетка
-[]
+Доброго ранку, Оля
+Доброго вечора, Тарас
 ```
 
-Перший `for` вичерпав курсор, тому `list(cursor)` отримує порожній список. Запам'ятай цю поведінку: за нею стоїть більшість пасток із генераторами.
+`make_greeter` нічого не друкує. Вона будує функцію `greeter` і повертає її — без дужок, як значення.
 
-| Об'єкт | Приклад | Скільки проходів |
+## Замикання
+
+Подивись уважно на `greeter`: вона використовує `greeting` — параметр функції `make_greeter`. Але `make_greeter` уже завершилась, а в уроці 8 ми казали, що локальні змінні після цього зникають. Чому `morning("Оля")` досі пам'ятає «Доброго ранку»?
+
+Бо вкладена функція **запам'ятовує** змінні навколишньої функції, які вона використовує. Таку функцію разом з її запам'ятованими змінними називають **замиканням** (closure). `morning` і `evening` — два замикання з різними значеннями `greeting`.
+
+Замикання може не лише читати змінну, а й змінювати її — для цього потрібне слово `nonlocal`:
+
+```python
+def make_counter():
+    count = 0
+
+    def increment():
+        nonlocal count
+        count += 1
+        return count
+
+    return increment
+
+
+views = make_counter()
+likes = make_counter()
+print(views(), views(), views())
+print(likes())
+```
+
+```text
+1 2 3
+1
+```
+
+| Виклик | `count` у `views` | `count` у `likes` |
 |---|---|---|
-| ітерабельний | `list`, `str`, `dict`, `range` | скільки завгодно |
-| ітератор | `iter(список)`, генератор, файл | один |
+| `views()` | 1 | 0 |
+| `views()` | 2 | 0 |
+| `views()` | 3 | 0 |
+| `likes()` | 3 | 1 |
 
-!!! note "Власні ітератори-класи"
-    Щоб зробити власний ітерабельний об'єкт, пишуть клас з методами `__iter__` і `__next__`. Класи ми почнемо в уроці 19, а ітератори-класи докладно — в уроці 24. У ноутбуці заняття є приклад такого класу `TransactionIterator` — подивися, але не вивчай напам'ять. Генератори нижче дають той самий результат набагато простіше.
+Кожен виклик `make_counter()` створює новий `count`, тому лічильники незалежні.
 
-## yield: функція на паузі
-
-Звичайна функція з `return` віддає результат один раз і завершується. Функція з `yield` — **генераторна функція** — віддає значення і **ставиться на паузу**. Уся її пам'ять (локальні змінні, місце в коді) зберігається до наступного `next()`.
-
-```python
-def ticker():
-    print("старт")
-    yield "Нафтогаз"
-    print("продовжуємо")
-    yield "Розетка"
-    print("кінець")
-
-
-feed = ticker()
-print(type(feed).__name__)
-```
-
-```text
-generator
-```
-
-??? question "Що надрукують ці рядки?"
+!!! warning "Без `nonlocal` — помилка"
+    Рядок `count += 1` — це присвоєння `count = count + 1`. Без `nonlocal` Python вирішує, що `count` — нова **локальна** змінна `increment`, і при спробі прочитати її до присвоєння зупиняється:
 
     ```python
-    print(next(feed))
-    print(next(feed))
-    print(next(feed, "потік вичерпано"))
+    def broken_counter():
+        count = 0
+
+        def increment():
+            count += 1
+            return count
+
+        return increment
+
+
+    broken_counter()()
     ```
 
-    Зверни увагу: виклик `ticker()` вище ще не надрукував «старт».
-
-??? success "Відповідь і пояснення"
+    У Python 3.11 і новіших повідомлення таке (у 3.10 — `local variable 'count' referenced before assignment`):
 
     ```text
-    старт
-    Нафтогаз
-    продовжуємо
-    Розетка
-    кінець
-    потік вичерпано
+    UnboundLocalError: cannot access local variable 'count' where it is not associated with a value
     ```
 
-    | Виклик | Що виконується | Що повертає |
-    |---|---|---|
-    | `ticker()` | нічого, лише створюється генератор | об'єкт-генератор |
-    | перший `next` | від початку до першого `yield` | `"Нафтогаз"` |
-    | другий `next` | від паузи до другого `yield` | `"Розетка"` |
-    | третій `next` | від паузи до кінця тіла | `StopIteration` → значення за замовчуванням |
+    `nonlocal count` каже Python: «це не нова змінна, а `count` з навколишньої функції».
 
-    Покроково: генератор щоразу зупиняється на `yield` і продовжує з того самого місця:
+## Перша обгортка
 
-    ```mermaid
-    flowchart TD
-        classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-        classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-        classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-        classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-        classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
-
-        G["feed = ticker()<br>тіло ще не виконувалось"]
-        subgraph N1["next №1"]
-            direction LR
-            P1["print('старт')"] --> Y1["yield 'Нафтогаз'<br>пауза"]
-        end
-        subgraph N2["next №2"]
-            direction LR
-            P2["print('продовжуємо')"] --> Y2["yield 'Розетка'<br>пауза"]
-        end
-        subgraph N3["next №3"]
-            direction LR
-            P3["print('кінець')"] --> Y3["кінець тіла<br>StopIteration"]
-        end
-        G --> N1 --> N2 --> N3
-
-        class G step
-        class P1,P2,P3 step
-        class Y1,Y2 warning
-        class Y3 error
-    ```
-
-Генератор — це ітератор: його можна передати в `for`, `list()`, `sum()`, і він так само одноразовий.
-
-## Нескінченний потік угод
-
-Генератор не зберігає значення, він **обчислює** наступне, коли його просять. Тому він може описувати нескінченний потік — наприклад, угоди на біржі. Цикл `while True` тут безпечний: функція стає на паузу на кожному `yield`.
+Тепер є все, щоб винести перевірку прав з функції. Напишемо функцію, яка **отримує** функцію блогу і **повертає** нову функцію — з перевіркою перед викликом:
 
 ```python
-import random
-from itertools import islice
-
-COMPANIES = {"Нафтогаз": 145.0, "ПриватБанк": 89.0, "Розетка": 234.0}
-
-
-def trade_stream(seed):
-    rng = random.Random(seed)
-    prices = dict(COMPANIES)
-    trade_id = 1
-    while True:
-        company = rng.choice(list(prices))
-        prices[company] = round(prices[company] * (1 + rng.gauss(0, 0.01)), 2)
-        yield {
-            "id": trade_id,
-            "company": company,
-            "price": prices[company],
-            "volume": rng.randint(1, 100) * 100,
-        }
-        trade_id += 1
+def require_admin(func):
+    def wrapper(post_id):
+        if current_user["role"] != "admin":
+            print("Доступ заборонено")
+            return
+        return func(post_id)
+    return wrapper
 
 
-for trade in islice(trade_stream(seed=7), 5):
-    print(trade["id"], trade["company"], trade["price"], trade["volume"])
+def delete_post(post_id):
+    print(current_user["name"], "видаляє пост", post_id)
+
+
+delete_post = require_admin(delete_post)
+
+current_user = {"name": "Іван", "role": "guest"}
+delete_post(7)
+current_user = {"name": "Оля", "role": "admin"}
+delete_post(7)
 ```
 
 ```text
-1 ПриватБанк 89.84 700
-2 Нафтогаз 144.53 6900
-3 Нафтогаз 144.2 6500
-4 Нафтогаз 144.57 500
-5 Нафтогаз 144.07 1200
+Доступ заборонено
+Оля видаляє пост 7
 ```
 
-- `random.Random(seed)` — окремий генератор випадкових чисел. Той самий `seed` дає ті самі угоди, тож у тебе вийде той самий вивід.
-- `islice(потік, 5)` з модуля `itertools` бере з потоку перші 5 елементів і зупиняється. Це як зріз `[:5]`, але для ітераторів.
-
-!!! warning "Нескінченний потік не можна перетворити на список"
-    `list(trade_stream(7))` ніколи не завершиться: `list()` просить елементи, поки вони не скінчаться, а цей потік не скінчиться ніколи. Програма зависне, займаючи дедалі більше пам'яті. З нескінченного потоку беруть частину — через `islice` або цикл з `break`.
-
-## Скільки пам'яті
-
-Список зберігає всі елементи одразу. Генератор — лише свій стан: де зупинився і значення локальних змінних.
-
-```python
-import sys
-
-million_list = [n for n in range(1_000_000)]
-million_gen = (n for n in range(1_000_000))
-print(sys.getsizeof(million_list), sys.getsizeof(million_gen))
-```
-
-Точні числа залежать від версії Python, але порядок такий: близько **8 мільйонів байт** для списку (і це без самих чисел, лише «полиці» для них) і близько **200 байт** для генератора. На десяти мільйонах список виросте вдесятеро, генератор — ні.
-
-Запис `(n for n in range(…))` — **генераторний вираз**. Він пишеться як list comprehension з уроку 6, але в круглих дужках, і не будує список, а повертає генератор. Коли потрібен лише підсумок, список взагалі не потрібен:
-
-```python
-total_volume = sum(trade["volume"] for trade in islice(trade_stream(seed=7), 1000))
-print(total_volume)
-```
-
-```text
-4872300
-```
-
-Тисяча угод пройшла через `sum()` по одній, і жодного разу всі разом не лежали в пам'яті. Коли генераторний вираз — єдиний аргумент функції, другі дужки можна не писати.
-
-| | Список `[…]` | Генератор `(…)` |
-|---|---|---|
-| коли обчислюються елементи | одразу всі | по одному, на запит |
-| пам'ять | росте з кількістю елементів | стала, мала |
-| проходів | скільки завгодно | один |
-| `len()`, індекс `[i]` | є | немає |
-
-## Конвеєр з генераторів
-
-Генератор може отримувати на вхід інший генератор. Так з маленьких кроків складається **конвеєр**: кожен крок бере угоди з попереднього по одній, робить свою справу і передає далі. Щоб побачити, як угоди проходять конвеєр, кроки друкують, що роблять:
-
-```python
-def only_company(stream, company):
-    for trade in stream:
-        if trade["company"] == company:
-            print("  фільтр пропустив угоду", trade["id"])
-            yield trade
-
-
-def with_total(stream):
-    for trade in stream:
-        enriched = dict(trade)
-        enriched["total"] = round(trade["price"] * trade["volume"], 2)
-        print("  додано суму до угоди", trade["id"])
-        yield enriched
-
-
-pipeline = with_total(only_company(trade_stream(seed=7), "Розетка"))
-print("конвеєр зібрано")
-for trade in islice(pipeline, 2):
-    print("отримано угоду", trade["id"], "на суму", trade["total"])
-```
-
-??? question "У якому порядку з'являться рядки?"
-
-    Подумай: коли фільтр почне працювати — при збиранні конвеєра чи при першому запиті угоди? І чи дочекається `with_total`, поки фільтр пропустить усі угоди «Розетки»?
-
-??? success "Відповідь і пояснення"
-
-    ```text
-    конвеєр зібрано
-      фільтр пропустив угоду 6
-      додано суму до угоди 6
-    отримано угоду 6 на суму 1288980.0
-      фільтр пропустив угоду 8
-      додано суму до угоди 8
-    отримано угоду 8 на суму 1889649.0
-    ```
-
-    Рядок `pipeline = …` лише з'єднав генератори — жодна угода ще не оброблена. Коли `for` просить першу угоду, запит іде ланцюжком назад до джерела. Фільтр мовчки відкидає угоди 1–5 (це не «Розетка»), угода 6 проходить усі кроки, і лише потім конвеєр береться за наступну. Конвеєр обробляє **по одній угоді за раз**, тож у пам'яті ніколи немає більше однієї угоди на кожному кроці.
+Сама `delete_post` тепер займається лише видаленням. Перевірка живе в `require_admin`, а `wrapper` — замикання, яке пам'ятає, яку саме функцію `func` воно захищає.
 
 ```mermaid
 flowchart TD
@@ -342,273 +244,566 @@ flowchart TD
     classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
     classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
 
-    S["trade_stream(seed)<br>джерело: нескінченний потік"] --> F{"only_company<br>це Розетка?"}
-    F -- ні --> X["угоду відкинуто"]
-    F -- так --> T["with_total<br>додає суму угоди"]
-    T --> R["vwap / sum / for<br>споживач: просить наступну"]
-    R -. "next()" .-> S
+    C["виклик delete_post(7)<br>насправді викликає wrapper(7)"] --> Q{"current_user<br>має роль admin?"}
+    Q -- ні --> N["Доступ заборонено<br>func не викликається"]
+    Q -- так --> F["func(7)<br>справжня delete_post"]
+    F --> R["результат повертається<br>через return у wrapper"]
 
-    class S step
-    class F decision
-    class X error
-    class T step
-    class R success
+    class C step
+    class Q decision
+    class N error
+    class F,R success
 ```
 
-| Крок | Роль | Приклад |
+Ось що таке **декоратор**: функція, яка приймає функцію і повертає нову функцію з додатковою поведінкою. Код самої функції при цьому не змінюється.
+
+!!! warning "`func()` має бути всередині `wrapper`"
+    Якщо написати виклик `func(...)` на рівні `require_admin`, а не всередині `wrapper`, функція виконається **одразу**, в момент обгортання, ще до будь-якої перевірки. `require_admin` лише готує обгортку; справжня робота відбувається, коли викликають `wrapper`.
+
+## Запис через @
+
+Рядок `delete_post = require_admin(delete_post)` трапляється так часто, що для нього є коротший запис — `@` над оголошенням функції:
+
+```python
+@require_admin
+def archive_post(post_id):
+    print(current_user["name"], "архівує пост", post_id)
+
+
+archive_post(3)
+```
+
+```text
+Оля архівує пост 3
+```
+
+`@require_admin` над `def` означає рівно те саме, що `archive_post = require_admin(archive_post)` одразу після нього. Обгортання відбувається **один раз**, коли Python виконує `def`. Далі кожен виклик `archive_post(...)` іде через `wrapper`.
+
+## Аргументи й результат
+
+### Будь-які аргументи
+
+Наша `wrapper(post_id)` приймає рівно один аргумент. Спробуймо обгорнути функцію з іншою кількістю параметрів:
+
+```python
+@require_admin
+def rename_post(post_id, title):
+    print("Пост", post_id, "тепер називається", title)
+
+
+rename_post(3, "Нова назва")
+```
+
+```text
+TypeError: require_admin.<locals>.wrapper() takes 1 positional argument but 2 were given
+```
+
+Декоратор не повинен знати, скільки аргументів у функції, яку він обгортає. Для цього є два спеціальні параметри:
+
+- `*args` збирає всі позиційні аргументи в **кортеж**;
+- `**kwargs` збирає всі іменовані аргументи в **словник**.
+
+У виклику ті самі зірочки роблять навпаки — розкладають кортеж і словник назад в аргументи:
+
+```python
+def show_args(*args, **kwargs):
+    print(args, kwargs)
+
+
+show_args(3, "Нова назва", draft=True)
+```
+
+```text
+(3, 'Нова назва') {'draft': True}
+```
+
+Тому універсальна обгортка виглядає так:
+
+```python
+def require_admin(func):
+    def wrapper(*args, **kwargs):
+        if current_user["role"] != "admin":
+            print("Доступ заборонено")
+            return
+        return func(*args, **kwargs)
+    return wrapper
+
+
+@require_admin
+def rename_post(post_id, title):
+    print("Пост", post_id, "тепер називається", title)
+
+
+rename_post(3, title="Нова назва")
+```
+
+```text
+Пост 3 тепер називається Нова назва
+```
+
+Ще більше про `*args` і `**kwargs` — в уроці 19, де функції розглядаються як об'єкти першого класу.
+
+### Не загуби результат
+
+??? question "Що надрукує останній рядок?"
+
+    ```python
+    def shout(func):
+        def wrapper(*args, **kwargs):
+            func(*args, **kwargs).upper()
+        return wrapper
+
+
+    @shout
+    def title_of(post_id):
+        return "пост " + str(post_id)
+
+
+    print(title_of(5))
+    ```
+
+??? success "Відповідь і пояснення"
+
+    ```text
+    None
+    ```
+
+    `wrapper` обчислює `"ПОСТ 5"`, але не повертає його: у ньому немає `return`. А функція без `return` повертає `None` (урок 8). Декоратор мовчки «з'їв» результат. Правильно: `return func(*args, **kwargs).upper()`.
+
+Звідси правило: обгортка майже завжди закінчується на `return func(*args, **kwargs)` або повертає змінений результат.
+
+## Ім'я функції: functools.wraps
+
+Після обгортання функція «забуває», як її звати:
+
+```python
+print(rename_post.__name__)
+```
+
+```text
+wrapper
+```
+
+`rename_post` тепер — це `wrapper`. Ім'я й опис (`__doc__`) функції видно в повідомленнях про помилки, у `help()` і в редакторі, тож така підміна заважає. Стандартний модуль `functools` має для цього готовий декоратор `wraps`, який ставлять над `wrapper`:
+
+```python
+import functools
+
+
+def require_admin(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        if current_user["role"] != "admin":
+            print("Доступ заборонено")
+            return
+        return func(*args, **kwargs)
+    return wrapper
+
+
+@require_admin
+def rename_post(post_id, title):
+    """Змінює назву поста."""
+    print("Пост", post_id, "тепер називається", title)
+
+
+print(rename_post.__name__)
+print(rename_post.__doc__)
+```
+
+```text
+rename_post
+Змінює назву поста.
+```
+
+`@functools.wraps(func)` копіює ім'я, опис та інші дані `func` на `wrapper`. Став його в кожному своєму декораторі.
+
+## Декоратор з параметрами
+
+`require_admin` вміє лише одне: пропускати адміна. Для блогу потрібно по-різному: `view_post` — трьом ролям, `create_post` — двом, `delete_post` — одній. Хочеться передати ролі прямо в рядку з `@`:
+
+```python
+@require_role("user", "admin")
+def create_post(title):
+    ...
+```
+
+Для цього потрібен ще один рівень: функція, яка отримує ролі і **повертає декоратор**.
+
+```python
+def require_role(*allowed_roles):
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            if current_user["role"] not in allowed_roles:
+                print("Доступ заборонено, потрібна роль:", " або ".join(allowed_roles))
+                return
+            return func(*args, **kwargs)
+        return wrapper
+    return decorator
+
+
+@require_role("user", "admin")
+def create_post(title):
+    print(current_user["name"], "створює пост:", title)
+
+
+current_user = {"name": "Іван", "role": "guest"}
+create_post("Привіт")
+current_user = {"name": "Марта", "role": "user"}
+create_post("Привіт")
+```
+
+```text
+Доступ заборонено, потрібна роль: user або admin
+Марта створює пост: Привіт
+```
+
+| Рівень | Отримує | Повертає |
 |---|---|---|
-| джерело | створює елементи | `trade_stream`, файл, `range` |
-| фільтр | пропускає частину | `only_company` |
-| перетворення | змінює кожен елемент | `with_total` |
-| споживач | просить елементи і збирає підсумок | `for`, `sum`, `list`, `vwap` |
+| `require_role` | ролі `*allowed_roles` | `decorator` |
+| `decorator` | функцію `func` | `wrapper` |
+| `wrapper` | аргументи виклику | результат `func` або `None` |
 
-Останній крок — **споживач**, без нього конвеєр не зрушить. Наприклад, середньозважена ціна (VWAP, volume-weighted average price) — середня ціна, де кожна угода важить стільки, скільки в ній акцій:
+```mermaid
+flowchart TD
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+
+    A["require_role(#quot;user#quot;, #quot;admin#quot;)<br>запам'ятовує ролі"] --> B["повертає decorator"]
+    B --> C["@ застосовує decorator до create_post<br>один раз, при def"]
+    C --> D["create_post тепер — wrapper<br>пам'ятає func і ролі"]
+    D --> E["кожен виклик create_post(...)<br>спершу перевіряє роль"]
+
+    class A,B warning
+    class C step
+    class D,E success
+```
+
+Запис `@require_role("user", "admin")` — це `create_post = require_role("user", "admin")(create_post)`. Спершу виклик `require_role(...)` повертає декоратор, потім `@` застосовує його до функції. Кожен рівень — замикання: `wrapper` пам'ятає і `func`, і `allowed_roles`.
+
+!!! note "Дужки мають значення"
+    `@require_role("admin")` — з дужками, бо `require_role` спершу треба викликати, щоб отримати декоратор. `@require_admin` — без дужок, бо `require_admin` уже сам є декоратором. Якщо переплутати, Python спробує обгорнути функцію не тим рівнем, і помилка з'явиться при першому виклику.
+
+## Кілька декораторів
+
+Над функцією можна поставити кілька декораторів. Ось ще один — він пише в журнал кожен виклик:
 
 ```python
-def vwap(stream):
-    money = 0
-    shares = 0
-    for trade in stream:
-        money += trade["price"] * trade["volume"]
-        shares += trade["volume"]
-    return round(money / shares, 2)
+def log_call(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        print("виклик", func.__name__, args)
+        return func(*args, **kwargs)
+    return wrapper
 
 
-def quiet_only(stream, company):
-    for trade in stream:
-        if trade["company"] == company:
-            yield trade
+@log_call
+@require_role("admin")
+def delete_post(post_id):
+    print(current_user["name"], "видаляє пост", post_id)
 
 
-rozetka = quiet_only(islice(trade_stream(seed=7), 1000), "Розетка")
-print(vwap(rozetka))
+current_user = {"name": "Іван", "role": "guest"}
+delete_post(9)
 ```
 
 ```text
-230.22
+виклик delete_post (9,)
+Доступ заборонено, потрібна роль: admin
 ```
 
-`vwap` — звичайна функція з `return`: вона споживає потік і повертає одне число, як reducer з уроку 7. `islice` стоїть **до** фільтра, тому обробляються перші 1000 угод потоку, з яких приблизно третина — «Розетки».
+Декоратори застосовуються **знизу вгору**: спершу `require_role("admin")` обгортає `delete_post`, потім `log_call` обгортає результат. А під час виклику шар, що стоїть **вище**, спрацьовує **першим** — як обгортки подарунка: останню надягнули, першою знімають.
 
-## Пастки генераторів
+??? question "Що зміниться, якщо поміняти декоратори місцями?"
 
-**Генератор одноразовий.** Другий прохід нічого не дасть:
+    ```python
+    @require_role("admin")
+    @log_call
+    def delete_post(post_id):
+        print(current_user["name"], "видаляє пост", post_id)
+
+
+    delete_post(9)
+    ```
+
+??? success "Відповідь"
+
+    ```text
+    Доступ заборонено, потрібна роль: admin
+    ```
+
+    Тепер зовні стоїть перевірка ролі. Вона не пропускає гостя далі, тож `log_call` навіть не дізнається про спробу. Порядок декораторів — рішення: чи хочемо ми записувати в журнал і заборонені спроби.
+
+## Готовий декоратор: lru_cache
+
+У стандартній бібліотеці є декоратори, які вже написали за нас. Один з найкорисніших — `functools.lru_cache`: він запам'ятовує результати функції для аргументів, з якими її вже викликали.
+
+Візьмемо числа Фібоначчі: кожне дорівнює сумі двох попередніх. Рекурсивна функція (функція, що викликає саму себе) записує це буквально. Щоб порахувати, скільки роботи вона робить, напишемо ще один декоратор — лічильник викликів, як лічильник кроків в уроці 9:
 
 ```python
-prices = (trade["price"] for trade in islice(trade_stream(seed=7), 3))
-print(max(prices))
-print(list(prices))
+calls = {}
+
+
+def count_calls(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        calls[func.__name__] = calls.get(func.__name__, 0) + 1
+        return func(*args, **kwargs)
+    return wrapper
+
+
+@count_calls
+def fib(n):
+    if n < 2:
+        return n
+    return fib(n - 1) + fib(n - 2)
+
+
+print(fib(20), calls["fib"])
 ```
 
 ```text
-144.53
-[]
+6765 21891
 ```
 
-`max()` уже вичерпав генератор. Якщо дані потрібні кілька разів — або створи генератор заново, або **один раз** перетвори на список і працюй зі списком.
+21 891 виклик, щоб порахувати двадцяте число. `fib(20)` викликає `fib(19)` і `fib(18)`, але `fib(19)` знову викликає `fib(18)` — ту саму роботу рахують знову і знову. Кожне наступне n майже подвоює кількість викликів.
 
-**У генератора немає довжини й індексів.** Він не знає, скільки елементів буде, і не зберігає попередніх:
+Додамо кеш — `lru_cache` зверху, лічильник під ним, щоб рахувати лише справжні обчислення, а не відповіді з кешу:
 
 ```python
-feed = trade_stream(seed=7)
-print(len(feed))
+@functools.lru_cache(maxsize=None)
+@count_calls
+def fib_cached(n):
+    if n < 2:
+        return n
+    return fib_cached(n - 1) + fib_cached(n - 2)
+
+
+print(fib_cached(20), calls["fib_cached"])
 ```
 
 ```text
-TypeError: object of type 'generator' has no len()
+6765 21
 ```
 
-```python
-print(feed[0])
-```
+21 обчислення замість 21 891: кожне значення від `fib(0)` до `fib(20)` рахується один раз, далі береться з кешу. Мовою уроку 9: кількість викликів росла експоненційно, а з кешем росте як `O(n)`. Ціна — пам'ять під збережені результати.
 
-```text
-TypeError: 'generator' object is not subscriptable
-```
-
-!!! note "Коли потрібен список"
-    Генератор — не заміна списку, а інструмент для потоку. Список потрібен, коли дані треба пройти кілька разів, відсортувати, звертатися за індексом або знати їхню кількість наперед. Типовий підхід: конвеєр з генераторів відфільтровує й перетворює великий потік, а в список потрапляє лише **невеликий результат**.
-
-## Корисні інструменти
-
-`yield from` віддає по черзі всі елементи іншого ітерабельного об'єкта — зручно, коли генератор складається з кількох джерел:
-
-```python
-def morning_session():
-    yield from ["Нафтогаз", "Розетка"]
-    yield from ("Київстар",)
-
-
-print(list(morning_session()))
-```
-
-```text
-['Нафтогаз', 'Розетка', 'Київстар']
-```
-
-Модуль `itertools` зі стандартної бібліотеки має готові «цеглинки» для ітераторів:
-
-```python
-from itertools import chain, count
-
-print(list(islice(count(100), 3)))
-print(list(chain(["Нафтогаз"], ("Розетка", "Київстар"))))
-```
-
-```text
-[100, 101, 102]
-['Нафтогаз', 'Розетка', 'Київстар']
-```
-
-- `count(start)` — нескінченний лічильник, як `range` без кінця;
-- `chain(a, b, …)` — один потік з кількох, без склеювання в новий список;
-- `islice(потік, n)` — перші n елементів будь-якого ітератора.
+!!! note "Коли кеш не підходить"
+    Кешувати можна лише функції, які для тих самих аргументів завжди повертають той самий результат і нічого не змінюють ззовні — чисті функції з уроку 8. Функцію, що залежить від `current_user` або друкує, кешувати не можна: вона «відповідатиме» старим результатом.
 
 ## Практика { #practice }
 
-### Розібраний приклад: звіт по компаніях з потоку
+### Розібраний приклад: блог без повторень
 
-Програма проходить 3000 угод потоку **один раз** і для кожної компанії рахує кількість угод, обсяг акцій і VWAP.
+Шість функцій блогу, перевірка прав — у декораторі, журнал викликів — в іншому. Роль `moderator` додано так, як просив менеджер.
 
-```python linenums="1" hl_lines="8 9 10 11 12 13 17"
-from collections import defaultdict
-
-
-def company_report(stream):
-    trades = defaultdict(int)
-    shares = defaultdict(int)
-    money = defaultdict(float)
-    for trade in stream:
-        company = trade["company"]
-        trades[company] += 1
-        shares[company] += trade["volume"]
-        money[company] += trade["price"] * trade["volume"]
-    return trades, shares, money
+```python linenums="1" hl_lines="4 5 8 16 21 26 31 36 41 52"
+import functools
 
 
-trades, shares, money = company_report(islice(trade_stream(seed=7), 3000))
-for company in COMPANIES:
-    print(company, trades[company], shares[company], round(money[company] / shares[company], 2))
+def require_role(*allowed_roles):
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            if current_user["role"] not in allowed_roles:
+                print("Доступ заборонено:", func.__name__)
+                return
+            return func(*args, **kwargs)
+        return wrapper
+    return decorator
+
+
+@require_role("guest", "user", "moderator", "admin")
+def view_post(post_id):
+    print(current_user["name"], "переглядає пост", post_id)
+
+
+@require_role("user", "admin")
+def create_post(title):
+    print(current_user["name"], "створює пост:", title)
+
+
+@require_role("user", "moderator", "admin")
+def edit_post(post_id):
+    print(current_user["name"], "редагує пост", post_id)
+
+
+@require_role("moderator", "admin")
+def publish_post(post_id):
+    print(current_user["name"], "публікує пост", post_id)
+
+
+@require_role("admin")
+def delete_post(post_id):
+    print(current_user["name"], "видаляє пост", post_id)
+
+
+@require_role("admin")
+def archive_post(post_id):
+    print(current_user["name"], "архівує пост", post_id)
+
+
+users = [
+    {"name": "Іван", "role": "guest"},
+    {"name": "Марко", "role": "moderator"},
+    {"name": "Оля", "role": "admin"},
+]
+for user in users:
+    current_user = user
+    print("---", user["name"], "---")
+    view_post(1)
+    edit_post(1)
+    publish_post(1)
+    delete_post(1)
 ```
 
 ```text
-Нафтогаз 1004 4886500 162.55
-ПриватБанк 1010 5027600 75.2
-Розетка 986 5036300 233.43
+--- Іван ---
+Іван переглядає пост 1
+Доступ заборонено: edit_post
+Доступ заборонено: publish_post
+Доступ заборонено: delete_post
+--- Марко ---
+Марко переглядає пост 1
+Марко редагує пост 1
+Марко публікує пост 1
+Доступ заборонено: delete_post
+--- Оля ---
+Оля переглядає пост 1
+Оля редагує пост 1
+Оля публікує пост 1
+Оля видаляє пост 1
 ```
 
 Що відбувається в ключових рядках:
 
-- **рядок 8** — один прохід по потоку: кожна угода обробляється і відразу забувається;
-- **рядки 9–12** — три накопичувальні словники з уроку 6, `defaultdict(int)` створює нуль для нового ключа сам;
-- **рядок 13** — функція повертає три невеликі словники, а не список угод: у пам'яті лишається по три числа на компанію;
-- **рядок 17** — друк у порядку компаній зі словника `COMPANIES`, а VWAP — гроші поділені на акції.
+- **рядки 4–5** — два рівні фабрики: ролі потрапляють у `require_role`, функція — у `decorator`;
+- **рядок 8** — перевірка ролі, **єдине** місце на весь блог. Щоб змінити текст повідомлення чи логіку перевірки, досить змінити цей рядок;
+- **рядки 16–43** — кожна функція блогу займається лише своєю справою. Хто має до неї доступ, видно одразу над `def`;
+- **рядок 52** — `current_user` змінюється, а функції блогу — ні. Декоратор читає `current_user` у момент **виклику**, а не в момент обгортання.
 
-Той самий код працюватиме і для 3 000, і для 3 000 000 угод — пам'ять не зростає. Зміниться лише час.
+Додати роль `moderator` — це дописати слово в три рядки з `@`, а не переписувати тіла функцій. Нова роль `superuser`, що може все, — одне слово в кожному `@require_role`.
 
-### Зміни приклад: конвеєр логів
+### Зміни приклад: лічильник викликів
 
-Сервер біржі пише журнал. Треба вибрати лише помилки й прибрати з них позначку рівня:
-
-```python
-def get_logs():
-    yield "INFO: Server started"
-    yield "ERROR: Disk full"
-    yield "WARNING: High latency"
-    yield "ERROR: DB timeout"
-```
-
-Напиши два генератори: `filter_errors(stream)` пропускає рядки, що містять `"ERROR"`, а `extract_message(stream)` віддає текст після `": "`. Конвеєр `extract_message(filter_errors(get_logs()))` у циклі має надрукувати:
+Напиши декоратор `count_views`, який рахує, скільки разів кожну функцію блогу викликали, **навіть коли доступ заборонено**. Результат зберігай у словнику `views`:
 
 ```text
-Disk full
-DB timeout
+{'view_post': 3, 'edit_post': 3, 'publish_post': 3, 'delete_post': 3}
 ```
+
+(для циклу з трьома користувачами з розібраного прикладу).
 
 **Критерії перевірки:**
 
-- обидві функції — генератори з `yield`, без проміжних списків;
-- `extract_message` повертає рядок без змін, якщо в ньому немає `": "`;
-- `list(extract_message(filter_errors(get_logs())))` дає `['Disk full', 'DB timeout']`.
+- `count_views` використовує `functools.wraps`, тож `delete_post.__name__ == "delete_post"`;
+- обгортка приймає будь-які аргументи й повертає результат функції;
+- лічильник рахує і заборонені спроби, тож стоїть у правильному місці відносно `@require_role`.
 
 ??? tip "Підказка"
-    `line.split(": ", maxsplit=1)` розділяє рядок лише за першим `": "` і повертає список з однієї або двох частин.
+    Візьми за зразок `count_calls` з розділу про `lru_cache`. Подумай, який з двох декораторів має бути зверху, щоб до лічильника доходили навіть виклики гостя.
 
-### Спробуй самостійно: дані з датчика
+### Спробуй самостійно: заборонені ролі
 
-Інший контекст, та сама ідея. Датчик температури надсилає «брудний» потік: частина значень загублена (`None`), а частина надходить у градусах Фаренгейта (усе, що більше за 50):
+Інший контекст: платформа онлайн-курсу, ролі `guest`, `student`, `mentor`. Тут зручніше перелічити, кому **не можна**, ніж кому можна. Напиши декоратор з параметрами `deny_role(*blocked_roles)`: він не пускає перелічені ролі, а всім іншим дозволяє.
 
 ```python
-raw = [None, 98.6, 37.0, None, 101.3, 36.6, 212.0, None, 40.1]
+current_user = {"name": "Гість", "role": "guest"}
+
+
+@deny_role("guest")
+def open_homework(number):
+    return "Домашнє завдання " + str(number)
 ```
 
-Побудуй конвеєр з трьох генераторів:
-
-1. `clean_nulls(stream)` — відкидає `None`;
-2. `to_celsius(stream)` — значення більше за 50 переводить за формулою `(f - 32) * 5 / 9` і округлює до одного знака, решту лишає без змін;
-3. `batch(stream, size)` — збирає значення в пакети по `size` штук для запису в базу; останній неповний пакет теж віддає.
-
-Для `list(batch(to_celsius(clean_nulls(raw)), 3))` очікуваний результат:
+Очікувана поведінка:
 
 ```text
-[[37.0, 37.0, 38.5], [36.6, 100.0, 40.1]]
+роль guest   → open_homework(3) друкує повідомлення про заборону і повертає None
+роль student → open_homework(3) повертає 'Домашнє завдання 3'
+роль mentor  → open_homework(3) повертає 'Домашнє завдання 3'
 ```
 
 **Критерії перевірки:**
 
-- кожна функція — генератор, що приймає потік і віддає потік;
-- конвеєр працює з будь-яким ітерабельним джерелом: списком, `iter(raw)` чи іншим генератором;
-- для `batch(stream, 4)` пакети — `[37.0, 37.0, 38.5, 36.6]` і `[100.0, 40.1]`;
-- порожній вхід дає порожній результат, а не пакет `[]`.
+- `open_homework.__name__ == "open_homework"`;
+- працюють і позиційні, і іменовані аргументи: `open_homework(number=4)`;
+- `@deny_role("guest", "student")` над іншою функцією пускає лише `mentor`;
+- роль перевіряється під час **виклику**: зміна `current_user` після `def` змінює результат.
 
 ## Підсумок
 
+```python
+import functools
+
+
+def my_decorator(func):                      # декоратор без параметрів
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        # ... до виклику
+        result = func(*args, **kwargs)
+        # ... після виклику
+        return result
+    return wrapper
+
+
+def my_factory(*settings):                   # декоратор з параметрами
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            return func(*args, **kwargs)     # settings доступні тут
+        return wrapper
+    return decorator
+```
+
 | Що потрібно | Як |
 |---|---|
-| отримати ітератор | `cursor = iter(список)` |
-| наступний елемент | `next(cursor)`, без помилки в кінці — `next(cursor, None)` |
-| генераторна функція | `yield` замість `return`; виклик повертає генератор |
-| генераторний вираз | `(вираз for x in потік if умова)` |
-| нескінченний потік | `while True:` + `yield` |
-| перші n елементів | `itertools.islice(потік, n)` |
-| віддати елементи іншого джерела | `yield from джерело` |
-| кілька потоків в один | `itertools.chain(a, b)` |
-| конвеєр | `крок3(крок2(крок1(джерело)))` |
-| кілька проходів | один раз `list(генератор)` — і далі працювати зі списком |
+| передати функцію як значення | ім'я без дужок: `run_twice(say_hello, "Оля")` |
+| змінити змінну навколишньої функції | `nonlocal count` |
+| обгорнути функцію | `f = my_decorator(f)` або `@my_decorator` над `def` |
+| прийняти будь-які аргументи | `def wrapper(*args, **kwargs)` |
+| не загубити результат | `return func(*args, **kwargs)` |
+| зберегти ім'я та опис | `@functools.wraps(func)` над `wrapper` |
+| декоратор з параметрами | три рівні: фабрика → `decorator` → `wrapper` |
+| кілька декораторів | застосовуються знизу вгору, спрацьовують згори вниз |
+| кешувати чисту функцію | `@functools.lru_cache(maxsize=None)` |
 
 ### Самоперевірка
 
-1. Що робить `for` з об'єктом, перш ніж узяти перший елемент?
-2. Чому після `for x in cursor:` вираз `list(cursor)` дає `[]`?
-3. Виклик генераторної функції нічого не надрукував, хоча перший рядок її тіла — `print`. Чому?
-4. Чим `[x for x in data]` відрізняється від `(x for x in data)`?
-5. Чому `list(trade_stream(7))` зависне?
-6. Конвеєр `with_total(only_company(trade_stream(7), "Розетка"))` створено. Скільки угод уже оброблено?
-7. Коли генератор гірший за список?
+1. Чим `greet = say_hello` відрізняється від `greet = say_hello()`?
+2. Що таке замикання?
+3. Навіщо `nonlocal` і що буде без нього в `count += 1`?
+4. Що означає `@require_admin` над `def delete_post`?
+5. Чому обгортка має приймати `*args, **kwargs` і закінчуватися `return`?
+6. Навіщо `functools.wraps`?
+7. Чому `@require_role("admin")` пишуть з дужками, а `@require_admin` — без?
+8. Декоратори `@log_call` і `@require_role("admin")` стоять над функцією саме в такому порядку. Що спрацює першим при виклику?
 
 ??? success "Відповіді"
 
-    1. Викликає `iter()` і отримує ітератор, а потім бере елементи через `next()`, поки не прийде `StopIteration`.
-    2. Ітератор одноразовий: `for` дійшов до кінця, і курсор більше не має елементів.
-    3. Виклик лише створює об'єкт-генератор. Тіло почне виконуватися з першим `next()`.
-    4. Перше одразу будує список з усіма елементами. Друге повертає генератор, який обчислює елементи по одному, на запит, і займає сталу пам'ять.
-    5. Потік нескінченний: `list()` чекає на кінець, якого немає.
-    6. Жодної. Угоди почнуть проходити конвеєр, коли споживач попросить першу.
-    7. Коли дані треба пройти кілька разів, відсортувати, знати їхню кількість або звертатися за індексом.
+    1. `say_hello` без дужок — сама функція, `greet` стає її другим ім'ям. `say_hello()` — виклик, `greet` отримає результат (і без аргументу буде `TypeError`).
+    2. Вкладена функція разом зі змінними навколишньої функції, які вона запам'ятала й може використовувати після того, як навколишня функція завершилась.
+    3. Щоб змінити змінну навколишньої функції. Без `nonlocal` присвоєння робить `count` локальною змінною, і читання до присвоєння дає `UnboundLocalError`.
+    4. `delete_post = require_admin(delete_post)` одразу після `def`: ім'я `delete_post` тепер вказує на обгортку.
+    5. Щоб декоратор працював з функцією будь-якої сигнатури і не «з'їдав» її результат: без `return` виклик повертатиме `None`.
+    6. Щоб обгорнута функція зберегла власне ім'я `__name__` і опис `__doc__`, а не видавала себе за `wrapper`.
+    7. `require_role` — фабрика: її спершу викликають з ролями, і вона повертає декоратор. `require_admin` уже є декоратором.
+    8. `log_call`: він стоїть вище, тобто обгортає все інше, і спрацьовує першим — навіть для заборонених викликів.
 
 ### Що далі
 
-- Ноутбук заняття: [`lesson_10_transactions_streaming.ipynb`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_10_iterators_generators/lesson_10_transactions_streaming.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_10_iterators_generators/lesson_10_transactions_streaming.ipynb) — клас-ітератор і генератор угод, запис і потокове читання NDJSON / CSV, конвеєр з VWAP по всіх компаніях.
-- Додаткова практика: [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_10_iterators_generators/note_lesson_10_iterators_generators_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_10_iterators_generators/note_lesson_10_iterators_generators.ipynb){ .solutions-link } — конвеєр з генераторів на 500 000 замовлень ресторану з виміром пам'яті.
-- Живий потік: Dash-застосунок [`transactions_dash`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_1/lessons/lesson_10_iterators_generators/transactions_dash) — нескінченний генератор угод на графіках у реальному часі. Запускається на своєму комп'ютері: `pip install dash plotly`, потім `python app.py`.
-- Наступне заняття: [Практикум 2. Пошук](lesson_11.md). Дані, які вже лежать у пам'яті, можна обробляти розумніше, ніж перебором.
+- Ноутбук заняття: [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_10_decorators/note_lesson_10_decorators_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_10_decorators/note_lesson_10_decorators.ipynb){ .solutions-link } — історія блогу з ролями крок за кроком: від шести однакових перевірок до `require_role`, нова роль `superuser`, `@timer`, `lru_cache`, самоперевірка і завдання `deny_role`.
+- Поглиблення: [`note_lesson_10_decorators_architecture.ipynb`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_10_decorators/note_lesson_10_decorators_architecture.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_10_decorators/note_lesson_10_decorators_architecture.ipynb) — логер, таймер, стек декораторів як middleware, міні-проєкт обробки платежів, декоратори у FastAPI і pytest.
+- Довідник: [Функції та функціональне програмування](../../reference/python_core/functions.md), [Простори імен / LEGB](../../reference/python_core/namespaces_legb.md).
+- Наступний урок: [Урок 11. Ітератори й генератори](lesson_11.md). Функції навчаться віддавати результати по одному, не тримаючи всі дані в пам'яті.
 
-## Документація і джерела
+## Документація
 
-- Туторіал: [ітератори](https://docs.python.org/3/tutorial/classes.html#iterators), [генератори](https://docs.python.org/3/tutorial/classes.html#generators), [генераторні вирази](https://docs.python.org/3/tutorial/classes.html#generator-expressions)
-- Глосарій: [iterable](https://docs.python.org/3/glossary.html#term-iterable), [iterator](https://docs.python.org/3/glossary.html#term-iterator), [generator](https://docs.python.org/3/glossary.html#term-generator), [generator expression](https://docs.python.org/3/glossary.html#term-generator-expression)
-- Функції: [`iter()`](https://docs.python.org/3/library/functions.html#iter), [`next()`](https://docs.python.org/3/library/functions.html#next); модуль [`itertools`](https://docs.python.org/3/library/itertools.html): [`islice`](https://docs.python.org/3/library/itertools.html#itertools.islice), [`chain`](https://docs.python.org/3/library/itertools.html#itertools.chain), [`count`](https://docs.python.org/3/library/itertools.html#itertools.count)
-- Довідник мови: [вираз `yield`](https://docs.python.org/3/reference/expressions.html#yield-expressions); [PEP 255 — прості генератори](https://peps.python.org/pep-0255/), [PEP 289 — генераторні вирази](https://peps.python.org/pep-0289/)
-- Для охочих:
-    - Dave Beazley, [«Generator Tricks for Systems Programmers»](https://www.dabeaz.com/generators/) — класичний туторіал про конвеєри з генераторів для логів і файлів ([код і слайди на GitHub](https://github.com/dabeaz/generators));
-    - Dave Beazley, [Practical Python, розділ 6 «Generators»](https://dabeaz-course.github.io/practical-python/Notes/06_Generators/00_Overview.html) — вправи з потоковою обробкою біржових даних.
+- Глосарій: [декоратор](https://docs.python.org/3/glossary.html#term-decorator)
+- Туторіал: [довільні аргументи `*args`](https://docs.python.org/3/tutorial/controlflow.html#arbitrary-argument-lists), [іменовані аргументи і `**kwargs`](https://docs.python.org/3/tutorial/controlflow.html#keyword-arguments)
+- Довідник мови: [визначення функції і декоратори](https://docs.python.org/3/reference/compound_stmts.html#function-definitions), [інструкція `nonlocal`](https://docs.python.org/3/reference/simple_stmts.html#the-nonlocal-statement)
+- Модуль `functools`: [`wraps`](https://docs.python.org/3/library/functools.html#functools.wraps), [`lru_cache`](https://docs.python.org/3/library/functools.html#functools.lru_cache)
+- [PEP 318 — декоратори для функцій і методів](https://peps.python.org/pep-0318/)

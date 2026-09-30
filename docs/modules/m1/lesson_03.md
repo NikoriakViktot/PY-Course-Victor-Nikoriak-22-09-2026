@@ -438,7 +438,7 @@ d
 !!! note "Кодова точка — це не байти"
     `ord()` і `chr()` працюють з номерами символів у Unicode, а не з тим, як текст записується в пам'ять чи файл. Наприклад, `"ї"` — один символ з кодовою точкою `1111`, а в кодуванні UTF-8 він займає два байти: `"ї".encode("utf-8")` дає `b'\xd1\x97'`.
 
-Це основа роботи з текстом на рівні символів. **Повна вправа на шифр Цезаря — на практикумі П1 (урок 8)**; тут достатньо зрозуміти механіку `ord()` і `chr()`.
+Це основа роботи з текстом на рівні символів. **Повна вправа на шифр Цезаря — на практикумі П1 (урок 9)**; тут достатньо зрозуміти механіку `ord()` і `chr()`.
 
 Більше прикладів з індексами символів, `ord()` і `chr()` — у ноутбуці [`lesson_ord_chr.ipynb`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_03_variables_and_data_types/lesson_ord_chr.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_03_variables_and_data_types/lesson_ord_chr.ipynb).
 

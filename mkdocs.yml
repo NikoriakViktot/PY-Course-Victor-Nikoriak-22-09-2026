@@ -92,61 +92,61 @@ nav:
       - "4. Умови та цикли": modules/m1/lesson_04.md
       - "5. Списки, кортежі, множини": modules/m1/lesson_05.md
       - "6. Словники, for, comprehensions": modules/m1/lesson_06.md
-      - "7. Функції": modules/m1/lesson_07.md
-      - "8. П1. Big O + базові задачі": modules/m1/lesson_08.md
-      - "9. Декоратори": modules/m1/lesson_09.md
-      - "10. Ітератори й генератори": modules/m1/lesson_10.md
-      - "11. П2. Пошук": modules/m1/lesson_11.md
-      - "12. Модулі та стандартна бібліотека": modules/m1/lesson_12.md
-      - "13. Винятки та обробка помилок": modules/m1/lesson_13.md
-      - "14. Файли I/O, JSON": modules/m1/lesson_14.md
-      - "15. Git & GitHub: система": modules/m1/lesson_15.md
-      - "16. П3. Хеш-структури": modules/m1/lesson_16.md
-      - "17. Узагальнення + фінальний проєкт": modules/m1/lesson_17.md
+      - "8. Функції": modules/m1/lesson_08.md
+      - "9. П1. Big O + базові задачі": modules/m1/lesson_09.md
+      - "10. Декоратори": modules/m1/lesson_10.md
+      - "11. Ітератори й генератори": modules/m1/lesson_11.md
+      - "12. П2. Пошук": modules/m1/lesson_12.md
+      - "13. Модулі та стандартна бібліотека": modules/m1/lesson_13.md
+      - "14. Винятки та обробка помилок": modules/m1/lesson_14.md
+      - "15. Файли I/O, JSON": modules/m1/lesson_15.md
+      - "16. Git & GitHub: система": modules/m1/lesson_16.md
+      - "17. П3. Хеш-структури": modules/m1/lesson_17.md
+      - "18. Узагальнення + фінальний проєкт": modules/m1/lesson_18.md
     - "М2. Python Advanced":
       - Огляд модуля: modules/m2_python_advanced.md
-      - "18. Функції як об'єкти першого класу": modules/m2/lesson_18.md
-      - "19. Класи, простір імен": modules/m2/lesson_19.md
-      - "20. Наслідування, поліморфізм": modules/m2/lesson_20.md
-      - "21. Інкапсуляція, область видимості": modules/m2/lesson_21.md
-      - "22. П4. Рекурсія, divide & conquer, backtracking": modules/m2/lesson_22.md
-      - "23. @property, декоратори класів, dunder": modules/m2/lesson_23.md
-      - "24. Ітератори advanced": modules/m2/lesson_24.md
-      - "25. Тестування з pytest (+ валідація AI-коду)": modules/m2/lesson_25.md
-      - "26. П5. Динамічне програмування + greedy (вступ)": modules/m2/lesson_26.md
-      - "27. Потоки, multiprocessing, asyncio: вступ": modules/m2/lesson_27.md
-      - "28. П6. Stack, Queue, Heap, Trie + LRU → ООП-пакет": modules/m2/lesson_28.md
+      - "19. Функції як об'єкти першого класу": modules/m2/lesson_19.md
+      - "20. Класи, простір імен": modules/m2/lesson_20.md
+      - "21. Наслідування, поліморфізм": modules/m2/lesson_21.md
+      - "22. Інкапсуляція, область видимості": modules/m2/lesson_22.md
+      - "23. П4. Рекурсія, divide & conquer, backtracking": modules/m2/lesson_23.md
+      - "24. @property, декоратори класів, dunder": modules/m2/lesson_24.md
+      - "25. Ітератори advanced": modules/m2/lesson_25.md
+      - "26. Тестування з pytest (+ валідація AI-коду)": modules/m2/lesson_26.md
+      - "27. П5. Динамічне програмування + greedy (вступ)": modules/m2/lesson_27.md
+      - "28. Потоки, multiprocessing, asyncio: вступ": modules/m2/lesson_28.md
+      - "29. П6. Stack, Queue, Heap, Trie + LRU → ООП-пакет": modules/m2/lesson_29.md
     - "М3. Бази даних":
       - Огляд модуля: modules/m3_databases.md
       - "Бонус. Pandas: аналіз даних, графіки і Dash":
           - "Урок": modules/m3/bonus_pandas.md
           - "Довідник: аналіз даних": modules/m3/pandas/data_analytics.md
           - "Довідник: архітектура Dash": modules/m3/pandas/dash_architecture.md
-      - "29. Основи SQL (PostgreSQL)": modules/m3/lesson_29.md
-      - "30. Redis overview": modules/m3/lesson_30.md
+      - "30. Основи SQL (PostgreSQL)": modules/m3/lesson_30.md
+      - "31. Redis overview": modules/m3/lesson_31.md
     - "М4. Web (+ Web Advanced)":
       - Огляд модуля: modules/m4_web.md
-      - "31. HTTP: requests, httpx, aiohttp": modules/m4/lesson_31.md
-      - "32. REST: принципи дизайну API": modules/m4/lesson_32.md
-      - "33. Django intro: MVT, ORM, admin": modules/m4/lesson_33.md
-      - "34. Django: forms, HTML practice": modules/m4/lesson_34.md
-      - "35. DRF overview + Django vs FastAPI": modules/m4/lesson_35.md
-      - "36. Typing + Pydantic": modules/m4/lesson_36.md
-      - "37. FastAPI basics + Postman + OpenAPI":
-          - "Урок": modules/m4/lesson_37.md
+      - "32. HTTP: requests, httpx, aiohttp": modules/m4/lesson_32.md
+      - "33. REST: принципи дизайну API": modules/m4/lesson_33.md
+      - "34. Django intro: MVT, ORM, admin": modules/m4/lesson_34.md
+      - "35. Django: forms, HTML practice": modules/m4/lesson_35.md
+      - "36. DRF overview + Django vs FastAPI": modules/m4/lesson_36.md
+      - "37. Typing + Pydantic": modules/m4/lesson_37.md
+      - "38. FastAPI basics + Postman + OpenAPI":
+          - "Урок": modules/m4/lesson_38.md
           - "Довідник: FastAPI — архітектура і async": modules/m4/fastapi/fastapi_documentation.md
-      - "38. FastAPI + SQLAlchemy: повний CRUD": modules/m4/lesson_38.md
-      - "39. Middlewares і кешування (Redis на практиці)": modules/m4/lesson_39.md
-      - "40. Автентифікація та security basics (JWT, hashing, OWASP)": modules/m4/lesson_40.md
-      - "41. Тестування API (pytest + httpx)": modules/m4/lesson_41.md
-      - "42. AI-інструменти розробника + ризики й валідація":
-          - "Урок": modules/m4/lesson_42.md
+      - "39. FastAPI + SQLAlchemy: повний CRUD": modules/m4/lesson_39.md
+      - "40. Middlewares і кешування (Redis на практиці)": modules/m4/lesson_40.md
+      - "41. Автентифікація та security basics (JWT, hashing, OWASP)": modules/m4/lesson_41.md
+      - "42. Тестування API (pytest + httpx)": modules/m4/lesson_42.md
+      - "43. AI-інструменти розробника + ризики й валідація":
+          - "Урок": modules/m4/lesson_43.md
           - "Довідник: Claude Code": modules/m4/ai/claude_code.md
-      - "43. Інтеграція LLM API (Gemini / Anthropic)": modules/m4/lesson_43.md
-      - "44. Архітектура застосунків і патерни": modules/m4/lesson_44.md
-      - "45. WebSockets + практика: чат": modules/m4/lesson_45.md
-      - "46. Security advanced": modules/m4/lesson_46.md
-      - "47. Telegram Bot API": modules/m4/lesson_47.md
+      - "44. Інтеграція LLM API (Gemini / Anthropic)": modules/m4/lesson_44.md
+      - "45. Архітектура застосунків і патерни": modules/m4/lesson_45.md
+      - "46. WebSockets + практика: чат": modules/m4/lesson_46.md
+      - "47. Security advanced": modules/m4/lesson_47.md
+      - "48. Telegram Bot API": modules/m4/lesson_48.md
     - "М5. Production":
       - Огляд модуля: modules/m5_production.md
       - "Бонус. Linux для розробника":
@@ -171,13 +171,13 @@ nav:
               - "16. DevOps workflow": modules/m5/linux/16_devops_workflow.md
               - "17. Kubernetes: огляд": modules/m5/linux/17_kubernetes_overview.md
               - "18. Roadmap": modules/m5/linux/18_roadmap_next_steps.md
-      - "48. Docker": modules/m5/lesson_48.md
-      - "49. Docker Compose + деплой": modules/m5/lesson_49.md
-      - "50. CI/CD (GitHub Actions)": modules/m5/lesson_50.md
+      - "49. Docker": modules/m5/lesson_49.md
+      - "50. Docker Compose + деплой": modules/m5/lesson_50.md
+      - "51. CI/CD (GitHub Actions)": modules/m5/lesson_51.md
     - "М6. Капстоун":
       - Огляд модуля: modules/m6_capstone.md
-      - "51. Робота над фінальним проєктом": modules/m6/lesson_51.md
-      - "52. Випускний: питч фінального проєкту": modules/m6/lesson_52.md
+      - "52. Робота над фінальним проєктом": modules/m6/lesson_52.md
+      - "53. Випускний: питч фінального проєкту": modules/m6/lesson_53.md
       - "Бонус. CV розробника":
           - "Урок": modules/m6/bonus_cv.md
           - "Довідник: сильне CV": modules/m6/cv/cv_tutorial.md

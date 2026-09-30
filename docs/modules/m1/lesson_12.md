@@ -1,95 +1,38 @@
-# Урок 12. Модулі та стандартна бібліотека
+# Урок 12. Практикум П2. Пошук
 
-В уроці 7 звіт кафе розклали на функції. Відтоді кафе підключило касу, і тепер вона віддає чеки не з готовими «пт» і «вечеря», а з **міткою часу**: `2024-07-19 18:30`. Власниця хоче звіт за будь-який місяць, а адміністратор — запускати його сам, з термінала, без ноутбука.
+У практикумі П1 диспетчерська таксі навчилася **рахувати ціну** рішення: `O(n)` чи `O(n²)`. Тепер у неї нове питання — не «скільки коштує перебрати все», а **«чи треба перебирати все?»**
 
-Ноутбук з усім кодом уже на кілька екранів: генерація чеків, правила «яка година — який прийом їжі», функції звіту. Щоб знайти потрібну функцію, його доводиться гортати. Щоб скористатися звітом в іншій програмі, код доведеться копіювати. У цьому уроці ми розкладемо кафе на **модулі** — окремі файли, які імпортують один одного. А дати, підрахунки й календар візьмемо зі **стандартної бібліотеки**: вона вже встановлена разом з Python.
+Щодня диспетчеру ставлять питання: чи була поїздка о 18:40? Які дві поїздки разом дають рівно суму ваучера? Коли три найзавантаженіші години поспіль? Кожне з них можна розв'язати перебором. Але якщо про дані щось відомо — вони **відсортовані** або нас цікавить **суцільний відрізок** — роботи стає в рази менше.
 
-**Що потрібно з попередніх уроків:** `NamedTuple Order` (урок 5), словники й `dict.get` (урок 6), функції та звіт кафе (урок 7). Ти вже писав `from bisect import bisect_left` (урок 11) і `from functools import wraps` (урок 9), тож сьогодні розберемося, що саме відбувається в цьому рядку.
+**Що потрібно з попередніх уроків:** списки й індекси (урок 5), цикли `for` і `while` (уроки 4, 6), функції (урок 8), підрахунок кроків і Big O (урок 9).
 
 **Після уроку ти зможеш:**
 
-- розкладати програму на модулі й імпортувати з них функції трьома способами;
-- пояснювати, де Python шукає модуль і чому файл модуля виконується лише один раз;
-- захищати код перевірок у модулі через `if __name__ == "__main__":`;
-- розпізнавати затінення (shadowing), коли твій файл має ім'я стандартного модуля;
-- працювати з датами через `datetime` і `timedelta`, рахувати через `Counter`, користуватися `calendar`, `statistics` і `random`;
-- приймати аргументи з командного рядка через `sys.argv`.
+- обирати стратегію пошуку за властивістю даних, а не за звичкою;
+- писати бінарний пошук і пояснювати, чому подвоєння даних додає лише один крок — `O(log n)`;
+- користуватися модулем `bisect` для відсортованих списків;
+- розв'язувати задачі на пари у відсортованому списку двома вказівниками за `O(n)`;
+- рахувати суми суцільних відрізків ковзним вікном, не перераховуючи їх заново.
 
-**Задача розділу.** Перетворити ноутбук кафе на проєкт з чотирьох модулів, який друкує звіт за місяць командою `python main.py 2024 7`. Повний код — у розділі [«Практика»](#practice), готовий проєкт — у теці [`cafe_report/`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_1/lessons/lesson_12_modules_stdlib/cafe_report).
+**Задача розділу.** Чотири питання диспетчера таксі — чотири властивості даних — чотири стратегії. Практика — автодоповнення адреси в застосунку таксі.
 
-**Ноутбук заняття:** [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_12_modules_stdlib/note_lesson_12_modules_stdlib_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_12_modules_stdlib/note_lesson_12_modules_stdlib.ipynb){ .solutions-link }
+**Ноутбук заняття:** [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_12_practicum_search/note_lesson_12_search_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_12_practicum_search/note_lesson_12_search.ipynb){ .solutions-link }
 
 ## Пригадай
 
 Дай відповідь подумки, нічого не запускаючи:
 
-1. В уроці 10 ми писали `from collections import deque`, а в уроці 8 — `import time` і потім `time.perf_counter()`. Чому в першому випадку пишемо просто `deque(...)`, а в другому — з префіксом `time.`?
-2. Які поля має `Order` у звіті кафе з уроку 7?
-3. `print`, `len` і `sorted` ми ніколи не імпортували. Звідки вони беруться?
+1. Скільки кроків робить функція, що перевіряє кожен елемент списку з n елементів, у найгіршому випадку?
+2. Дослід подвоєння дав відношення ×2. Який це клас складності?
+3. Що дасть `[10, 20, 30, 40][-1]` і `[10, 20, 30, 40][1:3]`?
 
 ??? success "Відповіді"
 
-    1. `from collections import deque` бере з модуля одне ім'я і кладе його в нашу програму. `import time` дає лише ім'я модуля, тому до функцій звертаємося через крапку.
-    2. `total_bill`, `tip`, `day`, `time`, `size`.
-    3. Це **вбудовані** (built-in) функції: вони доступні завжди, без імпорту. Усе інше, навіть зі стандартної бібліотеки, треба імпортувати.
+    1. n кроків: елемент останній або його немає. Це `O(n)`.
+    2. `O(n)`: подвоїли дані — подвоїлась робота. Сьогодні побачимо клас, де подвоєння додає лише **один** крок.
+    3. `40` (останній елемент) і `[20, 30]` (індекси 1 і 2).
 
-## Модуль — це файл
-
-**Модуль** — це звичайний файл `.py`. Нічого особливого в ньому немає: ті самі `def`, `class` і змінні, що й у ноутбуці. Ім'я модуля — ім'я файлу без `.py`.
-
-Розкладемо код кафе за ролями, як у уроці 7 розкладали звіт на функції:
-
-```text
-cafe_report/
-├── rules.py    ← правила: мітка часу → день тижня, година → прийом їжі
-├── orders.py   ← чеки: RawOrder з каси, Order для звіту, генерація даних
-├── report.py   ← звіт: функції з уроку 7
-└── main.py     ← точка входу: python main.py 2024 7
-```
-
-Найпростіший модуль — правила кафе. У ньому немає жодного імпорту:
-
-```python title="rules.py"
-"""Правила кафе: як мітка часу перетворюється на день тижня і прийом їжі."""
-
-DAYS = ("пн", "вт", "ср", "чт", "пт", "сб", "нд")
-MONTHS = ("", "січень", "лютий", "березень", "квітень", "травень", "червень",
-          "липень", "серпень", "вересень", "жовтень", "листопад", "грудень")
-
-
-def day_from_timestamp(ts):
-    """Короткий день тижня: datetime(2024, 7, 19, ...) -> 'пт'."""
-    return DAYS[ts.weekday()]
-
-
-def meal_type_from_hour(hour):
-    """Прийом їжі за годиною замовлення."""
-    if 11 <= hour <= 15:
-        return "обід"
-    if 17 <= hour <= 23:
-        return "вечеря"
-    return "інше"
-```
-
-Інший файл, що лежить у тій самій теці, користується ним через `import`:
-
-```python
-import rules
-
-print(rules.meal_type_from_hour(19))
-print(rules.meal_type_from_hour(16))
-print(rules.DAYS[4])
-```
-
-```text
-вечеря
-інше
-пт
-```
-
-`rules.meal_type_from_hour` читається як «функція `meal_type_from_hour` з модуля `rules`». Кожен модуль — окремий **простір імен** (namespace): у `rules.py` і в `report.py` можуть бути змінні з однаковими іменами, і вони не заважатимуть одна одній. Префікс завжди показує, звідки ім'я.
-
-Модулі проєкту імпортують один одного і стандартну бібліотеку. Стрілка — «імпортує»:
+## Чотири питання — чотири властивості даних
 
 ```mermaid
 flowchart TD
@@ -99,87 +42,256 @@ flowchart TD
     classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
     classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
 
-    M["main.py<br>точка входу"] --> O["orders.py<br>чеки"]
-    M --> R["report.py<br>звіт"]
-    M --> U["rules.py<br>правила"]
-    O --> U
-    R --> U
-    M --> S1["sys, calendar"]
-    O --> S2["random, datetime, typing"]
-    R --> S3["collections"]
+    Q{"що відомо<br>про дані?"} -- нічого --> L["лінійний пошук<br>O(n)"]
+    Q -- відсортовані,<br>шукаємо одне значення --> B["бінарний пошук<br>O(log n)"]
+    Q -- відсортовані,<br>шукаємо пару --> T["два вказівники<br>O(n)"]
+    Q -- суцільні відрізки<br>фіксованої довжини --> W["ковзне вікно<br>O(n)"]
 
-    class M warning
-    class O,R,U step
-    class S1,S2,S3 success
+    class Q decision
+    class L warning
+    class B,T,W success
 ```
 
-Зелені блоки — стандартна бібліотека. `rules.py` нікого не імпортує, тому його найлегше перевіряти: даєш годину — отримуєш рядок.
-
-## Три способи імпорту
-
-| Спосіб | Як викликати | Коли зручно |
+| Питання диспетчера | Властивість даних | Стратегія |
 |---|---|---|
-| `import rules` | `rules.meal_type_from_hour(19)` | імен багато, важливо бачити, звідки кожне |
-| `from rules import meal_type_from_hour` | `meal_type_from_hour(19)` | одне-два імені, які часто використовуються |
-| `import statistics as st` | `st.mean(bills)` | довга назва або домовленість (`import pandas as pd`) |
+| чи їздив клієнт сьогодні? | немає порядку | лінійний пошук |
+| чи була поїздка о 18:40? | час відсортований | бінарний пошук |
+| які дві поїздки дають рівно суму ваучера? | суми відсортовані | два вказівники |
+| коли три найзавантаженіші години поспіль? | години йдуть підряд | ковзне вікно |
 
-Є й четвертий спосіб, `from math import *`: він забирає з модуля **всі** імена. Так не пишуть, бо незрозуміло, звідки взялося ім'я, а чуже ім'я може непомітно замінити твоє або вбудоване:
+## Лінійний пошук: коли нічого не відомо
+
+Журнал поїздок за день записаний у порядку дзвінків, імена клієнтів ідуть як завгодно. Щоб дізнатися, чи їздив клієнт, лишається перевірити кожен запис:
 
 ```python
-print(pow(2, 3))
+def linear_search(items, target):
+    steps = 0
+    for i in range(len(items)):
+        steps += 1
+        if items[i] == target:
+            return i, steps
+    return -1, steps
 
-from math import *
 
-print(pow(2, 3))
+clients = ["Марта", "Олег", "Ірина", "Тарас", "Олена", "Богдан"]
+print(linear_search(clients, "Тарас"))
+print(linear_search(clients, "Софія"))
 ```
 
 ```text
-8
-8.0
+(3, 4)
+(-1, 6)
 ```
 
-Вбудована `pow` повертала ціле число, а після `import *` той самий виклик дає `8.0`: `math.pow` мовчки замінила вбудовану функцію. [PEP 8](https://peps.python.org/pep-0008/#imports) радить уникати таких імпортів.
+Функція повертає пару: індекс знайденого (або `-1`) і кількість перевірок. Софії в журналі немає, тому довелося переглянути всі 6 записів. Це `O(n)` — базовий рівень, з яким порівнюємо все далі. Оператор `in` для списку робить те саме, лише без лічильника.
 
-!!! warning "`datetime` — і модуль, і клас"
-    У модулі `datetime` є клас з тим самим іменем. Після `import datetime` ім'я `datetime` означає **модуль**, і викликати його не можна:
+## Бінарний пошук: відсортовані дані
+
+### Ідея: відкинути половину
+
+Система записує час початку кожної поїздки у хвилинах від опівночі: 18:40 — це `18 * 60 + 40 = 1120`. Записи додаються по порядку, тому список **відсортований**. Це змінює все.
+
+Подивимося на середній запис. Якщо там 17:15, а шукаємо 18:40 — уся ліва половина списку ще раніша, і шукати там немає сенсу. Одне порівняння відкидає **половину** даних. Далі — середина правої половини, і так поки не знайдемо або поки не залишиться нічого.
+
+Так ми шукаємо слово в паперовому словнику: відкриваємо посередині й одразу знаємо, в якій половині продовжувати.
+
+```python
+def binary_search(items, target):
+    low, high = 0, len(items) - 1
+    steps = 0
+    while low <= high:
+        mid = (low + high) // 2
+        steps += 1
+        if items[mid] == target:
+            return mid, steps
+        if items[mid] < target:
+            low = mid + 1
+        else:
+            high = mid - 1
+    return -1, steps
+
+
+starts = [425, 510, 612, 700, 845, 930, 1035, 1120, 1210, 1290, 1375]
+print(binary_search(starts, 1120))
+print(binary_search(starts, 1000))
+```
+
+```text
+(7, 4)
+(-1, 3)
+```
+
+Як шукалося 1120:
+
+| Крок | `low` … `high` | `mid` → значення | Рішення |
+|---|---|---|---|
+| 1 | 0 … 10 | 5 → 930 | 930 < 1120 → `low = 6` |
+| 2 | 6 … 10 | 8 → 1210 | 1210 > 1120 → `high = 7` |
+| 3 | 6 … 7 | 6 → 1035 | 1035 < 1120 → `low = 7` |
+| 4 | 7 … 7 | 7 → 1120 | знайдено |
+
+Покроково — межі звужуються, доки `mid` не влучить:
+
+```mermaid
+flowchart TD
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+
+    subgraph K1["крок 1 · low 0, high 10"]
+        direction LR
+        M1{"mid 5 → 930<br>930 < 1120"} --> R1["low = 6<br>ліва половина відкинута"]
+    end
+    subgraph K2["крок 2 · low 6, high 10"]
+        direction LR
+        M2{"mid 8 → 1210<br>1210 > 1120"} --> R2["high = 7"]
+    end
+    subgraph K3["крок 3 · low 6, high 7"]
+        direction LR
+        M3{"mid 6 → 1035<br>1035 < 1120"} --> R3["low = 7"]
+    end
+    subgraph K4["крок 4 · low 7, high 7"]
+        direction LR
+        M4{"mid 7 → 1120"} --> R4["знайдено<br>(7, 4)"]
+    end
+    K1 --> K2 --> K3 --> K4
+
+    class M1,M2,M3,M4 decision
+    class R1,R2,R3 warning
+    class R4 success
+```
+
+Після кроку 1 лишилося 5 записів з 11, після кроку 2 — 2, після кроку 3 — 1.
+
+Чотири кроки на 11 записах. Для 1000 (це 16:40) пошук за три кроки звузив межі до порожнього проміжку: `low` став більшим за `high` — отже, такої поїздки немає.
+
+### Дослід подвоєння: +1 крок
+
+Скільки кроків знадобиться на списку з тисячі, двох тисяч, мільйона записів? Візьмемо найгірший випадок — шуканого значення немає:
+
+```python
+for n in [1000, 2000, 4000, 1_000_000]:
+    times = list(range(0, 2 * n, 2))
+    _, steps = binary_search(times, -1)
+    print(n, steps)
+```
+
+```text
+1000 9
+2000 10
+4000 11
+1000000 19
+```
+
+Подвоїли дані — додався **один** крок. Мільйон записів — 19 кроків. Лінійному пошуку для мільйона потрібен мільйон перевірок.
+
+Кожен крок ділить залишок навпіл, тому кроків приблизно стільки, скільки разів n можна поділити на 2 до одиниці. Це **логарифм за основою 2**: `log₂ 1 000 000 ≈ 20`. Звідси назва класу — `O(log n)`.
+
+| n | лінійний пошук | бінарний пошук |
+|---|---|---|
+| 1 000 | до 1 000 | до 10 |
+| 1 000 000 | до 1 000 000 | до 20 |
+| 1 000 000 000 | до 1 000 000 000 | до 30 |
+
+!!! warning "Лише для відсортованих даних"
+    На невідсортованому списку бінарний пошук не падає з помилкою — він **мовчки бреше**:
 
     ```python
-    import datetime
-
-    ts = datetime(2024, 7, 19)
+    print(binary_search([1120, 425, 930, 612], 1120))
     ```
 
     ```text
-    TypeError: 'module' object is not callable. Did you mean: 'datetime.datetime(...)'?
+    (-1, 3)
     ```
 
-    Підказку «Did you mean» друкує Python 3.12 і новіші.
+    1120 у списку є, але пошук відкинув не ту половину. Якщо даних не впорядковано, спершу відсортуй їх (`sorted()`, урок 5) або користуйся лінійним пошуком.
 
-    Або `datetime.datetime(2024, 7, 19)`, або `from datetime import datetime`. У цьому уроці — другий варіант.
+### Готовий бінарний пошук: bisect
+
+У стандартній бібліотеці є модуль `bisect` з бінарним пошуком. Функція `bisect_left(список, x)` повертає позицію, **куди можна вставити** `x`, щоб порядок не зламався. Це дає більше, ніж «є чи немає»: наприклад, скільки поїздок почалося **до** певного часу.
 
 ```python
-from datetime import datetime
+from bisect import bisect_left
 
-print(datetime(2024, 7, 19))
+evening = 18 * 60
+index = bisect_left(starts, evening)
+print(index, starts[index])
+print("поїздок до 18:00:", index)
+print("поїздок з 18:00:", len(starts) - index)
 ```
 
 ```text
-2024-07-19 00:00:00
+7 1120
+поїздок до 18:00: 7
+поїздок з 18:00: 4
 ```
 
-**Порядок імпортів** за PEP 8 — на початку файлу, трьома групами через порожній рядок: стандартна бібліотека, сторонні пакети (`pip install`), модулі твого проєкту. Так на початку `orders.py`:
+Перша поїздка після 18:00 — з індексом 7, о 18:40. Щоб перевірити, чи значення є в списку, дивимося, що лежить на знайденій позиції:
 
-```python title="orders.py — початок"
-import random
-from datetime import datetime, timedelta
-from typing import NamedTuple
+```python
+def contains(items, target):
+    i = bisect_left(items, target)
+    return i < len(items) and items[i] == target
 
-from rules import day_from_timestamp, meal_type_from_hour
+
+print(contains(starts, 1120), contains(starts, 1000))
 ```
 
-## Що робить import
+```text
+True False
+```
 
-Коли Python бачить `import rules`, він виконує чотири кроки:
+Перевірка `i < len(items)` потрібна, бо для значення, більшого за всі елементи, `bisect_left` повертає `len(items)` — позицію **після** останнього.
+
+## Два вказівники: пара у відсортованому списку
+
+Компанія видала пасажиру ваучер на **рівно 500 грн** і дозволяє покрити ним дві поїздки. Суми поїздок за тиждень відсортовані:
+
+```python
+fares = [120, 150, 180, 230, 270, 320, 410]
+```
+
+Які дві поїздки разом дають 500? Перебір усіх пар — цикл у циклі, `O(n²)`. Але список відсортований, і цим можна скористатися.
+
+Поставимо один вказівник на початок (найдешевша поїздка), другий — на кінець (найдорожча):
+
+- сума **замала** → потрібно більше: зсуваємо лівий вказівник праворуч, до дорожчої поїздки;
+- сума **завелика** → зсуваємо правий вказівник ліворуч, до дешевшої;
+- сума **рівно** 500 → знайшли.
+
+```python
+def pair_with_sum(items, target):
+    left, right = 0, len(items) - 1
+    steps = 0
+    while left < right:
+        steps += 1
+        total = items[left] + items[right]
+        if total == target:
+            return (items[left], items[right]), steps
+        if total < target:
+            left += 1
+        else:
+            right -= 1
+    return None, steps
+
+
+print(pair_with_sum(fares, 500))
+```
+
+```text
+((180, 320), 4)
+```
+
+| Крок | `left` → сума | `right` → сума | Разом | Що робимо |
+|---|---|---|---|---|
+| 1 | 120 | 410 | 530 | завелика → `right` ліворуч |
+| 2 | 120 | 320 | 440 | замала → `left` праворуч |
+| 3 | 150 | 320 | 470 | замала → `left` праворуч |
+| 4 | 180 | 320 | 500 | знайшли |
+
+Покроково — кожен крок назавжди відкидає одну поїздку:
 
 ```mermaid
 flowchart TD
@@ -189,641 +301,266 @@ flowchart TD
     classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
     classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
 
-    A["import rules"] --> B{"rules уже<br>в sys.modules?"}
-    B -- так --> F["взяти готовий модуль<br>файл не виконується"]
-    B -- ні --> C["шукати rules.py<br>по теках sys.path"]
-    C --> D{"знайшли?"}
-    D -- ні --> E["ModuleNotFoundError"]
-    D -- так --> G["виконати файл<br>зверху вниз"]
-    G --> H["зберегти в sys.modules"]
-    H --> I["ім'я rules<br>з'являється в програмі"]
-    F --> I
+    subgraph K1["крок 1 · 120 + 410"]
+        direction LR
+        S1{"530 > 500"} --> A1["right ліворуч<br>410 відкинуто"]
+    end
+    subgraph K2["крок 2 · 120 + 320"]
+        direction LR
+        S2{"440 < 500"} --> A2["left праворуч<br>120 відкинуто"]
+    end
+    subgraph K3["крок 3 · 150 + 320"]
+        direction LR
+        S3{"470 < 500"} --> A3["left праворуч<br>150 відкинуто"]
+    end
+    subgraph K4["крок 4 · 180 + 320"]
+        direction LR
+        S4{"500 = 500"} --> A4["знайшли<br>(180, 320)"]
+    end
+    K1 --> K2 --> K3 --> K4
 
-    class A,C,G,H step
-    class B,D decision
-    class E error
-    class F,I success
+    class S1,S2,S3,S4 decision
+    class A1,A2,A3 error
+    class A4 success
 ```
 
-1. **Кеш.** Якщо модуль уже імпортували, Python бере його зі словника `sys.modules` і нічого не виконує повторно.
-2. **Пошук.** Інакше перебирає теки зі списку `sys.path` по черзі, доки не знайде `rules.py`.
-3. **Виконання.** Виконує файл модуля зверху вниз, як звичайну програму: `def` створюють функції, присвоєння — змінні, `print` друкує.
-4. **Збереження.** Кладе готовий модуль у `sys.modules`, а в програмі з'являється ім'я `rules`.
-
-Кеш легко побачити:
+Чому можна безпечно відкинути 410 на першому кроці? Бо навіть із **найдешевшою** поїздкою 120 вона дає забагато, а з дорожчими буде ще більше. Кожен крок відкидає одну поїздку назавжди, тому кроків щонайбільше n − 1 — це `O(n)`.
 
 ```python
-import sys
-import collections
+def pair_with_sum_brute(items, target):
+    steps = 0
+    for i in range(len(items)):
+        for j in range(i + 1, len(items)):
+            steps += 1
+            if items[i] + items[j] == target:
+                return (items[i], items[j]), steps
+    return None, steps
 
-print("collections" in sys.modules)
-print(type(sys.modules["collections"]))
+
+print(pair_with_sum_brute(fares, 500))
+print(pair_with_sum(fares, 10_000))
+print(pair_with_sum_brute(fares, 10_000))
 ```
 
 ```text
-True
-<class 'module'>
+((180, 320), 14)
+(None, 6)
+(None, 21)
 ```
 
-### Де Python шукає: sys.path
+Коли пари немає, перебір перевіряє всі 21 пару з 7 поїздок, а два вказівники — 6 кроків. Для тисячі поїздок це близько 500 000 проти 999.
 
-`sys.path` — звичайний список тек. Порядок пошуку:
+!!! note "А якщо суми не відсортовані?"
+    Два вказівники спираються на порядок: «зсунь лівий — сума зросте». Без сортування ця логіка не працює. Можна спершу відсортувати (`sorted()` — це `O(n log n)`), а можна скористатися множиною — це тема [Практикуму 3](lesson_17.md), де ця сама задача повернеться з невідсортованими даними.
 
-1. **тека скрипта**, який запустили (`python main.py` — тека, де лежить `main.py`); у ноутбуці — поточна тека;
-2. теки зі змінної оточення `PYTHONPATH`, якщо вона задана;
-3. стандартна бібліотека;
-4. `site-packages` — пакети, встановлені через `pip`.
+## Ковзне вікно: суцільні відрізки
 
-Перша ж тека, де знайшовся файл, перемагає. Тому `main.py` бачить `rules.py`, що лежить поруч, без жодних налаштувань. І тому ж з'являється пастка, про яку далі.
-
-### Виконання лише один раз
-
-Файл модуля виконується **при першому імпорті**. Усе, що стоїть на верхньому рівні файлу, спрацює в цей момент — навіть якщо імпортуючий хотів лише одну функцію.
-
-Коли `report.py` переносили з ноутбука, в кінець файлу за звичкою потрапила перевірка з уроку 7:
-
-```python title="report.py — перша версія (кінець файлу)"
-orders = [
-    Order(540.0, 50.0, "пт", "вечеря", 2),
-    Order(320.0, 30.0, "пт", "обід", 1),
-    Order(980.0, 120.0, "сб", "вечеря", 4),
-]
-print_report(orders)
-```
-
-Адміністратор запускає звіт за липень і бачить **два** звіти. Перший — з трьох тестових чеків:
-
-```bash
-python main.py 2024 7
-```
-
-```text
-пт — чеків:  2, виторг:    860.00, середній: 430.00
-сб — чеків:  1, виторг:    980.00, середній: 980.00
-Найкращий день: сб
-За прийомом їжі: {'вечеря': 2, 'обід': 1}
-Звіт кафе: липень 2024, днів: 31, чеків: 86
-пн — чеків: 17, виторг:  14561.67, середній: 856.57
-...
-```
-
-`main.py` виконав `from report import print_report` → Python виконав `report.py` зверху вниз → разом з функціями виконався і тестовий `print_report(orders)`. Це **побічний ефект імпорту**. А от другий `import report` у тій самій програмі вже нічого не надрукує: модуль у кеші.
-
-## `if __name__ == "__main__":`
-
-Тестовий звіт у `report.py` корисний: ним зручно перевірити модуль окремо, командою `python report.py`. Потрібно, щоб він спрацьовував **лише** тоді, коли файл запускають напряму, а не імпортують.
-
-Для цього в кожного модуля є змінна `__name__`:
-
-| Як використали файл | Значення `__name__` всередині нього |
-|---|---|
-| `python report.py` — запустили напряму | `"__main__"` |
-| `import report` з іншого файлу | `"report"` — ім'я модуля |
-
-Отже, тестовий код ховаємо під умову:
-
-```python title="report.py — кінець файлу"
-if __name__ == "__main__":
-    from orders import Order
-
-    demo = [
-        Order(540.0, 50.0, "пт", "вечеря", 2),
-        Order(320.0, 30.0, "пт", "обід", 1),
-        Order(980.0, 120.0, "сб", "вечеря", 4),
-    ]
-    print_report(demo)
-```
-
-Тепер `python report.py` друкує тестовий звіт, а `python main.py 2024 7` — лише звіт за липень. Так само закінчується і `main.py`: `main(sys.argv)` стоїть під тією ж умовою, тож `main.py` можна імпортувати в тести, і звіт при цьому не запуститься.
-
-У ноутбуці `__name__` завжди `"__main__"`: ноутбук — це програма, яку запускають напряму.
+Кількість поїздок по годинах доби зберігається списком з 24 чисел (індекс — година):
 
 ```python
-print(__name__)
+per_hour = [3, 1, 0, 0, 1, 4, 12, 30, 41, 25, 18, 20,
+            22, 19, 17, 21, 33, 45, 52, 38, 24, 15, 9, 6]
 ```
 
-```text
-__main__
-```
+Диспетчер хоче знати, коли почати пікову зміну водіїв: які **три години поспіль** найзавантаженіші?
 
-!!! tip "Модуль без побічних ефектів"
-    На верхньому рівні модуля лишай тільки імпорти, константи (`DAYS`), `def` і `class`. Усе, що друкує, читає файли чи довго рахує, — у функції або під `if __name__ == "__main__":`. Тоді `import` нічого не робить, крім того, що дає імена.
-
-## Затінення: коли твій файл заважає стандартному
-
-Адміністраторка кафе вирішила зберігати графік змін у тій самій теці і назвала файл логічно — `calendar.py`:
-
-```python title="calendar.py"
-STAFF = {"пн": ["Оксана", "Тарас"], "сб": ["Ірина"]}
-```
-
-Наступний запуск звіту падає:
-
-```bash
-python main.py 2024 7
-```
-
-```text
-Traceback (most recent call last):
-  ...
-    days_in_month = calendar.monthrange(year, month)[1]
-                    ^^^^^^^^^^^^^^^^^^^
-AttributeError: module 'calendar' has no attribute 'monthrange'
-```
-
-`main.py` пише `import calendar`, маючи на увазі стандартний модуль. Але першою в `sys.path` стоїть тека скрипта, а там тепер лежить `calendar.py` з графіком. Python знайшов **його** і далі не шукав. Стандартний `calendar` **затінено** (shadowing).
-
-Python 3.13 підказує прямо:
-
-```text
-AttributeError: module 'calendar' has no attribute 'monthrange' (consider renaming '.../cafe_report/calendar.py' since it has the same name as the standard library module named 'calendar' and prevents importing that standard library module)
-```
-
-Старіші версії такої підказки не дають. Ліки однакові: перейменувати свій файл, наприклад на `staff_schedule.py`, і видалити теку `__pycache__` поруч, якщо вона з'явилася.
-
-!!! warning "Не називай файли іменами стандартних модулів"
-    `random.py`, `math.py`, `calendar.py`, `statistics.py`, `test.py`, `email.py` — усе це імена модулів стандартної бібліотеки. Помилка при цьому з'являється не у твоєму файлі, а в чужому коді, який чекав на справжній модуль. Швидка перевірка: `print(calendar.__file__)` показує, який саме файл завантажено.
-
-## Стандартна бібліотека: батарейки в комплекті
-
-Python постачається з сотнями готових модулів. Про це кажуть «batteries included» — батарейки в комплекті. Перш ніж писати щось самому чи шукати пакет для `pip install`, варто перевірити [перелік модулів](https://docs.python.org/3/library/index.html). Кафе знадобиться п'ять.
-
-### datetime: дата і час одним об'єктом
-
-Каса віддає мітку часу як об'єкт `datetime`. З нього дістаємо все, що потрібно звіту:
+Прямий спосіб — для кожної початкової години порахувати суму трьох годин заново:
 
 ```python
-from datetime import datetime, timedelta
+def busiest_window_naive(counts, k):
+    best_start, best_sum = 0, sum(counts[0:k])
+    for start in range(1, len(counts) - k + 1):
+        window_sum = sum(counts[start:start + k])
+        if window_sum > best_sum:
+            best_start, best_sum = start, window_sum
+    return best_start, best_sum
 
-ts = datetime(2024, 7, 19, 18, 30)
-print(ts)
-print(ts.year, ts.month, ts.day, ts.hour, ts.minute)
-print(ts.weekday())
+
+print(busiest_window_naive(per_hour, 3))
 ```
 
 ```text
-2024-07-19 18:30:00
-2024 7 19 18 30
-4
+(17, 135)
 ```
 
-`weekday()` рахує дні з нуля: 0 — понеділок, 6 — неділя. Тому `rules.DAYS[ts.weekday()]` — це `"пт"`.
+Пік — години 17, 18 і 19, тобто з 17:00 до 20:00: 135 поїздок. Але кожне вікно перераховується з нуля: k додавань на кожен з n кроків, `O(n·k)`.
 
-**Рядок ↔ дата.** `strftime` (string **f**rom time) перетворює дату на рядок за шаблоном, `strptime` (string **p**arse time) — навпаки:
+Подивися на сусідні вікна: 16–18 і 17–19. У них спільні години 17 і 18. Коли вікно зсувається на годину, **одна година випадає зліва, одна додається справа**. Отже, нову суму можна отримати зі старої двома діями:
 
 ```python
-print(ts.strftime("%d.%m.%Y %H:%M"))
-print(ts.strftime("%Y-%m"))
+def busiest_window(counts, k):
+    window_sum = sum(counts[0:k])
+    best_start, best_sum = 0, window_sum
+    for end in range(k, len(counts)):
+        window_sum += counts[end] - counts[end - k]
+        if window_sum > best_sum:
+            best_start, best_sum = end - k + 1, window_sum
+    return best_start, best_sum
 
-parsed = datetime.strptime("15.07.2024", "%d.%m.%Y")
-print(parsed)
+
+print(busiest_window(per_hour, 3))
+print(busiest_window(per_hour, 5))
 ```
 
 ```text
-19.07.2024 18:30
-2024-07
-2024-07-15 00:00:00
+(17, 135)
+(16, 192)
 ```
 
-**Проміжки часу.** `timedelta` — «скільки часу»: його додають до дати, а різниця двох дат теж дає `timedelta`. Дати порівнюються, як числа:
+```mermaid
+flowchart TD
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
 
-```python
-print(ts + timedelta(hours=2))
-period = datetime(2025, 1, 1) - datetime(2023, 1, 1)
-print(period.days)
-print(datetime(2024, 7, 1) <= ts < datetime(2024, 8, 1))
+    A["вікно 16–18<br>33 + 45 + 52 = 130"] --> B["зсув на годину:<br>− 33 (година 16) + 38 (година 19)"]
+    B --> C["вікно 17–19<br>130 − 33 + 38 = 135"]
+    C --> D["без повторного додавання:<br>45 + 52 + 38 = 135"]
+
+    class A,C step
+    class B warning
+    class D success
 ```
 
-```text
-2024-07-19 20:30:00
-731
-True
-```
+Результат той самий, що в наївної версії, але кожне вікно тепер отримується з попереднього.
 
-731 день, бо 2024 рік високосний. Саме так `orders.py` генерує мітки часу: початок періоду плюс випадкова кількість днів, годин і хвилин.
+Кожне вікно тепер коштує дві дії, незалежно від k: `O(n)`. Для k = 3 різниця невелика, а для «найзавантаженішого тижня з року» (k = 7 із 365 днів) чи «найкращих 60 хвилин доби» (k = 60 з 1440 хвилин) — суттєва.
 
-!!! note "Назви днів і місяців англійською"
-    `ts.strftime("%A")` дасть `Friday`: назви залежать від **локалі** системи. Модуль `locale` вміє перемкнути її на українську, але лише якщо українська локаль встановлена на конкретному комп'ютері. У Colab чи на сервері її може не бути, і `locale.setlocale` впаде з `locale.Error`. Тому кафе тримає власні кортежі `DAYS` і `MONTHS` у `rules.py`: вони працюють однаково всюди.
+## Як обрати стратегію
 
-### random: відтворювані випадкові дані
-
-Справжньої каси в нас немає, тому чеки генеруємо. Щоб звіт щоразу виходив однаковим, генератор створюємо з **зерном** (seed):
-
-```python
-import random
-
-rng = random.Random(42)
-print(rng.randint(1, 6), rng.randint(1, 6), rng.randint(1, 6))
-
-rng = random.Random(42)
-print(rng.randint(1, 6), rng.randint(1, 6), rng.randint(1, 6))
-```
-
-```text
-6 1 1
-6 1 1
-```
-
-Те саме зерно дає ту саму послідовність. Числа лише **псевдовипадкові**: їх обчислює формула. Для навчальних даних і тестів це саме те, що треба, для паролів — ні (для них є модуль [`secrets`](https://docs.python.org/3/library/secrets.html)).
-
-`random.Random(seed)` — окремий генератор, який належить лише функції `generate_raw_orders`. Виклик `random.seed(42)` змінив би спільний генератор для всієї програми, а це побічний ефект.
-
-### collections.Counter: підрахунок одним рядком
-
-В уроці 6 чеки за днями рахували вручну: `counts[day] = counts.get(day, 0) + 1`. `Counter` робить те саме одним рядком:
-
-```python
-from collections import Counter
-
-times = ["вечеря", "обід", "вечеря", "інше", "вечеря", "обід"]
-counts = Counter(times)
-print(counts)
-print(counts["вечеря"], counts["сніданок"])
-print(counts.most_common(1))
-```
-
-```text
-Counter({'вечеря': 3, 'обід': 2, 'інше': 1})
-3 0
-[('вечеря', 3)]
-```
-
-`Counter` — це словник, тож усе, що вміє `dict`, вміє і він. Відсутній ключ дає `0`, а не `KeyError`. `most_common(k)` повертає k найчастіших значень. У `report.py` функція `count_by_day` тепер займає один рядок: `return Counter(order.day for order in orders)`.
-
-### calendar: скільки днів у місяці
-
-Щоб порахувати «чеків на день», треба знати, скільки днів у місяці. Для лютого це залежить від року:
-
-```python
-import calendar
-
-first_weekday, days = calendar.monthrange(2024, 2)
-print(days, first_weekday == 3)
-print(calendar.monthrange(2023, 2)[1])
-print(calendar.isleap(2024))
-print(calendar.month_name[7], repr(calendar.month_name[0]))
-```
-
-```text
-29 True
-28
-True
-July ''
-```
-
-`monthrange` повертає пару: день тижня першого числа (3 — четвер, нумерація як у `weekday()`) і кількість днів. `month_name` нумерує місяці з 1, тому під індексом 0 — порожній рядок. Кортеж `MONTHS` у `rules.py` влаштований так само: `MONTHS[7] == "липень"`.
-
-### statistics: середнє і медіана
-
-```python
-import statistics as st
-
-bills = [320, 540, 760, 980, 4500]
-print(st.mean(bills))
-print(st.median(bills))
-```
-
-```text
-1420
-760
-```
-
-Один банкет на 4500 грн підняв середній чек до 1420, хоча чотири з п'яти чеків менші за тисячу. Медіана — середнє значення **за порядком** — такому викиду не піддається. Коли власниця питає «скільки зазвичай витрачає гість», чесніша відповідь — медіана.
-
-### Як знайти потрібний модуль
-
-- Перелік модулів з описами: [The Python Standard Library](https://docs.python.org/3/library/index.html).
-- Що є в модулі: `dir(module)` і `help(module.function)` прямо в інтерпретаторі.
-- Який файл завантажено: `module.__file__`.
-
-```python
-import rules
-
-print([name for name in dir(rules) if not name.startswith("_")])
-print(rules.meal_type_from_hour.__doc__)
-```
-
-```text
-['DAYS', 'MONTHS', 'day_from_timestamp', 'meal_type_from_hour']
-Прийом їжі за годиною замовлення.
-```
-
-Рядок документації (docstring), який ти пишеш під `def`, — це саме те, що покаже `help()`.
-
-## sys.argv: аргументи з командного рядка
-
-Адміністратор запускає звіт так:
-
-```bash
-python main.py 2024 7
-```
-
-Усе, що написано після `python`, Python кладе в список `sys.argv`:
-
-| Індекс | Значення | Тип |
+| Що відомо про дані | Стратегія | Складність |
 |---|---|---|
-| `sys.argv[0]` | `"main.py"` — ім'я скрипта | `str` |
-| `sys.argv[1]` | `"2024"` | `str` |
-| `sys.argv[2]` | `"7"` | `str` |
+| нічого | лінійний пошук, `in` | `O(n)` |
+| відсортовані, шукаємо значення чи позицію | бінарний пошук, `bisect` | `O(log n)` |
+| відсортовані, шукаємо пару | два вказівники | `O(n)` |
+| суцільні відрізки однакової довжини | ковзне вікно | `O(n)` |
 
-**Усі** аргументи — рядки, навіть якщо схожі на числа. Тому `main.py` перетворює їх через `int()`:
-
-```python title="main.py"
-"""Звіт кафе за місяць: python main.py РІК МІСЯЦЬ"""
-import calendar
-import sys
-
-from orders import generate_raw_orders, in_month, to_order
-from report import print_report
-from rules import MONTHS
-
-
-def main(args):
-    if len(args) != 3:
-        print("Використання: python main.py РІК МІСЯЦЬ, наприклад: python main.py 2024 7")
-        return
-    year, month = int(args[1]), int(args[2])
-    raw_orders = generate_raw_orders(2000, seed=42)
-    orders = [to_order(raw) for raw in raw_orders if in_month(raw, year, month)]
-    days_in_month = calendar.monthrange(year, month)[1]
-    print(f"Звіт кафе: {MONTHS[month]} {year}, днів: {days_in_month}, чеків: {len(orders)}")
-    print_report(orders)
-
-
-if __name__ == "__main__":
-    main(sys.argv)
-```
-
-`main` отримує список аргументів параметром, а не читає `sys.argv` сама. Так її легко перевірити в тестах: `main(["main.py", "2024", "7"])`.
-
-```bash
-python main.py
-```
-
-```text
-Використання: python main.py РІК МІСЯЦЬ, наприклад: python main.py 2024 7
-```
-
-А якщо ввести місяць словом?
-
-```bash
-python main.py 2024 липень
-```
-
-```text
-ValueError: invalid literal for int() with base 10: 'липень'
-```
-
-Програма падає з трасуванням. Як перехоплювати такі помилки й відповідати людині зрозуміло — тема [уроку 13](lesson_13.md). Для складніших програм зі стандартної бібліотеки є [`argparse`](https://docs.python.org/3/library/argparse.html): він сам друкує довідку `--help` і перевіряє типи аргументів.
+Головне питання практикуму: **що я знаю про ці дані такого, що дозволяє не перевіряти все?**
 
 ## Практика { #practice }
 
-### Розібраний приклад: звіт кафе з чотирьох модулів
+### Розібраний приклад: автодоповнення адреси
 
-Готовий проєкт лежить у теці [`cafe_report/`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_1/lessons/lesson_12_modules_stdlib/cafe_report). `rules.py` і `main.py` ти вже бачив вище. Ось два інші модулі повністю:
+Пасажир починає вводити вулицю в застосунку таксі, і після кожної літери з'являються підказки. Вулиць у місті тисячі, а підказки мають з'являтися миттєво. Список вулиць відсортований за абеткою.
 
-```python title="orders.py" linenums="1" hl_lines="9 17 28 30 33 34 35 42 47"
-"""Чеки кафе: сирі записи з каси і перетворення на Order з уроку 7."""
-import random
-from datetime import datetime, timedelta
-from typing import NamedTuple
+```python linenums="1" hl_lines="7 8 9 10"
+from bisect import bisect_left
 
-from rules import day_from_timestamp, meal_type_from_hour
+streets = sorted(["Богдана Хмельницького", "Велика Васильківська", "Верхній Вал",
+                  "Володимирська", "Хрещатик", "Хорива", "Шота Руставелі"])
 
 
-class RawOrder(NamedTuple):
-    """Чек, як його віддає каса: з міткою часу."""
-    total_bill: float
-    tip: float
-    size: int
-    timestamp: datetime
+def suggest(streets, prefix, limit=3):
+    start = bisect_left(streets, prefix)
+    result = []
+    i = start
+    while i < len(streets) and streets[i].startswith(prefix) and len(result) < limit:
+        result.append(streets[i])
+        i += 1
+    return result
 
 
-class Order(NamedTuple):
-    """Чек, як його рахує звіт з уроку 7."""
-    total_bill: float
-    tip: float
-    day: str
-    time: str
-    size: int
-
-
-def generate_raw_orders(n, seed=None):
-    """n випадкових чеків за 2023–2024 роки, кафе працює з 9:00 до 23:00."""
-    rng = random.Random(seed)
-    start = datetime(2023, 1, 1)
-    days = (datetime(2025, 1, 1) - start).days
-    raw_orders = []
-    for _ in range(n):
-        timestamp = start + timedelta(days=rng.randrange(days),
-                                      hours=rng.randint(9, 22),
-                                      minutes=rng.randint(0, 59))
-        bill = round(rng.uniform(150, 1500), 2)
-        tip = round(bill * rng.uniform(0, 0.15), 2)
-        raw_orders.append(RawOrder(bill, tip, rng.randint(1, 6), timestamp))
-    return raw_orders
-
-
-def in_month(raw, year, month):
-    """Чи належить чек до вказаного місяця."""
-    return raw.timestamp.year == year and raw.timestamp.month == month
-
-
-def to_order(raw):
-    """RawOrder -> Order: день і прийом їжі обчислюються з мітки часу."""
-    return Order(
-        total_bill=raw.total_bill,
-        tip=raw.tip,
-        day=day_from_timestamp(raw.timestamp),
-        time=meal_type_from_hour(raw.timestamp.hour),
-        size=raw.size,
-    )
-```
-
-```python title="report.py" linenums="1" hl_lines="2 4 8 33 38"
-"""Звіт кафе: функції з уроку 7, тепер в окремому модулі."""
-from collections import Counter
-
-from rules import DAYS
-
-
-def count_by_day(orders):
-    """Кількість чеків у кожен день."""
-    return Counter(order.day for order in orders)
-
-
-def revenue_by_day(orders):
-    """Сума чеків за кожен день."""
-    revenue = {}
-    for order in orders:
-        revenue[order.day] = revenue.get(order.day, 0) + order.total_bill
-    return revenue
-
-
-def best_day(revenue):
-    """День з найбільшим виторгом."""
-    best = None
-    for day, amount in revenue.items():
-        if best is None or amount > revenue[best]:
-            best = day
-    return best
-
-
-def print_report(orders):
-    """Друкує звіт кафе за списком чеків."""
-    counts = count_by_day(orders)
-    revenue = revenue_by_day(orders)
-    for day in DAYS:
-        if day in revenue:
-            average = revenue[day] / counts[day]
-            print(f"{day} — чеків: {counts[day]:>2}, виторг: {revenue[day]:>9.2f}, середній: {average:.2f}")
-    print("Найкращий день:", best_day(revenue))
-    print("За прийомом їжі:", dict(Counter(order.time for order in orders).most_common()))
-
-
-if __name__ == "__main__":
-    from orders import Order
-
-    demo = [
-        Order(540.0, 50.0, "пт", "вечеря", 2),
-        Order(320.0, 30.0, "пт", "обід", 1),
-        Order(980.0, 120.0, "сб", "вечеря", 4),
-    ]
-    print_report(demo)
-```
-
-Запуск з теки `cafe_report/`:
-
-```bash
-python main.py 2024 7
+print(suggest(streets, "В"))
+print(suggest(streets, "Ве"))
+print(suggest(streets, "Х"))
+print(suggest(streets, "Я"))
 ```
 
 ```text
-Звіт кафе: липень 2024, днів: 31, чеків: 86
-пн — чеків: 17, виторг:  14561.67, середній: 856.57
-вт — чеків:  9, виторг:   8332.69, середній: 925.85
-ср — чеків: 17, виторг:  14020.64, середній: 824.74
-чт — чеків: 14, виторг:  10434.54, середній: 745.32
-пт — чеків: 12, виторг:   8032.91, середній: 669.41
-сб — чеків:  6, виторг:   3416.60, середній: 569.43
-нд — чеків: 11, виторг:  10220.77, середній: 929.16
-Найкращий день: пн
-За прийомом їжі: {'вечеря': 39, 'обід': 27, 'інше': 20}
+['Велика Васильківська', 'Верхній Вал', 'Володимирська']
+['Велика Васильківська', 'Верхній Вал']
+['Хорива', 'Хрещатик']
+[]
 ```
 
 Що відбувається в ключових рядках:
 
-- **`orders.py`, рядки 9 і 17** — два види чека. `RawOrder` — те, що дає каса, з міткою часу. `Order` — той самий `NamedTuple`, що в уроці 7, тож функції звіту не довелося переписувати;
-- **рядки 28 і 30** — власний генератор із зерном і довжина періоду як різниця двох дат: `.days` у `timedelta`;
-- **рядки 33–35** — мітка часу = початок періоду + `timedelta` з випадковими днями, годиною роботи кафе (9–22) і хвилинами;
-- **рядки 42 і 47** — дві маленькі функції замість одного великого циклу: `in_month` відбирає чеки, `to_order` перетворює `RawOrder → Order` за правилами з `rules.py`;
-- **`report.py`, рядки 2, 4 і 8** — `Counter` замінив ручний підрахунок з уроку 7. **Рядок 33** — порядок днів береться з `rules.DAYS`: звіт іде від понеділка до неділі, хоч би в якому порядку прийшли чеки;
-- **рядки 29–38** — `print_report` майже не змінилася. Вона не знає ні про касу, ні про мітки часу: її вхід — список `Order`, як і раніше.
+- **рядок 8** — `bisect_left` знаходить першу позицію, куди «вписався б» префікс. Усі вулиці, що з нього починаються, стоять підряд саме звідти — бо список відсортований за абеткою;
+- **рядки 9–13** — від цієї позиції йдемо праворуч, поки вулиця починається з префікса й підказок ще менше за `limit`;
+- **рядок 11** — перевірка `i < len(streets)` стоїть першою: коли префікс «більший» за всі вулиці, `bisect_left` повертає позицію після кінця списку.
 
-Перевірки проєкту — у [`test_cafe_report.py`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_12_modules_stdlib/cafe_report/test_cafe_report.py). Це теж модуль: він імпортує `rules`, `orders`, `report` і `main` і перевіряє їх `assert`-ами, зокрема що `import report` нічого не друкує. Запуск: `python test_cafe_report.py`.
+На 10 000 вулиць пошук позиції займе ~14 кроків замість 10 000, а далі — лише стільки кроків, скільки підказок показуємо.
 
-### Зміни приклад: чайові за прийомом їжі
+### Зміни приклад: тихі години для техобслуговування
 
-Власниця хоче знати, коли гості залишають щедріші чайові. Додай у `report.py` дві функції:
+Сервер диспетчерської треба оновити, і на це потрібно **дві години поспіль** з найменшою кількістю поїздок. Напиши `quietest_window(counts, k)` — ковзне вікно, що шукає мінімум, і повертає пару `(початкова година, сума)`.
 
-- `tip_percent(order)` — частка чайових у чеку, у відсотках;
-- `tips_by_time(orders)` — словник «прийом їжі → середній відсоток чайових», округлений до одного знака. Середнє порахуй через `statistics.mean`.
-
-І рядок у кінці `print_report`:
+Для `per_hour` з розділу вище:
 
 ```text
-Чайові, %: {'обід': 7.6, 'вечеря': 7.3, 'інше': 6.2}
+quietest_window(per_hour, 2) → (2, 0)
+quietest_window(per_hour, 4) → (1, 2)
 ```
 
 **Критерії перевірки:**
 
-- `python main.py 2024 7` друкує рядок, як вище, останнім;
-- `tips_by_time([])` повертає `{}`, а не падає;
-- імпорт `statistics` стоїть на початку `report.py`, у групі стандартної бібліотеки, над `from rules import DAYS`;
-- `python report.py` теж друкує рядок про чайові — для трьох тестових чеків.
+- функція проходить список один раз, без `sum()` усередині циклу;
+- результат збігається з наївною версією для k від 1 до 24;
+- при однакових сумах повертається найраніше вікно.
 
 ??? tip "Підказка"
-    Групуй, як `bills_by_time` в уроці 7: `groups.setdefault(order.time, []).append(tip_percent(order))`. Потім dict comprehension: `{time: round(mean(values), 1) for time, values in groups.items()}`. Для порожнього списку чеків цикл не виконається жодного разу, і comprehension поверне порожній словник.
+    Скопіюй `busiest_window` і зміни одне порівняння. Подумай, яке саме, щоб при рівних сумах лишалося найраніше вікно.
 
-### Спробуй самостійно: звіт за тиждень
+### Спробуй самостійно: перша поїздка після часу
 
-Бухгалтер просить звіт не за місяць, а за тиждень, що починається з указаної дати:
-
-```bash
-python week.py 2024-07-15
-```
+Напиши **власний** бінарний пошук `first_at_or_after(items, target)` без модуля `bisect`: він повертає індекс першого елемента, не меншого за `target`, або `len(items)`, якщо таких немає. Це і є те, що робить `bisect_left`.
 
 ```text
-Звіт кафе: тиждень з 2024-07-15 до 2024-07-21, чеків: 21
-пн — чеків:  4, виторг:   3586.74, середній: 896.68
-ср — чеків:  4, виторг:   3609.78, середній: 902.45
-чт — чеків:  3, виторг:   2465.85, середній: 821.95
-пт — чеків:  5, виторг:   3284.45, середній: 656.89
-сб — чеків:  4, виторг:   2436.49, середній: 609.12
-нд — чеків:  1, виторг:   1291.95, середній: 1291.95
-Найкращий день: ср
-За прийомом їжі: {'інше': 9, 'вечеря': 8, 'обід': 4}
+first_at_or_after(starts, 1080) → 7
+first_at_or_after(starts, 1120) → 7
+first_at_or_after(starts, 400)  → 0
+first_at_or_after(starts, 1400) → 11
+first_at_or_after([], 5)        → 0
 ```
 
-Створи в теці `cafe_report/` новий модуль `week.py`. Правила:
+**Критерії перевірки:**
 
-- `rules.py`, `orders.py` і `report.py` не змінюються: `week.py` лише імпортує з них;
-- дату з `sys.argv[1]` розбери через `datetime.strptime`, кінець тижня — `start + timedelta(days=7)`;
-- чек потрапляє у звіт, якщо `start <= raw.timestamp < end`: 22 липня 00:00 вже не входить;
-- у заголовку — останній день тижня (`end - timedelta(days=1)`), дату виводь через `.date()` або `strftime("%Y-%m-%d")`;
-- без аргументу `week.py` друкує підказку, як у `main.py`;
-- код запуску — під `if __name__ == "__main__":`.
-
-У звіті немає вівторка: за цей тиждень у згенерованих даних не було жодного вівторкового чека, і `print_report` пропускає такі дні.
+- результат збігається з `bisect_left(items, target)` для всіх значень `target` від 400 до 1400;
+- функція робить не більше `len(items).bit_length() + 1` порівнянь (додай лічильник);
+- цикл `while` з двома межами, без перебору всіх елементів.
 
 ## Підсумок
 
-| Поняття | Що запам'ятати |
+| Що потрібно | Як |
 |---|---|
-| Модуль | файл `.py`; його ім'я — простір імен: `rules.DAYS` |
-| `import` | шукає по `sys.path`, виконує файл один раз, кешує в `sys.modules` |
-| `__name__` | `"__main__"` при запуску напряму, ім'я модуля при імпорті |
-| Затінення | свій `calendar.py` у теці скрипта ховає стандартний `calendar` |
-| `datetime` | `.year`, `.weekday()`, `strftime`/`strptime`, `timedelta`, порівняння |
-| `Counter` | `Counter(values)`, `most_common(k)`, відсутній ключ — `0` |
-| `sys.argv` | список рядків; `[0]` — ім'я скрипта |
+| знайти в невідсортованому | лінійний пошук або `x in items` — `O(n)` |
+| знайти у відсортованому | бінарний пошук: середина, відкинути половину — `O(log n)` |
+| позиція для вставки, «скільки до x» | `bisect_left(items, x)` |
+| чи є x у відсортованому | `i = bisect_left(items, x)`, потім `i < len(items) and items[i] == x` |
+| пара з заданою сумою у відсортованому | два вказівники з кінців назустріч — `O(n)` |
+| найкращий відрізок довжини k | ковзне вікно: `+ новий − той, що випав` — `O(n)` |
 
 ### Самоперевірка
 
-1. Чим `import rules` відрізняється від `from rules import meal_type_from_hour` з погляду того, як далі викликати функцію?
-2. У `report.py` на верхньому рівні стоїть `print("звіт завантажено")`. Що побачить користувач, який запускає `main.py`, де `report` імпортується двічі?
-3. Чому тестовий код модуля ховають під `if __name__ == "__main__":`?
-4. Поруч з `main.py` лежить твій файл `random.py`. Що станеться з `orders.py`, який робить `import random`?
-5. Що надрукує `print(type(sys.argv[1]))` для `python main.py 2024 7`?
-6. Чому `generate_raw_orders` створює `random.Random(seed)`, а не викликає `random.seed(seed)`?
-7. Власниця каже: «Середній чек у липні — 800 грн, але більшість гостей платить менше». Як таке можливо і який показник їй краще показати?
+1. Чому бінарний пошук не можна застосувати до невідсортованого списку?
+2. Скільки кроків приблизно зробить бінарний пошук на 1 000 000 записів? А на 2 000 000?
+3. Що поверне `bisect_left([10, 20, 30], 25)` і що це означає?
+4. У двох вказівниках сума замала. Чому зсуваємо саме лівий вказівник?
+5. Чим ковзне вікно краще за перерахунок суми кожного відрізка?
+6. Диспетчеру треба знайти поїздку за номером у журналі, де номери йдуть як завгодно. Яку стратегію обрати?
 
 ??? success "Відповіді"
 
-    1. Після `import rules` викликаємо з префіксом: `rules.meal_type_from_hour(19)`. Після `from rules import meal_type_from_hour` — без нього: `meal_type_from_hour(19)`, але ім'я `rules` у програмі не з'являється.
-    2. Один рядок «звіт завантажено»: файл модуля виконується лише при першому імпорті, другий `import` бере модуль із `sys.modules`.
-    3. Щоб він виконувався, лише коли файл запускають напряму (`python report.py`), і не виконувався, коли модуль імпортують.
-    4. Python знайде твій `random.py` першим (тека скрипта стоїть першою в `sys.path`) і завантажить його замість стандартного. Виклик `random.Random` впаде з `AttributeError`.
-    5. `<class 'str'>`: усі аргументи командного рядка — рядки.
-    6. `random.seed` змінює спільний генератор усієї програми, тобто має побічний ефект. Власний `random.Random(seed)` належить лише функції: результат відтворюваний, а інший код не зачеплено.
-    7. Кілька великих чеків (банкетів) підтягують середнє вгору. Медіана (`statistics.median`) показує «типовий» чек і до таких викидів не чутлива.
+    1. Бінарний пошук відкидає половину, спираючись на порядок: «середній менший — отже вся ліва половина менша». Без порядку цей висновок хибний, і пошук мовчки дасть неправильну відповідь.
+    2. Близько 20. На 2 000 000 — близько 21: подвоєння додає один крок.
+    3. `2` — позицію, куди вставити 25, щоб порядок не зламався: після 10 і 20, перед 30. Також це кількість елементів, менших за 25.
+    4. Правий вказівник уже на найбільшому з можливих. Щоб сума зросла, лишається збільшити менше число — зсунути лівий праворуч.
+    5. Сусідні вікна відрізняються двома елементами, тож нову суму отримуємо зі старої за дві дії, а не за k. Разом `O(n)` замість `O(n·k)`.
+    6. Лінійний пошук: порядку немає, скористатися нічим. Якщо таких пошуків буде багато, варто один раз відсортувати або (у Практикумі 3) побудувати словник.
 
 ### Що далі
 
-- Ноутбук заняття: [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_12_modules_stdlib/note_lesson_12_modules_stdlib_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_12_modules_stdlib/note_lesson_12_modules_stdlib.ipynb){ .solutions-link } — та сама історія кафе: модулі створюються прямо з ноутбука через `%%writefile`, з вправами й перевірками.
-- Довідник: [`notes_modules.ipynb`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_12_modules_stdlib/notes_modules.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_12_modules_stdlib/notes_modules.ipynb) — пакети й `__init__.py`, відносні імпорти та ще десяток модулів стандартної бібліотеки: `pathlib`, `re`, `itertools`, `functools`, `json`, `timeit`.
-- Наступне заняття: [Урок 13. Винятки](lesson_13.md). `python main.py 2024 липень` падає з `ValueError`, а `python main.py 2024 13` — з помилкою `calendar`. Навчимося перехоплювати такі помилки.
-- Урок 14 — файли й JSON: каса віддаватиме чеки не з генератора, а з файлу, і `datetime.strptime` знадобиться знову.
+- Ноутбук заняття: [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_12_practicum_search/note_lesson_12_search_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_12_practicum_search/note_lesson_12_search.ipynb){ .solutions-link } — зміна диспетчера таксі: чотири задачі, чотири стратегії, лічильники кроків і перевірки.
+- Наступне заняття: [Урок 13. Модулі та стандартна бібліотека](lesson_13.md). Модуль `bisect` — лише один з багатьох готових інструментів.
+- Лінію «алгоритм залежить від представлення даних» продовжить [Практикум 3. Хеш-структури](lesson_17.md): пошук за `O(1)` через `dict` і `set`.
 
 ## Документація і джерела
 
-- Туторіал Python: [Modules](https://docs.python.org/3/tutorial/modules.html) — модулі, `__name__`, `sys.path`, пакети
-- Довідник мови: [The import system](https://docs.python.org/3/reference/import.html); [`sys.path`](https://docs.python.org/3/library/sys.html#sys.path), [`sys.modules`](https://docs.python.org/3/library/sys.html#sys.modules), [`sys.argv`](https://docs.python.org/3/library/sys.html#sys.argv)
-- [`__main__` — Top-level code environment](https://docs.python.org/3/library/__main__.html)
-- Модулі уроку: [`datetime`](https://docs.python.org/3/library/datetime.html) (коди форматів — [strftime() and strptime() Format Codes](https://docs.python.org/3/library/datetime.html#format-codes)), [`collections.Counter`](https://docs.python.org/3/library/collections.html#collections.Counter), [`calendar`](https://docs.python.org/3/library/calendar.html), [`statistics`](https://docs.python.org/3/library/statistics.html), [`random`](https://docs.python.org/3/library/random.html), [`argparse`](https://docs.python.org/3/library/argparse.html)
-- Перелік усіх модулів: [The Python Standard Library](https://docs.python.org/3/library/index.html)
-- Стиль імпортів: [PEP 8 — Imports](https://peps.python.org/pep-0008/#imports)
+- Модуль [`bisect`](https://docs.python.org/3/library/bisect.html): [`bisect_left`](https://docs.python.org/3/library/bisect.html#bisect.bisect_left), [пошук у відсортованих списках](https://docs.python.org/3/library/bisect.html#searching-sorted-lists)
+- Методи рядків: [`str.startswith`](https://docs.python.org/3/library/stdtypes.html#str.startswith); сортування: [Sorting Techniques](https://docs.python.org/3/howto/sorting.html)
+- [Складність операцій `list`, `dict`, `set`](https://wiki.python.org/moin/TimeComplexity)
 - Для охочих:
-    - Harvard CS50P, [лекція 4 «Libraries»](https://cs50.harvard.edu/python/weeks/4/) — модулі, `random`, `statistics`, `sys.argv`, власні модулі;
-    - Princeton, *Introduction to Programming in Python*, [розділ 2.2 «Modules and Clients»](https://introcs.cs.princeton.edu/python/22module/) — програма з кількох модулів, `if __name__ == '__main__'` для тестування модуля;
-    - Doug Hellmann, [Python 3 Module of the Week](https://pymotw.com/3/) — приклади до кожного модуля стандартної бібліотеки.
+    - Harvard CS50, [тиждень 3 «Algorithms»](https://cs50.harvard.edu/x/weeks/3/) — лінійний і бінарний пошук на прикладі телефонної книги;
+    - MIT 6.0001, [лекція 12 «Searching and Sorting»](https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/resources/lecture-12-searching-and-sorting/).

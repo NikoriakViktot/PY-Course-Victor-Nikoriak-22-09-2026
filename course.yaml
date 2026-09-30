@@ -28,32 +28,32 @@ modules:
     slug: python-core
     title: "Module 1 — Python Core"
     path: module_1/lessons
-    lessons: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]
+    lessons: [1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]
   - number: 2
     slug: python-advanced
     title: "Module 2 — Python Advanced"
     path: module_2/lessons
-    lessons: [18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28]
+    lessons: [19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29]
   - number: 3
     slug: databases
     title: "Module 3 — Databases"
     path: module_3/lessons
-    lessons: [29, 30]
+    lessons: [30, 31]
   - number: 4
     slug: web
     title: "Module 4 — Web (incl. Web Advanced)"
     path: module_4/lessons
-    lessons: [31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47]
+    lessons: [32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48]
   - number: 5
     slug: production
     title: "Module 5 — Production"
     path: module_5/lessons
-    lessons: [48, 49, 50]
+    lessons: [49, 50, 51]
   - number: 6
     slug: capstone
     title: "Module 6 — Capstone"
     path: module_6/lessons
-    lessons: [51, 52]
+    lessons: [52, 53]
 
 # Self-paced "AI для розробників" track (xlsx: "поза сіткою" / outside the grid) is
 # deliberately NOT encoded as a module here yet — see migration_plan.md for why

@@ -1,539 +1,176 @@
-# Урок 24. Ітератори advanced
+# Урок 24. @property, декоратори класів, dunder
 
-Застосунок кур'єрів «Смачно + Таксі» шле в диспетчерську потік подій: кур'єр забрав замовлення (`picked`), кур'єр доставив (`delivered`). Кожна подія — рядок «час кур'єр замовлення подія». Так виглядає журнал вечірньої зміни:
+Сервіс «Смачно + Таксі» отримав мобільний застосунок. Його розробник пише код поверх наших класів так, як пише звичайний Python: `sorted(deliveries)`, `len(cart)`, `"Борщ" in cart`, `price + fee`. І перший же рядок падає:
 
 ```python
-LOG = [
-    "17:52 D-2 98 delivered",
-    "17:58 D-1 97 delivered",
-    "18:03 D-1 101 picked",
-    "18:05 D-2 102 picked",
-    "18:07 D-3 103 picked",
-    "18:21 D-1 101 delivered",
-    "18:24 ?? зламаний рядок",
-    "18:29 D-2 102 delivered",
-    "18:31 D-1 104 picked",
-    "18:44 D-3 103 delivered",
-    "18:52 D-1 104 delivered",
-]
-print(len(LOG))
+class Delivery:
+    def __init__(self, order_id, minutes):
+        self.order_id = order_id
+        self.minutes = minutes
+
+
+deliveries = [Delivery(1, 35), Delivery(2, 20), Delivery(3, 50)]
+try:
+    sorted(deliveries)
+except TypeError as error:
+    print(error)
+print(Delivery(1, 35) == Delivery(1, 35))
 ```
 
 ```text
-11
+'<' not supported between instances of 'Delivery' and 'Delivery'
+False
 ```
 
-Тут усе, з чим стикається справжній потік: події попередньої зміни (до 18:00), битий рядок, доставки різних кур'єрів упереміш. А диспетчерській потрібно:
+Список чисел Python сортує, а список доставок — ні: він не знає, що означає «одна доставка менша за іншу». А дві однакові доставки для нього різні, бо `==` за замовчуванням порівнює **ідентичність** — чи це той самий об'єкт.
 
-- середній час доставки **на льоту**, після кожної події, а не наприкінці дня;
-- звіт по кур'єрах;
-- лише події поточної зміни;
-- список битих рядків, щоб розібратися з ними, а не губити мовчки.
+Є ще дві проблеми. Тариф таксі має три поля, і кожне має бути додатним. Три пари `@property` із сеттерами — це тричі та сама перевірка. А класи, які просто зберігають дані, обростають однаковими `__init__`, `__repr__` і `__eq__`.
 
-В уроці 10 ми навчилися будувати конвеєри з генераторів. Сьогодні — наступний рівень: власні ітератори-класи, генератори, які **приймають** дані через `.send()`, генератор як скінченний автомат і «алгебра» `itertools`.
+Сьогодні вчимо класи **говорити мовою Python**: dunder-методи підключають об'єкт до вбудованого синтаксису, дескриптори дають одну перевірку на багато полів, а декоратори класів пишуть шаблонний код за нас.
 
-**Що потрібно з попередніх уроків:** ітератори, `yield`, конвеєри й `islice` (урок 10), декоратори (урок 9), скінченний автомат статусів (урок 21), `__iter__` (урок 23), перебір з поверненням (урок 22).
+**Що потрібно з попередніх уроків:** декоратори функцій (урок 10), хешування (урок 17), функції як об'єкти й `key=` (урок 19), класи й `__repr__` (урок 20), качина типізація (урок 21), `@property` і сеттер (урок 22).
 
 **Після уроку ти зможеш:**
 
-- писати клас-ітератор з `__iter__` і `__next__` і відокремлювати ітерабельне від ітератора;
-- пояснювати стани генератора, `return` у генераторі, `close()` і `finally`;
-- передавати дані в генератор через `.send()` і запускати його декоратором;
-- будувати скінченний автомат на генераторі;
-- використовувати `yield from` для делегування й отримання результату;
-- обирати інструмент `itertools`: `dropwhile`, `takewhile`, `groupby`, `pairwise`, `accumulate`, `combinations`;
-- проєктувати ETL-конвеєр зі стадіями, які легко тестувати, і окремим списком відхилених записів.
+- пояснювати, який dunder-метод викликає Python для `len`, `in`, `for`, `+`, `<`, `==`, `hash`;
+- робити власні класи-контейнери й об'єкти-значення (гроші), що працюють з `sorted`, `sum`, `set`;
+- пояснювати, чому `__eq__` без `__hash__` робить об'єкт непридатним для множини;
+- писати обчислювані властивості й уникати рекурсії в сеттері;
+- писати дескриптор, який перевіряє багато полів одним класом;
+- застосовувати декоратори класів: власні, `@total_ordering`, `@dataclass`;
+- відрізняти об'єкт-значення від сутності й обирати інструмент під задачу.
 
-**Задача розділу.** Конвеєр «журнал → розбір → зміна → тривалості → звіт», що рахує середній час доставки кожного кур'єра й збирає биті рядки окремо. Повний код — у розділі [«Практика»](#practice).
+**Задача розділу.** Кошик замовлення з грошима як об'єктом-значенням: `len(cart)`, `"Узвар" in cart`, `cart.total` і позиції, які неможливо створити з нульовою кількістю. Повний код — у розділі [«Практика»](#practice).
 
-**Ноутбук заняття:** [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_24_iterators_advanced/note_lesson_24_iterators_advanced_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_24_iterators_advanced/note_lesson_24_iterators_advanced.ipynb){ .solutions-link }
+**Ноутбук заняття:** [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_24_property_decorators_dunder/note_lesson_24_property_dunder_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_24_property_decorators_dunder/note_lesson_24_property_dunder.ipynb){ .solutions-link }
 
 ## Пригадай
 
-1. Що робить `for` з об'єктом, перш ніж узяти перший елемент?
-2. Чому другий `list()` від того самого генератора порожній?
-3. Як в уроці 21 автомат статусів вирішував, чи дозволений перехід?
-4. Що повертав `__iter__` кошика в уроці 23?
+1. Що приймає і що повертає декоратор функції з уроку 10?
+2. Яке правило про хеш і рівність ключів словника ми бачили в уроці 17?
+3. Що робить `@property` без сеттера?
+4. Чому функцію з `fare()` можна викликати для будь-якої доставки, не знаючи її класу (урок 21)?
 
 ??? success "Відповіді"
 
-    1. Викликає `iter()` і отримує ітератор, а далі — `next()`, доки не прийде `StopIteration`.
-    2. Генератор одноразовий: перший `list()` дійшов до кінця.
-    3. Шукав пару «поточний статус → новий» у словнику `TRANSITIONS`.
-    4. Готовий ітератор словника: `iter(self._items.items())`.
+    1. Приймає функцію й повертає функцію — зазвичай обгортку.
+    2. Рівні ключі мусять мати однаковий хеш, інакше словник шукатиме ключ не в тій комірці.
+    3. Дає читати метод як атрибут; запис падає з `AttributeError`.
+    4. Качина типізація: важливо, що об'єкт **вміє**, а не який у нього клас.
 
-## Клас-ітератор: `__iter__` і `__next__`
+## Dunder-методи: як Python розмовляє з об'єктом
 
-В уроці 10 ми бачили протокол ззовні: `iter()`, потім `next()`, доки не `StopIteration`. Щоб наш клас сам був ітератором, треба два методи: `__next__` віддає наступний елемент або кидає `StopIteration`, а `__iter__` повертає сам ітератор. Перша спроба — журнал зміни, що перебирає власні рядки:
+Коли Python бачить `len(cart)`, він не шукає функцію `len` усередині кошика. Він викликає **спеціальний метод** класу: `type(cart).__len__(cart)`. Таких методів — із двома підкресленнями з обох боків, **dunder** (double underscore) — десятки. Разом вони утворюють **протоколи**: реалізував потрібні методи — і твій об'єкт працює з вбудованим синтаксисом, як список чи число.
+
+| Вираз | Що викликає Python | Протокол |
+|---|---|---|
+| `len(x)` | `x.__len__()` | розмір |
+| `item in x` | `x.__contains__(item)` | належність |
+| `for item in x` | `x.__iter__()` | ітерація |
+| `x[key]` | `x.__getitem__(key)` | доступ за ключем |
+| `bool(x)`, `if x:` | `x.__bool__()`, інакше `x.__len__()` | істинність |
+| `a + b` | `a.__add__(b)`, інакше `b.__radd__(a)` | арифметика |
+| `a == b`, `a < b` | `a.__eq__(b)`, `a.__lt__(b)` | порівняння |
+| `hash(x)` | `x.__hash__()` | хешування |
+| `repr(x)`, `str(x)` | `x.__repr__()`, `x.__str__()` | подання |
+| `x(arg)` | `x.__call__(arg)` | виклик |
+
+Це качина типізація з уроку 21, доведена до кінця: `len` не питає, чи ти список, — лише чи вмієш ти `__len__`.
+
+### Кошик як контейнер
 
 ```python
-class ShiftLog:
-    def __init__(self, lines):
-        self.lines = lines
-        self.position = 0
+class Cart:
+    def __init__(self):
+        self._items = {}
+
+    def add(self, dish, qty=1):
+        self._items[dish] = self._items.get(dish, 0) + qty
+
+    def __len__(self):
+        return sum(self._items.values())
+
+    def __contains__(self, dish):
+        return dish in self._items
 
     def __iter__(self):
-        return self
+        return iter(self._items.items())
 
-    def __next__(self):
-        if self.position >= len(self.lines):
-            raise StopIteration
-        line = self.lines[self.position]
-        self.position += 1
-        return line
+    def __getitem__(self, dish):
+        return self._items[dish]
+
+    def __repr__(self):
+        return f"Cart({self._items})"
 
 
-log = ShiftLog(LOG[2:5])
-print(list(log))
-print(list(log))
+cart = Cart()
+cart.add("Борщ", 2)
+cart.add("Узвар")
+print(len(cart), "Борщ" in cart, cart["Борщ"])
+for dish, qty in cart:
+    print(dish, qty)
 ```
 
 ```text
-['18:03 D-1 101 picked', '18:05 D-2 102 picked', '18:07 D-3 103 picked']
-[]
+3 True 2
+Борщ 2
+Узвар 1
 ```
 
-Працює — один раз. Курсор `position` живе в самому журналі, тож після першого проходу журнал «порожній», хоча рядки нікуди не ділися. Так само зламаються вкладені цикли по тому самому журналу: внутрішній цикл вичерпає курсор для зовнішнього.
+`_items` лишився внутрішнім (урок 22), а зовнішній код користується кошиком як звичайною колекцією. `len` рахує порції, а не рядки: це наше рішення, і його видно в одному методі.
 
-Проблема в тому, що ми змішали дві ролі:
-
-- **ітерабельне** (журнал) — знає дані й на кожен `iter()` видає **новий** ітератор;
-- **ітератор** (курсор) — пам'ятає позицію, одноразовий.
-
-```mermaid
-flowchart LR
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
-
-    LOG["ShiftLog<br>дані"] -- "iter()" --> C1["курсор 1<br>position = 0"]
-    LOG -- "iter()" --> C2["курсор 2<br>position = 0"]
-    C1 -- "next()" --> L["рядок"]
-    C1 -- "next() в кінці" --> STOP["StopIteration"]
-
-    class LOG success
-    class C1,C2 step
-    class L step
-    class STOP warning
-```
-
-Розділяємо ролі на два класи:
+Методу `__bool__` ми не писали. Як гадаєш, що надрукує цей код?
 
 ```python
-class ShiftLogIterator:
-    def __init__(self, lines):
-        self._lines = lines
-        self._position = 0
-
-    def __iter__(self):
-        return self
-
-    def __next__(self):
-        if self._position >= len(self._lines):
-            raise StopIteration
-        line = self._lines[self._position]
-        self._position += 1
-        return line
-
-
-class ShiftLog:
-    def __init__(self, lines):
-        self.lines = list(lines)
-
-    def __iter__(self):
-        return ShiftLogIterator(self.lines)
-
-
-log = ShiftLog(LOG[2:5])
-print(len(list(log)), len(list(log)))
-print(len([(a, b) for a in log for b in log]))
+print(bool(Cart()), bool(cart))
 ```
 
 ```text
-3 3
-9
+False True
 ```
 
-Кожен `for` отримує свій курсор: два проходи по 3 рядки, вкладений цикл — 3 × 3 пар. А `__iter__` ітератора повертає `self` для того, щоб ітератор теж можна було передати в `for`.
+Без `__bool__` Python бере `__len__`: нульова довжина — хибність. Тому `if cart:` читається природно — «якщо в кошику щось є».
 
-Писати окремий клас-курсор доводиться рідко. Якщо `__iter__` — генератор, Python сам створює новий курсор на кожен виклик:
+### Гроші: об'єкт-значення з арифметикою
+
+Ціни як голі числа легко переплутати: хвилини, кілометри й гривні — усе `int`. Клас `Money` робить одиницю явною і дозволяє складати лише гроші з грошима.
 
 ```python
-class ShiftLog:
-    def __init__(self, lines):
-        self.lines = list(lines)
+class Money:
+    def __init__(self, amount):
+        self.amount = amount
 
-    def __iter__(self):
-        for line in self.lines:
-            yield line
+    def __add__(self, other):
+        if not isinstance(other, Money):
+            return NotImplemented
+        return Money(self.amount + other.amount)
 
+    def __eq__(self, other):
+        if not isinstance(other, Money):
+            return NotImplemented
+        return self.amount == other.amount
 
-log = ShiftLog(LOG[2:5])
-print(len(list(log)), len(list(log)))
-```
+    def __repr__(self):
+        return f"Money({self.amount})"
 
-```text
-3 3
-```
-
-!!! tip "Коли потрібен справжній клас-ітератор"
-    Коли курсор має **власний інтерфейс**: наприклад, `peek()` — подивитися наступний елемент, не забираючи його, чи `position` для відновлення читання після збою. Для простого перебору досить генератора в `__iter__`.
-
-## Генератор зсередини
-
-Генераторна функція при виклику не виконується, а створює об'єкт-генератор. Модуль `inspect` показує, в якому стані цей об'єкт:
-
-```python
-from inspect import getgeneratorstate
+    def __str__(self):
+        return f"{self.amount} грн"
 
 
-def shift():
-    print("зміна почалась")
-    yield "перша подія"
-    print("між подіями")
-    yield "друга подія"
-    print("зміна закінчилась")
-    return "звіт готовий"
-
-
-gen = shift()
-print(getgeneratorstate(gen))
-print(next(gen))
-print(getgeneratorstate(gen))
-print(next(gen))
+bill = Money(95) + Money(60)
+print(bill, repr(bill), bill == Money(155))
 try:
-    next(gen)
-except StopIteration as stop:
-    print("StopIteration:", stop.value)
-print(getgeneratorstate(gen))
-```
-
-```text
-GEN_CREATED
-зміна почалась
-перша подія
-GEN_SUSPENDED
-між подіями
-друга подія
-зміна закінчилась
-StopIteration: звіт готовий
-GEN_CLOSED
-```
-
-```mermaid
-stateDiagram-v2
-    [*] --> GEN_CREATED: gen = shift()
-    GEN_CREATED --> GEN_RUNNING: next()
-    GEN_RUNNING --> GEN_SUSPENDED: yield
-    GEN_SUSPENDED --> GEN_RUNNING: next() / send()
-    GEN_RUNNING --> GEN_CLOSED: return або кінець тіла
-    GEN_SUSPENDED --> GEN_CLOSED: close()
-    GEN_CLOSED --> [*]
-```
-
-Три речі, яких не було в уроці 10:
-
-- кожен `next()` виконує тіло **від попереднього `yield` до наступного** — тому «між подіями» друкується лише з другим `next()`;
-- `return` у генераторі не віддає значення в `for`, а кладе його в `StopIteration.value`. `for` це значення ігнорує; нижче побачимо, хто його забирає;
-- закритий генератор уже нічого не віддасть.
-
-### `close()` і `finally`: прибирання за собою
-
-Генератор, що читає з мережі чи файлу, мусить закрити з'єднання, навіть якщо споживач узяв лише частину даних:
-
-```python
-def read_events(lines):
-    print("відкрили з'єднання")
-    try:
-        for line in lines:
-            yield line
-    finally:
-        print("закрили з'єднання")
-
-
-events = read_events(LOG)
-print(next(events))
-events.close()
-print(getgeneratorstate(events))
-```
-
-```text
-відкрили з'єднання
-17:52 D-2 98 delivered
-закрили з'єднання
-GEN_CLOSED
-```
-
-`close()` кидає всередину генератора, на місці паузи, спеціальний виняток `GeneratorExit`. Спрацьовує `finally`, і генератор завершується. CPython робить те саме автоматично, коли на генератор більше немає посилань, але явне закриття — надійніше.
-
-## `.send()`: генератор, що приймає дані
-
-Досі дані текли **з** генератора. Метод `.send(value)` передає значення **в** генератор: воно стає результатом виразу `yield`. Середній час доставки, що оновлюється після кожної доставки:
-
-```python
-def running_average():
-    total = 0
-    count = 0
-    average = None
-    while True:
-        minutes = yield average
-        total += minutes
-        count += 1
-        average = round(total / count, 1)
-
-
-avg = running_average()
-print(next(avg))
-for minutes in [18, 24, 37, 21]:
-    print(avg.send(minutes))
-```
-
-```text
-None
-18.0
-21.0
-26.3
-25.0
-```
-
-Рядок `minutes = yield average` робить дві речі: віддає назовні поточне середнє й ставить функцію на паузу, **чекаючи** на наступне число. Стан — `total` і `count` — живе в локальних змінних призупиненої функції, без класу й без глобальних змінних.
-
-Перший `next(avg)` **запускає** генератор: доводить його до першого `yield`, де вже є кому прийняти значення. Без запуску:
-
-```python
-fresh = running_average()
-try:
-    fresh.send(18)
+    Money(95) + 60
 except TypeError as error:
     print(error)
 ```
 
 ```text
-can't send non-None value to a just-started generator
+155 грн Money(155) True
+unsupported operand type(s) for +: 'Money' and 'int'
 ```
 
-Щоб не забувати запуск, його ховають у декоратор — той самий прийом, що в уроці 9:
-
-```python
-from functools import wraps
-
-
-def primed(func):
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        gen = func(*args, **kwargs)
-        next(gen)
-        return gen
-    return wrapper
-
-
-@primed
-def running_average():
-    total = 0
-    count = 0
-    average = None
-    while True:
-        minutes = yield average
-        total += minutes
-        count += 1
-        average = round(total / count, 1)
-
-
-avg = running_average()
-print(avg.send(18), avg.send(24))
-```
-
-```text
-18.0 21.0
-```
-
-Такий генератор, що отримує дані через `send`, називають **сопрограмою** (coroutine).
-
-### Генератор як скінченний автомат
-
-В уроці 21 автомат статусів жив у класі `Order`. Той самий автомат можна записати генератором: стан — локальна змінна, подія приходить через `send`, новий стан віддається через `yield`.
-
-```python
-COURIER_TRANSITIONS = {
-    ("вільний", "picked"): "везе",
-    ("везе", "delivered"): "вільний",
-}
-
-
-@primed
-def courier_state():
-    state = "вільний"
-    while True:
-        event = yield state
-        new_state = COURIER_TRANSITIONS.get((state, event))
-        if new_state is None:
-            print(f"  подія {event} у стані «{state}» — пропускаю")
-        else:
-            state = new_state
-
-
-courier = courier_state()
-for event in ["picked", "delivered", "delivered", "picked"]:
-    print(event, "→", courier.send(event))
-```
-
-```text
-picked → везе
-delivered → вільний
-  подія delivered у стані «вільний» — пропускаю
-delivered → вільний
-picked → везе
-```
-
-Генератор чи клас? Генератор коротший, коли автомат має **один вхід і один вихід**: подія → стан. Клас кращий, коли станом цікавиться багато коду (`order.status`), є кілька дій з різними іменами (`cook()`, `cancel()`) чи історія змін. Для `Order` з уроку 21 клас правильний; для лічильника стану кур'єра в потоці подій — генератор.
-
-### `yield from`: делегування й результат
-
-В уроці 10 `yield from` просто віддавав елементи іншого ітерабельного. Але він робить більше: передає `send` і `close` вкладеному генератору, а коли той завершується — **повертає його `return`-значення**. Так генератор-стадія може віддавати дані й наприкінці ще й звітувати:
-
-```python
-def valid_events(lines):
-    broken = 0
-    for line in lines:
-        parts = line.split()
-        if len(parts) != 4 or not parts[2].isdigit():
-            broken += 1
-            continue
-        yield parts
-    return broken
-
-
-def with_report(lines):
-    broken = yield from valid_events(lines)
-    print(f"битих рядків: {broken}")
-
-
-events = list(with_report(LOG))
-print(len(events), events[2])
-```
-
-```text
-битих рядків: 1
-10 ['18:03', 'D-1', '101', 'picked']
-```
-
-`with_report` для зовнішнього коду — звичайний генератор із 10 подіями, а всередині він дізнався, скільки рядків відкинуто. Саме з `yield from` і сопрограм на генераторах виросли `async` / `await` — про них в уроці 27.
-
-## Алгебра `itertools`
-
-Модуль `itertools` — набір «цеглинок», з яких збирають конвеєри без ручних циклів. В уроці 10 були `count`, `chain`, `islice`. Далі — ті, що розв'язують задачі диспетчерської.
-
-### `dropwhile` і `takewhile`: межі потоку
-
-Журнал упорядкований за часом. Треба відкинути події до початку зміни й узяти першу половину зміни:
-
-```python
-from itertools import dropwhile, takewhile
-
-shift_events = dropwhile(lambda line: line < "18:00", LOG)
-print(next(shift_events))
-
-first_half = takewhile(lambda line: line < "18:30", dropwhile(lambda line: line < "18:00", LOG))
-print(len(list(first_half)))
-```
-
-```text
-18:03 D-1 101 picked
-6
-```
-
-Рядки порівнюються як текст, а формат «ГГ:ХХ» сортується так само, як час. Чим це відрізняється від `filter`:
-
-- `dropwhile` відкидає елементи, **доки** умова правдива, а потім пропускає все, вже не перевіряючи;
-- `takewhile` бере елементи, **доки** умова правдива, і на першому хибному **зупиняє** потік.
-
-Тому `takewhile` працює і з нескінченним потоком, а `filter` на ньому ніколи не закінчиться. Ціна — обидва покладаються на **упорядкованість**: подія 18:10, що запізнилася й прийшла після 18:31, буде відкинута `takewhile` разом із рештою.
-
-### `groupby`: групи сусідів
-
-`groupby(дані, key)` збирає в групу **сусідні** елементи з однаковим ключем. Як гадаєш, скільки груп дадуть події, згруповані за кур'єром?
-
-```python
-from itertools import groupby
-
-groups = [(courier, len(list(group))) for courier, group in groupby(events, key=lambda event: event[1])]
-print(len(groups), groups[:4])
-```
-
-```text
-9 [('D-2', 1), ('D-1', 2), ('D-2', 1), ('D-3', 1)]
-```
-
-Дев'ять груп на трьох кур'єрів: щойно кур'єр змінюється, починається нова група. `groupby` схожий на `uniq` з командного рядка — він не шукає однакові ключі по всьому потоку. Щоб отримати по групі на кур'єра, дані спершу сортують за тим самим ключем:
-
-```python
-by_courier = sorted(events, key=lambda event: event[1])
-print([(courier, len(list(group))) for courier, group in groupby(by_courier, key=lambda event: event[1])])
-```
-
-```text
-[('D-1', 5), ('D-2', 3), ('D-3', 2)]
-```
-
-Але сортування потребує **всіх** даних у пам'яті й `O(n log n)`. Для потоку зі змішаними ключами словник або `Counter` з уроку 6 — один прохід і пам'ять лише на ключі. `groupby` доречний, коли дані **вже** прийшли згруповані: журнал, відсортований за днем, файл, розбитий за кур'єром.
-
-### `pairwise` і `accumulate`: сусідні пари й наростаючий підсумок
-
-Найдовша пауза між подіями — сигнал, що застосунок втрачав зв'язок. `pairwise` (Python 3.10+) віддає пари сусідніх елементів:
-
-```python
-from itertools import accumulate, pairwise
-
-
-def minutes(hhmm):
-    hours, mins = hhmm.split(":")
-    return int(hours) * 60 + int(mins)
-
-
-times = [minutes(event[0]) for event in events]
-gaps = [later - earlier for earlier, later in pairwise(times)]
-print(gaps, max(gaps))
-
-delivered = [1 if event[3] == "delivered" else 0 for event in events]
-print(list(accumulate(delivered)))
-```
-
-```text
-[6, 5, 2, 2, 14, 8, 2, 13, 8] 14
-[1, 2, 2, 2, 2, 3, 4, 4, 5, 6]
-```
-
-`accumulate` — наростаючий підсумок: після кожної події видно, скільки доставок уже виконано. Це той самий «підсумок на льоту», що й `running_average`, лише для суми.
-
-### `combinations`: перебір без вкладених циклів
-
-В уроці 22 ми шукали набори поїздок на ваучер 500 грн перебором з поверненням. Для наборів фіксованого розміру є готовий перебір:
-
-```python
-from itertools import combinations
-
-fares = [230, 150, 270, 180, 120, 410]
-print([pair for pair in combinations(fares, 2) if sum(pair) == 500])
-print([trio for trio in combinations(fares, 3) if sum(trio) == 500])
-print(sum(1 for size in range(1, len(fares) + 1) for _ in combinations(fares, size)))
-```
-
-```text
-[(230, 270)]
-[(230, 150, 120)]
-63
-```
-
-Ті самі два набори, що в уроці 22. Але `combinations` перебирає **всі** 63 непорожні підмножини — без відсікання. Для 6 поїздок це дрібниця; для 40 — понад трильйон. `combinations` і `product` замінюють вкладені цикли, коли перебрати треба все; коли гілки можна відсікати — потрібен перебір з поверненням.
-
-!!! note "Інші корисні цеглинки"
-    `zip_longest` — `zip`, що не обрізає довший потік; `chain.from_iterable` — сплющити потік списків; `tee` — розгалузити один ітератор на кілька (з буфером у пам'яті); `batched(дані, n)` — пачки по n (з Python 3.12; для старіших версій напишемо самі в практиці).
-
-## Архітектура: ETL-конвеєр подій { #architecture }
-
-Задачу диспетчерської зручно побудувати як **ETL** (extract — transform — load): витягти дані, перетворити, завантажити результат. Кожна стадія — функція «ітерабельне → ітерабельне», і стадії з'єднуються як труби:
+`__repr__` — для розробника (однозначно, як створити об'єкт), `__str__` — для людини; `print` бере `__str__`. А `NotImplemented` — не помилка, а сигнал «я не вмію з цим типом». Python тоді дає шанс іншому операнду і лише потім кидає `TypeError`:
 
 ```mermaid
 flowchart TD
@@ -543,227 +180,772 @@ flowchart TD
     classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
     classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
 
-    SRC["журнал<br>рядки"] --> P["parse<br>рядок → подія"]
-    P --> S["in_shift<br>dropwhile"]
-    S --> D["durations<br>пара picked–delivered"]
-    D --> R["report<br>середнє по кур'єрах"]
-    P -. "битий рядок" .-> REJ["rejected<br>окремий список"]
+    A["a + b"] --> L["a.__add__(b)"]
+    L --> Q1{"повернув<br>NotImplemented?"}
+    Q1 -- ні --> OK["результат"]
+    Q1 -- так --> R["b.__radd__(a)"]
+    R --> Q2{"повернув<br>NotImplemented?"}
+    Q2 -- ні --> OK
+    Q2 -- так --> ERR["TypeError"]
 
-    class SRC,P,S,D step
-    class R success
-    class REJ warning
+    class A,L,R step
+    class Q1,Q2 decision
+    class OK success
+    class ERR error
 ```
 
-### Хто штовхає, а хто тягне
+Звідси пастка з `sum`: він починає рахувати з `0`, тобто перший крок — `0 + Money(95)`. Число не вміє додавати гроші, а `__radd__` у нас немає:
 
-У конвеєрі з генераторів дані **тягне** споживач: `report` просить наступну тривалість, `durations` — наступну подію, і так до джерела. Сопрограми з `.send()` працюють навпаки — дані **штовхає** джерело:
+```python
+prices = [Money(95), Money(60), Money(40)]
+try:
+    sum(prices)
+except TypeError as error:
+    print(error)
+print(sum(prices, Money(0)))
+```
+
+```text
+unsupported operand type(s) for +: 'int' and 'Money'
+195 грн
+```
+
+Два виходи: передати `sum` стартове значення `Money(0)` або навчити гроші «правого» додавання:
+
+```python
+class Money(Money):
+    def __radd__(self, other):
+        if other == 0:
+            return self
+        return NotImplemented
+
+
+print(sum([Money(95), Money(60), Money(40)]))
+```
+
+```text
+195 грн
+```
+
+!!! note "`class Money(Money)`"
+    Як і в уроці 22, нарощуємо клас частинами: кожен новий `Money` наслідує попередній. У справжньому проєкті всі методи живуть в одному класі.
+
+### `__eq__` і `__hash__`: пара, яку не розривають
+
+Спробуймо покласти гроші в множину:
+
+```python
+try:
+    {Money(95), Money(95)}
+except TypeError as error:
+    print(error)
+print(Money.__hash__)
+```
+
+```text
+unhashable type: 'Money'
+None
+```
+
+Щойно клас визначає `__eq__`, Python **прибирає** успадкований `__hash__`. Причина — правило з уроку 17: рівні об'єкти мусять мати однаковий хеш. Стандартний хеш рахується з ідентичності об'єкта, тож два рівні `Money(95)` отримали б різні хеші, і множина вважала б їх різними. Python волів відмовити, ніж тихо помилятися. Якщо об'єкт має бути ключем, хеш рахують із тих самих полів, що й рівність:
+
+```python
+class Money(Money):
+    def __hash__(self):
+        return hash(self.amount)
+
+
+print(len({Money(95), Money(95), Money(60)}), Money(95) in {Money(95)})
+```
+
+```text
+2 True
+```
+
+Але хеш від **змінюваного** поля — міна. Об'єкт лежить у комірці множини, що відповідає старому хешу:
+
+```python
+wallet = {Money(95)}
+coin = next(iter(wallet))
+coin.amount = 100
+print(Money(100) in wallet, coin in wallet)
+```
+
+```text
+False False
+```
+
+Монета в множині є, але знайти її неможливо ні за старим, ні за новим значенням. Висновок: хешованим має бути лише **незмінний** об'єкт. Як зробити `Money` незмінним одним рядком — у розділі про `@dataclass`.
+
+### Порівняння і сортування
+
+Для `sorted` досить одного методу — `__lt__`:
+
+```python
+class Delivery:
+    def __init__(self, order_id, minutes):
+        self.order_id = order_id
+        self.minutes = minutes
+
+    def __lt__(self, other):
+        return self.minutes < other.minutes
+
+    def __repr__(self):
+        return f"Delivery(№{self.order_id}, {self.minutes} хв)"
+
+
+deliveries = [Delivery(1, 35), Delivery(2, 20), Delivery(3, 50)]
+print(sorted(deliveries))
+print(max(deliveries))
+try:
+    Delivery(1, 35) <= Delivery(2, 20)
+except TypeError as error:
+    print(error)
+```
+
+```text
+[Delivery(№2, 20 хв), Delivery(№1, 35 хв), Delivery(№3, 50 хв)]
+Delivery(№3, 50 хв)
+'<=' not supported between instances of 'Delivery' and 'Delivery'
+```
+
+`max` порівнює через `>`, і Python сам перевернув його на `b < a`. А для `<=` дзеркальної пари з `__lt__` немає — треба або дописати ще методи, або скористатися `@total_ordering` (нижче).
+
+Але спершу архітектурне питання: яка доставка «менша»? Швидша? Дешевша? Раніша за номером? Сьогодні звіт сортує за часом, завтра — за ціною. **Природного** порядку в доставок немає, тому надійніше передати порядок явно, як в уроці 19:
+
+```python
+print(sorted(deliveries, key=lambda delivery: delivery.order_id, reverse=True))
+```
+
+```text
+[Delivery(№3, 50 хв), Delivery(№2, 20 хв), Delivery(№1, 35 хв)]
+```
+
+!!! tip "Коли писати `__lt__`"
+    Лише коли порядок один і очевидний: гроші, час, версії. Якщо сортувати можна по-різному — `key=`.
+
+### `__call__`: об'єкт, що поводиться як функція
+
+У вечірні години тариф множиться на коефіцієнт. Коефіцієнт — це налаштування, а застосувати його треба як функцію:
+
+```python
+class Surge:
+    def __init__(self, factor):
+        self.factor = factor
+
+    def __call__(self, fare):
+        return round(fare * self.factor)
+
+
+evening = Surge(1.5)
+print(evening(120), callable(evening))
+print(list(map(evening, [100, 80])))
+```
+
+```text
+180 True
+[150, 120]
+```
+
+`evening` можна передати туди, де чекають функцію, — у `map`, `sorted(key=…)`, у стратегію з уроку 19. Замикання (урок 19) робить те саме; клас із `__call__` зручніший, коли налаштувань кілька або їх треба показати в `repr`.
+
+## @property докладніше
+
+В уроці 22 `@property` захищав запис. Друге його призначення — **обчислювані атрибути**: значення, яке не зберігається, а рахується щоразу, коли його читають.
+
+```python
+PRICES = {"Борщ": 95, "Вареники": 110, "Узвар": 40}
+
+
+class Cart(Cart):
+    @property
+    def total(self):
+        return sum(PRICES[dish] * qty for dish, qty in self)
+
+
+cart = Cart()
+cart.add("Борщ", 2)
+cart.add("Узвар")
+print(cart.total)
+cart.add("Вареники")
+print(cart.total)
+```
+
+```text
+230
+340
+```
+
+Якби `add` оновлював поле `self.total`, кожен новий метод (прибрати страву, змінити кількість) мусив би не забути його оновити. Обчислювана властивість **не може застаріти**: її джерело правди — лише `_items`. І зверни увагу: `total` перебирає `self`, тобто користується нашим же `__iter__`.
+
+### Пастка: сеттер, що викликає сам себе
+
+```python
+class Courier:
+    def __init__(self, name, rating):
+        self.name = name
+        self.rating = rating
+
+    @property
+    def rating(self):
+        return self.rating
+
+    @rating.setter
+    def rating(self, value):
+        if not 1 <= value <= 5:
+            raise ValueError("рейтинг має бути від 1 до 5")
+        self.rating = value
+
+
+try:
+    Courier("Олег", 4.8)
+except RecursionError as error:
+    print(type(error).__name__)
+```
+
+```text
+RecursionError
+```
+
+`self.rating = value` у сеттері — це знову присвоєння властивості, тобто знову виклик сеттера, і так до переповнення стеку (урок 23). Значення зберігають в **іншому** імені — `self._rating`. А ось у `__init__` писати саме `self.rating = rating` правильно: так перевірка спрацює і при створенні об'єкта.
+
+### `cached_property`: порахувати один раз
+
+Довжина маршруту рахується довго, а маршрут після створення не змінюється. `functools.cached_property` обчислює значення при першому читанні й кладе результат в атрибут екземпляра:
+
+```python
+from functools import cached_property
+
+
+class Route:
+    def __init__(self, stops):
+        self.stops = stops
+
+    @cached_property
+    def length(self):
+        print("рахую маршрут…")
+        return sum(abs(b - a) for a, b in zip(self.stops, self.stops[1:]))
+
+
+route = Route([0, 4, 1, 7])
+print(route.length)
+print(route.length)
+```
+
+```text
+рахую маршрут…
+13
+13
+```
+
+Ціна — застарілість: якщо змінити `route.stops`, `length` лишиться старим. Тому `cached_property` — лише для даних, що не змінюються.
+
+## Дескриптори: одна перевірка на багато полів
+
+Тариф таксі: подача, ціна кілометра і мінімальна вартість — усі мають бути більшими за нуль. Через `@property` це три геттери й три сеттери з однаковим `if value <= 0` — близько 25 рядків повторів. Повтор — сигнал винести правило в окремий об'єкт. Такий об'єкт — **дескриптор**: клас із методами `__get__` і `__set__`, екземпляр якого лежить в атрибуті **класу**.
+
+```python
+class Positive:
+    def __set_name__(self, owner, name):
+        self.name = "_" + name
+
+    def __get__(self, obj, objtype=None):
+        if obj is None:
+            return self
+        return getattr(obj, self.name)
+
+    def __set__(self, obj, value):
+        if value <= 0:
+            raise ValueError(f"{self.name[1:]} має бути більшим за 0, а маємо {value}")
+        setattr(obj, self.name, value)
+
+
+class Tariff:
+    base = Positive()
+    per_km = Positive()
+    min_fare = Positive()
+
+    def __init__(self, base, per_km, min_fare):
+        self.base = base
+        self.per_km = per_km
+        self.min_fare = min_fare
+
+    def fare(self, km):
+        return max(self.min_fare, self.base + self.per_km * km)
+
+
+day = Tariff(40, 12, 80)
+print(day.fare(2), day.fare(10))
+try:
+    day.per_km = -5
+except ValueError as error:
+    print(error)
+print(vars(day))
+```
+
+```text
+80 160
+per_km має бути більшим за 0, а маємо -5
+{'_base': 40, '_per_km': 12, '_min_fare': 80}
+```
+
+Що відбувається:
+
+1. Коли Python створює клас `Tariff`, він викликає `__set_name__` для кожного дескриптора — так `Positive()` дізнається, що його звуть `per_km`, і зберігатиме значення в `_per_km`.
+2. `day.per_km = -5` — Python бачить у **класі** об'єкт із `__set__` і замість запису в екземпляр викликає `Positive.__set__(дескриптор, day, -5)`.
+3. `day.per_km` — так само викликається `__get__`. Умова `obj is None` — для звернення через клас, `Tariff.per_km`: тоді повертаємо сам дескриптор.
+
+Один дескриптор — три поля, і правило живе в одному місці. Новий тариф чи новий клас з додатними полями — ще один рядок `поле = Positive()`.
+
+### Порядок пошуку атрибута
+
+`@property` — теж дескриптор, просто вбудований:
+
+```python
+print(type(vars(Tariff)["base"]).__name__, hasattr(property, "__set__"))
+```
+
+```text
+Positive True
+```
+
+Дескриптори бувають двох видів: **data** (є `__set__`: `property`, `Positive`) і **non-data** (лише `__get__`: звичайні методи, `cached_property`). Від виду залежить, хто виграє, коли в класі є дескриптор, а в екземплярі — однойменний атрибут:
 
 ```mermaid
-flowchart LR
+flowchart TD
     classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
     classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
     classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
     classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
     classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
 
-    subgraph PUSH["push: сопрограми"]
-        direction TB
-        SRC2["джерело: подія прийшла"] -- "send()" --> K1["стадія"]
-        K1 -- "send()" --> K2["підсумок"]
-    end
-    subgraph PULL["pull: генератори"]
-        direction TB
-        C1["споживач: for / list"] -- "next()" --> G1["стадія"]
-        G1 -- "next()" --> SRC1["джерело"]
-    end
+    A["obj.attr"] --> D1{"у класі data-дескриптор?<br>property, Positive"}
+    D1 -- так --> G1["__get__ дескриптора"]
+    D1 -- ні --> D2{"attr у vars(obj)?"}
+    D2 -- так --> V["значення з екземпляра"]
+    D2 -- ні --> D3{"у класі non-data дескриптор?<br>метод, cached_property"}
+    D3 -- так --> G2["__get__ дескриптора"]
+    D3 -- ні --> D4{"attr у класі чи батьках (MRO)?"}
+    D4 -- так --> C["атрибут класу"]
+    D4 -- ні --> E["AttributeError"]
 
-    class C1,SRC2 decision
-    class G1,K1 step
-    class SRC1 step
-    class K2 success
+    class A step
+    class D1,D2,D3,D4 decision
+    class G1,G2,V,C success
+    class E error
 ```
 
-Pull природний, коли дані можна **попросити**: файл, список, база. Push — коли дані **приходять самі** й треба реагувати на кожну: повідомлення від застосунку, дані з датчика. Середній час після кожної доставки — задача push; звіт наприкінці зміни — pull.
+Звідси два факти, які ми вже бачили. `property` стоїть **перед** словником екземпляра — тому обійти сеттер записом в атрибут не можна. А `cached_property` стоїть **після** — тому, поклавши результат у `vars(route)`, він більше не викликається: наступне читання знаходить значення в екземплярі.
 
-### Компроміси
+## Декоратори класів
 
-| Підхід | Пам'ять | Проходів | Хто керує | Коли |
-|---|---|---|---|---|
-| списки між стадіями | весь проміжний результат | скільки завгодно | код, що викликає стадії | мало даних, треба кілька проходів чи індекси |
-| конвеєр генераторів | один елемент на стадію | один | споживач (pull) | великі файли, потоки, звіти |
-| клас-ітератор | як генератор | один на курсор | споживач | курсор з власними методами: `peek`, позиція |
-| сопрограма `.send()` | стан сопрограми | — | джерело (push) | реакція на кожну подію, автомат, ковзні підсумки |
+Декоратор функції (урок 10) приймає функцію й повертає функцію. **Декоратор класу** приймає клас і повертає клас — той самий, доповнений, або новий. Найпростіше застосування — реєстр: кожен клас сам записується в довідник, щойно його оголосили.
 
-### Помилки й тести
-
-- **Биті дані не губимо мовчки** (Zen of Python: «помилки не мають минати непомітно»). Стадія розбору відкладає биті рядки в окремий список — у промисловому ETL це «dead letter queue». Альтернатива — лічильник через `return` і `yield from`, як у `valid_events`.
-- **Кожна стадія тестується окремо**: вона приймає будь-яке ітерабельне, тож для перевірки досить списку з двох-трьох рядків. Саме так ми писатимемо тести в уроці 25.
-
-## Практика { #practice }
-
-### Розібраний приклад: середній час доставки по кур'єрах
-
-```python linenums="1" hl_lines="5 8 12 16 19 21 28 32"
-def parse(lines, rejected):
-    for line in lines:
-        parts = line.split()
-        if len(parts) != 4 or not parts[2].isdigit():
-            rejected.append(line)
-            continue
-        time, courier, order, kind = parts
-        yield {"time": minutes(time), "courier": courier, "order": int(order), "kind": kind}
+```python
+PAYMENTS = {}
 
 
-def in_shift(events, start):
-    return dropwhile(lambda event: event["time"] < start, events)
+def payment(code):
+    def register(cls):
+        PAYMENTS[code] = cls
+        return cls
+    return register
 
 
-def durations(events):
-    picked = {}
-    for event in events:
-        if event["kind"] == "picked":
-            picked[event["order"]] = event["time"]
-        elif event["kind"] == "delivered" and event["order"] in picked:
-            yield event["courier"], event["time"] - picked.pop(event["order"])
+@payment("card")
+class CardPayment:
+    def pay(self, amount):
+        return f"картка: {amount} грн"
 
 
-def report(pairs):
-    by_courier = {}
-    for courier, spent in pairs:
-        by_courier.setdefault(courier, []).append(spent)
-    return {courier: round(sum(spent) / len(spent), 1) for courier, spent in sorted(by_courier.items())}
+@payment("cash")
+class CashPayment:
+    def pay(self, amount):
+        return f"готівка кур'єру: {amount} грн"
 
 
-rejected = []
-pipeline = durations(in_shift(parse(LOG, rejected), minutes("18:00")))
-print(report(pipeline))
-print(rejected)
+print(PAYMENTS)
+print(PAYMENTS["cash"]().pay(340))
 ```
 
 ```text
-{'D-1': 19.5, 'D-2': 24.0, 'D-3': 37.0}
-['18:24 ?? зламаний рядок']
+{'card': <class '__main__.CardPayment'>, 'cash': <class '__main__.CashPayment'>}
+готівка кур'єру: 340 грн
+```
+
+Застосунок обирає спосіб оплати за кодом із запиту: `PAYMENTS[code]().pay(amount)`. Новий спосіб — новий клас із декоратором; жоден `if/elif` правити не треба. Це поліморфізм з уроку 21 плюс автоматична реєстрація.
+
+### `@total_ordering`: решту порівнянь допише Python
+
+`functools.total_ordering` — декоратор класу зі стандартної бібліотеки. Даєш йому `__eq__` і один із `__lt__`, `__le__`, `__gt__`, `__ge__` — він дописує решту:
+
+```python
+from functools import total_ordering
+
+
+@total_ordering
+class Money(Money):
+    def __lt__(self, other):
+        if not isinstance(other, Money):
+            return NotImplemented
+        return self.amount < other.amount
+
+
+print(Money(95) > Money(60), Money(60) <= Money(60), max([Money(95), Money(40)]))
+```
+
+```text
+True True 95 грн
+```
+
+Для грошей порядок природний — це якраз той випадок, коли порівняння мають жити в класі.
+
+### `@dataclass`: клас-дані без шаблонного коду
+
+`Money` уже має `__init__`, `__repr__`, `__eq__`, `__hash__`, `__lt__` — і всі вони механічні: беруть поля й роблять з ними очевидне. `dataclasses.dataclass` читає **анотації полів** і генерує ці методи сам:
+
+```python
+from dataclasses import dataclass
+
+
+@dataclass(frozen=True, order=True)
+class Money:
+    amount: int
+
+    def __add__(self, other):
+        if not isinstance(other, Money):
+            return NotImplemented
+        return Money(self.amount + other.amount)
+
+    def __str__(self):
+        return f"{self.amount} грн"
+
+
+a = Money(95)
+print(repr(a), a == Money(95), a < Money(100), len({a, Money(95)}))
+print([name for name in ("__init__", "__repr__", "__eq__", "__lt__", "__hash__") if name in vars(Money)])
+try:
+    a.amount = 100
+except AttributeError as error:
+    print(type(error).__name__)
+```
+
+```text
+Money(amount=95) True True 1
+['__init__', '__repr__', '__eq__', '__lt__', '__hash__']
+FrozenInstanceError
+```
+
+- `@dataclass` згенерував `__init__`, `__repr__`, `__eq__` з полів;
+- `order=True` — порівняння `<`, `<=`, `>`, `>=` (порівнюються кортежі полів);
+- `frozen=True` — присвоєння полю падає з `FrozenInstanceError` (нащадок `AttributeError`), а раз об'єкт незмінний, генерується й `__hash__`. Пастка з монетою, що «загубилася» в множині, тепер неможлива.
+
+Свої методи (`__add__`, `__str__`) пишемо як завжди: `@dataclass` не перезаписує `__init__`, `__repr__` чи `__eq__`, якщо вони вже є в класі. Виняток — порівняння: з `order=True` власний `__lt__` дає `TypeError`, тож обирай щось одне.
+
+Перевірка полів у датакласі — у методі `__post_init__`, який викликається одразу після згенерованого `__init__`. Його ми використаємо в практиці.
+
+## Архітектура: значення, сутності й вибір інструменту { #architecture }
+
+### Об'єкт-значення і сутність
+
+У сервісі є два різні види об'єктів, і dunder-методи для них різні.
+
+| | Об'єкт-значення | Сутність |
+|---|---|---|
+| Приклади | `Money`, `CartItem`, координати | `Order`, `Courier`, `Delivery` |
+| Що таке «рівні» | однакові поля: `Money(95) == Money(95)` | той самий об'єкт або той самий `id`: два замовлення з однаковими стравами — різні замовлення |
+| Змінюваність | незмінний: «змінити» — створити новий | змінюється з часом: статус, рейтинг |
+| Хеш | з полів; можна в `set` і ключем `dict` | за замовчуванням (ідентичність) або за незмінним `id` |
+| Інструмент | `@dataclass(frozen=True)` | звичайний клас, `@property`, методи-двері (урок 22) |
+
+Помилка, якої варто уникати: `@dataclass` без `frozen` для сутності з хешем за змінюваними полями — це та сама «загублена монета», лише з замовленням.
+
+### Який інструмент обрати
+
+```mermaid
+flowchart TD
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+
+    S["що потрібно класу?"] --> Q1{"працювати з синтаксисом Python?<br>len, in, +, sorted"}
+    Q1 -- так --> DUN["dunder-методи"]
+    Q1 -- ні --> Q2{"поле з правилом?"}
+    Q2 -- "одне поле" --> PROP["@property + сеттер"]
+    Q2 -- "те саме правило<br>на багатьох полях" --> DESC["дескриптор"]
+    Q2 -- ні --> Q3{"клас переважно<br>зберігає дані?"}
+    Q3 -- так --> DC["@dataclass<br>frozen для значень"]
+    Q3 -- ні --> Q4{"треба зареєструвати<br>чи доповнити клас?"}
+    Q4 -- так --> CD["декоратор класу"]
+    Q4 -- ні --> PLAIN["звичайний клас"]
+
+    class S step
+    class Q1,Q2,Q3,Q4 decision
+    class DUN,PROP,DESC,DC,CD,PLAIN success
+```
+
+Інструменти поєднуються: у практиці нижче `@dataclass` дає поля, `@property` — обчислювану суму, а dunder-методи — `len` і `in`.
+
+### Схема класів кошика
+
+```mermaid
+classDiagram
+    class Money {
+        <<value>>
+        +amount: int
+        +#95;#95;add#95;#95;(other) Money
+        +#95;#95;mul#95;#95;(times) Money
+        +#95;#95;lt#95;#95;(other) bool
+        +#95;#95;hash#95;#95;() int
+    }
+    class CartItem {
+        <<value>>
+        +dish: str
+        +price: Money
+        +qty: int
+        +total: Money
+        +#95;#95;post_init#95;#95;()
+    }
+    class Cart {
+        +items: list
+        +add(dish, price, qty)
+        +total: Money
+        +#95;#95;len#95;#95;() int
+        +#95;#95;iter#95;#95;()
+        +#95;#95;contains#95;#95;(dish) bool
+    }
+    class Positive {
+        <<descriptor>>
+        +#95;#95;set_name#95;#95;(owner, name)
+        +#95;#95;get#95;#95;(obj, objtype)
+        +#95;#95;set#95;#95;(obj, value)
+    }
+    class Tariff {
+        +base: Positive
+        +per_km: Positive
+        +min_fare: Positive
+        +fare(km) int
+    }
+    Cart "1" *-- "*" CartItem
+    CartItem --> Money
+    Tariff ..> Positive : поля
+```
+
+### Компроміси: як описати клас-дані
+
+| Варіант | Плюси | Мінуси | Коли |
+|---|---|---|---|
+| `dict` | нуль коду | опечатка в ключі — тихий баг; немає методів | тимчасові дані, JSON на вході (урок 15) |
+| `NamedTuple` | незмінний, розпаковується як кортеж | поля лише за позицією/ім'ям, мало гнучкості | прості записи, рядки з файлу |
+| `@dataclass` | методи з анотацій, `frozen`, `order`, `__post_init__` | перевірки — вручну в `__post_init__` | більшість класів-даних сервісу |
+| ручний клас | повний контроль | шаблонний код, легко забути `__hash__` | сутності з поведінкою й правилами |
+
+## Практика { #practice }
+
+### Розібраний приклад: кошик із грошима
+
+```python linenums="1" hl_lines="4 20 26 27 28 30 37 42 45 48 51 53"
+from dataclasses import dataclass, field
+
+
+@dataclass(frozen=True, order=True)
+class Money:
+    amount: int
+
+    def __add__(self, other):
+        if not isinstance(other, Money):
+            return NotImplemented
+        return Money(self.amount + other.amount)
+
+    def __mul__(self, times):
+        return Money(self.amount * times)
+
+    def __str__(self):
+        return f"{self.amount} грн"
+
+
+@dataclass(frozen=True)
+class CartItem:
+    dish: str
+    price: Money
+    qty: int = 1
+
+    def __post_init__(self):
+        if self.qty < 1:
+            raise ValueError(f"кількість має бути від 1, а маємо {self.qty}")
+
+    @property
+    def total(self):
+        return self.price * self.qty
+
+
+@dataclass
+class Cart:
+    items: list = field(default_factory=list)
+
+    def add(self, dish, price, qty=1):
+        self.items.append(CartItem(dish, Money(price), qty))
+
+    def __len__(self):
+        return sum(item.qty for item in self.items)
+
+    def __iter__(self):
+        return iter(self.items)
+
+    def __contains__(self, dish):
+        return any(item.dish == dish for item in self.items)
+
+    @property
+    def total(self):
+        return sum((item.total for item in self.items), Money(0))
+
+
+cart = Cart()
+cart.add("Борщ", 95, 2)
+cart.add("Узвар", 40)
+print(len(cart), "Узвар" in cart, cart.total)
+print(max(cart, key=lambda item: item.total))
+try:
+    cart.add("Вареники", 110, 0)
+except ValueError as error:
+    print(error)
+print(len(cart))
+```
+
+```text
+3 True 230 грн
+CartItem(dish='Борщ', price=Money(amount=95), qty=2)
+кількість має бути від 1, а маємо 0
+3
 ```
 
 Що тут працює:
 
-- `parse` — генератор-стадія: перетворює рядок на словник-подію, биті рядки відкладає в `rejected`.
-- `in_shift` — одна `dropwhile`: події попередньої зміни (доставки 97 і 98) не потрапляють далі.
-- `durations` пам'ятає лише **відкриті** замовлення — ті, що забрали, але ще не доставили. Доставлене замовлення виходить зі словника через `pop`, тож пам'ять не росте разом з потоком.
-- `report` — єдине місце, де дані накопичуються, і лише як тривалості по кур'єрах.
-- Рядок 32 нічого не обчислює: він лише з'єднує труби. Робота починається, коли `report` просить першу тривалість.
+- `Money` і `CartItem` — об'єкти-значення: `frozen=True`, рівність за полями, хеш.
+- `__post_init__` перевіряє кількість — позицію з `qty=0` неможливо навіть створити, тому вона не потрапила в кошик, і `len(cart)` лишився 3.
+- `__mul__` дає `price * qty` → `Money`; `sum(…, Money(0))` стартує з грошей, тож `__radd__` не потрібен.
+- `field(default_factory=list)` — кожен кошик отримує **свій** список (чому не `items: list = []` — у «Знайди помилку»).
+- `max(cart, key=…)` працює, бо є `__iter__`; `print` показує `repr`, згенерований датакласом.
 
-`D-1` доставив два замовлення: 101 за 18 хв і 104 за 21 хв — середнє 19.5.
+!!! note "Поля датакласу публічні"
+    `cart.items.append(…)` обійде перевірки `add`. Для кошика це прийнятно; де потрібен сильний інваріант — ховаємо стан за `_` і методами, як в уроці 22.
 
-### Зміни приклад: запізнення
+### Зміни приклад: об'єднати кошики
 
-Додай стадію `late(pairs, limit)`, що пропускає далі лише доставки, довші за `limit` хвилин, і виведи їх для `limit=30`. Стадію став між `durations` і `list`, не змінюючи інших функцій.
+Сім'я замовляє з двох телефонів. Додай `Cart.__add__`, щоб `family = cart_mom + cart_son` повертав **новий** кошик з усіма позиціями, не змінюючи жодного з вихідних.
 
 ??? tip "Підказка"
 
     ```python
-    def late(pairs, limit):
-        for courier, spent in pairs:
-            if spent > limit:
-                yield courier, spent
+    def __add__(self, other):
+        if not isinstance(other, Cart):
+            return NotImplemented
+        return Cart(self.items + other.items)
     ```
 
-    `list(late(durations(in_shift(parse(LOG, []), minutes("18:00"))), 30))` дасть `[('D-3', 37)]`.
+    `self.items + other.items` створює новий список. А позиції `CartItem` незмінні, тож ділити їх між кошиками безпечно.
 
-### Спробуй самостійно: пачки й ковзне середнє
+### Спробуй самостійно: рейтинг кур'єра
 
-1. Напиши генератор `batched(iterable, n)`, що віддає кортежі по `n` елементів (останній може бути коротшим): `list(batched(range(7), 3))` → `[(0, 1, 2), (3, 4, 5), (6,)]`. Він має працювати з **нескінченним** потоком: `next(batched(count(), 2))` → `(0, 1)`.
-2. Напиши генератор `moving_average(values, k)` — середнє останніх `k` значень для кожної позиції, починаючи з `k`-ї: `list(moving_average([18, 24, 37, 21], 2))` → `[21.0, 30.5, 29.0]`. Не перераховуй суму вікна щоразу — ковзне вікно з уроку 11.
+Напиши дескриптор `Range(low, high)`, який пропускає лише значення з проміжку `[low, high]`, і клас `Courier` з полями `rating = Range(1, 5)` та `experience = Range(0, 50)` (роки). Перевір:
+
+- `Courier("Олег", 4.8, 3).rating == 4.8`;
+- `Courier("Ірина", 7, 2)` падає з `ValueError`;
+- у `vars(courier)` значення лежать під `_rating` і `_experience`;
+- список кур'єрів сортується за рейтингом через `key=`.
 
 ??? tip "Підказка"
 
-    1. Бери пачку через `tuple(islice(iterator, n))` з **одного** ітератора `it = iter(iterable)`; порожня пачка — сигнал зупинитися.
-    2. Тримай `window_sum`: додай нове значення, відніми те, що випало з вікна (`values[i - k]`), або тримай вікно в `collections.deque(maxlen=k)`.
+    Відмінність від `Positive` — лише `__init__(self, low, high)`, що запам'ятовує межі, і умова в `__set__`: `if not self.low <= value <= self.high`.
 
 ### Знайди помилку
 
 ```python
-# 1 — звіт по кур'єрах
-from itertools import groupby
+# 1
+class Money:
+    def __init__(self, amount):
+        self.amount = amount
 
-counts = {courier: len(list(group)) for courier, group in groupby(events, key=lambda event: event[1])}
+    def __add__(self, other):
+        self.amount += other.amount
+        return self
 
-# 2 — дві цифри з одного розбору
-parsed = parse(LOG, [])
-total = sum(1 for _ in parsed)
-result = report(durations(parsed))
+# 2
+from dataclasses import dataclass
 
-# 3 — середнє на льоту
-def running_average():
-    total, count, average = 0, 0, None
-    while True:
-        minutes = yield average
-        total += minutes
-        count += 1
-        average = total / count
+@dataclass
+class Order:
+    order_id: int
+    dishes: list = []
 
-avg = running_average()
-print(avg.send(18))
+# 3
+class Money:
+    def __init__(self, amount):
+        self.amount = amount
+
+    def __eq__(self, other):
+        return self.amount == other.amount
 ```
 
 ??? success "Відповіді"
 
-    1. Дані не відсортовані за кур'єром: `groupby` дає кілька груп на одного кур'єра, і в словнику лишиться лише **остання** група кожного. Треба спершу `sorted(events, key=…)` — або рахувати `Counter(event[1] for event in events)`.
-    2. `sum` вичерпав генератор `parsed`; `report` отримає порожній потік і поверне `{}`. Або створити конвеєр заново, або — якщо даних мало — один раз зробити `list(parse(…))`.
-    3. Генератор не запущено: `send(18)` падає з `TypeError: can't send non-None value to a just-started generator`. Треба спершу `next(avg)` або декоратор `@primed`.
+    1. `__add__` змінює лівий операнд: після `total = price + fee` змінилася і сама `price`. Оператор має повертати **новий** об'єкт: `return Money(self.amount + other.amount)`.
+    2. Датаклас узагалі не створиться: `ValueError: mutable default <class 'list'> for field dishes is not allowed: use default_factory`. Спільний список за замовчуванням — та сама пастка, що й змінюваний аргумент за замовчуванням в уроці 8. Правильно: `dishes: list = field(default_factory=list)`.
+    3. `Money(5) == 5` падає з `AttributeError`, бо в числа немає `amount`. Треба `if not isinstance(other, Money): return NotImplemented` — тоді Python чесно поверне `False`. І ще: після `__eq__` зник `__hash__`, тож такі гроші не покладеш у множину.
 
 ## Підсумок
 
 | Поняття | Що запам'ятати |
 |---|---|
-| Клас-ітератор | `__next__` віддає елемент або `StopIteration`; `__iter__` повертає `self` |
-| Ітерабельне й ітератор | ітерабельне на кожен `iter()` дає **новий** курсор; найпростіше — генератор у `__iter__` |
-| Стани генератора | `GEN_CREATED` → `GEN_SUSPENDED` ⇄ `GEN_RUNNING` → `GEN_CLOSED` |
-| `return` у генераторі | значення йде в `StopIteration.value`; забирає його `yield from` |
-| `close()` і `finally` | прибирання ресурсів, навіть якщо споживач зупинився раніше |
-| `.send()` | значення стає результатом `yield`; спершу запустити `next()` або `@primed` |
-| Генератор-автомат | стан у локальній змінній; добре для «подія → стан» |
-| `dropwhile` / `takewhile` | межі впорядкованого потоку; `takewhile` зупиняє і нескінченний потік |
-| `groupby` | групує лише **сусідів** — спершу сортувати за тим самим ключем |
-| `pairwise`, `accumulate` | сусідні пари; наростаючий підсумок |
-| `combinations` | повний перебір наборів фіксованого розміру, без відсікання |
-| ETL-конвеєр | стадії «ітерабельне → ітерабельне», биті записи — окремо, кожна стадія тестується окремо |
-| Pull і push | генератори тягнуть дані, сопрограми отримують їх через `send` |
+| Dunder-методи | Python викликає їх сам: `len` → `__len__`, `in` → `__contains__`, `+` → `__add__` |
+| `NotImplemented` | «не вмію з цим типом» — Python спробує інший операнд, потім `TypeError` |
+| `__radd__` | потрібен, коли лівий операнд не наш: `0 + Money(…)` у `sum` |
+| `__eq__` + `__hash__` | `__eq__` прибирає `__hash__`; хеш — з тих самих полів і лише для незмінних об'єктів |
+| `__lt__` чи `key=` | `__lt__` — коли порядок один і природний; інакше `key=` |
+| `__call__` | об'єкт із налаштуваннями, що викликається як функція |
+| Обчислювана властивість | рахується при читанні, не може застаріти |
+| Сеттер | зберігає в `_name`, інакше рекурсія |
+| Дескриптор | `__set_name__`, `__get__`, `__set__`; одне правило — багато полів |
+| Декоратор класу | приймає клас, повертає клас: реєстр, `@total_ordering`, `@dataclass` |
+| `@dataclass` | `__init__`, `__repr__`, `__eq__`; `order`, `frozen`, `__post_init__`, `default_factory` |
+| Значення і сутність | значення — рівність за полями, незмінне; сутність — ідентичність, змінюється |
 
 ### Самоперевірка
 
-1. Чому другий `list(log)` для першої версії `ShiftLog` порожній? Як це виправити двома способами?
-2. Що друкує генератор `shift()` між першим і другим `next()` і чому саме тоді?
-3. Куди потрапляє значення `return` генератора? Хто його може отримати?
-4. Навіщо в `read_events` блок `finally`?
-5. Що робить рядок `minutes = yield average`? Чому перед першим `send` потрібен `next`?
-6. Коли автомат краще писати генератором, а коли — класом?
-7. Чим `takewhile` відрізняється від `filter` на нескінченному потоці?
-8. Чому `groupby` дав 9 груп на трьох кур'єрів?
-9. Чому `durations` не накопичує всі події зміни в пам'яті?
+1. Що викликає Python для `if cart:`, якщо в класі немає `__bool__`?
+2. Навіщо `__add__` повертає `NotImplemented`, а не кидає `TypeError` сам?
+3. Чому `sum([Money(95), Money(60)])` без `__radd__` падає, а `Money(95) + Money(60)` — ні?
+4. Чому після визначення `__eq__` об'єкт не можна покласти в множину? Чому хеш від змінюваного поля небезпечний?
+5. Чому `self.rating = value` у сеттері `rating` призводить до `RecursionError`?
+6. Чому `cached_property` спрацьовує лише один раз, а `property` — щоразу?
+7. Що робить `__set_name__` і коли його викликають?
+8. Чим `Money` має відрізнятися від `Order` щодо `__eq__`, `__hash__` і змінюваності?
 
 ??? success "Відповіді"
 
-    1. Курсор `position` живе в самому журналі й після першого проходу стоїть у кінці. Виправлення: окремий клас-курсор, який `__iter__` створює щоразу, або генератор у `__iter__`.
-    2. «між подіями» — бо кожен `next()` виконує тіло від попереднього `yield` до наступного.
-    3. У `StopIteration.value`. Його отримує `yield from` як значення виразу, або код, що сам ловить `StopIteration`.
-    4. Щоб з'єднання закрилося, навіть коли споживач не дочитав до кінця й викликав `close()`.
-    5. Віддає `average` назовні й чекає; значення з `send` стає результатом `yield`. До першого `next` генератор ще не дійшов до `yield`, тож приймати значення нікому.
-    6. Генератор — коли вхід один (подія) і вихід один (стан). Клас — коли стан читає багато коду, є кілька дій з іменами чи історія.
-    7. `takewhile` зупиняє потік на першому хибному елементі; `filter` перевіряє всі елементи й на нескінченному потоці не закінчиться.
-    8. Він групує лише сусідні елементи, а кур'єри в журналі йдуть упереміш.
-    9. Він тримає лише відкриті замовлення й видаляє кожне через `pop`, щойно воно доставлене.
+    1. `__len__`: нульова довжина — хибність.
+    2. Щоб Python спробував другий операнд (`__radd__`). Якщо і той не вміє — `TypeError` кине сам Python.
+    3. `sum` починає з `0`, тобто рахує `0 + Money(95)`: `int` не вміє додавати гроші, а `Money.__radd__` немає. У другому виразі лівий операнд — `Money`, і його `__add__` працює.
+    4. Python прибирає `__hash__`, щоб рівні об'єкти не мали різних хешів. Якщо поле, з якого рахується хеш, змінити, об'єкт лишиться в комірці старого хешу, і множина його не знайде.
+    5. Присвоєння властивості викликає сеттер, який знову присвоює властивості, — нескінченна рекурсія. Значення треба зберігати в `self._rating`.
+    6. `property` — data-дескриптор, він перед словником екземпляра. `cached_property` — non-data, після словника: записавши результат в екземпляр, він більше не викликається.
+    7. Повідомляє дескриптору ім'я атрибута, в який його поклали. Python викликає його один раз — під час створення класу.
+    8. `Money` — значення: рівність за сумою, незмінний (`frozen`), хеш з полів. `Order` — сутність: рівність за ідентичністю чи `id`, змінюється (статус), не хешується за змінюваними полями.
 
 ### Що далі
 
-- Ноутбук заняття: [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_24_iterators_advanced/note_lesson_24_iterators_advanced_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_24_iterators_advanced/note_lesson_24_iterators_advanced.ipynb){ .solutions-link } — прогнози й вправи з перевірками: курсор з `peek`, сопрограма-лічильник, `batched`, ковзне середнє, звіт по кур'єрах.
-- Наступне заняття — урок 25 «Тестування з pytest»: стадії нашого конвеєра — ідеальні кандидати на перші тести.
-- Урок 27 — потоки, `multiprocessing` і `asyncio`: `async` / `await` — нащадки `.send()` і `yield from`.
+- Ноутбук заняття: [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_24_property_decorators_dunder/note_lesson_24_property_dunder_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_24_property_decorators_dunder/note_lesson_24_property_dunder.ipynb){ .solutions-link } — прогнози й вправи з перевірками: кошик, гроші, дескриптор `Range`, реєстр способів оплати.
+- Практикум на реальних даних: [`lab_lesson_24_cars_descriptors.ipynb`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_24_property_decorators_dunder/lab_lesson_24_cars_descriptors.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_2/lessons/lesson_24_property_decorators_dunder/lab_lesson_24_cars_descriptors.ipynb) — автомобілі з уроку 22: від `set_mpg()` до `@property` і дескриптора `PositiveNumber` на датасеті `mpg`.
+- Наступне заняття — урок 25 «Ітератори advanced»: сьогодні `__iter__` повертав готовий ітератор списку, а далі — власний `__next__`, генератори з `.send()` і конвеєри з `itertools`.
+- Урок 26 — тестування з `pytest`: перевірки на кшталт наших `assert` стануть справжніми тестами.
 
 ## Документація і джерела
 
-- Туторіал: [Iterators](https://docs.python.org/3/tutorial/classes.html#iterators), [Generators](https://docs.python.org/3/tutorial/classes.html#generators)
-- Довідник мови: [Generator-iterator methods](https://docs.python.org/3/reference/expressions.html#generator-iterator-methods) — `__next__`, `send`, `throw`, `close`
-- [`itertools`](https://docs.python.org/3/library/itertools.html) — усі цеглинки й «рецепти» з прикладами; [`inspect.getgeneratorstate`](https://docs.python.org/3/library/inspect.html#inspect.getgeneratorstate)
-- [PEP 342 — Coroutines via Enhanced Generators](https://peps.python.org/pep-0342/) (`send`, `close`); [PEP 380 — Syntax for Delegating to a Subgenerator](https://peps.python.org/pep-0380/) (`yield from`)
-- Для охочих: Dave Beazley, [«A Curious Course on Coroutines and Concurrency»](https://www.dabeaz.com/coroutines/) — сопрограми на генераторах, конвеєри з `send`, від простого до власного планувальника задач.
+- Довідник мови: [Data model — Special method names](https://docs.python.org/3/reference/datamodel.html#special-method-names)
+- [Descriptor HowTo Guide](https://docs.python.org/3/howto/descriptor.html) — дескриптори, порядок пошуку атрибутів, як влаштовані `property` і методи
+- [`dataclasses`](https://docs.python.org/3/library/dataclasses.html), [`functools.total_ordering`](https://docs.python.org/3/library/functools.html#functools.total_ordering), [`functools.cached_property`](https://docs.python.org/3/library/functools.html#functools.cached_property), [`property`](https://docs.python.org/3/library/functions.html#property)
+- [Mermaid: Class diagrams](https://mermaid.js.org/syntax/classDiagram.html)
+- Harvard CS50P: [Lecture 8 — Object-Oriented Programming](https://cs50.harvard.edu/python/notes/8/) — `@property`, `__str__`, перевантаження операторів
+- Для охочих: Martin Fowler, [Value Object](https://martinfowler.com/bliki/ValueObject.html) — чому гроші й точки мають бути незмінними значеннями.

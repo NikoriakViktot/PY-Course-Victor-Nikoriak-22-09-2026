@@ -1,308 +1,370 @@
-# Урок 33. Django intro: MVT, ORM, admin
+# Урок 33. REST: принципи дизайну API
 
-За два попередні уроки ми написали два сервери. `smachno_api.py` (урок 31) — на голому `http.server`: самі розбирали шлях, самі перевіряли токен, самі збирали JSON. Meteo API (урок 32) — на FastAPI: маршрути й перевірку даних узяв на себе фреймворк. Обидва сервери віддавали **дані** іншим програмам.
+В уроці 32 ми були **клієнтом**: надсилали запити до чужого API і розбирались із його відповідями. Сьогодні — інша роль: ми **проєктуємо** API, яким користуватимуться інші.
 
-А якщо потрібен **сайт для людей**: сторінки з HTML, база даних, вхід для адміністратора, панель, де можна додати чи виправити запис без жодного SQL? Писати все це самому — тижні роботи. Для цього є **Django** — вебфреймворк «з батарейками в комплекті»: ORM для бази даних, міграції, шаблони, адмін-панель, авторизація, захист від типових атак — усе в одному пакеті.
+Приклад — справжній проєкт викладача. Кожні три години метеостанції України передають **синоптичні телеграми** — короткі рядки цифр на кшталт `AAXX 02181 34504 32975 51106 10251 …`. Сервіс завантажує їх із сайту [ogimet.com](https://www.ogimet.com/), розкодовує в температуру, тиск і вітер, зберігає в базі й віддає через API: для Streamlit-дашборду, для аналізу в pandas, для інших програм.
 
-З цього уроку ми будуємо **застосунок нотаток**. Він ростиме з уроку в урок: форми й Bootstrap (урок 34), API (урок 35), вхід і права (урок 40), тести (урок 41), чат на WebSocket (урок 45), Docker і деплой (уроки 48–49) — аж до повного [**Notes Chat App**](https://github.com/NikoriakViktot/notes_chat_app) викладача. Сьогодні — перший крок: проєкт, сторінки, модель `Note`, ORM і адмінка.
+Перша версія цього API працює. Але подивимось на її адреси: `/download_telegrams`, `POST /filter_telegrams/`, `/telegram/ua/3450420249218` — і на відповідь «даних немає» з кодом **200 OK**. Клієнтам таким API користуватися важко. Сьогодні розберемо, як це зробити правильно (REST), перепроєктуємо API у версію 2 і побудуємо до неї карту погоди. А ще подивимось, якими бувають API взагалі: RPC, GraphQL, gRPC, SOAP, WebSocket, webhook.
 
-**Що потрібно з попередніх уроків:** віртуальне середовище й `pip` (урок 2), класи (урок 19), SQL: таблиці, ключі, `SELECT … WHERE` (урок 29), HTTP-запит і відповідь (урок 31), REST (урок 32).
+**Що потрібно з попередніх уроків:** класи (урок 20), pytest (урок 26), репозиторій (урок 30), HTTP-методи й статус-коди, `requests`, клієнт-клас (урок 32).
 
 **Після уроку ти зможеш:**
 
-- створити Django-проєкт і застосунок, пояснити їхню структуру й `settings.py`;
-- пояснити шлях запиту в Django: URL → view → модель → шаблон → відповідь (MVT);
-- написати view-функцію, маршрут і HTML-шаблон;
-- описати модель, створити й застосувати міграцію, прочитати її SQL;
-- працювати з даними через ORM: `create`, `filter`, `get`, `order_by`, `update`, `delete`;
-- зареєструвати модель в адмін-панелі й налаштувати список записів.
+- розрізнити типи API — REST, RPC, GraphQL, gRPC, SOAP, WebSocket, SSE, webhook — і обрати тип під задачу;
+- спроєктувати REST API: ресурси-іменники, методи за призначенням, чесні статус-коди, формат помилок;
+- додати фільтри, вибір полів і пагінацію;
+- обробити довгу операцію через `202 Accepted`;
+- знайти порушення REST у чужому API і запропонувати виправлення;
+- написати клієнт до свого API й дашборд поверх нього.
 
-**Задача розділу.** Сайт нотаток `hello_project` з адмін-панеллю, а в практиці — «закріплені» нотатки. Повний приклад — у розділі [«Практика»](#practice).
+**Задача розділу.** Meteo API v2 і Streamlit-карта погоди. Повний приклад — у розділі [«Практика»](#practice).
 
-**Ноутбук заняття:** [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_33_django_intro/note_lesson_33_django_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_33_django_intro/note_lesson_33_django.ipynb){ .solutions-link } — Django, ORM і адмінка прямо в ноутбуці.
-
-!!! info "Книга Django"
-    Цей урок — стислий вхід у тему. Кожен розділ має посилання **«Поглиблено»** на [Django-книгу викладача](https://nikoriakviktot.github.io/notes_chat_app/): там той самий проєкт розібрано детальніше, а маршрут [Zero to Hero](https://nikoriakviktot.github.io/notes_chat_app/tutorials/) веде від цього уроку до готового застосунку з чатом. Урок 33 — це кроки 1–2 цього маршруту.
+**Ноутбук заняття:** [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_33_rest_api_design/note_lesson_33_rest_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_33_rest_api_design/note_lesson_33_rest.ipynb){ .solutions-link } — сервер запускається прямо в ноутбуці.
 
 ## Пригадай
 
-1. Як у SQL вибрати нотатки, в заголовку яких є слово «Django», від найновішої (урок 29)?
-2. Що таке клас і екземпляр (урок 19)? Чим `Note` відрізняється від `Note(title="…")`?
-3. Що має повернути сервер на запит неіснуючої сторінки (урок 32)?
+1. Який метод ідемпотентний: `POST` чи `DELETE`? Що це означає (урок 32)?
+2. Чим відповідь `404` відрізняється від `422`?
+3. Навіщо клієнт-клас (`SmachnoClient`), якщо є `requests`?
 
 ??? success "Відповіді"
 
-    1. `SELECT * FROM note WHERE title LIKE '%Django%' ORDER BY created_at DESC;` Сьогодні той самий запит напишемо на Python — і побачимо, що Django згенерує майже такий самий SQL.
-    2. Клас — опис (креслення), екземпляр — конкретний об'єкт. У Django клас-модель описує **таблицю**, а екземпляр — **рядок** у ній.
-    3. `404 Not Found`. Django робить це сам для адрес, яких немає в маршрутах.
+    1. `DELETE`: повторний запит лишає сервер у тому самому стані — ресурсу немає. `POST` при повторі створює ще один ресурс.
+    2. `404` — такого ресурсу немає. `422` — запит зрозумілий, але дані не пройшли перевірку (наприклад, від'ємна сума).
+    3. Адреса, тайм-аут, повтори й перетворення кодів на винятки — в одному місці, а не в кожному виклику.
 
-## Встановлення і перший проєкт
+## Метеотелеграма: які дані віддає API
 
-Django — звичайний пакет з PyPI. Встановлюємо у віртуальне середовище проєкту (урок 2):
+Уся робота — у папці уроку [`lesson_33_rest_api_design`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_4/lessons/lesson_33_rest_api_design). Встанови залежності (у Colab це робить ноутбук):
 
 ```bash
-python -m venv venv
-source venv/bin/activate            # Windows: venv\Scripts\activate
-pip install "Django>=5.2,<6"
+pip install fastapi uvicorn pymetdecoder strawberry-graphql grpcio grpcio-tools websockets httpx requests
 ```
 
-Версія 5.2 — **LTS** (довгострокова підтримка до квітня 2028), на ній побудована книга й Notes Chat App.
+Телеграма SYNOP (код КН-01) — рядок груп по п'ять цифр. Розкодовує її бібліотека [`pymetdecoder`](https://pypi.org/project/pymetdecoder/); обгортка з проєкту викладача — у `meteo_api/decoder.py`:
 
-Приклад виводу (номер патч-версії у тебе може бути новішим):
+```python
+from meteo_api.decoder import decode_synop
+
+telegram = "AAXX 02181 34504 32975 51106 10251 20129 39989 40151 52027 80001 333 10330"
+for key, value in decode_synop(telegram).items():
+    print(f"{key:19} {value}")
+```
 
 ```text
-$ python -m django --version
-5.2.17
+temperature         25.1
+dew_point           12.9
+relative_humidity   47
+wind_dir            110
+wind_speed          6
+pressure            998.9
+sea_level_pressure  1015.1
+max_temperature     33.0
+min_temperature     None
 ```
 
-Django-сайт складається з **проєкту** — налаштувань усього сайту — і **застосунків** (apps): окремих частин за змістом. Нотатки — один застосунок; згодом додамо інші (наприклад, чат). Створимо проєкт `hello_project` у поточній папці (крапка в кінці!) і застосунок `hello_app`:
-
-```text
-$ django-admin startproject hello_project .
-$ python manage.py startapp hello_app
-$ find . -name "*.py" | sort
-./hello_app/__init__.py
-./hello_app/admin.py
-./hello_app/apps.py
-./hello_app/migrations/__init__.py
-./hello_app/models.py
-./hello_app/tests.py
-./hello_app/views.py
-./hello_project/__init__.py
-./hello_project/asgi.py
-./hello_project/settings.py
-./hello_project/urls.py
-./hello_project/wsgi.py
-./manage.py
-```
-
-| Файл | Навіщо |
+| Група | Що означає |
 |---|---|
-| `manage.py` | командний рядок проєкту: запуск сервера, міграції, shell |
-| `hello_project/settings.py` | налаштування: застосунки, база даних, мова, часовий пояс |
-| `hello_project/urls.py` | головна таблиця маршрутів: яка адреса — яка функція |
-| `hello_project/wsgi.py`, `asgi.py` | вхідні точки для production-серверів (уроки 45, 49) |
-| `hello_app/models.py` | моделі — таблиці бази даних |
-| `hello_app/views.py` | view-функції: запит → відповідь |
-| `hello_app/admin.py` | що показувати в адмін-панелі |
-| `hello_app/migrations/` | історія змін структури бази |
+| `AAXX` | телеграма з наземної станції |
+| `02181` | день `02`, строк `18` UTC, вітер у м/с (`1`) |
+| `34504` | номер станції за каталогом WMO: `34` — район, `504` — Дніпро |
+| `51106` | хмарність, вітер: напрямок `11` → 110°, швидкість `06` м/с |
+| `10251` | `1` — температура, `0` — плюс, `251` → 25.1 °C |
+| `20129` | `2` — точка роси: 12.9 °C |
+| `39989` | `3` — тиск на станції: 998.9 гПа |
+| `40151` | `4` — тиск на рівні моря: 1015.1 гПа |
+| `333 10330` | розділ 3: максимальна температура за день 33.0 °C |
 
-Новий застосунок треба **зареєструвати** в налаштуваннях — інакше Django його не бачить. Заодно — українська мова й київський час:
+Відносну вологість (47 %) телеграма не передає — її обчислюємо з температури й точки роси.
 
-```python title="hello_project/settings.py (фрагмент)"
-INSTALLED_APPS = [
-    "django.contrib.admin",
-    "django.contrib.auth",
-    "django.contrib.contenttypes",
-    "django.contrib.sessions",
-    "django.contrib.messages",
-    "django.contrib.staticfiles",
-    "hello_app",
-]
+Ця телеграма — справжня: станція Дніпро, 2 вересня 2024 року, 18:00 UTC, з документації API викладача. Вона ж — фікстура для тестів, і поки що API працює саме на ній. Знімок телеграм 12 обласних центрів за кілька діб робить скрипт `meteo_api/fetch_snapshot.py` (код викладача, що завантажує телеграми з ogimet.com): щойно файли знімка з'являться в `meteo_api/data/`, API підхопить їх автоматично.
 
-LANGUAGE_CODE = "uk"
+## Які бувають API
 
-TIME_ZONE = "Europe/Kyiv"
+**API** (Application Programming Interface) — домовленість, як одна програма просить іншу щось зробити. Функції модуля `math` — теж API: **бібліотечний**, у межах однієї програми. Сьогодні говоримо про **мережеві** API, де програми — на різних комп'ютерах.
+
+Запустимо навчальний сервер: він віддає ті самі метеодані через усі типи API одразу.
+
+```python
+from meteo_api.app import start_server
+
+BASE = start_server()
+print(BASE)
 ```
-
-Вбудовані застосунки (`admin`, `auth`, `sessions` …) вже мають свої таблиці. Створимо їх у базі — за замовчуванням це файл SQLite `db.sqlite3` поруч з `manage.py`:
 
 ```text
-$ python manage.py migrate
-Operations to perform:
-  Apply all migrations: admin, auth, contenttypes, sessions
-Running migrations:
-  Applying contenttypes.0001_initial... OK
-  Applying auth.0001_initial... OK
-  Applying admin.0001_initial... OK
-  Applying admin.0002_logentry_remove_auto_add... OK
-  Applying admin.0003_logentry_add_action_flag_choices... OK
-  Applying contenttypes.0002_remove_content_type_name... OK
-  Applying auth.0002_alter_permission_name_max_length... OK
-  Applying auth.0003_alter_user_email_max_length... OK
-  Applying auth.0004_alter_user_username_opts... OK
-  Applying auth.0005_alter_user_last_login_null... OK
-  Applying auth.0006_require_contenttypes_0002... OK
-  Applying auth.0007_alter_validators_add_error_messages... OK
-  Applying auth.0008_alter_user_username_max_length... OK
-  Applying auth.0009_alter_user_last_name_max_length... OK
-  Applying auth.0010_alter_group_name_max_length... OK
-  Applying auth.0011_update_proxy_permissions... OK
-  Applying auth.0012_alter_user_first_name_max_length... OK
-  Applying sessions.0001_initial... OK
+http://127.0.0.1:8032
 ```
 
-!!! tip "Поглиблено"
-    Книга: [Середовище та запуск](https://nikoriakviktot.github.io/notes_chat_app/tutorials/01_hello_django/environment/), [Структура проєкту](https://nikoriakviktot.github.io/notes_chat_app/02_django_core/project_structure_full/), [Команди manage.py](https://nikoriakviktot.github.io/notes_chat_app/02_django_core/management_commands_full/).
+| Тип | Хто починає розмову | Формат | Контракт | Де зустрінеш |
+|---|---|---|---|---|
+| HTTP + файл (CSV) | клієнт | CSV, текст | документація сайту | ogimet, старі державні й наукові сервіси |
+| **REST** | клієнт | JSON | OpenAPI (необов'язково) | більшість публічних API: GitHub, Stripe, Telegram Bot API |
+| JSON-RPC | клієнт | JSON | список методів | блокчейн-вузли, LSP (редактори коду) |
+| GraphQL | клієнт | JSON, мова запитів | схема (обов'язково) | GitHub API v4, Shopify, мобільні застосунки |
+| gRPC | клієнт; можливі потоки в обидва боки | Protobuf (двійковий) | `.proto` (обов'язково) | зв'язок мікросервісів усередині компанії |
+| SOAP | клієнт | XML-конверт | WSDL (обов'язково) | банки, державні реєстри, старі корпоративні системи |
+| WebSocket | будь-хто, канал відкритий | будь-який, частіше JSON | домовленість | чати, біржові котирування, ігри (урок 46) |
+| SSE | сервер після запиту клієнта | текстові події | домовленість | стрічки новин, прогрес задач, відповіді LLM по слову |
+| Webhook | **сервер** — сам дзвонить клієнту | JSON | документація | оплати (Stripe), GitHub, Telegram-боти (урок 48) |
 
-## MVT: як Django відповідає на запит
+### HTTP + CSV: так працює ogimet
 
-Django побудований за схемою **MVT** — Model, View, Template:
+Сайт ogimet.com віддає телеграми за звичайним GET-запитом з параметрами — без JSON і без ресурсів. Наш сервер має двійника цього ендпоінта з тим самим форматом:
 
-- **Model** — дані і робота з базою (`models.py`);
-- **View** — логіка: отримує запит, бере дані з моделі, повертає відповідь (`views.py`);
-- **Template** — як дані виглядають у HTML (`templates/`).
+```python
+import requests
 
-А хто вирішує, яку view викликати? **URLconf** — таблиця маршрутів (`urls.py`).
+params = {"block": "34504", "begin": "202409020000", "end": "202409022359"}
+response = requests.get(f"{BASE}/cgi-bin/getsynop", params=params, timeout=5)
+print(response.headers["Content-Type"])
+print(response.text)
+```
+
+```text
+text/plain; charset=utf-8
+34504,2024,09,02,18,00,AAXX 02181 34504 32975 51106 10251 20129 39989 40151 52027 80001 333 10330=
+```
+
+Це теж API: адреса, параметри, формат відповіді. Але клієнт має знати формат рядка напам'ять: немає назв полів, немає статус-кодів для «станції немає» — лише порожня відповідь. Так виглядають багато старих наукових і державних сервісів. Тому проєкт викладача й загортає ogimet у власний API.
+
+### RPC: виклик функції через мережу
+
+**RPC** (Remote Procedure Call) — «виклич функцію на іншому комп'ютері». Один URL, а **назва методу** й аргументи — у тілі запиту. Найпростіший стандарт — [JSON-RPC 2.0](https://www.jsonrpc.org/specification):
+
+```python
+call = {"jsonrpc": "2.0", "method": "temperature.latest", "params": {"wmo": "34504"}, "id": 1}
+print(requests.post(f"{BASE}/rpc", json=call, timeout=5).json())
+
+call = {"jsonrpc": "2.0", "method": "temperature.forecast", "params": {"wmo": "34504"}, "id": 2}
+print(requests.post(f"{BASE}/rpc", json=call, timeout=5).json())
+```
+
+```text
+{'jsonrpc': '2.0', 'result': {'time': '2024-09-02T18:00Z', 'temperature': 25.1}, 'id': 1}
+{'jsonrpc': '2.0', 'error': {'code': -32601, 'message': "метод 'temperature.forecast' не існує"}, 'id': 2}
+```
+
+- Усі виклики — `POST /rpc`, статус HTTP завжди 200; помилка — в полі `error` з кодом зі стандарту (`-32601` — «метод не існує»).
+- RPC природний, коли операція — справді **дія**, а не ресурс: «перерахувати», «надіслати», «запустити». Але кеші, проксі й браузер не знають, що `temperature.latest` лише читає дані: для них це просто `POST`.
+
+### GraphQL: клієнт сам обирає поля
+
+[GraphQL](https://graphql.org/learn/) — мова запитів до API. Один URL `/graphql`; клієнт описує, **які саме поля** і **які пов'язані дані** хоче, — і отримує рівно це, одним запитом:
+
+```python
+query = """
+{
+  station(wmo: "34504") {
+    name
+    observations(last: 1) { time temperature }
+  }
+}
+"""
+print(requests.post(f"{BASE}/graphql", json={"query": query}, timeout=5).json())
+```
+
+```text
+{'data': {'station': {'name': 'Дніпро', 'observations': [{'time': '2024-09-02T18:00Z', 'temperature': 25.1}]}}}
+```
+
+- Відповідь повторює форму запиту: `station → name, observations → time, temperature`. Тиску немає, бо ми його не просили.
+- У REST для цього знадобилося б два запити (станція, потім спостереження). GraphQL зручний мобільним застосункам: менше запитів і менше зайвих байтів.
+- Платимо складністю: сервер має схему типів, а один «важкий» запит може навантажити базу. Кешувати GraphQL важче, ніж `GET`.
+
+### SOAP: XML-конверт
+
+SOAP — старший за REST стандарт (кінець 1990-х). Запит і відповідь — XML-«конверт», а контракт описаний у файлі **WSDL**. Досі живе в банках і державних реєстрах:
+
+```python
+envelope = """<?xml version="1.0" encoding="utf-8"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:m="urn:meteo">
+  <soap:Body>
+    <m:GetLatestTemperature><m:Station>34504</m:Station></m:GetLatestTemperature>
+  </soap:Body>
+</soap:Envelope>"""
+response = requests.post(f"{BASE}/soap", data=envelope.encode(), timeout=5,
+                         headers={"Content-Type": "text/xml; charset=utf-8"})
+print(response.status_code)
+print(response.text)
+```
+
+```text
+200
+<?xml version="1.0" encoding="utf-8"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:m="urn:meteo"><soap:Body><m:GetLatestTemperatureResponse><m:Station>34504</m:Station><m:Time>2024-09-02T18:00Z</m:Time><m:Temperature>25.1</m:Temperature></m:GetLatestTemperatureResponse></soap:Body></soap:Envelope>
+```
+
+Той самий виклик «дай температуру», що й у JSON-RPC, але в кілька разів довший. Для SOAP є бібліотека [`zeep`](https://docs.python-zeep.org/): вона читає WSDL і створює Python-методи, щоб XML не писати руками.
+
+### gRPC: двійковий контракт
+
+[gRPC](https://grpc.io/docs/what-is-grpc/introduction/) — RPC від Google поверх HTTP/2. Контракт пишуть у файлі `.proto`:
+
+```text
+service Meteo {
+  rpc GetLatest (StationRequest) returns (Observation);
+  rpc StreamObservations (StationRequest) returns (stream Observation);
+}
+message StationRequest { string wmo = 1; }
+message Observation { string station = 1; string time = 2; double temperature = 3; double pressure = 4; }
+```
+
+З нього `grpcio-tools` генерує класи і для сервера, і для клієнта. Клієнт викликає методи сервера як звичайні функції:
+
+```python
+import grpc
+
+from meteo_api.grpc_meteo import connect, start_grpc_server
+
+stub, pb2 = connect(start_grpc_server())
+reply = stub.GetLatest(pb2.StationRequest(wmo="34504"), timeout=5)
+print(type(reply).__name__, reply.station, reply.time, reply.temperature)
+print(len(reply.SerializeToString()), "байтів у двійковому вигляді")
+
+try:
+    stub.GetLatest(pb2.StationRequest(wmo="99999"), timeout=5)
+except grpc.RpcError as error:
+    print(error.code(), error.details())
+```
+
+```text
+Observation 34504 2024-09-02T18:00Z 25.1
+44 байтів у двійковому вигляді
+StatusCode.NOT_FOUND станцію 99999 не знайдено
+```
+
+- Повідомлення — двійкові (Protocol Buffers): коротші за JSON і розбираються швидше. Людині їх не прочитати — для налагодження потрібні спеціальні інструменти.
+- Помилки — власні коди gRPC (`NOT_FOUND`, `UNAVAILABLE`…), а не HTTP-статуси.
+- З браузера gRPC напряму не викликати. Тому його обирають для зв'язку **сервісів між собою**, а не для публічних API.
+
+### WebSocket і SSE: сервер надсилає сам
+
+У всіх попередніх типах розмову починає клієнт: «запитав — отримав». А якщо клієнт хоче дізнатися про нове спостереження **одразу**, як воно з'явиться? Питати сервер щосекунди (**polling**) — марна робота для обох.
+
+**WebSocket** — постійний двосторонній канал: після рукостискання по HTTP з'єднання лишається відкритим, і писати в нього може будь-яка сторона.
+
+```python
+import asyncio
+import json
+
+import websockets
+
+
+async def listen(wmo):
+    async with websockets.connect(BASE.replace("http", "ws") + "/ws/observations") as ws:
+        await ws.send(json.dumps({"subscribe": wmo}))
+        async for message in ws:
+            print("отримано:", message)
+
+
+asyncio.run(listen("34504"))
+```
+
+```text
+отримано: {"time":"2024-09-02T18:00Z","temperature":25.1}
+отримано: {"done":true}
+```
+
+**SSE** (Server-Sent Events) — простіше: звичайна HTTP-відповідь з типом `text/event-stream`, яку сервер не закриває й дописує подію за подією. Канал односторонній — лише від сервера. Так ChatGPT і Claude показують відповідь по словах.
+
+```python
+import httpx
+
+with httpx.stream("GET", f"{BASE}/events/observations", params={"station": "34504"}, timeout=5) as response:
+    print(response.headers["content-type"])
+    for line in response.iter_lines():
+        print(repr(line))
+```
+
+```text
+text/event-stream; charset=utf-8
+'event: observation'
+'data: {"time": "2024-09-02T18:00Z", "temperature": 25.1}'
+''
+'event: done'
+'data: {}'
+''
+```
+
+### Webhook: «не дзвоніть нам — ми подзвонимо»
+
+**Webhook** перевертає ролі: клієнт один раз реєструє **свою** адресу, а сервер сам робить `POST` на неї, коли стається подія. Так платіжні системи повідомляють про оплату, а GitHub — про новий коміт.
+
+Для прикладу піднімемо маленький «приймач» — сервер одержувача на порту 8099:
+
+```python
+import threading
+from http.server import BaseHTTPRequestHandler, HTTPServer
+
+received = []
+
+
+class Receiver(BaseHTTPRequestHandler):
+    def do_POST(self):
+        body = self.rfile.read(int(self.headers["Content-Length"]))
+        received.append((self.headers["X-Meteo-Signature"], body))
+        self.send_response(204)
+        self.end_headers()
+
+    def log_message(self, *args):
+        pass
+
+
+threading.Thread(target=HTTPServer(("127.0.0.1", 8099), Receiver).serve_forever, daemon=True).start()
+
+print(requests.post(f"{BASE}/webhooks", json={"url": "http://127.0.0.1:8099/meteo"}, timeout=5).json())
+print(requests.post(f"{BASE}/webhooks/test-event", json={"station": "34504"}, timeout=5).json())
+signature, body = received[0]
+print(body.decode())
+```
+
+```text
+{'url': 'http://127.0.0.1:8099/meteo', 'events': ['observation.created']}
+{'delivered': 1, 'subscribers': 1}
+{"event": "observation.created", "station": "34504", "time": "2024-09-02T18:00Z", "temperature": 25.1}
+```
+
+Адресу одержувача знає кожен, хто її побачив, тому будь-хто може надіслати туди підробку. Захист — **підпис**: сервер рахує HMAC-SHA256 від тіла зі спільним секретом (урок 17) і кладе його в заголовок. Одержувач перераховує підпис сам:
+
+```python
+import hashlib
+import hmac
+
+from meteo_api.api_types import WEBHOOK_SECRET
+
+expected = hmac.new(WEBHOOK_SECRET, body, hashlib.sha256).hexdigest()
+print("підпис справжній:", hmac.compare_digest(signature, expected))
+print("підробка пройде:", hmac.compare_digest(signature, hmac.new(b"guess", body, hashlib.sha256).hexdigest()))
+```
+
+```text
+підпис справжній: True
+підробка пройде: False
+```
+
+`hmac.compare_digest`, а не `==`: звичайне порівняння зупиняється на першій різниці, і за часом відповіді можна підбирати підпис посимвольно.
 
 ```mermaid
 sequenceDiagram
-    participant B as браузер
-    participant U as urls.py
-    participant V as view note_list
-    participant M as модель Note
-    participant D as db.sqlite3
-    participant T as шаблон note_list.html
-    B->>U: GET /notes/
-    U->>V: note_list(request)
-    V->>M: Note.objects.all()
-    M->>D: SELECT … FROM hello_app_note
-    D-->>M: рядки
-    M-->>V: об'єкти Note
-    V->>T: render(…, {"notes": notes})
-    T-->>V: HTML
-    V-->>B: 200 OK + HTML
+    participant C as клієнт
+    participant S as сервер
+    Note over C,S: polling — клієнт питає щоразу
+    C->>S: GET /observations/latest
+    S-->>C: нічого нового
+    C->>S: GET /observations/latest
+    S-->>C: нове спостереження
+    Note over C,S: WebSocket / SSE — канал відкритий
+    C->>S: підписуюсь на 34504
+    S-->>C: спостереження 18:00
+    S-->>C: спостереження 21:00
+    Note over C,S: webhook — сервер дзвонить сам
+    C->>S: POST /webhooks {url}
+    S->>C: POST url: нове спостереження + підпис
+    C-->>S: 204
 ```
 
-!!! note "MVT і MVC"
-    В інших фреймворках схожу схему називають MVC (Model–View–Controller). Назви зсунуті: те, що в MVC «контролер», у Django — **view**, а те, що в MVC «view» (відображення), у Django — **template**.
-
-### Перші сторінки: view і маршрут
-
-View — звичайна функція: приймає об'єкт запиту `request` і повертає `HttpResponse`.
-
-```python title="hello_app/views.py"
-from django.http import HttpResponse
-
-
-def index(request):
-    return HttpResponse("Hello, Django!")
-
-
-def about(request):
-    return HttpResponse("Це моя перша сторінка на Django!")
-```
-
-Маршрути застосунку — у його власному `urls.py`. `name` дає маршруту ім'я, щоб посилатися на нього без жорстко прописаної адреси:
-
-```python title="hello_app/urls.py"
-from django.urls import path
-
-from . import views
-
-app_name = "hello_app"
-
-urlpatterns = [
-    path("", views.index, name="index"),
-    path("about/", views.about, name="about"),
-]
-```
-
-І підключаємо їх до головного `urls.py` проєкту через `include`:
-
-```python title="hello_project/urls.py"
-from django.contrib import admin
-from django.urls import include, path
-
-urlpatterns = [
-    path("admin/", admin.site.urls),
-    path("", include("hello_app.urls")),
-]
-```
-
-Запускаємо сервер розробки (в окремому терміналі — він працює, доки не натиснеш `Ctrl+C`) і заходимо на сторінки через `curl` (урок 31) або браузер:
-
-Приклад виводу (дата й час у тебе інші):
-
-```text
-$ python manage.py runserver
-Watching for file changes with StatReloader
-Performing system checks...
-
-System check identified no issues (0 silenced).
-September 27, 2026 - 06:55:37
-Django version 5.2.17, using settings 'hello_project.settings'
-Starting development server at http://127.0.0.1:8000/
-Quit the server with CONTROL-C.
-```
-
-```text
-$ curl -s http://127.0.0.1:8000/
-Hello, Django!
-$ curl -s http://127.0.0.1:8000/about/
-Це моя перша сторінка на Django!
-$ curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:8000/weather/
-404
-```
-
-- `127.0.0.1:8000` — наш комп'ютер, порт 8000 (урок 31).
-- На `/weather/` маршруту немає — Django сам відповідає `404`. Поки `DEBUG = True`, у браузері буде ще й жовта сторінка з переліком маршрутів — підказка для розробника. На production `DEBUG` вимикають (урок 49).
-- `runserver` сам перезапускається, коли ти змінюєш `.py`-файли, — перезапускати вручну не треба.
-
-!!! tip "Поглиблено"
-    Книга: [URLs та Views](https://nikoriakviktot.github.io/notes_chat_app/tutorials/01_hello_django/urls_and_views/), [URL routing](https://nikoriakviktot.github.io/notes_chat_app/02_django_core/url_routing_full/), [Views](https://nikoriakviktot.github.io/notes_chat_app/02_django_core/views_full/), [Життєвий цикл запиту](https://nikoriakviktot.github.io/notes_chat_app/02_django_core/request_lifecycle/).
-
-## Модель і міграції
-
-**Модель** — Python-клас, який описує таблицю. Кожен атрибут-поле — колонка:
-
-```python title="hello_app/models.py"
-from django.db import models
-
-
-class Note(models.Model):
-    title = models.CharField("Заголовок", max_length=200)
-    content = models.TextField("Текст", blank=True)
-    created_at = models.DateTimeField("Створено", auto_now_add=True)
-
-    class Meta:
-        verbose_name = "нотатка"
-        verbose_name_plural = "нотатки"
-        ordering = ["-created_at"]
-
-    def __str__(self):
-        return self.title
-```
-
-| Поле | Колонка SQL | Що означає |
-|---|---|---|
-| `id` (додається сам) | `integer PRIMARY KEY` | первинний ключ (урок 29) |
-| `CharField(max_length=200)` | `varchar(200) NOT NULL` | короткий рядок з обмеженням довжини |
-| `TextField(blank=True)` | `text NOT NULL` | довгий текст; `blank=True` — можна лишити порожнім у формі |
-| `DateTimeField(auto_now_add=True)` | `datetime NOT NULL` | Django сам запише час створення |
-
-`Meta.ordering = ["-created_at"]` — порядок за замовчуванням: мінус означає «за спаданням», нові зверху. `__str__` — як нотатку показувати людям: в адмінці й у shell.
-
-Таблиці ще немає. Django порівнює моделі з попереднім станом і створює **міграцію** — Python-файл з описом змін:
-
-```text
-$ python manage.py makemigrations
-Migrations for 'hello_app':
-  hello_app/migrations/0001_initial.py
-    + Create model Note
-```
-
-Яку SQL-команду виконає ця міграція? Подивимось — це той самий `CREATE TABLE` з уроку 29:
-
-```text
-$ python manage.py sqlmigrate hello_app 0001
-BEGIN;
---
--- Create model Note
---
-CREATE TABLE "hello_app_note" ("id" integer NOT NULL PRIMARY KEY AUTOINCREMENT, "title" varchar(200) NOT NULL, "content" text NOT NULL, "created_at" datetime NOT NULL);
-COMMIT;
-```
-
-І застосовуємо:
-
-```text
-$ python manage.py migrate hello_app
-Operations to perform:
-  Apply all migrations: hello_app
-Running migrations:
-  Applying hello_app.0001_initial... OK
-```
+### Як обрати тип API
 
 ```mermaid
 flowchart TD
@@ -312,614 +374,543 @@ flowchart TD
     classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
     classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
 
-    subgraph S1["1. змінюємо models.py"]
-        direction LR
-        A1["class Note:<br>title, content, created_at"]
-    end
-    subgraph S2["2. makemigrations"]
-        direction LR
-        A2["порівняти моделі<br>з історією міграцій"] --> B2["0001_initial.py<br>CreateModel Note"]
-    end
-    subgraph S3["3. migrate"]
-        direction LR
-        A3["CREATE TABLE<br>hello_app_note"] --> B3["записати 0001<br>у django_migrations"]
-    end
-    S1 --> S2 --> S3
+    Q["новий API"] --> P{"сервер має повідомляти<br>про події сам?"}
+    P -- "так, іншому серверу" --> WH["webhook"]
+    P -- "так, у браузер" --> BI{"писати мають<br>обидві сторони?"}
+    BI -- так --> WS["WebSocket"]
+    BI -- "ні, лише сервер" --> SSE["SSE"]
+    P -- ні --> WHO{"хто клієнти?"}
+    WHO -- "свої сервіси,<br>важлива швидкість" --> G["gRPC"]
+    WHO -- "фронтенд з різними<br>потребами в полях" --> GQ["GraphQL"]
+    WHO -- "будь-хто,<br>публічний API" --> R["REST"]
+    WHO -- "стара система<br>вимагає XML" --> SO["SOAP"]
 
-    class A1 step
-    class A2 warning
-    class B2,A3 step
-    class B3 success
+    class Q step
+    class P,BI,WHO decision
+    class R success
+    class WH,WS,SSE,G,GQ step
+    class SO warning
 ```
 
-- **`makemigrations`** — лише створює файл. База не змінюється.
-- **`migrate`** — виконує ще не застосовані міграції й записує їх у службову таблицю `django_migrations`. Тому повторний `migrate` нічого не зробить.
-- Файли міграцій **комітять у git**: з ними база кожного розробника й сервера має ту саму структуру.
+Для публічного API і для більшості вебзастосунків вибір за замовчуванням — **REST**: його розуміють усі інструменти, від браузера до `curl`. Решта цього уроку — про REST.
 
-!!! tip "Поглиблено"
-    Книга: [Моделі і міграції](https://nikoriakviktot.github.io/notes_chat_app/tutorials/02_first_model/models_and_migrations/), [Django models](https://nikoriakviktot.github.io/notes_chat_app/03_database_and_orm/django_models/), [Міграції детально](https://nikoriakviktot.github.io/notes_chat_app/03_database_and_orm/django_migrations_full/).
+## REST: принципи
 
-## ORM: SQL мовою Python
+**REST** (Representational State Transfer) — архітектурний стиль, який описав Рой Філдінг у 2000 році у своїй дисертації. Не протокол і не бібліотека, а набір обмежень. Головні з них:
 
-**ORM** (Object-Relational Mapping) перетворює роботу з рядками таблиці на роботу з Python-об'єктами. Запускаємо інтерактивну консоль з уже налаштованим Django:
+| Обмеження | Що означає для API |
+|---|---|
+| **Ресурси** | API — це набір «речей» з адресами: станції, спостереження. URL — іменник, дія — метод HTTP |
+| **Єдиний інтерфейс** | однакові правила для всіх ресурсів: ті самі методи, ті самі коди, той самий формат помилок |
+| **Представлення** | клієнт отримує не сам об'єкт з бази, а його представлення — JSON |
+| **Stateless** | кожен запит несе все потрібне: сервер не пам'ятає попередніх (урок 32). Токен — у кожному запиті |
+| **Кешованість** | `GET` можна кешувати — проксі, браузер, CDN; `POST` — ні |
+| **Шари** | клієнт не знає, чи відповідає сам сервер, балансувальник, чи кеш (nginx — урок 50) |
+
+### Ресурси й URL
+
+Ресурси Meteo API v2 утворюють дерево: станція містить свої спостереження.
+
+```mermaid
+graph TD
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+
+    ROOT["/api/v1"] --> ST["/stations<br>колекція станцій"]
+    ST --> S1["/stations/34504<br>одна станція"]
+    S1 --> OB["/stations/34504/observations<br>колекція спостережень"]
+    OB --> O1["/stations/34504/observations/2024-09-02T18:00Z<br>одне спостереження"]
+    ROOT --> LA["/observations/latest<br>останні по всіх станціях"]
+    ROOT --> IM["/imports<br>задачі імпорту"]
+
+    class ROOT step
+    class ST,OB,IM decision
+    class S1,O1 success
+    class LA warning
+```
+
+Правила адрес:
+
+- **іменники в множині**: `/stations`, а не `/getStations` чи `/station_list`;
+- **ідентифікатор — у шляху**: `/stations/34504`; фільтри — у параметрах: `?hour=18`;
+- **вкладеність** показує належність: спостереження живуть «всередині» станції. Глибше двох рівнів не йдемо;
+- **ідентифікатор читається**: `2024-09-02T18:00Z` (формат ISO 8601), а не склеєне `3450420249218`;
+- **версія** на початку: `/api/v1/…`. Коли зміни зламають старих клієнтів, з'явиться `/api/v2/…`, а `v1` ще якийсь час житиме.
+
+### Методи
+
+| Запит | Що робить | Ідемпотентний |
+|---|---|---|
+| `GET /stations` | список станцій | так |
+| `GET /stations/34504` | одна станція | так |
+| `GET /stations/34504/observations` | спостереження станції | так |
+| `POST /stations/34504/observations` | додати спостереження | **ні** |
+| `PATCH …/observations/2024-09-02T18:00Z` | виправити частину полів | так (у нашому API) |
+| `DELETE …/observations/2024-09-02T18:00Z` | видалити | так |
+
+Прочитаємо станцію і одне спостереження:
+
+```python
+print(requests.get(f"{BASE}/api/v1/stations/34504", timeout=5).json())
+obs = requests.get(f"{BASE}/api/v1/stations/34504/observations/2024-09-02T18:00Z", timeout=5).json()
+print(obs["temperature"], obs["pressure"], obs["wind_speed"])
+```
+
+```text
+{'wmo': '34504', 'name': 'Дніпро', 'lat': None, 'lon': None, 'elevation': None}
+25.1 998.9 6
+```
+
+### Статус-коди і формат помилок
+
+Код відповіді — перше, що дивиться клієнт (урок 32: `raise_for_status`). Тому код має казати правду.
+
+Створимо **умовне** спостереження (значення вигадані для прикладу — наприкінці розділу ми його видалимо), спробуємо створити його вдруге, надішлемо неправильні дані й попросимо неіснуючу станцію:
+
+```python
+url = f"{BASE}/api/v1/stations/34504/observations"
+new = {"time": "2024-09-02T21:00Z", "temperature": 21.4, "pressure": 999.6}
+
+created = requests.post(url, json=new, timeout=5)
+print(created.status_code, created.headers["Location"])
+print(created.json()["temperature"])
+
+again = requests.post(url, json=new, timeout=5)
+print(again.status_code, again.json())
+
+bad = requests.post(url, json={"time": "2024-09-03T00:00Z", "temperature": 95}, timeout=5)
+print(bad.status_code, bad.json()["detail"][0]["loc"], bad.json()["detail"][0]["msg"])
+
+missing = requests.get(f"{BASE}/api/v1/stations/99999", timeout=5)
+print(missing.status_code, missing.json())
+```
+
+```text
+201 /api/v1/stations/34504/observations/2024-09-02T21:00Z
+21.4
+409 {'detail': 'спостереження 34504 на 2024-09-02T21:00Z вже є'}
+422 ['body', 'temperature'] Input should be less than or equal to 60
+404 {'detail': 'станцію 99999 не знайдено'}
+```
+
+- `201 Created` + заголовок `Location` — адреса нового ресурсу: клієнту не треба її вгадувати.
+- `409 Conflict` — спостереження на цей строк уже є. Повторний `POST` не створив дубль.
+- `422` — дані не пройшли перевірку: FastAPI сам перевіряє тіло за моделлю Pydantic (урок 37) і пояснює, яке поле і чому.
+- `404` — станції немає. Тіло помилки завжди має однакову форму `{"detail": …}`: клієнт розбирає її одним кодом.
+
+```mermaid
+flowchart TD
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+
+    A["запит прийшов"] --> B{"хто клієнт —<br>відомо?"}
+    B -- ні --> E401["401"]
+    B -- так --> C{"має право?"}
+    C -- ні --> E403["403"]
+    C -- так --> D{"ресурс існує?"}
+    D -- ні --> E404["404"]
+    D -- так --> F{"дані правильні?"}
+    F -- ні --> E422["422 / 400"]
+    F -- так --> G{"не суперечить<br>поточному стану?"}
+    G -- ні --> E409["409"]
+    G -- так --> H{"що зроблено?"}
+    H -- "прочитано / змінено" --> S200["200"]
+    H -- "створено" --> S201["201 + Location"]
+    H -- "видалено, тіла немає" --> S204["204"]
+    H -- "прийнято, виконується" --> S202["202 + Location"]
+
+    class A step
+    class B,C,D,F,G,H decision
+    class E401,E403,E404,E422,E409 error
+    class S200,S201,S204 success
+    class S202 warning
+```
+
+### PATCH, PUT і DELETE
+
+`PATCH` змінює **лише передані поля**; `PUT` замінює ресурс **цілком** — поля, яких немає в тілі, зникнуть. Для виправлення однієї температури правильний метод — `PATCH`:
+
+```python
+url = f"{BASE}/api/v1/stations/34504/observations/2024-09-02T21:00Z"
+fixed = requests.patch(url, json={"temperature": 21.1}, timeout=5).json()
+print(fixed["temperature"], fixed["pressure"])
+
+print(requests.patch(url, json={"temperature": -300}, timeout=5).status_code)
+
+first = requests.delete(url, timeout=5)
+second = requests.delete(url, timeout=5)
+print(first.status_code, repr(first.text), "|", second.status_code, second.json())
+```
+
+```text
+21.1 999.6
+422
+204 '' | 404 {'detail': 'спостереження 34504 на 2024-09-02T21:00Z немає'}
+```
+
+- Тиск `999.6` залишився: `PATCH` торкнувся лише температури.
+- `DELETE` ідемпотентний за **станом сервера**: після першого й другого запиту спостереження однаково немає. Код відповіді при цьому може відрізнятися: `204 No Content`, потім `404`.
+
+### Фільтри, поля і пагінація
+
+Колекція може бути великою: 12 станцій × 8 строків × 365 днів — понад 35 тисяч спостережень за рік. Віддавати все одним шматком не можна: відповідь довга, клієнт чекає, пам'ять сервера забивається. Тому колекції віддають **сторінками**, а клієнт може попросити **лише потрібні поля**.
+
+Щоб було що гортати, додамо **умовну** станцію «Навчальна» з вісьмома спостереженнями за добу (значення вигадані для прикладу). Станцію додаємо прямо в сховище — у нашому API немає `POST /stations`, — а спостереження вже через API:
+
+```python
+from meteo_api.app import app
+
+app.state.repo.add_station("99001", "Навчальна")
+url = f"{BASE}/api/v1/stations/99001/observations"
+for hour, temperature in zip(range(0, 24, 3), [11.2, 10.4, 12.9, 17.5, 20.1, 19.3, 15.8, 13.0]):
+    requests.post(url, json={"time": f"2026-09-20T{hour:02d}:00Z", "temperature": temperature}, timeout=5)
+
+page = requests.get(url, params={"fields": "time,temperature", "limit": 3}, timeout=5).json()
+print("total:", page["total"], "| limit:", page["limit"], "| offset:", page["offset"])
+for item in page["items"]:
+    print(item)
+print("next:", page["next"])
+
+print(requests.get(url, params={"fields": "time,colour"}, timeout=5).json())
+```
+
+```text
+total: 8 | limit: 3 | offset: 0
+{'time': '2026-09-20T00:00Z', 'temperature': 11.2}
+{'time': '2026-09-20T03:00Z', 'temperature': 10.4}
+{'time': '2026-09-20T06:00Z', 'temperature': 12.9}
+next: http://127.0.0.1:8032/api/v1/stations/99001/observations?fields=time%2Ctemperature&offset=3&limit=3
+{'detail': 'невідомі поля: colour'}
+```
+
+Конверт сторінки: `items` — дані, `total` — скільки всього, `next` — готове посилання на наступну сторінку або `None`, якщо сторінка остання. Невідоме поле у `fields` — помилка клієнта `400`, а не мовчазне ігнорування. Клієнт іде за `next`, поки воно не стане `None`, — так робить `MeteoClient` у розділі «Архітектура»:
+
+```mermaid
+flowchart TD
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+
+    subgraph P1["запит 1: offset = 0, limit = 3"]
+        direction LR
+        A1["GET …/observations<br>?limit=3"] --> B1["items: 00, 03, 06 год<br>total: 8"] --> C1["next:<br>offset=3"]
+    end
+    subgraph P2["запит 2: offset = 3"]
+        direction LR
+        A2["GET за посиланням next"] --> B2["items: 09, 12, 15 год"] --> C2["next:<br>offset=6"]
+    end
+    subgraph P3["запит 3: offset = 6"]
+        direction LR
+        A3["GET за посиланням next"] --> B3["items: 18, 21 год"] --> C3["next: None<br>кінець"]
+    end
+    P1 --> P2 --> P3
+
+    class A1,A2,A3 step
+    class B1,B2,B3 warning
+    class C1,C2 decision
+    class C3 success
+```
+
+```python
+params = {"fields": "time", "limit": 3}
+while url:
+    page = requests.get(url, params=params, timeout=5).json()
+    print(page["offset"], [item["time"][11:16] for item in page["items"]], "next:", page["next"] is not None)
+    url, params = page["next"], None
+```
+
+```text
+0 ['00:00', '03:00', '06:00'] next: True
+3 ['09:00', '12:00', '15:00'] next: True
+6 ['18:00', '21:00'] next: False
+```
+
+`offset` / `limit` — найпростіша пагінація. Великі API (GitHub, Stripe) використовують **курсор** — «дай 100 записів після запису X»: це стабільніше, коли нові записи з'являються посеред гортання.
+
+### Довга операція: 202 Accepted
+
+У першій версії `POST /download_telegrams` завантажував телеграми з ogimet 1–5 хвилин, і весь цей час клієнт чекав відповіді — поки не спрацює тайм-аут. REST-відповідь на довгу роботу — **`202 Accepted`**: «прийняв, виконую». Клієнт отримує адресу задачі й перевіряє її стан пізніше:
+
+```python
+import time
+
+csv_line = "34504,2024,09,02,18,00,AAXX 02181 34504 32975 51106 10251 20129 39989 40151 52027 80001 333 10330="
+job = requests.post(f"{BASE}/api/v1/imports", json={"csv": csv_line}, timeout=5)
+print(job.status_code, job.json()["status"])
+status_url = BASE + job.headers["Location"]
+while (state := requests.get(status_url, timeout=5).json())["status"] not in ("done", "failed"):
+    time.sleep(0.1)
+print(state["status"], "| додано:", state["added"], "| пропущено:", state["skipped"])
+```
+
+```text
+202 queued
+done | додано: 1 | пропущено: 0
+```
+
+```mermaid
+sequenceDiagram
+    participant C as клієнт
+    participant A as API
+    participant W as фонова задача
+    C->>A: POST /api/v1/imports
+    A->>W: запустити імпорт
+    A-->>C: 202 Accepted<br>Location: /api/v1/imports/7f3a
+    W->>W: розкодувати телеграми
+    C->>A: GET /api/v1/imports/7f3a
+    A-->>C: 200 {"status": "running"}
+    W-->>A: готово: додано 1
+    C->>A: GET /api/v1/imports/7f3a
+    A-->>C: 200 {"status": "done", "added": 1}
+```
+
+Імпорт того самого рядка вдруге не створює дубль: спостереження з таким строком просто перезаписується. Тут фонова задача живе в тому самому процесі (`BackgroundTasks` FastAPI). У production її віддають черзі — Redis з уроку 31 і Celery (уроки 49–50).
+
+### OpenAPI: контракт, який пише сам код
+
+FastAPI будує опис API за стандартом **OpenAPI** з самого коду: шляхи, методи, моделі даних. На ньому працює інтерактивна документація `/docs` (Swagger UI). Подивимось, що в ньому є:
+
+```python
+spec = requests.get(f"{BASE}/openapi.json", timeout=5).json()
+print(spec["info"]["title"], spec["info"]["version"])
+for path, methods in spec["paths"].items():
+    if path.startswith("/api/v1"):
+        print(f"{' '.join(m.upper() for m in methods):12} {path}")
+```
+
+```text
+Meteo API 2.0.0
+GET          /api/v1/stations
+GET          /api/v1/stations/{wmo}
+GET POST     /api/v1/stations/{wmo}/observations
+GET PATCH DELETE /api/v1/stations/{wmo}/observations/{moment}
+GET          /api/v1/observations/latest
+POST         /api/v1/imports
+GET          /api/v1/imports/{job_id}
+```
+
+З цього файла інструменти генерують клієнтів для різних мов, а Postman імпортує всі запити одним кліком. Докладно — в уроці 38.
+
+## Кейс: API v1 → v2
+
+Порівняймо першу версію API (файл `legacy/main.py`, код викладача) з версією 2:
+
+| Було (v1) | Проблема | Стало (v2) |
+|---|---|---|
+| `POST /filter_telegrams/` з тілом-фільтром | дієслово в URL; `POST` для читання — не кешується, не ідемпотентний | `GET /api/v1/stations/{wmo}/observations?hour=18&fields=…` |
+| `POST /download_telegrams` — чекає хвилини | клієнт висить до тайм-ауту | `POST /api/v1/imports` → `202` + адреса статусу |
+| `GET /telegram/ua/3450420249218` | склеєний id: `2024`+`9`+`2`+`18` — чи це `9`+`21`+`8`? Ще й назва колекції MongoDB з URL | `GET /api/v1/stations/34504/observations/2024-09-02T18:00Z` |
+| `{"message": "Дані за цей період відсутні"}` з кодом **200** | `raise_for_status()` мовчить, клієнт падає пізніше з `KeyError` | `404` + `{"detail": …}` |
+| `{"error": str(e)}` з кодом **200** | помилка сервера виглядає як успіх | виняток → `500`, `404`, `409`, `422` |
+| `PUT` з довільним `dict` | `PUT` мав би замінити ресурс цілком; поля без перевірки | `PATCH` з моделлю Pydantic: лише дозволені поля, з межами |
+| `DELETE` → 200 `{"message": …}` в обох випадках | клієнт не відрізнить успіх від «не знайдено» | `204` / `404` |
+| увесь результат одним списком | тисячі записів в одній відповіді | `limit` / `offset` / `total` / `next` |
+
+Друга версія **не складніша** за першу — вона послідовніша. Кожне рішення вище — одне з правил цього уроку.
+
+## Архітектура: API, клієнт і карта { #architecture }
+
+```mermaid
+flowchart TD
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+
+    OG[("ogimet.com<br>телеграми CSV")] -- "fetch_snapshot.py" --> SNAP[("знімок CSV")]
+    SNAP --> REPO["MeteoRepository<br>storage.py"]
+    DEC["decode_synop<br>decoder.py"] --> REPO
+    REPO --> API["Meteo API v2<br>FastAPI, app.py"]
+    API -- "JSON по HTTP" --> CL["MeteoClient<br>client.py"]
+    CL --> MAP["карта погоди<br>Streamlit"]
+    CL --> NB["ноутбук, pandas"]
+
+    class OG,SNAP decision
+    class REPO,DEC step
+    class API success
+    class CL warning
+    class MAP,NB step
+```
+
+- **Шари, як в уроці 30.** `MeteoRepository` приховує, звідки дані. Перейти зі знімка CSV на MongoDB чи PostgreSQL — це заміна одного класу, а ендпоінти лишаються тими самими.
+- **API не знає про Streamlit.** Карта — лише один із клієнтів. Ноутбук, Telegram-бот чи інший сервіс ходять тими самими запитами.
+- **Клієнт-клас, як в уроці 32.** `MeteoClient` (файл [`weather_map/client.py`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_33_rest_api_design/weather_map/client.py)) знає адресу, тайм-аут, пагінацію і перетворює `404` на `StationNotFound`. Streamlit-код не містить жодного URL.
+- **Дані із зовнішнього сайту — знімком.** API не ходить в ogimet на кожен запит клієнта: окремий скрипт раз на кілька годин завантажує телеграми. Якщо ogimet «ляже», карта продовжить працювати на останніх даних.
+
+**Карта погоди** — [`weather_map/app.py`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_33_rest_api_design/weather_map/app.py), на основі дашборду викладача: вкладки «Карта» (температура на станціях: синій — мороз, червоний — тепло), «Станція» (графіки температури й тиску) та «HTTP-інспектор» (останній запит клієнта). Запуск — два термінали:
 
 ```bash
-python manage.py shell
+uvicorn meteo_api.app:app --port 8032          # API: http://127.0.0.1:8032/docs
+streamlit run weather_map/app.py               # карта: http://localhost:8501
 ```
 
-Усі приклади нижче — введені в цю консоль. Створюємо нотатки:
+Або обидва одразу через Docker Compose ([`docker-compose.yml`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_33_rest_api_design/docker-compose.yml); Docker — урок 49):
 
-```python
-from hello_app.models import Note
-
-Note.objects.create(title="Купити молоко", content="2 л, 2.5%")
-Note.objects.create(title="Вивчити Django ORM", content="filter, get, order_by")
-note = Note(title="Ідеї для проєкту")
-note.save()
-print(note.id, note)
-print(Note.objects.count())
+```bash
+docker compose up --build
 ```
 
-```text
-3 Ідеї для проєкту
-3
-```
-
-- `Note.objects` — **менеджер**: вхідна точка до таблиці. `create` = створити об'єкт і одразу `save()`.
-- `Note(...)` без `save()` існує лише в пам'яті Python — в базі його ще немає.
-
-### Читання: QuerySet
-
-```python
-for note in Note.objects.all():
-    print(note.id, note.title)
-
-django_notes = Note.objects.filter(title__icontains="django")
-print(django_notes)
-print(Note.objects.exclude(content="").count())
-print(Note.objects.order_by("title").first())
-```
-
-```text
-3 Ідеї для проєкту
-2 Вивчити Django ORM
-1 Купити молоко
-<QuerySet [<Note: Вивчити Django ORM>]>
-2
-Ідеї для проєкту
-```
-
-`filter` повертає **QuerySet** — набір записів, з яким можна працювати далі. Умови пишуть як `поле__умова=значення`:
-
-| ORM | SQL |
-|---|---|
-| `title="Купити молоко"` | `title = 'Купити молоко'` |
-| `title__icontains="django"` | `title LIKE '%django%'` без урахування регістру |
-| `title__startswith="Ку"` | `title LIKE 'Ку%'` |
-| `id__gte=2` | `id >= 2` |
-| `id__in=[1, 3]` | `id IN (1, 3)` |
-| `content=""` в `exclude` | `NOT (content = '')` |
-
-Який SQL Django насправді надішле? Кожен QuerySet має атрибут `query`:
-
-```python
-print(django_notes.query)
-```
-
-```text
-SELECT "hello_app_note"."id", "hello_app_note"."title", "hello_app_note"."content", "hello_app_note"."created_at" FROM "hello_app_note" WHERE "hello_app_note"."title" LIKE %django% ESCAPE '\' ORDER BY "hello_app_note"."created_at" DESC
-```
-
-!!! warning "SQLite і кирилиця"
-    У SQLite `icontains` не враховує регістр лише для **латинських** літер: `filter(title__icontains="купити")` не знайде «Купити молоко». PostgreSQL порівнює без регістру будь-які літери — ще одна причина використовувати його в production (урок 38). Те саме стосується пошуку в адмінці.
-
-Порівняй з першим питанням з «Пригадай»: той самий `SELECT … WHERE … LIKE … ORDER BY created_at DESC`. `ORDER BY` з'явився сам — з `Meta.ordering`.
-
-### Один запис: get
-
-`get` повертає **один** об'єкт і суворо перевіряє, що він рівно один:
-
-```python
-note = Note.objects.get(id=2)
-print(note.title, "|", note.content)
-
-try:
-    Note.objects.get(id=99)
-except Note.DoesNotExist as error:
-    print("DoesNotExist:", error)
-
-try:
-    Note.objects.get(id__gte=1)
-except Note.MultipleObjectsReturned as error:
-    print("MultipleObjectsReturned:", error)
-```
-
-```text
-Вивчити Django ORM | filter, get, order_by
-DoesNotExist: Note matching query does not exist.
-MultipleObjectsReturned: get() returned more than one Note -- it returned 3!
-```
-
-### QuerySet лінивий
-
-QuerySet не йде в базу, доки не знадобляться дані: під час `for`, `print`, `len`, `list`, індексування. Тому ланцюжок `filter(...).exclude(...).order_by(...)` — це **один** SQL-запит, а не три. Перевіримо, рахуючи запити:
-
-```python
-from django.db import connection, reset_queries
-from django.conf import settings
-
-settings.DEBUG = True               # у режимі DEBUG Django запам'ятовує виконані запити
-reset_queries()
-chain = Note.objects.filter(id__gte=1).exclude(content="").order_by("title")
-print("запитів після побудови:", len(connection.queries))
-titles = [note.title for note in chain]
-print("запитів після циклу:", len(connection.queries))
-print(titles)
-```
-
-```text
-запитів після побудови: 0
-запитів після циклу: 1
-['Вивчити Django ORM', 'Купити молоко']
-```
-
-### Зміна і видалення
-
-```python
-note = Note.objects.get(title="Купити молоко")
-note.content = "2 л, 2.5%, і хліб"
-note.save()
-
-updated = Note.objects.filter(title__icontains="django").update(content="QuerySet, lookups")
-print("оновлено:", updated)
-
-deleted = Note.objects.filter(title="Ідеї для проєкту").delete()
-print("видалено:", deleted)
-print(list(Note.objects.values_list("title", "content")))
-```
-
-```text
-оновлено: 1
-видалено: (1, {'hello_app.Note': 1})
-[('Вивчити Django ORM', 'QuerySet, lookups'), ('Купити молоко', '2 л, 2.5%, і хліб')]
-```
-
-- `note.save()` — змінити **один** об'єкт: прочитали, змінили атрибут, зберегли.
-- `QuerySet.update()` — один `UPDATE … WHERE …` для всіх відповідних рядків, без завантаження об'єктів у Python.
-- `delete()` повертає кількість видалених рядків і розбивку за моделями.
-- `values_list` — лише потрібні колонки, кортежами, без створення об'єктів `Note`.
-
-!!! tip "Поглиблено"
-    Книга: [Django ORM](https://nikoriakviktot.github.io/notes_chat_app/03_database_and_orm/django_orm_full/), [ORM у схемах](https://nikoriakviktot.github.io/notes_chat_app/03_database_and_orm/orm_mermaid_full/), [Оптимізація запитів](https://nikoriakviktot.github.io/notes_chat_app/03_database_and_orm/query_optimization/).
-
-## Шаблон: дані з бази на сторінці
-
-View для списку нотаток бере дані з моделі й передає їх у **шаблон** — HTML з мовою шаблонів Django (DTL):
-
-```python title="hello_app/views.py"
-from django.http import HttpResponse
-from django.shortcuts import render
-
-from .models import Note
-
-
-def index(request):
-    return HttpResponse("Hello, Django!")
-
-
-def about(request):
-    return HttpResponse("Це моя перша сторінка на Django!")
-
-
-def note_list(request):
-    notes = Note.objects.all()
-    return render(request, "hello_app/note_list.html", {"notes": notes})
-```
-
-```python title="hello_app/urls.py"
-from django.urls import path
-
-from . import views
-
-app_name = "hello_app"
-
-urlpatterns = [
-    path("", views.index, name="index"),
-    path("about/", views.about, name="about"),
-    path("notes/", views.note_list, name="note_list"),
-]
-```
-
-Шаблони Django шукає в папці `templates/` кожного застосунку. Вкладена папка з назвою застосунку (`templates/hello_app/`) захищає від конфлікту однакових імен між застосунками:
-
-```html title="hello_app/templates/hello_app/note_list.html"
-<!doctype html>
-<html lang="uk">
-<head><meta charset="utf-8"><title>Нотатки</title></head>
-<body>
-  <h1>Нотатки ({{ notes|length }})</h1>
-  <ul>
-    {% for note in notes %}
-      <li><strong>{{ note.title }}</strong> — {{ note.content|default:"без тексту" }}</li>
-    {% empty %}
-      <li>Нотаток ще немає.</li>
-    {% endfor %}
-  </ul>
-</body>
-</html>
-```
-
-- `{{ … }}` — вставити значення; `|length`, `|default:"…"` — **фільтри**.
-- `{% for %} … {% empty %} … {% endfor %}` — цикл; гілка `empty` — коли список порожній.
-- Django **екранує** HTML у значеннях: нотатка з заголовком `<script>` покажеться як текст, а не виконається (захист від XSS — урок 40).
-
-```text
-$ curl -s http://127.0.0.1:8000/notes/
-<!doctype html>
-<html lang="uk">
-<head><meta charset="utf-8"><title>Нотатки</title></head>
-<body>
-  <h1>Нотатки (2)</h1>
-  <ul>
-
-      <li><strong>Вивчити Django ORM</strong> — QuerySet, lookups</li>
-
-      <li><strong>Купити молоко</strong> — 2 л, 2.5%, і хліб</li>
-
-  </ul>
-</body>
-</html>
-```
-
-!!! tip "Поглиблено"
-    Книга: [Шаблони](https://nikoriakviktot.github.io/notes_chat_app/tutorials/01_hello_django/templates/), [Django templates](https://nikoriakviktot.github.io/notes_chat_app/05_frontend_and_templates/django_templates_full/). Base-шаблон, Bootstrap і форми — урок 34.
-
-## Адмін-панель
-
-Django **сам** будує адмін-панель для моделей: список, пошук, фільтри, форми додавання й редагування. Потрібно лише зареєструвати модель:
-
-```python title="hello_app/admin.py"
-from django.contrib import admin
-
-from .models import Note
-
-
-@admin.register(Note)
-class NoteAdmin(admin.ModelAdmin):
-    list_display = ("title", "created_at")
-    search_fields = ("title", "content")
-```
-
-- `list_display` — колонки таблиці-списку;
-- `search_fields` — поля, за якими шукає рядок пошуку (`icontains`, як у ORM).
-
-Увійти може лише **суперкористувач**. Створюємо його (інтерактивно команда попросить пароль; тут пароль передано змінною середовища `DJANGO_SUPERUSER_PASSWORD`, щоб команду можна було виконати в скрипті):
-
-```text
-$ python manage.py createsuperuser --noinput --username admin --email admin@example.com
-Superuser created successfully.
-$ curl -s -o /dev/null -w "%{http_code} -> %{redirect_url}\n" http://127.0.0.1:8000/admin/
-302 -> http://127.0.0.1:8000/admin/login/?next=/admin/
-```
-
-Без входу адмінка перенаправляє (`302`) на сторінку логіну. Після входу `admin` бачить нотатки — ті самі, що створили через ORM:
-
-![Список нотаток в адмін-панелі Django: колонки «Заголовок» і «Створено», рядок пошуку](img/lesson_33_admin.png)
-
-Пароль у базі не зберігається — лише його хеш (урок 16):
-
-```python
-from django.contrib.auth.models import User
-
-admin_user = User.objects.get(username="admin")
-print(admin_user.is_superuser, admin_user.is_staff)
-print(admin_user.password.split("$")[0])
-print(admin_user.check_password("lesson33-pass"), admin_user.check_password("qwerty"))
-```
-
-```text
-True True
-pbkdf2_sha256
-True False
-```
-
-`pbkdf2_sha256` — алгоритм: сотні тисяч раундів хешування із сіллю, щоб підбирати паролі було дорого. Докладно — в уроці 40.
-
-!!! tip "Поглиблено"
-    Книга: [Django Admin (крок 1)](https://nikoriakviktot.github.io/notes_chat_app/tutorials/01_hello_django/admin/), [Кастомний ModelAdmin (крок 2)](https://nikoriakviktot.github.io/notes_chat_app/tutorials/02_first_model/django_admin/), [Django Admin детально](https://nikoriakviktot.github.io/notes_chat_app/05_frontend_and_templates/django_admin_full/).
-
-## Архітектура: проєкт, застосунки і шлях до Notes Chat App { #architecture }
-
-```mermaid
-flowchart TD
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
-
-    M["manage.py<br>команди"] --> P["hello_project/<br>settings, urls, wsgi/asgi"]
-    P -- "INSTALLED_APPS" --> A["hello_app/<br>models, views, urls, admin"]
-    P -- "INSTALLED_APPS" --> ADM["django.contrib.admin<br>auth, sessions …"]
-    P -- "include()" --> AU["hello_app/urls.py"]
-    AU --> V["views.py"]
-    V --> MD["models.py<br>Note"]
-    V --> T["templates/hello_app/"]
-    MD -- "ORM, міграції" --> DB[("db.sqlite3<br>або PostgreSQL")]
-    ADM --> MD
-
-    class M,P step
-    class A,AU,V,T success
-    class ADM decision
-    class MD warning
-    class DB decision
-```
-
-- **Проєкт — один, застосунків — багато.** Проєкт тримає налаштування й головні маршрути; застосунок — одну частину сайту зі своїми моделями, view й шаблонами. У Notes Chat App застосунок `notes_app` містить нотатки, списки, групи й чат; великі проєкти ділять таке на кілька застосунків.
-- **База даних — налаштування, а не код.** Моделі й ORM однакові для SQLite і PostgreSQL: змінюється лише `DATABASES` у `settings.py`. Розробляємо на SQLite, у production — PostgreSQL (уроки 38, 48).
-- **Адмінка — для персоналу, не для користувачів.** Вона швидко дає робочий інструмент власникові сервісу, але сторінки для відвідувачів пишемо самі (урок 34).
-
-Звідки й куди рухається цей проєкт — маршрут [Zero to Hero](https://nikoriakviktot.github.io/notes_chat_app/tutorials/) Django-книги й уроки курсу:
-
-```mermaid
-flowchart TD
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
-
-    K12["кроки 1–2: hello_project<br>урок 33 — ми тут"] --> K4["крок 4: форми, Bootstrap<br>урок 34"]
-    K4 --> API["API до нотаток: DRF<br>урок 35"]
-    API --> K3["крок 3: services, selectors,<br>PostgreSQL — уроки 38, 44"]
-    K3 --> K5["крок 5: вхід, права<br>урок 40"]
-    K5 --> K6["крок 6: тести<br>урок 41"]
-    K6 --> K7["крок 7: чат на WebSocket<br>урок 45"]
-    K7 --> K89["кроки 8–9: Celery, Docker,<br>деплой — уроки 48–49"]
-    K89 --> FIN["Notes Chat App"]
-
-    class K12 warning
-    class K4,API,K3,K5,K6,K7,K89 step
-    class FIN success
-```
-
-!!! tip "Поглиблено"
-    Книга: [Архітектура Django](https://nikoriakviktot.github.io/notes_chat_app/02_django_core/django_architecture_full/), [Notes Chat App: архітектура](https://nikoriakviktot.github.io/notes_chat_app/12_final_project/architecture/), [Domain model](https://nikoriakviktot.github.io/notes_chat_app/12_final_project/domain_model/).
+У Compose карта звертається до API за адресою `http://api:8032`, а не `localhost`: кожен контейнер — окремий «комп'ютер» у спільній мережі, а `api` — ім'я сервісу.
 
 ## Практика { #practice }
 
-### Розібраний приклад: закріплені нотатки
+### Розібраний приклад: середньодобова температура через API
 
-У Notes Chat App важливі нотатки можна **закріпити** — вони завжди зверху. Додамо поле `is_pinned` у модель:
-
-```python title="hello_app/models.py"
-from django.db import models
-
-
-class Note(models.Model):
-    title = models.CharField("Заголовок", max_length=200)
-    content = models.TextField("Текст", blank=True)
-    is_pinned = models.BooleanField("Закріплена", default=False)
-    created_at = models.DateTimeField("Створено", auto_now_add=True)
-
-    class Meta:
-        verbose_name = "нотатка"
-        verbose_name_plural = "нотатки"
-        ordering = ["-is_pinned", "-created_at"]
-
-    def __str__(self):
-        return self.title
-```
-
-Модель змінилась — потрібна нова міграція:
-
-```text
-$ python manage.py makemigrations
-Migrations for 'hello_app':
-  hello_app/migrations/0002_alter_note_options_note_is_pinned.py
-    ~ Change Meta options on note
-    + Add field is_pinned to note
-$ python manage.py migrate hello_app
-Operations to perform:
-  Apply all migrations: hello_app
-Running migrations:
-  Applying hello_app.0002_alter_note_options_note_is_pinned... OK
-```
-
-`default=False` важливий: у таблиці вже є рядки, і міграція має знати, що записати в нову колонку для них. Без `default` `makemigrations` спитав би значення інтерактивно.
-
-Модель змінилась, тож shell треба перезапустити (`exit()` і знову `python manage.py shell`) — старий пам'ятає стару модель:
+Клієнт викладача `TelegramDataLoader` завантажував спостереження з API і рахував середньодобові значення в pandas. Зробимо те саме через `MeteoClient` — з пагінацією і лише потрібними полями:
 
 ```python
-from hello_app.models import Note
+import sys
 
-Note.objects.create(title="Пароль від Wi-Fi у кав'ярні", content="coffee2026", is_pinned=True)
-Note.objects.create(title="Прочитати про міграції")
-for note in Note.objects.all():
-    print("📌" if note.is_pinned else "  ", note.title)
-print("закріплених:", Note.objects.filter(is_pinned=True).count())
+import pandas as pd
+
+sys.path.insert(0, "weather_map")
+from client import MeteoClient, StationNotFound
+
+client = MeteoClient(BASE)
+observations = pd.DataFrame(client.observations("34504", fields="time,temperature"))
+observations["time"] = pd.to_datetime(observations["time"])
+daily = observations.set_index("time")["temperature"].resample("D").agg(["mean", "min", "max", "count"])
+print(daily.round(1))
+print(client.last_exchange["request"])
+
+try:
+    client.observations("99999")
+except StationNotFound as error:
+    print("StationNotFound:", error)
 ```
 
 ```text
-📌 Пароль від Wi-Fi у кав'ярні
-   Прочитати про міграції
-   Вивчити Django ORM
-   Купити молоко
-закріплених: 1
+                           mean   min   max  count
+time
+2024-09-02 00:00:00+00:00  25.1  25.1  25.1      1
+GET http://127.0.0.1:8032/api/v1/stations/34504/observations?fields=time%2Ctemperature&limit=200&offset=0
+StationNotFound: станцію 99999 не знайдено
 ```
 
-- `ordering = ["-is_pinned", "-created_at"]`: спершу закріплені (`True` > `False`), усередині — нові зверху.
-- Закріплена нотатка — нагорі, хоч створена раніше за «Прочитати про міграції».
+- `client.observations` сам гортає сторінки: логіка пагінації — в одному місці.
+- `fields="time,temperature"` — з сервера не йдуть зайві тиск і вітер.
+- `resample("D")` групує строки по днях (бонусний урок pandas); `count` показує, скільки строків було за добу.
+- 404 перетворився на `StationNotFound`: код аналізу нічого не знає про HTTP.
 
-І в адмінці — колонка й фільтр:
+### Зміни приклад: лише денні строки
 
-```python title="hello_app/admin.py"
-from django.contrib import admin
-
-from .models import Note
-
-
-@admin.register(Note)
-class NoteAdmin(admin.ModelAdmin):
-    list_display = ("title", "is_pinned", "created_at")
-    list_filter = ("is_pinned",)
-    list_editable = ("is_pinned",)
-    search_fields = ("title", "content")
-```
-
-`list_filter` додає праворуч фільтр «Закріплена: так / ні», `list_editable` — прапорець прямо в списку, без відкриття нотатки.
-
-![Адмін-панель: колонка «Закріплена», фільтр праворуч](img/lesson_33_admin_pinned.png)
-
-### Зміни приклад: пріоритет
-
-У Notes Chat App у нотатки є **пріоритет** від 1 до 4. Додай поле `priority` з варіантами вибору:
-
-```python
-PRIORITY_CHOICES = [(1, "Низький"), (2, "Звичайний"), (3, "Високий"), (4, "Терміновий")]
-priority = models.PositiveSmallIntegerField("Пріоритет", choices=PRIORITY_CHOICES, default=2)
-```
+Додай у `MeteoClient.observations` параметр `hour=None` і передавай його API як фільтр `?hour=`. Порахуй середню температуру лише о 12:00 UTC.
 
 **Критерії перевірки:**
 
-- нова міграція `0003_…` створена й застосована;
-- в адмінці пріоритет — випадний список з чотирма назвами, є колонка й фільтр;
-- `note.get_priority_display()` повертає назву, наприклад `"Звичайний"` для нової нотатки;
-- `Note.objects.filter(priority__gte=3)` знаходить лише високі й термінові.
+- без `hour` поведінка не змінилася;
+- з `hour=12` усі отримані записи мають час `…T12:00Z`;
+- фільтрує **сервер**, а не pandas: у `client.last_exchange["request"]` видно `hour=12`.
 
-### Спробуй самостійно: блокноти
+### Спробуй самостійно: ресурс «попередження»
 
-У Notes Chat App нотатки лежать у **блокнотах**. Створи модель `Notebook` (`title`, `description`) і зв'язок «блокнот — нотатки» — зовнішній ключ з уроку 29:
-
-```python
-notebook = models.ForeignKey(Notebook, on_delete=models.SET_NULL, null=True, blank=True, related_name="notes")
-```
+Спроєктуй (спершу на папері) ресурс **попереджень** про небезпечну погоду для станції: «спека понад 35 °C», «вітер понад 20 м/с». Попередження створює синоптик, переглядають усі, закриває синоптик.
 
 **Критерії перевірки:**
 
-- міграція створює таблицю `hello_app_notebook` і колонку `notebook_id` у нотатках — перевір через `sqlmigrate`;
-- `notebook.notes.all()` повертає нотатки блокнота (це дав `related_name`);
-- `Note.objects.filter(notebook__title="Робота")` — фільтр через зв'язок (подвійне підкреслення переходить по зовнішньому ключу, як `JOIN`);
-- видалення блокнота **не** видаляє нотатки — у них `notebook` стає `None` (`SET_NULL`);
-- `Notebook` зареєстровано в адмінці.
+- адреси — іменники, вкладені в станцію; є і колекція, і один елемент;
+- для кожної дії обрано метод і код успіху; «закрити попередження» — це `PATCH` зі статусом, а не `POST /close_alert`;
+- описано 404, 409 (закрити вже закрите) і 422 (невідомий тип попередження);
+- список попереджень має фільтр за статусом і пагінацію.
 
 ??? tip "Підказка"
-    `ForeignKey` тримай у моделі `Note`, а клас `Notebook` оголоси **вище** за `Note` у `models.py`. Для `on_delete` порівняй `CASCADE`, `SET_NULL` і `PROTECT` у [документації](https://docs.djangoproject.com/en/5.2/ref/models/fields/#django.db.models.ForeignKey.on_delete).
+    `GET/POST /api/v1/stations/{wmo}/alerts`, `GET/PATCH /api/v1/stations/{wmo}/alerts/{id}`, фільтр `?status=active`. Реалізувати в `app.py` можна за зразком спостережень.
 
 ### Знайди помилку
 
-Колега додав у модель пріоритет, одразу відкрив shell — і отримав помилку:
-
-```python title="hello_app/models.py"
-from django.db import models
-
-
-class Note(models.Model):
-    PRIORITY_CHOICES = [(1, "Низький"), (2, "Звичайний"), (3, "Високий"), (4, "Терміновий")]
-
-    title = models.CharField("Заголовок", max_length=200)
-    content = models.TextField("Текст", blank=True)
-    is_pinned = models.BooleanField("Закріплена", default=False)
-    priority = models.PositiveSmallIntegerField("Пріоритет", choices=PRIORITY_CHOICES, default=2)
-    created_at = models.DateTimeField("Створено", auto_now_add=True)
-
-    class Meta:
-        verbose_name = "нотатка"
-        verbose_name_plural = "нотатки"
-        ordering = ["-is_pinned", "-created_at"]
-
-    def __str__(self):
-        return self.title
-```
+Колега додав ендпоінт «середня температура станції»:
 
 ```python
-from hello_app.models import Note
+from fastapi import FastAPI
+from fastapi.testclient import TestClient
 
-print(Note.objects.filter(priority__gte=3).count())
+from meteo_api.storage import MeteoRepository
+
+repo = MeteoRepository.default()
+buggy = FastAPI()
+
+
+@buggy.post("/get_mean_temperature")
+def get_mean_temperature(wmo: str):
+    try:
+        items = repo.list_observations(wmo)
+        return {"mean": sum(o["temperature"] for o in items) / len(items)}
+    except Exception as e:
+        return {"error": str(e)}
+
+
+test = TestClient(buggy)
+response = test.post("/get_mean_temperature", params={"wmo": "99999"})
+print(response.status_code, response.json())
 ```
 
 ```text
-OperationalError: no such column: hello_app_note.priority
+200 {'error': 'станцію 99999 не знайдено'}
 ```
+
+Знайди **три** порушення REST.
 
 ??? success "Відповідь"
-    Модель змінили, а **міграцію не створили й не застосували**. Клас `Note` знає про поле `priority`, і ORM будує SQL з колонкою `hello_app_note.priority`, але в таблиці бази її ще немає. Звідси `no such column`.
-
-    Виправлення — завжди пара команд після зміни моделі:
-
-    ```text
-    $ python manage.py makemigrations
-    Migrations for 'hello_app':
-      hello_app/migrations/0003_note_priority.py
-        + Add field priority to note
-    $ python manage.py migrate hello_app
-    Operations to perform:
-      Apply all migrations: hello_app
-    Running migrations:
-      Applying hello_app.0003_note_priority... OK
-    ```
-
-    І перезапустити shell. Якщо `makemigrations` відповідає «No changes detected» — перевір, чи застосунок є в `INSTALLED_APPS`.
-
-Після міграції той самий запит працює:
-
-```python
-from hello_app.models import Note
-
-print(Note.objects.filter(priority__gte=3).count())
-print(Note.objects.first().get_priority_display())
-```
-
-```text
-0
-Звичайний
-```
+    1. **Дієслово в URL і `POST` для читання.** Нічого не створюється — це `GET` ресурсу: `GET /api/v1/stations/{wmo}/temperature/mean` або поле в `GET /api/v1/stations/{wmo}`.
+    2. **Помилка з кодом 200.** Клієнт з `raise_for_status()` вирішить, що все добре, і впаде далі на `response.json()["mean"]` з `KeyError`. Неіснуюча станція — `404`.
+    3. **`except Exception` ховає все.** Навіть справжній збій у коді (ділення на нуль для станції без спостережень) стає «успішною» відповіддю. Ловимо лише очікуваний `NotFoundError`; решту хай FastAPI перетворить на `500` і запише в лог.
 
 ## Підсумок
 
 | Поняття | Що запам'ятати |
 |---|---|
-| Django | вебфреймворк «з батарейками»: ORM, міграції, шаблони, адмінка, auth |
-| Проєкт / застосунок | `startproject` — налаштування сайту; `startapp` — частина за змістом; застосунок — в `INSTALLED_APPS` |
-| MVT | URLconf → view → model → template → `HttpResponse` |
-| View | функція `request → HttpResponse` / `render(...)` |
-| URL | `path("notes/", views.note_list, name="note_list")`, `include()`, `app_name` |
-| Модель | клас = таблиця, поле = колонка, екземпляр = рядок; `Meta.ordering`, `__str__` |
-| Міграції | `makemigrations` створює файл, `migrate` змінює базу; `sqlmigrate` показує SQL; файли — в git |
-| ORM | `create`, `all`, `filter`, `exclude`, `get`, `order_by`, `update`, `delete`, `values_list` |
-| Lookups | `поле__icontains`, `__gte`, `__in`, `зв'язок__поле` |
-| QuerySet | лінивий: SQL — лише коли потрібні дані; `.query` показує SQL |
-| Шаблони | `{{ змінна|фільтр }}`, `{% for %}…{% empty %}`, автоекранування HTML |
-| Адмінка | `@admin.register`, `list_display`, `search_fields`, `list_filter`, `list_editable`; суперкористувач |
+| Типи API | REST, RPC, GraphQL, gRPC, SOAP — клієнт питає; WebSocket, SSE — сервер шле сам; webhook — сервер дзвонить клієнту |
+| REST | ресурси з адресами + методи HTTP + чесні коди; stateless, кешованість |
+| URL | іменники в множині, id у шляху, фільтри в параметрах, версія `/api/v1` |
+| Методи | `GET` читає, `POST` створює, `PATCH` змінює частину, `PUT` замінює цілком, `DELETE` видаляє |
+| Коди | `201` + `Location`, `204`, `202` + `Location`; `400`/`422`, `401`, `403`, `404`, `409` |
+| Помилки | один формат `{"detail": …}`; ніколи не 200 з `{"error": …}` |
+| Колекції | `limit` / `offset` / `total` / `next`; `fields` — лише потрібне |
+| Довгі операції | `202 Accepted` + адреса задачі, клієнт перевіряє стан |
+| OpenAPI | опис API з коду; `/docs` у FastAPI |
+| Webhook | підпис HMAC + `hmac.compare_digest` |
+| Архітектура | репозиторій ↔ API ↔ клієнт-клас ↔ UI; зовнішні дані — знімком |
 
 ### Самоперевірка
 
-1. Чим проєкт відрізняється від застосунку? Що буде, якщо забути додати застосунок в `INSTALLED_APPS`?
-2. Опиши шлях запиту `GET /notes/` у Django.
-3. Навіщо дві команди — `makemigrations` і `migrate`?
-4. Чим `get()` відрізняється від `filter()`? Які винятки може кинути `get()`?
-5. Скільки SQL-запитів виконає `Note.objects.filter(...).exclude(...).order_by(...)`, якщо результат ніде не використати?
-6. Чим `note.save()` відрізняється від `Note.objects.filter(...).update(...)`?
-7. Навіщо `default=False` у новому полі `is_pinned`?
+1. Чим REST відрізняється від RPC? Коли RPC доречніший?
+2. Чому `POST /filter_telegrams/` — погана ідея для пошуку? Як це виправити?
+3. Який код повернути: створено спостереження; таке вже є; температура 95 °C; станції немає; імпорт почався, але не закінчився?
+4. Навіщо в конверті сторінки поле `next`?
+5. Чим `PATCH` відрізняється від `PUT`?
+6. Коли обрати GraphQL, gRPC, WebSocket, webhook?
+7. Навіщо підписувати webhook і чому `compare_digest`, а не `==`?
 
 ??? success "Відповіді"
 
-    1. Проєкт — налаштування й маршрути всього сайту; застосунок — окрема частина з моделями, view й шаблонами. Без `INSTALLED_APPS` Django не бачить моделей застосунку: `makemigrations` нічого не знайде, адмінка й шаблони застосунку не працюватимуть.
-    2. `urls.py` проєкту → `include` → `urls.py` застосунку → `note_list(request)` → `Note.objects.all()` → SQL до бази → `render` шаблону з контекстом → `HttpResponse` з HTML.
-    3. `makemigrations` описує зміну у файлі (його переглядають і комітять), `migrate` виконує її на конкретній базі. Одна міграція застосовується на базах усіх розробників і сервера.
-    4. `filter()` повертає QuerySet — 0, 1 чи багато записів. `get()` повертає один об'єкт і кидає `DoesNotExist` (немає) або `MultipleObjectsReturned` (більше одного).
-    5. Жодного: QuerySet лінивий. SQL піде, коли дані знадобляться — у циклі, `list`, `print`, `len`.
-    6. `save()` зберігає один завантажений об'єкт; `update()` — один `UPDATE` для всіх рядків QuerySet, без завантаження об'єктів у Python.
-    7. У таблиці вже є рядки; міграції треба знати, що записати в нову колонку для них.
+    1. REST оперує ресурсами (іменник + метод HTTP), RPC — викликами функцій (назва дії в тілі, один URL). RPC доречний, коли операція — справжня дія без очевидного ресурсу, і для внутрішніх сервісів (gRPC).
+    2. Пошук — читання: має бути `GET` з параметрами. Тоді він ідемпотентний, кешується, його можна відкрити в браузері й покласти в закладки: `GET /api/v1/stations/34504/observations?hour=18`.
+    3. `201` + `Location`; `409`; `422`; `404`; `202` + адреса задачі.
+    4. Клієнт не рахує `offset` сам, а йде за готовим посиланням. Сервер може змінити спосіб пагінації (наприклад, на курсор), і клієнти не зламаються.
+    5. `PATCH` змінює лише передані поля; `PUT` замінює ресурс цілком — поля, яких немає в тілі, зникають.
+    6. GraphQL — фронтенду з різними потребами в полях і зв'язаних даних. gRPC — швидкий зв'язок власних сервісів. WebSocket — двосторонній канал у реальному часі (чат). Webhook — повідомити інший сервер про подію без опитування.
+    7. Адресу webhook може дізнатися будь-хто й надіслати підробку; підпис HMAC зі спільним секретом доводить, що лист від справжнього сервера. `==` зупиняється на першій різниці, тож за часом відповіді можна підбирати підпис; `compare_digest` порівнює за однаковий час.
 
 ### Що далі
 
-- Ноутбук заняття: [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_33_django_intro/note_lesson_33_django_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_33_django_intro/note_lesson_33_django.ipynb){ .solutions-link } — ORM, view, шаблон і адмінка з перевірками.
-- Готовий проєкт уроку — [`hello_project`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_4/lessons/lesson_33_django_intro/hello_project) у папці уроку.
-- Наступний урок — 34, «Django: forms, HTML practice»: base-шаблон, Bootstrap, `ModelForm` і повний CRUD нотаток — крок 4 маршруту Zero to Hero.
-- Книга: контрольні точки [кроку 1](https://nikoriakviktot.github.io/notes_chat_app/tutorials/01_hello_django/checkpoint/) і [кроку 2](https://nikoriakviktot.github.io/notes_chat_app/tutorials/02_first_model/checkpoint/) — чеклисти й типові помилки.
+- Ноутбук заняття: [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_33_rest_api_design/note_lesson_33_rest_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_33_rest_api_design/note_lesson_33_rest.ipynb){ .solutions-link } — ресурси, коди, пагінація, `PATCH`, GraphQL і клієнт з перевірками.
+- Наступний урок — 34, «Django intro: MVT, ORM, admin»: перший повноцінний вебфреймворк.
+- FastAPI зсередини — уроки 37–39 (Pydantic, FastAPI + OpenAPI + Postman, CRUD з базою даних). Автентифікація — урок 41, тестування API — урок 42, WebSocket-чат — урок 46, Telegram Bot API з webhook — урок 48.
 
 ## Документація і джерела
 
-- Django: [Tutorial part 1 — Requests and responses](https://docs.djangoproject.com/en/5.2/intro/tutorial01/), [part 2 — Models and the admin site](https://docs.djangoproject.com/en/5.2/intro/tutorial02/), [Models](https://docs.djangoproject.com/en/5.2/topics/db/models/), [Making queries](https://docs.djangoproject.com/en/5.2/topics/db/queries/), [QuerySet API](https://docs.djangoproject.com/en/5.2/ref/models/querysets/), [Migrations](https://docs.djangoproject.com/en/5.2/topics/migrations/), [Templates](https://docs.djangoproject.com/en/5.2/topics/templates/), [The admin site](https://docs.djangoproject.com/en/5.2/ref/contrib/admin/), [FAQ: MTV](https://docs.djangoproject.com/en/5.2/faq/general/#django-appears-to-be-a-mvc-framework-but-you-call-the-controller-the-view-and-the-view-the-template-how-come-you-don-t-use-the-standard-names), [версії й підтримка](https://www.djangoproject.com/download/#supported-versions)
-- Книга викладача: [Django-книга і маршрут Zero to Hero](https://nikoriakviktot.github.io/notes_chat_app/) — репозиторій [`NikoriakViktot/notes_chat_app`](https://github.com/NikoriakViktot/notes_chat_app)
+- REST: Roy Fielding, [Architectural Styles and the Design of Network-based Software Architectures](https://ics.uci.edu/~fielding/pubs/dissertation/rest_arch_style.htm), розділ 5 (2000); [RFC 9110 — HTTP Semantics](https://www.rfc-editor.org/rfc/rfc9110) (методи, коди, `Location`); [RFC 5789 — PATCH](https://www.rfc-editor.org/rfc/rfc5789)
+- Настанови з дизайну API: [Microsoft REST API Guidelines](https://github.com/microsoft/api-guidelines), [Google API Design Guide](https://cloud.google.com/apis/design)
+- Інші типи: [JSON-RPC 2.0](https://www.jsonrpc.org/specification), [GraphQL](https://graphql.org/learn/), [gRPC](https://grpc.io/docs/what-is-grpc/introduction/) і [Protocol Buffers](https://protobuf.dev/), [WebSocket — RFC 6455](https://www.rfc-editor.org/rfc/rfc6455), [Server-Sent Events — стандарт HTML](https://html.spec.whatwg.org/multipage/server-sent-events.html)
+- Бібліотеки: [FastAPI](https://fastapi.tiangolo.com/), [Strawberry GraphQL](https://strawberry.rocks/docs), [grpcio](https://grpc.io/docs/languages/python/quickstart/), [websockets](https://websockets.readthedocs.io/), [pymetdecoder](https://pypi.org/project/pymetdecoder/), [Streamlit](https://docs.streamlit.io/), [OpenAPI](https://spec.openapis.org/oas/latest.html)
+- Дані: [ogimet.com](https://www.ogimet.com/) — телеграми SYNOP; код КН-01 / WMO FM 12 SYNOP
+- Проєкт викладача: [`NikoriakViktot/ogimet`](https://github.com/NikoriakViktot/ogimet) (перша версія API) і його розвиток — `ogimet-main` та клієнт `meteo_parser/telegram_filter.py`

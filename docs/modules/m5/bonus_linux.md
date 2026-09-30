@@ -1,18 +1,18 @@
 # Бонус. Linux для розробника
 
-До цього моменту `news_hub` і проєкт нотаток жили на твоєму комп'ютері: `uvicorn --reload`, `python manage.py runserver`. Модуль 5 переносить їх туди, де працює майже кожен вебзастосунок, — на **Linux**: у контейнер Docker (урок 48), на сервер з Compose (49), у CI на GitHub Actions (50). Усі три — це Linux, і всі їхні «загадкові» поломки — звичайні речі Linux: процес не отримав сигнал, користувач не має прав на папку, сервер слухає не ту адресу, змінну середовища не передали.
+До цього моменту `news_hub` і проєкт нотаток жили на твоєму комп'ютері: `uvicorn --reload`, `python manage.py runserver`. Модуль 5 переносить їх туди, де працює майже кожен вебзастосунок, — на **Linux**: у контейнер Docker (урок 49), на сервер з Compose (49), у CI на GitHub Actions (50). Усі три — це Linux, і всі їхні «загадкові» поломки — звичайні речі Linux: процес не отримав сигнал, користувач не має прав на папку, сервер слухає не ту адресу, змінну середовища не передали.
 
-Цей бонус-урок (поза нумерацією 1–52) — мінімум Linux, потрібний для уроків 48–50. Кожна тема тут — з того, на що ми справді наткнулися, переносячи `news_hub` у Docker.
+Цей бонус-урок (поза нумерацією 1–52) — мінімум Linux, потрібний для уроків 49–51. Кожна тема тут — з того, на що ми справді наткнулися, переносячи `news_hub` у Docker.
 
 | Крок | Матеріал | Що вчимо |
 |---|---|---|
 | 1 | [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_5/bonus/linux_devops/note_bonus_linux_devops_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_5/bonus/linux_devops/note_bonus_linux_devops.ipynb){ .solutions-link } | 9 вправ у справжньому Linux (Colab — це Ubuntu): пайплайни, коди виходу, права, процеси й сигнали, порти, змінні середовища, скрипт з `set -euo pipefail` |
-| 2 | ця сторінка | ментальна модель і все, що знадобиться в уроках 48–50 |
+| 2 | ця сторінка | ментальна модель і все, що знадобиться в уроках 49–51 |
 | 3 | [довідник у 18 розділах](linux/index.md) | від «навіщо Linux» до Kubernetes: термінал, файли, права, процеси, пакети, SSH, секрети, bash, Makefile, деплой Django, nginx, журнали, Docker, Compose, DevOps |
 
 Довідник перевірено: команди запущено в контейнерах Ubuntu, Debian і `python:3.12-slim`, конфігурації nginx і Compose — перевірені інструментами.
 
-**Що потрібно з попередніх уроків:** запуск Python-скриптів і `pip` (М1), `subprocess` і процеси (урок 27), HTTP і порти (31), змінні середовища й секрети (43, 46).
+**Що потрібно з попередніх уроків:** запуск Python-скриптів і `pip` (М1), `subprocess` і процеси (урок 28), HTTP і порти (31), змінні середовища й секрети (43, 46).
 
 **Після уроку ти зможеш:**
 
@@ -64,7 +64,7 @@ UID      PID    PPID   C    STIME   TTY   TIME       CMD
 
 ## Пайплайни й коди виходу { #pipes }
 
-Команда Linux робить одну річ і пише результат у **stdout**, помилки — у **stderr**. `|` передає stdout однієї команди на stdin наступної. Хто найчастіше звертається до сервера (журнал nginx, урок 49):
+Команда Linux робить одну річ і пише результат у **stdout**, помилки — у **stderr**. `|` передає stdout однієї команди на stdin наступної. Хто найчастіше звертається до сервера (журнал nginx, урок 50):
 
 ```text
 $ cut -d' ' -f1 access.log | sort | uniq -c | sort -rn | head -3
@@ -73,7 +73,7 @@ $ cut -d' ' -f1 access.log | sort | uniq -c | sort -rn | head -3
       9 192.168.1.20
 ```
 
-Кожна програма завершується **кодом виходу**: `0` — успіх, інше — помилка. На ньому тримається автоматизація: `a && b` запускає `b`, лише якщо `a` вдалась; CI позначає крок червоним, якщо код не 0 (урок 50). Код **пайплайна** — код його **останньої** команди:
+Кожна програма завершується **кодом виходу**: `0` — успіх, інше — помилка. На ньому тримається автоматизація: `a && b` запускає `b`, лише якщо `a` вдалась; CI позначає крок червоним, якщо код не 0 (урок 51). Код **пайплайна** — код його **останньої** команди:
 
 ```text
 true                                 → код 0
@@ -108,7 +108,7 @@ $ stat -c '%a %U %n' app/api.py data .env
 | `touch data/news_hub.db` | так | власник папки `data` — `student` |
 | `cat .env` | ні | `600`: лише власник |
 
-Саме так побудовано образ уроку 48: застосунок працює від користувача `app` (UID 10001); код належить root і доступний лише для читання — зламаний процес не перепише власний код; у `/data` (база SQLite) писати можна. `root` у контейнері — це той самий root ядра, тому застосунок від root — зайвий ризик.
+Саме так побудовано образ уроку 49: застосунок працює від користувача `app` (UID 10001); код належить root і доступний лише для читання — зламаний процес не перепише власний код; у `/data` (база SQLite) писати можна. `root` у контейнері — це той самий root ядра, тому застосунок від root — зайвий ризик.
 
 Детальніше — [права доступу й користувачі](linux/04_files_permissions_users.md).
 
@@ -167,7 +167,7 @@ sh -c (shell-форма CMD)    {'сервер = перший процес': Fal
 sh -c exec …               {'сервер = перший процес': True, 'журнал': "SIGTERM: закриваю з'єднання", 'сервер пережив SIGTERM': False}
 ```
 
-У контейнері `docker stop` надсилає `SIGTERM` процесу з PID 1. Тому в `Dockerfile` пишуть exec-форму `CMD ["uvicorn", …]`: з shell-формою `news_hub` зупинявся 10.2 с з кодом 137, з exec-формою — 1.8 с з кодом 0 ([урок 48](lesson_48.md#refactor-4)).
+У контейнері `docker stop` надсилає `SIGTERM` процесу з PID 1. Тому в `Dockerfile` пишуть exec-форму `CMD ["uvicorn", …]`: з shell-формою `news_hub` зупинявся 10.2 с з кодом 137, з exec-формою — 1.8 с з кодом 0 ([урок 49](lesson_49.md#refactor-4)).
 
 Детальніше — [процеси, порти, сервіси](linux/05_processes_ports_services.md).
 
@@ -185,12 +185,12 @@ $ python3 -m http.server 8765 --bind 127.0.0.1 &   python3 -m http.server 8766 -
 
 `192.0.2.2` — адреса машини в мережі (`hostname -I`).
 
-У контейнера власна мережа: «та сама машина» для нього — він сам. Звідси два правила уроку 48:
+У контейнера власна мережа: «та сама машина» для нього — він сам. Звідси два правила уроку 49:
 
 - сервер у контейнері слухає `0.0.0.0`, інакше `-p 8000:8000` не допоможе;
 - `localhost` у `REDIS_URL` усередині контейнера — сам контейнер; інші контейнери — за іменем у спільній мережі (`redis://redis:6379`).
 
-На сервері навпаки: PostgreSQL і Redis **не** відкривають назовні — лише в мережі Compose (урок 49), а назовні слухає тільки nginx на 80/443.
+На сервері навпаки: PostgreSQL і Redis **не** відкривають назовні — лише в мережі Compose (урок 50), а назовні слухає тільки nginx на 80/443.
 
 Детальніше — [процеси, порти, сервіси](linux/05_processes_ports_services.md), [nginx, gunicorn, uvicorn](linux/12_nginx_gunicorn_uvicorn.md).
 
@@ -204,14 +204,14 @@ export SECRET=abc; pyt   → abc
 SECRET=abc python3 -c    → abc
 ```
 
-Так `news_hub` отримує `DATABASE_URL`, `REDIS_URL` і секрети — і так їх передає Docker (`-e`, `--env-file`) та Compose (`environment`, `env_file`). Пастка — `$` у значенні. bcrypt-хеш пароля адміна (урок 46) — `$2b$12$…`, а в bash `$2` у подвійних лапках — «другий аргумент»:
+Так `news_hub` отримує `DATABASE_URL`, `REDIS_URL` і секрети — і так їх передає Docker (`-e`, `--env-file`) та Compose (`environment`, `env_file`). Пастка — `$` у значенні. bcrypt-хеш пароля адміна (урок 47) — `$2b$12$…`, а в bash `$2` у подвійних лапках — «другий аргумент»:
 
 ```text
 у подвійних лапках: b2
 з .env.admin:       $2b$12$eBDJbnUjhmlfW0bqlm9n1u
 ```
 
-Одинарні лапки — «усе буквально». Але кожен інструмент читає `.env` по-своєму: `source` у bash знімає лапки й підставляє змінні, Compose знімає лапки, а `docker run --env-file` бере значення **разом з лапками** ([урок 48](lesson_48.md#refactor-3)).
+Одинарні лапки — «усе буквально». Але кожен інструмент читає `.env` по-своєму: `source` у bash знімає лапки й підставляє змінні, Compose знімає лапки, а `docker run --env-file` бере значення **разом з лапками** ([урок 49](lesson_49.md#refactor-3)).
 
 Детальніше — [змінні середовища й секрети](linux/08_environment_variables_and_secrets.md).
 
@@ -235,11 +235,11 @@ pg_dump: error: connection failed: password authentication failed
 
 ??? success "Відповідь"
 
-    Код пайплайна — код **останньої** команди. `gzip` успішно стиснув порожній вхід (20 байт — лише заголовок gzip), тож `set -e` помилки не побачив. `set -eo pipefail` — і скрипт завершується з кодом 1, не друкуючи «бекап готовий». Такий самий бекап PostgreSQL з контейнера буде в уроці 49 — з `set -euo pipefail`.
+    Код пайплайна — код **останньої** команди. `gzip` успішно стиснув порожній вхід (20 байт — лише заголовок gzip), тож `set -e` помилки не побачив. `set -eo pipefail` — і скрипт завершується з кодом 1, не друкуючи «бекап готовий». Такий самий бекап PostgreSQL з контейнера буде в уроці 50 — з `set -euo pipefail`.
 
 ## Як обрати: systemd чи Docker { #how-to-choose }
 
-Довідник показує два способи тримати застосунок запущеним на сервері: сервіс **systemd** ([деплой Django на Linux](linux/11_deploy_django_on_linux.md)) і **контейнер** (уроки 48–49).
+Довідник показує два способи тримати застосунок запущеним на сервері: сервіс **systemd** ([деплой Django на Linux](linux/11_deploy_django_on_linux.md)) і **контейнер** (уроки 49–50).
 
 ```mermaid
 flowchart TD
@@ -253,7 +253,7 @@ flowchart TD
     Q1{"кілька сервісів:<br>база, Redis, nginx, бот?"}
     Q2{"однакове середовище<br>локально, у CI і на сервері?"}
     Q3{"один процес Python,<br>решта вже встановлена?"}
-    D["Docker + Compose<br>уроки 48–49"]
+    D["Docker + Compose<br>уроки 49–50"]
     S["systemd-сервіс + venv<br>довідник, розділ 11"]
     Q0 --> Q1
     Q1 -->|так| D
@@ -268,7 +268,7 @@ flowchart TD
     class D,S success
 ```
 
-Обидва спираються на те саме: процес від окремого користувача, зупинка сигналом `SIGTERM`, налаштування — у змінних середовища, журнали — у stdout (`journalctl` чи `docker logs`). У курсі — Docker: `news_hub` і проєкт нотаток мають по кілька сервісів, і CI (урок 50) збирає той самий образ, що й сервер.
+Обидва спираються на те саме: процес від окремого користувача, зупинка сигналом `SIGTERM`, налаштування — у змінних середовища, журнали — у stdout (`journalctl` чи `docker logs`). У курсі — Docker: `news_hub` і проєкт нотаток мають по кілька сервісів, і CI (урок 51) збирає той самий образ, що й сервер.
 
 ## Довідник { #reference }
 
@@ -277,19 +277,19 @@ flowchart TD
 | 1 | [Ментальна модель Linux](linux/01_linux_mental_model.md) | навіщо Linux веброзробнику, що таке сервер |
 | 2 | [Термінал і shell](linux/02_terminal_and_shell.md) | stdin/stdout/stderr, коди виходу, пайплайни |
 | 3 | [Файлова система](linux/03_filesystem_navigation.md) | `/etc`, `/var/log`, навігація, пошук файлів |
-| 4 | [Права доступу й користувачі](linux/04_files_permissions_users.md) | `chmod`, `chown`, `sudo`; користувач `app` в образі (урок 48) |
+| 4 | [Права доступу й користувачі](linux/04_files_permissions_users.md) | `chmod`, `chown`, `sudo`; користувач `app` в образі (урок 49) |
 | 5 | [Процеси, порти, сервіси](linux/05_processes_ports_services.md) | `ps`, `kill`, `systemd`, хто слухає порт |
 | 6 | [Пакетні менеджери](linux/06_package_managers_and_software.md) | `apt` проти `pip`, venv |
-| 7 | [SSH і сервер](linux/07_ssh_and_remote_server.md) | ключі, підключення, `scp`, `rsync` — деплой (урок 49) |
+| 7 | [SSH і сервер](linux/07_ssh_and_remote_server.md) | ключі, підключення, `scp`, `rsync` — деплой (урок 50) |
 | 8 | [Змінні середовища й секрети](linux/08_environment_variables_and_secrets.md) | `.env`, що не можна комітити |
 | 9 | [Bash-скрипти](linux/09_bash_scripts.md) | `set -euo pipefail`, аргументи, функції |
 | 10 | [Makefile](linux/10_makefile_basics.md) | короткі команди для проєкту |
 | 11 | [Деплой Django на Linux](linux/11_deploy_django_on_linux.md) | без Docker: venv, gunicorn, systemd, nginx |
-| 12 | [Nginx, Gunicorn, Uvicorn](linux/12_nginx_gunicorn_uvicorn.md) | reverse proxy, WSGI і ASGI (урок 49) |
+| 12 | [Nginx, Gunicorn, Uvicorn](linux/12_nginx_gunicorn_uvicorn.md) | reverse proxy, WSGI і ASGI (урок 50) |
 | 13 | [Журнали й дебаг](linux/13_logs_monitoring_debugging.md) | `journalctl`, `tail -f`, «сайт не відкривається» |
-| 14 | [Docker basics](linux/14_docker_basics.md) | образ, контейнер, порти — перед уроком 48 |
-| 15 | [Docker Compose](linux/15_docker_compose.md) | кілька сервісів однією командою — перед уроком 49 |
-| 16 | [DevOps workflow](linux/16_devops_workflow.md) | CI/CD, staging, production — перед уроком 50 |
+| 14 | [Docker basics](linux/14_docker_basics.md) | образ, контейнер, порти — перед уроком 49 |
+| 15 | [Docker Compose](linux/15_docker_compose.md) | кілька сервісів однією командою — перед уроком 50 |
+| 16 | [DevOps workflow](linux/16_devops_workflow.md) | CI/CD, staging, production — перед уроком 51 |
 | 17 | [Kubernetes: огляд](linux/17_kubernetes_overview.md) | що далі після Compose |
 | 18 | [Roadmap](linux/18_roadmap_next_steps.md) | куди рухатись далі |
 

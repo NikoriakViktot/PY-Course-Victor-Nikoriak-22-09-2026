@@ -468,7 +468,7 @@ print("Найкращий день:", best_day, best_revenue)
 `best_day is None` спрацьовує на першому повторі: першу пару беремо як стартового лідера. Далі лідер змінюється лише тоді, коли знайшовся більший виторг.
 
 !!! note "max() для словника"
-    `max(d)` порівнює **ключі**, а не значення. Для `{"кава": 30, "чай": 12, "какао": 7}` він поверне `'чай'` — останній за абеткою, хоча найбільше значення в кави. Найбільше значення дає `max(d.values())`, а ключ з найбільшим значенням — `max(d, key=d.get)`. Запис `key=d.get` передає в `max()` метод як значення; як це працює, розберемо в уроці 9.
+    `max(d)` порівнює **ключі**, а не значення. Для `{"кава": 30, "чай": 12, "какао": 7}` він поверне `'чай'` — останній за абеткою, хоча найбільше значення в кави. Найбільше значення дає `max(d.values())`, а ключ з найбільшим значенням — `max(d, key=d.get)`. Запис `key=d.get` передає в `max()` метод як значення; як це працює, розберемо в уроці 10.
 
 ??? note "Поглиблення: Counter і defaultdict"
     У модулі `collections` є готові інструменти для цих патернів:
@@ -792,7 +792,7 @@ grades = [
 - Ноутбук заняття: [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_06_dicts_loops_comprehensions/note_lesson_06_dicts_loops_comprehensions_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_06_dicts_loops_comprehensions/note_lesson_06_dicts_loops_comprehensions.ipynb){ .solutions-link } — вправи й аналітика на реальному наборі з 244 чеків.
 - Додатковий конспект: [`notes_loops_dicts_comprehensions.ipynb`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_06_dicts_loops_comprehensions/notes_loops_dicts_comprehensions.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_06_dicts_loops_comprehensions/notes_loops_dicts_comprehensions.ipynb)
 - Довідник: [Словники (dict)](../../reference/python_core/dicts.md).
-- Наступний урок: [Урок 7. Функції](lesson_07.md). Звіт кафе вже працює, але це один довгий блок коду. Навчимося розкладати програму на функції з іменами.
+- Наступний урок: [Урок 8. Функції](lesson_08.md). Звіт кафе вже працює, але це один довгий блок коду. Навчимося розкладати програму на функції з іменами.
 
 ## Документація
 

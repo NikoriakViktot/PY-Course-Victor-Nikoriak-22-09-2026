@@ -1,278 +1,182 @@
-# Урок 47. Telegram Bot API
+# Урок 47. Security advanced
 
-Агрегатор уже збирає новини, аналізує їх моделлю й захищає запис. Але щоб дізнатися, що нового, треба самому відкрити `GET /api/news`. Сьогодні агрегатор отримує **Telegram-бота**:
+Агрегатор уроку 44 уміє багато: збирає новини, аналізує їх платною моделлю, дає повний CRUD. Але **хто завгодно** може зробити це за нього. Справжній запуск проєкту уроку 44:
 
-- `/news` — останні новини прямо в чаті;
-- `/digest` — тема й тональність за аналізом LLM (урок 43);
-- `/subscribe бюджет` — і нова новина про бюджет прийде сама, щойно агрегатор її збере.
+```text
+$ curl -X POST http://127.0.0.1:8000/api/scrape -d '{"source": "snapshot"}'      → news_saved: 168
+$ curl -X DELETE http://127.0.0.1:8000/api/news
+{"deleted":168}
+$ curl -X POST http://127.0.0.1:8000/api/analyze/jobs -d '{"limit": 200}'        → HTTP 202
+```
 
-Бот — ще один **вхід** у той самий застосунок. Він читає ту саму базу через той самий `NewsRepository`, аналізує тим самим `analyze_news`, а його webhook захищений так само, як webhook уроку 46.
+Жодного пароля. Один запит стер базу, інший запустив аналіз 200 новин за наш рахунок.
 
-Стартовий код: `echo_bot` і `ai_bot` (aiogram 3: роутери, middleware, фабрики бота), `production_bot` (webhook у FastAPI, розсилка). Переносячи його, запускаємо стартовий код без змін проти «Telegram» і дивимось, що той відповідає.
+В уроці 41 ми вже закрили вхід у Django-застосунок: сесії, CSRF, JWT для API, групи. Сьогодні — три загрози, які з'являються, коли API **живе в мережі серед інших систем**:
+
+1. **Хто може писати.** Адмін отримує JWT за паролем. Кожен ендпоінт запису без токена відповідає `401`, а тест стежить, щоб новий ендпоінт не «забув» захист.
+2. **Куди ходить сервер (SSRF).** Адмін додає RSS-джерело за URL, і сервер його завантажує. Але сервер стоїть **усередині** мережі: він бачить localhost, Redis, базу й адресу метаданих хмари `169.254.169.254`. URL — це прохання до сервера сходити туди від свого імені.
+3. **Хто нам пише (webhook).** Зовнішній планувальник запускає збір запитом до нас. Адреса публічна, тож відрізнити справжній запит від підробленого можна лише за підписом.
+
+Стартовий код: адмін-JWT і webhook Telegram з `production_bot`, захист від SSRF — з `OWASP_TOP_10.md`. Кожен шматок переносимо і перевіряємо тестом на атаку.
 
 | Урок | Крок агрегатора |
 |---|---|
 | 36–39 | парсер і модель, FastAPI, база, Redis |
-| 41–43 | тести; Claude Code і RSS; аналіз LLM |
-| 46 | безпека: адмін-JWT, SSRF, підписані webhook |
-| **47** | **Telegram-бот: `/news`, `/digest`, підписки й сповіщення, webhook у FastAPI** |
+| 41–43 | тести; Claude Code і RSS-джерело; аналіз LLM |
+| **46** | **безпека: запис лише адміну з JWT, RSS-джерела за URL без SSRF, підписані webhook** |
+| 47 | Telegram-бот: `/news`, `/digest`, webhook Telegram |
 | 48–50 | Docker, Compose, CI/CD |
 
-Проєкт: [`news_hub`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_4/lessons/lesson_47_telegram_bot/news_hub).
+Проєкт: [`news_hub`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_4/lessons/lesson_47_security_advanced/news_hub).
 
-**Що потрібно з попередніх уроків:** HTTP-запит і JSON (урок 31); `async`/`await` (27); `Depends` і `BackgroundTasks` (37, 39); rate limit на Redis (39); тести з локальним aiohttp-сервером (41); `analyze_news` (43); секрет webhook і `compare_digest` (46).
+**Що потрібно з попередніх уроків:** JWT — будова, підпис, `exp` (урок 41); `Depends` і `dependency_overrides` (37); Alembic (38); Redis, `SET NX`, rate limit (39); тести API й локальний aiohttp-сервер замість мережі (41); HTTP-перенаправлення й DNS (31).
 
 **Після уроку ти зможеш:**
 
-- пояснити, як Telegram доставляє повідомлення боту: polling і webhook;
-- написати бота на aiogram 3: роутер, фільтри команд, middleware, залежності в handler;
-- безпечно відповідати в HTML: екранування і ліміт 4096 символів;
-- розсилати сповіщення з урахуванням лімітів Telegram і заблокованих чатів;
-- приймати webhook Telegram у FastAPI;
-- тестувати бота без мережі й токена — на двійнику Telegram Bot API.
+- закрити ендпоінти запису JWT-адміна і довести тестом, що жоден не лишився відкритим;
+- зберігати пароль як bcrypt-хеш і не підказувати атакувальнику, що саме не так;
+- завантажувати URL від користувача без SSRF: перевірка IP після DNS, кожного перенаправлення, розміру й типу;
+- приймати webhook з підписом HMAC, вікном часу й захистом від повтору;
+- відрізняти, які перевірки ловлять тести, а які — лише рецензія (порівняння секретів за сталий час).
 
-**Ноутбук заняття:** [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_47_telegram_bot/note_lesson_47_telegram_bot_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_47_telegram_bot/note_lesson_47_telegram_bot.ipynb){ .solutions-link } — бот розмовляє з двійником Telegram прямо в ноутбуці, без токена й мережі.
+**Ноутбук заняття:** [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_47_security_advanced/note_lesson_47_security_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_47_security_advanced/note_lesson_47_security.ipynb){ .solutions-link } — підробка токенів, SSRF на локальних серверах, підпис webhook; мережа не потрібна.
 
 ## Пригадай
 
-1. Що повертає HTTP API, коли запит не вдався, і як клієнт дізнається причину (урок 31)?
-2. Навіщо `BackgroundTasks` у FastAPI і коли вони виконуються (урок 39)?
-3. Чому секрет webhook порівнюють `hmac.compare_digest`, а не `==` (урок 46)?
+1. З чого складається JWT і що саме перевіряє сервер, коли його отримує (урок 41)?
+2. Чим `SET key value NX EX 60` у Redis відрізняється від `GET`, а потім `SET` (урок 40)?
+3. Що робить браузер чи `requests`, коли сервер відповідає `302` з `Location` (урок 32)?
 
 ??? success "Відповіді"
 
-    1. Код стану (4xx — помилка клієнта, 5xx — сервера) і тіло з описом. Telegram Bot API робить так само: `{"ok": false, "error_code": 403, "description": "Forbidden: bot was blocked by the user"}`.
-    2. Щоб не тримати клієнта: відповідь іде одразу, задача виконується після неї, у тому ж процесі.
-    3. `==` зупиняється на першому неспівпадінні, тож за часом відповіді секрет можна підбирати по символу. `compare_digest` порівнює за сталий час.
+    1. `header.payload.signature`, кожна частина — base64. Сервер рахує HMAC від `header.payload` своїм секретом і порівнює з підписом, потім дивиться `exp`. Payload **не зашифрований**: прочитати може будь-хто, змінити без секрету — ні.
+    2. `SET NX` — одна атомарна команда «запиши, якщо ключа ще немає»; відповідь каже, чи вийшло. `GET` + `SET` — два кроки, між якими встигне інший запит.
+    3. Робить новий запит на адресу з `Location` — сам, без питань. Ця адреса може вести куди завгодно, зокрема на інший хост.
 
 ## Старт: з якого коду починаємо
 
 | Звідки | Що там | Куди в `news_hub` |
 |---|---|---|
-| `ai_bot/app/bot.py` | `create_bot`, `create_dispatcher`: outer / inner middleware, порядок роутерів, `set_my_commands` | `news_hub/bot/factory.py` |
-| `ai_bot/app/handlers/commands.py`, `echo_bot/app/handlers/` | `Router`, `CommandStart()`, `Command("help")`, залежності в параметрах handler | `news_hub/bot/handlers.py` |
-| `ai_bot/app/middlewares/rate_limit.py`, `inject.py` | ліміт повідомлень (Redis), «впорскування» залежностей у handler | `news_hub/bot/middlewares.py` |
-| `ai_bot/app/utils/text.py`, `formatter.py` | `escape_html`, `split_long_message` | `news_hub/bot/formatting.py` |
-| `production_bot/backend/api/webhook.py`, `app.py` | webhook у FastAPI, `setWebhook` у lifespan, `dp.feed_update` | `POST /api/telegram/webhook`, `start_bot` в `api.py` |
-| `production_bot/backend/workers/notifications.py` | розсилка `bot.send_message` у циклі | `news_hub/notify.py` |
+| `production_bot/backend/core/security.py` | хеш пароля, `create_access_token`, `decode_token` | `news_hub/security.py` |
+| `production_bot/backend/api/deps.py`, `api/admin/auth.py` | `get_current_admin` (401 / 403), `POST /admin/auth/token` | `require_admin`, `POST /api/admin/token` |
+| `production_bot/backend/core/config.py` | `JWT_SECRET`, `ADMIN_PASSWORD`, `WEBHOOK_SECRET` зі змінних середовища | `load_admin_settings`, `load_webhook_secret` |
+| `production_bot/backend/api/webhook.py` | webhook Telegram: секретний шлях + заголовок | `news_hub/webhooks.py` |
+| `OWASP_TOP_10.md` | A10 SSRF: «небезпечне завантаження аватара з URL» і захист | `news_hub/safe_fetch.py` |
 
-Як Telegram спілкується з ботом — довідники стартового проєкту (`lesson_documentation.md`, `lesson_mermaid.md`) і [документація Bot API](https://core.telegram.org/bots/api). Коротко: бот — це програма, яка отримує від Telegram **update** (JSON з повідомленням користувача) і відповідає викликами HTTP API: `https://api.telegram.org/bot<TOKEN>/sendMessage`.
+Теорію — що таке JWT, bcrypt, OWASP Top 10 — урок 41 уже пояснив. Тут — як ці шматки поводяться в **нашому** проєкті і які атаки їх обходять.
 
-### «Telegram» без Telegram: двійник Bot API
+## Рефакторинг 1. Адмін і JWT { #refactor-1 }
 
-`api.telegram.org` у середовищі, де писали урок, недоступний. Токена бота немає ні там, ні в Colab. Тому всі тести, ноутбук і запуск наживо працюють проти **двійника**: `tests/telegram_twin.py`. Це aiohttp-сервер, який відповідає у форматі Bot API і записує кожен виклик. aiogram уміє ходити на інший сервер (так працює й офіційний локальний Bot API server):
+### Хеш пароля: bcrypt без passlib
 
-```python title="news_hub/bot/factory.py"
-def create_bot(token: str, api_url: str | None = None) -> Bot:
-    session = AiohttpSession(api=TelegramAPIServer.from_base(api_url)) if api_url else None
-    return Bot(token=token, session=session, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+Старий `security.py` хешує через `passlib`, а `admin/auth.py` робить це **при імпорті модуля**:
+
+```python title="production_bot/backend/api/admin/auth.py (стартовий код)"
+_ADMIN_PASSWORD_HASH = hash_password(settings.ADMIN_PASSWORD)
 ```
 
-Двійник — не Telegram. Він відтворює лише задокументовані правила, які потрібні урокові:
-
-- неправильний токен → 401;
-- заблокований чат → 403;
-- ліміт → 429 з `retry_after`;
-- у режимі HTML — лише дозволені теги, а «<», «>», «&» поза тегом дають 400 «can't parse entities»;
-- текст понад 4096 символів → 400.
-
-Зі справжнім токеном той самий код ходить на api.telegram.org — достатньо не задавати `TELEGRAM_API_URL`.
-
-## Рефакторинг 1. Бот над `news_hub`: фабрики, роутер, залежності { #refactor-1 }
-
-Бот з aiogram 3 складається з трьох частин:
-
-- **`Bot`** — HTTP-клієнт Bot API: `send_message`, `set_webhook`, …;
-- **`Dispatcher`** — отримує update і веде його крізь middleware до потрібного handler;
-- **`Router`** — набір handler з фільтрами (`Command("news")`, `F.text`).
-
-```python title="news_hub/bot/factory.py"
-def create_dispatcher(session_factory: async_sessionmaker[AsyncSession], redis: Redis, llm: LLMClient | None,
-                      admin_ids: frozenset[int] = frozenset()) -> Dispatcher:
-    dp = Dispatcher()
-    dp.message.outer_middleware(RateLimitMiddleware(redis, BOT_RATE_LIMIT, BOT_RATE_WINDOW))
-    dp.message.middleware(InjectMiddleware(session_factory, redis, llm, admin_ids))
-    dp.include_router(handlers.build_router())
-    return dp
-```
-
-| Було (`ai_bot`) | Стало | Чому |
-|---|---|---|
-| `create_dispatcher(redis)` читає глобальний `config` | залежності — параметрами: база, Redis, LLM, адміни | ті самі фабрики збирають бота для webhook у FastAPI, для polling і для тестів |
-| `router = Router(...)` — змінна модуля, handler з декоратором `@router.message(...)` | `build_router()` — новий роутер на кожен диспетчер | aiogram прив'язує Router лише до **одного** Dispatcher (див. нижче) |
-| `InjectMiddleware` кладе в `data` один спільний `HistoryRepository` над Redis | на кожен update — **своя** сесія бази, COMMIT після handler | як `get_db` у FastAPI: сесію SQLAlchemy не ділять між одночасними update |
-| `RateLimitMiddleware` на своєму `RateLimitRepository` | той самий `RateLimiter` (`INCR` + `EXPIRE NX`), що й rate limit API в уроці 39 | одна реалізація на весь застосунок; про ліміт — одна відповідь за вікно, далі бот мовчить |
-
-Чому не змінна модуля. Справжній вивід стартового `ai_bot`, коли в процесі створюють другий диспетчер (а API, тести й ноутбук створюють):
+`passlib` не оновлювався з 2020 року, а `bcrypt` 5 змінив поведінку. Справжній вивід на чистій установці (`passlib 1.7.4`, `bcrypt 5.0.0`):
 
 ```text
-другий create_dispatcher: Router is already attached to <Dispatcher '0x7f3ed1ce2a50'>
+(trapped) error reading bcrypt version
+ValueError: password cannot be longer than 72 bytes, truncate manually if necessary (e.g. my_password[:72])
 ```
 
-Залежності доходять до handler через параметри. aiogram «впорскує» значення з `data` за іменем, як `Depends` у FastAPI:
+Помилка — при імпорті, тож застосунок не стартує взагалі. Тепер `bcrypt` напряму:
 
-```python title="news_hub/bot/middlewares.py (фрагмент)"
-    async def __call__(self, handler: Handler, event: TelegramObject, data: dict[str, Any]) -> Any:
-        async with self._factory() as session:
-            data["news"] = NewsRepository(session)
-            data["subscriptions"] = SubscriptionRepository(session)
-            data["redis"] = self._redis
-            data["llm"] = GuardedLLM(self._llm, CircuitBreaker(self._redis)) if self._llm else None
-            data["admin_ids"] = self._admin_ids
-            result = await handler(event, data)
-            await session.commit()
-            return result
+```python title="news_hub/security.py"
+def hash_password(password: str, rounds: int = 12) -> str:
+    """bcrypt: сіль у самому хеші, 2^rounds ітерацій — навмисно повільно (~0,2 с при 12)."""
+    data = password.encode()
+    if len(data) > BCRYPT_MAX_BYTES:
+        raise ValueError(f"пароль довший за {BCRYPT_MAX_BYTES} байти: bcrypt його не прийме")
+    return bcrypt.hashpw(data, bcrypt.gensalt(rounds)).decode()
+
+
+def verify_password(password: str, password_hash: str) -> bool:
+    data = password.encode()
+    if len(data) > BCRYPT_MAX_BYTES:        # bcrypt ≥ 5 кидає ValueError — для нас це просто «не той пароль»
+        return False
+    return bcrypt.checkpw(data, password_hash.encode())
 ```
 
-```python title="news_hub/bot/handlers.py (фрагмент)"
-async def cmd_news(message: Message, command: CommandObject, news: NewsRepository) -> None:
+Межа 72 байти — властивість самого алгоритму bcrypt. Старші версії мовчки обрізали довший пароль, `bcrypt` 5 кидає `ValueError` і в `checkpw`. Без перевірки довжини запит на вхід з довгим паролем закінчувався б `500`. Тест `test_bad_login_is_one_answer` надсилає 100 літер «я» (200 байт) і чекає `401`.
+
+У середовищі — **хеш**, а не пароль: `python -m news_hub.security` питає пароль і друкує рядки для `.env`.
+
+### Налаштування: без «change-me»
+
+```python title="production_bot/backend/core/config.py (стартовий код)"
+JWT_SECRET: str = os.getenv("JWT_SECRET", "change-me-in-production")
+ADMIN_PASSWORD: str = os.getenv("ADMIN_PASSWORD", "change-me")
+```
+
+`validate()` перевіряє лише «не порожній», тож значення за замовчуванням проходить. Хто прочитав код (а він публічний), той підпише токен сам. Справжній вивід:
+
+```text
+validate() пропускає: True
+підроблений токен приймається: {'sub': 'admin', 'role': 'admin', 'exp': 1790577575}
+```
+
+PyJWT сам попереджає: `InsecureKeyLengthWarning: The HMAC key is 23 bytes long, which is below the minimum recommended length of 32 bytes`.
+
+```python title="news_hub/security.py"
+def load_admin_settings(env: Mapping[str, str] = os.environ) -> AdminSettings | None:
+    """None — адмінку не налаштовано (ендпоінти запису → 503). Налаштовано погано — RuntimeError при старті."""
+    secret, password_hash = env.get("JWT_SECRET", ""), env.get("ADMIN_PASSWORD_HASH", "")
+    if not secret and not password_hash:
+        return None
+    if len(secret) < MIN_SECRET_LENGTH:
+        raise RuntimeError(f"JWT_SECRET має бути не коротшим за {MIN_SECRET_LENGTH} символи; "
+                           "згенеруй: python -m news_hub.security")
     ...
-    rows = await news.latest(count)
-    await answer_lines(message, [f"📰 <b>Останні новини</b> ({len(rows)})", ""] +
-                       [f"• {link(row.url, row.title)} <i>{esc(row.category)}</i>" for row in rows])
 ```
 
-Шлях одного update крізь диспетчер — покроково, на двох повідомленнях Анни:
+Три стани, і жоден не «працює з дефолтним секретом»:
 
-```mermaid
-flowchart TD
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+- **нічого не задано** — читати можна, запис відповідає `503 адмін-доступ не налаштовано`;
+- **задано погано** — застосунок не стартує;
+- **задано добре** — працює.
 
-    subgraph U1["update 1: «/subscribe Бюджет» від 2002"]
-        direction LR
-        a1{"RateLimit:<br>rate:bot:tg2002 = 1 ≤ 20?"} -- так --> a2["роутер по черзі:<br>start, help, news, digest,<br>search — ні"] --> a3{"Command<br>subscribe?"} -- так --> a4["Inject: сесія бази"] --> a5["cmd_subscribe<br>INSERT … ON CONFLICT"] --> a6["COMMIT<br>✅ Підписка на «бюджет»"]
-    end
-    subgraph U2["update 2: «привіт» від 2002"]
-        direction LR
-        b1{"RateLimit:<br>2 ≤ 20?"} -- так --> b2["жодна команда<br>не підійшла"] --> b3{"F.text?"} -- так --> b4["unknown()<br>Не знаю такої команди"]
-    end
-    U1 --> U2
-
-    class a1,a3,b1,b3 decision
-    class a2,b2 step
-    class a4,a5 warning
-    class a6,b4 success
-```
-
-Порядок має значення: aiogram перевіряє handler згори донизу і зупиняється на першому, чий фільтр підійшов. `F.text` («будь-який текст») пропускає й команди, тому він — останній.
-
-Поглиблено: aiogram — [Router](https://docs.aiogram.dev/en/latest/dispatcher/router.html), [Middlewares](https://docs.aiogram.dev/en/latest/dispatcher/middlewares.html), [Dependency injection](https://docs.aiogram.dev/en/latest/dispatcher/dependency_injection.html).
-
-## Рефакторинг 2. Відповідь у HTML: екранування і 4096 { #refactor-2 }
-
-Бот відповідає з `parse_mode=HTML`: `<b>`, `<i>`, `<a href>`. Telegram розбирає розмітку сам і відхиляє повідомлення, у якому «<», «>» чи «&» стоять поза тегом.
-
-Старий `/start`:
-
-```python title="ai_bot/app/handlers/commands.py (стартовий код)"
-    await message.answer(
-        f"Привіт, <b>{user.first_name}</b>! 🤖\n\n"
-        ...
-```
-
-`first_name` — те, що користувач написав у профілі. Справжній вивід стартового коду без змін (aiogram 3.15.0 з його `requirements.txt`) проти двійника:
+Справжній запуск з секретом зі стартового конфігу:
 
 ```text
-/start від 'Олена': надіслано
-/start від '<Олена>': TelegramBadRequest: Telegram server says - Bad Request: can't parse entities: unexpected character at byte offset 11
-/start від 'Tom & Jerry': TelegramBadRequest: Telegram server says - Bad Request: can't parse entities: unsupported entity at byte offset 15
+$ JWT_SECRET=change-me-in-production uvicorn news_hub.api:app
+RuntimeError: JWT_SECRET має бути не коротшим за 32 символи; згенеруй: python -m news_hub.security
+ERROR:    Application startup failed. Exiting.
 ```
 
-Користувач із «&» в імені ніколи не отримає відповіді. Той самий ризик у кожному заголовку новини: «Бюджет & податки», «ціна < 100 грн».
+### Токен і перевірка
 
-```python title="news_hub/bot/formatting.py"
-def esc(text: str) -> str:
-    """Текст → безпечний для HTML Telegram: & < > (лапки поза атрибутом не потрібні)."""
-    return html.escape(text, quote=False)
-
-
-def link(url: str, title: str) -> str:
-    return f'<a href="{html.escape(url, quote=True)}">{esc(title)}</a>'
-```
-
-Правило для всього проєкту: **усе, що прийшло ззовні** (ім'я, заголовок, ключове слово), іде в текст лише через `esc` або `link`. Наживо, через webhook:
-
-```text
-POST /_twin/say {"text": "/start", "first_name": "<Олена & Ко>"}
-Привіт, <b>&lt;Олена &amp; Ко&gt;</b>! Я бот новинного агрегатора news_hub.
-```
-
-### Довге повідомлення: різати між рядками
-
-Telegram приймає до 4096 символів. Старий `split_long_message` різав кожні 4000:
-
-```python title="ai_bot/app/utils/formatter.py (стартовий код)"
-    return [text[i: i + MAX_MESSAGE_LEN] for i in range(0, len(text), MAX_MESSAGE_LEN)]
-```
-
-Розріз може припасти всередину `<pre>…</pre>` чи `&amp;`. Справжній вивід на довгій відповіді AI з блоком коду (`format_ai_response` + `split_long_message`):
-
-```text
-частин: 4 | невалідних: ["Bad Request: can't parse entities: can't find end tag corres", "Bad Request: can't parse entities: can't find end tag corres"]
-```
-
-Бот складає повідомлення з **рядків**, кожен рядок — цілий HTML. Ділимо лише між ними:
-
-```python title="news_hub/bot/formatting.py"
-def split_message(lines: list[str], limit: int = MAX_MESSAGE) -> list[str]:
-    """Рядки → частини ≤ limit, розріз лише між рядками. Рядок, довший за limit, обрізається як текст."""
-    parts: list[str] = []
-    current = ""
-    for line in lines:
-        if len(line) > limit:
-            line = line[: limit - 1] + "…"          # лише для рядків без розмітки (ми їх такими не складаємо)
-        candidate = f"{current}\n{line}" if current else line
-        if len(candidate) > limit:
-            parts.append(current)
-            current = line
-        else:
-            current = candidate
-    if current:
-        parts.append(current)
-    return parts
-```
-
-Поглиблено: Bot API — [Formatting options: HTML style](https://core.telegram.org/bots/api#html-style).
-
-## Рефакторинг 3. Підписки і сповіщення { #refactor-3 }
-
-`/subscribe бюджет` записує пару «чат + слово» в таблицю `subscriptions` (міграція `0004`). `chat_id` — `BigInteger`: id груп у Telegram на кшталт `-1001234567890` не вміщаються в 32 біти. Тест `test_group_chat_id_fits` з `Integer` падає на PostgreSQL.
-
-Збіг — за **початком слова**. Українська змінює закінчення, тож точний збіг пропускав би більшість новин, а пошук підрядка будь-де давав би хибні збіги:
-
-| Слово | Заголовок | Збіг? |
+| Було (`production_bot`) | Стало (`news_hub/security.py`) | Чому |
 |---|---|---|
-| `бюджет` | «Бюджету бракує 100 млрд» | так — інше закінчення |
-| `рада` | «Верховна Рада ухвалила закон» | так |
-| `рада` | «Це зрада, кажуть експерти» | ні — «рада» всередині слова |
-| `газ` | «Газета вийшла вранці» | так — межа методу: початок слова ≠ корінь |
+| `JWT_ALGORITHM` зі змінної середовища | `JWT_ALGORITHM = "HS256"` у коді | алгоритм — не налаштування; `decode` приймає лише його |
+| `jwt.decode(token, secret, algorithms=[...])` | + `options={"require": ["exp", "sub", "role"]}` | токен без `exp` жив би вічно |
+| `if body.username != settings.ADMIN_USERNAME: raise 401` — пароль уже не перевіряється | `hmac.compare_digest` для імені, bcrypt — **завжди** | інакше чуже ім'я відповідає за мілісекунду, а своє — за 200 мс: за часом видно, що ім'я вгадали |
+| `HTTPBearer()` — кидає сам | `HTTPBearer(auto_error=False)` + свої 401 з `WWW-Authenticate: Bearer` | зрозумілі причини: «потрібен токен», «прострочений», «недійсний» |
+| без обмеження спроб | 5 спроб входу за 5 хв з адреси → `429` | bcrypt сповільнює кожну спробу, ліміт — їхню кількість |
 
-### Коли сповіщати
+```python title="news_hub/security.py"
+def require_admin(settings: AdminSettingsDep,
+                  credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(bearer_scheme)]) -> str:
+    """401 — немає токена, підроблений чи прострочений; 403 — токен справжній, але не адміна."""
+    if credentials is None:
+        raise _unauthorized("потрібен токен: Authorization: Bearer <access_token>")
+    try:
+        payload = decode_token(settings, credentials.credentials)
+    except jwt.ExpiredSignatureError as error:
+        raise _unauthorized("токен прострочений") from error
+    except jwt.InvalidTokenError as error:
+        raise _unauthorized("недійсний токен") from error
+    if payload["role"] != "admin":
+        raise HTTPException(status.HTTP_403_FORBIDDEN, detail="потрібні права адміністратора")
+    return payload["sub"]
 
-| Було (`workers/notifications.py`) | Стало (`notify.py`) |
-|---|---|
-| окремий `while True` + `sleep(3600)`, вибірка з бази щогодини | виклик **після збору**, з новинами, які щойно з'явились у базі (`NewsRepository.insert_new` — `RETURNING` лише вставлених рядків): повторний збір тих самих новин нікого не сповіщає вдруге |
-| по повідомленню на кожен запис | одне повідомлення на чат з усіма збігами (частини ≤ 4096) |
-| `except Exception: logger.warning` | 403 (бота заблокували) → підписки чату видаляються; 429 → чекаємо `retry_after` і пробуємо ще раз; інші помилки — у звіт, решті розсилка триває |
 
-```python title="news_hub/notify.py (фрагмент)"
-        try:
-            for text in messages:
-                await _send(bot, chat_id, text)
-                report.sent += 1
-                await asyncio.sleep(SEND_PAUSE)
-        except TelegramForbiddenError:
-            await subscriptions.remove_chat(chat_id)
-            report.blocked.append(chat_id)
+AdminDep = Depends(require_admin)
 ```
 
-Розсилку запускає кожен шлях збору: `POST /api/scrape`, фонова задача `/api/scrape/jobs` (і webhook уроку 46), `/api/sources/{id}/fetch`, адмінська `/scrape` у боті. В API це фонова задача: вона йде після відповіді, тобто вже після COMMIT, і читає новини зі своєю сесією (`Notifier`).
-
-Покроково — збір знімка (168 новин), три підписники, один заблокував бота:
+Шлях запиту `DELETE /api/news` через цю залежність — покроково, на трьох запитах:
 
 ```mermaid
 flowchart TD
@@ -282,132 +186,321 @@ flowchart TD
     classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
     classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
 
-    subgraph S1["збір: POST /api/scrape (snapshot)"]
+    subgraph A["запит 1: curl без заголовка"]
         direction LR
-        s1["validate_news"] --> s2["insert_new:<br>RETURNING нових"] --> s3["COMMIT → відповідь 200"]
+        a1{"Authorization<br>є?"} -- ні --> a2["401 потрібен токен<br>WWW-Authenticate: Bearer"]
     end
-    subgraph S2["фонова задача: підписки by_chat()"]
+    subgraph B["запит 2: токен з alg none"]
         direction LR
-        c1["1001: зеленськ"] ~~~ c2["2002: погода"] ~~~ c3["3003: зеленськ, україн"]
+        b1{"Authorization<br>є?"} -- так --> b2{"HS256 і підпис<br>збігається?"} -- ні --> b3["401 недійсний токен"]
     end
-    subgraph S3["збіги й надсилання"]
+    subgraph C["запит 3: токен з POST /api/admin/token"]
         direction LR
-        d1{"1001:<br>є збіги?"} -- так --> d2["sendMessage → 200"]
-        d3{"2002:<br>є збіги?"} -- ні --> d4["нічого"]
-        d5{"3003:<br>є збіги?"} -- так --> d6["sendMessage → 403<br>blocked"] --> d7["remove_chat(3003)"]
+        c1{"підпис HS256?"} -- так --> c2{"exp у майбутньому?"} -- так --> c3{"role = admin?"} -- так --> c4["delete_all_news()<br>200 deleted: 168"]
     end
-    subgraph S4["повторний збір тих самих новин"]
-        direction LR
-        e1["insert_new → []"] --> e2["розсилки немає"]
-    end
-    S1 --> S2 --> S3 --> S4
+    A --> B --> C
 
-    class s1,s2,c1,c2,c3 step
-    class s3,d2,e2 success
-    class d1,d3,d5 decision
-    class d4 step
-    class d6 error
-    class d7 warning
-    class e1 step
+    class a1,b1,b2,c1,c2,c3 decision
+    class a2,b3 error
+    class c4 success
 ```
 
-Наживо: підписка в боті, збір через API з токеном адміна, сповіщення в чат:
+### Хто може писати — і тест, що нічого не забули
 
-```text
-POST /_twin/say {"text": "/subscribe Зеленськ", "chat_id": 2002}   → ✅ Підписка на «зеленськ»
-POST /_twin/say {"text": "/scrape snapshot", "chat_id": 2002}      → Ця команда — лише для адміністратора.
-POST /api/scrape (Bearer адміна) {"source": "snapshot"}             → news_saved: 168
-🔔 Нові новини за підписками (зеленськ):
-
-• <a href="https://www.rbc.ua/rus/news/putina-obrazilisya-dozvil-zelenskogo-provesti-1778272356.html">У Путіна образилися на дозвіл Зеленського провести парад 9 травня</a>
-• <a href="https://www.rbc.ua/rus/news/zelenskiy-dozvoliv-provedennya-paradu-moskvi-1778265521.html">Зеленський дозволив проведення параду в Москві 9 травня</a>
-```
-
-`/scrape` у боті — лише для `BOT_ADMIN_IDS`: бот — ще один вхід у застосунок, і правило «хто може змінювати» з уроку 46 діє й тут.
-
-Поглиблено: Telegram — [ліміти розсилки](https://core.telegram.org/bots/faq#my-bot-is-hitting-limits-how-do-i-avoid-this); aiogram — [винятки](https://docs.aiogram.dev/en/latest/api/exceptions.html).
-
-## Рефакторинг 4. Polling і webhook у FastAPI { #refactor-4 }
-
-Telegram доставляє update одним із двох способів:
-
-```mermaid
-flowchart TD
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
-
-    Q1{"є публічна адреса<br>з https?"} -- ні --> P["polling:<br>python -m news_hub.bot"]
-    Q1 -- так --> Q2{"бот — частина<br>вебзастосунку?"}
-    Q2 -- так --> W["webhook у FastAPI:<br>POST /api/telegram/webhook"]
-    Q2 -- ні --> P2["polling або окремий<br>webhook-сервіс"]
-    P --> N1["бот питає getUpdates;<br>webhook має бути вимкнений"]
-    W --> N2["Telegram сам надсилає update;<br>секрет у заголовку"]
-
-    class Q1,Q2 decision
-    class P,P2,W success
-    class N1,N2 warning
-```
-
-**Polling** — для розробки: `python -m news_hub.bot` видаляє webhook (Telegram не віддає update обома способами одночасно) і питає `getUpdates`. **Webhook** — для сервера: з `BOT_TOKEN` і `TELEGRAM_WEBHOOK_URL` застосунок у `lifespan` сам викликає `setWebhook` із секретом.
+Захист — `dependencies=[AdminDep]` у декораторі: 10 наявних ендпоінтів (запис, збір, аналіз і статуси задач) і 4 нові `/api/sources` — разом 14:
 
 ```python title="news_hub/api.py (фрагмент)"
-@app.post("/api/telegram/webhook", tags=["telegram"], summary="Update від Telegram")
-async def telegram_webhook(request: Request, background: BackgroundTasks) -> dict[str, bool]:
-    bot, dispatcher, settings = request.app.state.bot, request.app.state.dispatcher, request.app.state.telegram
-    if bot is None or dispatcher is None or settings is None or settings.webhook_secret is None:
-        raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE, detail="бот вимкнений або працює через polling")
-    if not verify_secret_token(settings.webhook_secret.encode(), request.headers.get(TELEGRAM_SECRET_HEADER)):
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED, detail="неправильний секрет webhook")
-    try:
-        update = Update.model_validate(await request.json(), context={"bot": bot})
-    except (ValueError, ValidationError) as error:
-        raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="це не update Telegram") from error
-    background.add_task(dispatcher.feed_update, bot, update)
-    return {"ok": True}
+@app.delete("/api/news", tags=["news"], dependencies=[AdminDep])
+async def delete_all_news(repo: RepoDep) -> dict[str, int]:
+    return {"deleted": await repo.clear()}
 ```
 
-| Було (`production_bot`) | Стало | Чому |
-|---|---|---|
-| секрет у шляху `/webhook/{SECRET}` + заголовок, порівняння `!=` | шлях без секрету; заголовок `X-Telegram-Bot-Api-Secret-Token` через `verify_secret_token` уроку 46 | шлях потрапляє в журнали; `compare_digest` — сталий час |
-| `await dp.feed_update(...)` до відповіді | відповідь 200 одразу, обробка — `BackgroundTasks` | Telegram чекає відповіді недовго і, не дочекавшись, надсилає update повторно |
-| при зупинці — `await bot.delete_webhook()` | webhook лишається | під час перезапуску новий процес уже поставив webhook; старий, зупиняючись, прибрав би його, і Telegram перестав би надсилати update |
-| бот створюється завжди, `settings.validate()` вимагає `BOT_TOKEN` | без `BOT_TOKEN` бота немає — API працює як в уроці 46 | один застосунок: розробка без бота, сервер з ботом |
-| — | `TELEGRAM_WEBHOOK_SECRET`: 32–256 символів `A-Z a-z 0-9 _ -`, інакше застосунок не стартує | це правило самого Telegram для `secret_token`; помилка краще при старті, ніж мовчазний бот |
+Небезпека такого захисту — **забути** його на новому ендпоінті. Тому тест не перебирає ендпоінти вручну. Він обходить усі маршрути застосунку і шукає `require_admin` у дереві залежностей кожного:
+
+```python title="tests/integration/test_admin_api.py"
+# Єдині ендпоінти без токена адміна. Новий ендпоінт сюди не потрапить сам: або AdminDep, або рішення тут.
+PUBLIC = {
+    ("GET", "/health"), ("GET", "/api/news"), ("GET", "/api/news/search"), ("GET", "/api/news/count"),
+    ("GET", "/api/news/stats"), ("GET", "/api/news/{news_id}"),
+    ("POST", "/api/admin/token"),                   # вхід — пароль
+    ("POST", "/api/webhooks/scrape"),               # свій захист — підпис HMAC (test_webhooks_api.py)
+}
+
+
+def test_every_other_endpoint_requires_admin() -> None:
+    unprotected = {(method, path) for method, path, route in endpoints() if not admin_protected(route)}
+    assert unprotected == PUBLIC
+```
+
+А параметризований `test_anonymous_gets_401` сам надсилає анонімний запит на кожен закритий маршрут і чекає `401`. Додав ендпоінт без `AdminDep` — червоний тест, і в повідомленні про падіння видно, який саме.
+
+Наживо (uvicorn, `LLM_PROVIDER=fake`):
+
+```text
+$ curl -X DELETE http://127.0.0.1:8000/api/news
+HTTP/1.1 401 Unauthorized
+www-authenticate: Bearer
+{"detail":"потрібен токен: Authorization: Bearer <access_token>"}
+
+$ curl -X POST .../api/admin/token -d '{"username":"admin","password":"guess"}'
+{"detail":"неправильне ім'я або пароль"}
+
+$ curl -X POST .../api/scrape -H "Authorization: Bearer $TOKEN" -d '{"source":"snapshot"}'
+→ news_saved: 168, news_total: 168
+```
+
+У Swagger (`/docs`) з'явилась кнопка **Authorize**: `HTTPBearer` описує схему в OpenAPI, і закриті ендпоінти позначено замком. Колекція Postman отримала запит «Вхід адміна», який зберігає `token` у змінну. `newman run … --env-var adminPassword=…` дає 19 запитів і 27 перевірок, 0 падінь.
+
+Поглиблено: урок 41 курсу — [JWT для API](lesson_41.md); FastAPI — [OAuth2 з JWT](https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/).
+
+## Рефакторинг 2. SSRF: куди ходить сервер { #refactor-2 }
+
+Нова можливість: адмін додає RSS-джерело за адресою (`POST /api/sources`), сервер завантажує стрічку (`POST /api/sources/{id}/fetch`) і пропускає її через той самий `parse_pravda_rss` → `NewsItem`. Таблиця `sources` — міграція `0003`.
+
+**SSRF** (Server-Side Request Forgery, OWASP A10): атакувальник не може дістатися внутрішньої мережі сам, але може попросити сервер. Що ховається за «внутрішніми» адресами:
+
+| Адреса | Що там буває |
+|---|---|
+| `127.0.0.1`, `localhost`, `[::1]` | сам сервер: Redis без пароля, адмінки, debug-панелі |
+| `10.x`, `172.16–31.x`, `192.168.x` | інші сервіси компанії |
+| `169.254.169.254` | **метадані хмари** (AWS, GCP, Azure): тимчасові ключі доступу до всього акаунта |
+| `0.0.0.0`, `100.64.x` | «цей хост», мережа провайдера |
+
+### Старий захист: перевірити рядок
+
+```python title="OWASP_TOP_10.md, A10 (стартовий код)"
+ALLOWED_HOSTS_FOR_FETCH = ['i.imgur.com', 'avatars.githubusercontent.com']
+
+def is_safe_url(url):
+    parsed = urlparse(url)
+    return parsed.hostname in ALLOWED_HOSTS_FOR_FETCH
+
+def upload_avatar(request):
+    url = request.POST.get('avatar_url')
+    if not is_safe_url(url):
+        raise PermissionDenied
+    response = requests.get(url)
+```
+
+Перевірено **рядок** URL, а з'єднання йде туди, куди скаже мережа. Хто керує дозволеним сайтом (чи знайшов у ньому «відкрите перенаправлення»), відповідає `302` на внутрішню адресу, а `requests.get` іде за перенаправленням сам. Справжній вивід цього коду на двох локальних серверах («дозволений» і «внутрішній»):
+
+```text
+is_safe_url: True
+фінальна адреса: http://localhost:39855/latest/meta-data/
+відповідь: INTERNAL: aws_secret_access_key=...
+```
+
+Для нашого випадку allowlist ще й не підходить: адмін має додавати будь-яке RSS, а не три наперед відомі сайти.
+
+### Нова перевірка: адреса з'єднання
+
+`safe_fetch` перевіряє не рядок, а **IP, до якого з'єднується**:
+
+```python title="news_hub/safe_fetch.py (фрагмент)"
+def is_public_ip(ip: IPAddress) -> bool:
+    """is_global: не приватна, не loopback, не link-local, не 0.0.0.0, не зарезервована, не 100.64/10."""
+    ip = normalize(ip)                        # ::ffff:127.0.0.1 → 127.0.0.1
+    return ip.is_global and not ip.is_multicast
+
+
+class PolicyResolver(ThreadedResolver):
+    """DNS + перевірка: aiohttp під'єднується лише до адрес, які повернув цей resolver."""
+
+    async def resolve(self, host, port=0, family=socket.AF_INET):
+        results = await super().resolve(host, port, family)
+        for result in results:           # «0x7f.1», «localhost» — getaddrinfo дає 127.0.0.1
+            check_ip(result["host"], self._policy)
+        return results
+```
+
+Чому перевірка **в resolver**, а не окремо перед запитом. Якщо спершу запитати DNS «чи публічна адреса?», а потім з'єднатися, DNS-сервер атакувальника може відповісти двічі по-різному: перший раз — публічна IP, другий — `127.0.0.1` (**DNS rebinding**). Resolver з'єднання повертає aiohttp саме ті адреси, які перевірив, і між перевіркою та з'єднанням нічого не змінюється.
+
+Решта — у `check_url` і циклі `safe_fetch`:
+
+| Перевірка | Навіщо |
+|---|---|
+| схема лише `http`/`https` | `file:///etc/passwd`, `gopher://` — інші протоколи |
+| порт лише 80/443 | `http://example.com:6379/` — Redis, `:22` — SSH |
+| без `user:pass@` в URL | облікові дані чужого сервісу в нашому запиті |
+| IP-літерал в адресі — перевірити одразу | для `http://169.254.169.254/` aiohttp **не викликає** resolver |
+| перенаправлення вручну, кожне — знову через `check_url` і resolver, максимум 3 | захист до рефакторингу обходили саме так |
+| тайм-аут 10 с, до 2 МБ (читаємо частинами), тип `application/rss+xml` / `xml` | повільний чи безкінечний сервер не тримає нас; відповідь — лише стрічка |
+| `trust_env=False` | з `HTTP_PROXY` у середовищі з'єднання пішло б через проксі — повз наш resolver |
+
+Покроково: `feed` — «зовнішній» сайт, `/to-metadata` відповідає `302` на адресу метаданих (тест `test_redirect_is_checked_again`):
+
+```mermaid
+flowchart TD
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+
+    subgraph H0["перенаправлення 0: http://feed/to-metadata"]
+        direction LR
+        h1{"check_url:<br>схема, порт"} -- ок --> h2["PolicyResolver:<br>DNS → IP"] --> h3{"IP публічна?"} -- так --> h4["GET → 302<br>Location: 169.254.169.254"]
+    end
+    subgraph H1["перенаправлення 1: http://169.254.169.254/latest/meta-data/"]
+        direction LR
+        k1{"check_url:<br>схема, порт"} -- ок --> k2{"IP-літерал:<br>публічна?"} -- ні, link-local --> k3["UnsafeURL →<br>400 заборонена адреса"]
+    end
+    subgraph R["результат"]
+        direction LR
+        r1["внутрішній сервер:<br>0 запитів"] ~~~ r2["у базі:<br>нічого нового"]
+    end
+    H0 --> H1 --> R
+
+    class h1,h3,k1,k2 decision
+    class h2 step
+    class h4 warning
+    class k3 error
+    class r1,r2 success
+```
+
+Справжні відповіді API (uvicorn, адмін з токеном):
+
+```text
+POST /api/sources  http://169.254.169.254/latest/meta-data/
+{"detail":"заборонена адреса: адреса 169.254.169.254 — link-local: сервер туди не звертається"}
+POST /api/sources  http://localhost:6379/
+{"detail":"заборонена адреса: порт 6379: дозволено [80, 443]"}
+POST /api/sources  file:///etc/passwd
+{"detail":"заборонена адреса: схема file: дозволено лише http і https"}
+POST /api/sources  http://localhost/admin
+{"id":1,"url":"http://localhost/admin","name":"test","created_at":"2026-09-28T05:42:00"}
+POST /api/sources/1/fetch
+{"detail":"заборонена адреса: адреса 127.0.0.1 — loopback: сервер туди не звертається"}
+```
+
+`http://localhost/admin` при додаванні проходить: схема й порт у нормі, а ім'я без DNS не перевірити. Зупиняє resolver при завантаженні. Так і задумано: DNS міг змінитись між «додали» і «завантажили», тож перевірка — при **кожному** з'єднанні.
+
+Правило читання вмісту: у відповідь ендпоінт повертає **підсумок** (скільки новин знайдено, збережено, відхилено), а не тіло відповіді. Навіть якщо щось пройде, атакувальник не побачить, що там було. Такий SSRF називають «сліпим».
+
+Дві межі, які варто знати:
+
+- **Allowlist доменів новин** (`NewsItem.only_allowed`: rbc.ua, pravda.com.ua, epravda.com.ua) — правило **вмісту**: чиї новини ми зберігаємо. `safe_fetch` — правило **мережі**: куди сервер з'єднується. Одне не замінює іншого.
+- **`scraper.py`** (урок 38) ходить лише на сторінки rbc.ua (`is_rbc_host`), але перенаправлення за ним aiohttp виконує сам. Це завдання «Спробуй самостійно» нижче.
+
+Як обрати захист, коли сервер завантажує URL:
+
+```mermaid
+flowchart TD
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+
+    Q1{"URL задає<br>людина чи інша система?"} -- ні, лише код --> A1["константа в коді<br>(PAGES у scraper.py)"]
+    Q1 -- так --> Q2{"набір сайтів<br>відомий наперед?"}
+    Q2 -- так --> A2["allowlist хостів<br>+ перевірка кожного перенаправлення"]
+    Q2 -- ні --> A3["safe_fetch: IP після DNS,<br>порти, розмір, тип"]
+    A2 --> W["у будь-якому разі:<br>відповідь не віддавати як є"]
+    A3 --> W
+
+    class Q1,Q2 decision
+    class A1,A2,A3 success
+    class W warning
+```
+
+Поглиблено: [OWASP — SSRF Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Server_Side_Request_Forgery_Prevention_Cheat_Sheet.html); Python — [`ipaddress`](https://docs.python.org/3/library/ipaddress.html); aiohttp — [Resolvers](https://docs.aiohttp.org/en/stable/client_reference.html#resolvers).
+
+## Рефакторинг 3. Підписані webhook { #refactor-3 }
+
+`POST /api/webhooks/scrape` — зовнішній планувальник (cron на іншому сервері, GitHub Actions за розкладом) запускає збір. JWT йому не видаємо: токен живе 30 хвилин, а cron працює роками. Натомість обидві сторони знають **спільний секрет**.
+
+### Було: секрет у шляху і в заголовку
+
+```python title="production_bot/backend/api/webhook.py (стартовий код)"
+@router.post(settings.WEBHOOK_PATH)                       # "/webhook/{WEBHOOK_SECRET}"
+async def handle_webhook(request: Request) -> dict:
+    secret_header = request.headers.get("X-Telegram-Bot-Api-Secret-Token")
+    if secret_header != settings.WEBHOOK_SECRET:
+        raise HTTPException(status_code=403, detail="Invalid webhook secret")
+```
+
+Секрет **у шляху** URL потрапляє туди, куди потрапляють шляхи: журнали сервера, проксі, балансувальника. Справжній рядок журналу uvicorn:
+
+```text
+INFO:     127.0.0.1:40018 - "POST /webhook/s3cr3t-from-env HTTP/1.1" 200 OK
+```
+
+Заголовок з секретом кращий, але він ходить у **кожному** запиті: хто перехопив один запит, той знає секрет назавжди і може надсилати будь-що.
+
+### Стало: підпис HMAC, час і захист від повтору
+
+Відправник рахує підпис:
+
+```python
+X-Webhook-Timestamp: 1790574152
+X-Webhook-Signature: sha256=hex(HMAC-SHA256(WEBHOOK_SECRET, "1790574152." + тіло))
+```
+
+```python title="news_hub/webhooks.py"
+def verify_signature(secret: bytes, headers: Mapping[str, str], body: bytes, now: float | None = None) -> str:
+    """Перевіряє час і підпис; повертає підпис (для захисту від повтору). WebhookRejected — ні."""
+    signature, timestamp = headers.get(SIGNATURE_HEADER, ""), headers.get(TIMESTAMP_HEADER, "")
+    if not signature or not timestamp.isdigit():
+        raise WebhookRejected(f"потрібні заголовки {SIGNATURE_HEADER} і {TIMESTAMP_HEADER}")
+    now = time.time() if now is None else now
+    if abs(now - int(timestamp)) > TOLERANCE_SECONDS:
+        raise WebhookRejected(f"запит старший за {TOLERANCE_SECONDS} с (або годинник відправника не той)")
+    if not hmac.compare_digest(signature.encode(), sign(secret, int(timestamp), body).encode()):
+        raise WebhookRejected("підпис не збігається")
+    return signature
+
+
+async def remember_delivery(redis: Redis, signature: str) -> None:
+    """Той самий підпис удруге за вікно — повтор. Ключ живе вдвічі довше за вікно часу."""
+    fresh = await redis.set(f"webhook:seen:{signature}", "1", nx=True, ex=2 * TOLERANCE_SECONDS)
+    if not fresh:
+        raise WebhookRejected("цей запит уже отримано (повтор)", status_code=409)
+```
+
+Що дає кожна частина:
+
+| Частина | Без неї |
+|---|---|
+| підпис від **тіла** | перехоплений запит можна переслати зі зміненим тілом (`"source": "live"` замість `"snapshot"`) |
+| підпис від **сирих байтів**, до розбору JSON | `{"a":1}` і `{"a": 1}` — той самий JSON, але інші байти й інший підпис; розбирати чужий JSON до перевірки — зайвий ризик |
+| **час** у підписі + вікно 5 хв | перехоплений запит можна повторити завтра |
+| **`SET NX`** на підпис | усередині 5 хвилин той самий запит можна повторити багато разів |
+| `hmac.compare_digest` | `==` порівнює до першої розбіжності, тож за часом відповіді підпис можна підбирати по символу |
+| секрет **не передається** | хто перехопив запит, секрету не знає |
 
 ```mermaid
 sequenceDiagram
-    participant U as Анна в Telegram
-    participant T as Telegram Bot API
-    participant A as news_hub (FastAPI)
-    participant D as Dispatcher (aiogram)
-    participant DB as база
+    participant C as cron (знає секрет)
+    participant A as атакувальник
+    participant S as news_hub
+    participant R as Redis
 
-    Note over A,T: старт: setWebhook(url, secret_token)
-    U->>T: /news 3
-    T->>A: POST /api/telegram/webhook<br/>X-Telegram-Bot-Api-Secret-Token
-    A->>A: verify_secret_token → Update.model_validate
-    A-->>T: 200 {"ok": true}
-    A->>D: feed_update (після відповіді)
-    D->>DB: NewsRepository.latest(3)
-    D->>T: sendMessage(chat_id, HTML)
-    T-->>U: 📰 Останні новини (3)
+    C->>S: POST /api/webhooks/scrape<br/>X-Webhook-Timestamp, X-Webhook-Signature
+    S->>S: час у вікні 5 хв? HMAC(час + тіло) збігається?
+    S->>R: SET webhook:seen:«підпис» NX EX 600
+    R-->>S: OK (вперше)
+    S-->>C: 202 job_id — збір у фоні
+    A->>S: той самий запит (перехоплений)
+    S->>R: SET … NX
+    R-->>S: nil (уже був)
+    S-->>A: 409 повтор
+    A->>S: те саме, тіло змінено
+    S-->>A: 401 підпис не збігається
 ```
 
-Наживо — uvicorn з `BOT_TOKEN`, `TELEGRAM_API_URL` на двійник і `TELEGRAM_WEBHOOK_URL`:
+Справжній запуск (відправник підписує `news_hub.webhooks.sign`, як це зробив би cron):
 
 ```text
-webhook: http://127.0.0.1:8047/api/telegram/webhook          ← зареєстрував lifespan
-POST /api/telegram/webhook без секрету                       → 401
-(uvicorn зупинено) getWebhookInfo → http://127.0.0.1:8047/api/telegram/webhook   ← webhook лишився
-python -m news_hub.bot → webhook: ''  →  /news 1 → 📰 <b>Останні новини</b> (1) …   ← polling
+підписаний        → 202 queued
+той самий ще раз  → 409 цей запит уже отримано (повтор)
+змінене тіло      → 401 підпис не збігається
+без підпису       → 401 потрібні заголовки X-Webhook-Signature і X-Webhook-Timestamp
 ```
 
-`https://` у `TELEGRAM_WEBHOOK_URL` обов'язковий: Telegram не надсилає webhook на http. Виняток — коли задано `TELEGRAM_API_URL` (двійник або локальний Bot API server).
+Telegram (урок 48) так не підписує: він надсилає лише заголовок `X-Telegram-Bot-Api-Secret-Token`. Для нього в `webhooks.py` є `verify_secret_token` — теж з `compare_digest`, і теж без секрету в URL.
 
-Поглиблено: Bot API — [getUpdates](https://core.telegram.org/bots/api#getupdates), [setWebhook](https://core.telegram.org/bots/api#setwebhook), [Marvin's Patent Pending Guide to All Things Webhook](https://core.telegram.org/bots/webhooks); aiogram — [webhook](https://docs.aiogram.dev/en/latest/dispatcher/webhook.html).
+Поглиблено: [GitHub — Validating webhook deliveries](https://docs.github.com/en/webhooks/using-webhooks/validating-webhook-deliveries); Python — [`hmac.compare_digest`](https://docs.python.org/3/library/hmac.html#hmac.compare_digest).
 
 ## Архітектура { #architecture }
 
@@ -419,223 +512,230 @@ graph LR
     classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
     classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
 
-    subgraph TG["Telegram"]
-        TU["користувачі"]
-        TA["Bot API"]
+    subgraph IN["хто приходить"]
+        U["будь-хто"]
+        AD["адмін<br>(пароль → JWT)"]
+        CR["cron<br>(секрет HMAC)"]
     end
-    subgraph APP["news_hub"]
-        WH["POST /api/telegram/webhook<br>секрет"]
-        API["API: /api/scrape, jobs,<br>sources (AdminDep)"]
-        DP["Dispatcher:<br>RateLimit → Router → Inject"]
-        H["handlers:<br>/news /digest /subscribe"]
-        N["Notifier:<br>після збору"]
-        R["NewsRepository<br>SubscriptionRepository"]
-        L["analyze_news<br>+ GuardedLLM"]
+    subgraph API["news_hub API"]
+        RL["rate limit<br>login / scrape / analyze"]
+        RD["GET /api/news*<br>публічно"]
+        WR["запис, збір, аналіз,<br>/api/sources — AdminDep"]
+        WH["/api/webhooks/scrape<br>verify_signature + SET NX"]
     end
-    DB["PostgreSQL"]
-    RS["Redis"]
-    TU --> TA -->|update| WH --> DP --> H
-    H --> R --> DB
-    H --> L
-    DP --> RS
-    API -->|нові новини| N --> R
-    N -->|sendMessage| TA
-    H -->|sendMessage| TA
+    subgraph OUT["куди ходить сервер"]
+        SF["safe_fetch<br>IP після DNS, перенаправлення"]
+        NET["публічний інтернет<br>RSS"]
+        INT["внутрішня мережа<br>Redis, 169.254.169.254"]
+    end
+    U --> RD
+    U -. "401" .-> WR
+    AD --> RL --> WR
+    CR --> WH
+    WR --> SF --> NET
+    SF -. "400" .-x INT
 
-    class WH,API warning
-    class DP,H,N decision
-    class R,L step
-    class DB,RS,TA,TU success
+    class RD,NET success
+    class WR,WH,RL warning
+    class SF decision
+    class INT error
+    class U,AD,CR step
 ```
 
 | Модуль | Відповідає за |
 |---|---|
-| `bot/factory.py` | `create_bot` (з `TELEGRAM_API_URL`), `create_dispatcher`, меню команд |
-| `bot/handlers.py` | команди; `build_router()` — порядок перевірки |
-| `bot/middlewares.py` | ліміт повідомлень (Redis), сесія бази на update |
-| `bot/formatting.py` | `esc`, `link`, `split_message`, слова підписки |
-| `bot/settings.py` | змінні середовища бота; правила Telegram для `secret_token` |
-| `notify.py` | хто що отримує після збору; 403 / 429 |
-| `api.py` | `start_bot` у lifespan, webhook, `Notifier` у збору |
+| `security.py` | пароль (bcrypt), JWT, `require_admin`; налаштування з env з трьома станами |
+| `safe_fetch.py` | один вихід у мережу для URL ззовні: `FetchPolicy`, `check_url`, `PolicyResolver` |
+| `webhooks.py` | підпис, вікно часу, повтор; `verify_secret_token` для Telegram |
+| `middleware.py` | + ліміт спроб входу |
+| `api.py` | лише підключає: `dependencies=[AdminDep]`, `Depends(get_fetch_policy)`, `Depends(get_webhook_secret)` |
 
-Бот не має свого SQL і своєї логіки аналізу: репозиторії, `analyze_news`, `RateLimiter`, `verify_secret_token` — ті самі, що в API.
+Кожна перевірка — окрема функція без HTTP, тож її тестують unit-тести. А тести API перевіряють, що кожен ендпоінт її справді викликає.
 
 ## Тести { #tests }
 
 | Файл | Що перевіряє | Тестів |
 |---|---|---|
-| `tests/unit/test_bot_formatting.py` | правила HTML двійника; екранування; `link` з лапками в URL; розріз між рядками (і що розріз кожні N символів ламає розмітку); слова підписки; збіги; налаштування бота | 33 |
-| `tests/integration/test_bot.py` | команди через `dp.feed_update`: ім'я з «<» і «&», `/news` (найновіші, HTML у заголовку), підписки й ліміт 10, `/digest` з LLM і без, rate limit, `/scrape` лише адміну, група з id > 32 біт | 10 |
-| `tests/integration/test_notify.py` | через API: сповіщення один раз, заблокований чат (403) втрачає підписки, 429 → `retry_after`, розбиття на частини, фонова задача, без бота нічого не ламається | 6 |
-| `tests/integration/test_telegram_webhook.py` | webhook: секрет, 401 (зокрема з JWT адміна), 400, 503 без бота; lifespan ставить webhook і не видаляє його | 7 |
+| `tests/unit/test_security.py` | хеш і сіль, 72 байти, вхід, строк дії; 7 підроблених токенів (інший секрет, `alg: none`, HS512 тим самим секретом, змінений payload, без `role`, без `exp`, не JWT); налаштування з env | 16 |
+| `tests/unit/test_safe_fetch.py` | 16 адрес `is_public_ip`; 14 заборонених URL; дозволені; явна політика; IPv4 всередині IPv6 | 35 |
+| `tests/unit/test_webhooks.py` | підпис; 8 способів підробити (змінене тіло, інший порядок байтів, чужий секрет, старий і майбутній час, …); повтор; секрет Telegram | 11 |
+| `tests/integration/test_admin_api.py` | `PUBLIC` = усі незахищені маршрути; кожен закритий без токена → 401; вхід, brute-force → 429, прострочений, `alg: none`, роль → 403, не налаштовано → 503, Swagger | 27 |
+| `tests/integration/test_sources_ssrf.py` | справжній aiohttp проти двох локальних серверів: стрічка через перенаправлення; перенаправлення на внутрішній сервіс, метадані, `file://` → 400 (внутрішній сервер — 0 запитів); HTML, 2,6 МБ, петля → 502; `localhost` за DNS → 400 | 14 |
+| `tests/integration/test_webhooks_api.py` | 202 без JWT; 4 × 401; повтор 409; непідписане сміття — 401, а не 422; без секрету — 503 | 8 |
 
-Двійник записує кожен виклик, тож тест бачить, що саме бот «надіслав у Telegram». Він також відхиляє невалідний HTML, тож кожна відповідь, яку прийняв двійник, — ще й перевірка розмітки:
+Тести уроків 38–44 не змінились: фікстура `client` тепер надсилає токен адміна, а для «будь-кого» є нова фікстура `anon`. Змінились два тести: `test_openapi_lists_endpoints` — нові ендпоінти в переліку; `test_failed_commit_is_500_not_200` — його власний клієнт тепер з токеном.
 
-```python title="tests/integration/test_bot.py (фрагмент)"
-async def test_start_escapes_user_name(telegram: BotHarness) -> None:
-    """Ім'я в Telegram може містити будь-що — у HTML-повідомлення воно йде екранованим."""
-    [reply] = await telegram.say("/start", first_name="<Олена & Ко>")
-    assert "<b>&lt;Олена &amp; Ко&gt;</b>" in reply
+Політика `safe_fetch` у тестах розширюється **явно**, параметром, а не змінною середовища: змінну можна забути на сервері, а параметр видно в коді тесту.
+
+```python title="tests/integration/test_sources_ssrf.py (фрагмент)"
+@pytest.fixture
+def local_policy(feed: TestServer) -> FetchPolicy:
+    policy = FetchPolicy(allow_ip=lambda ip: ip.is_loopback, allowed_ports=frozenset({feed.port}),
+                         max_bytes=1_000_000)
+    app.dependency_overrides[get_fetch_policy] = lambda: policy
+    return policy
 ```
 
-Тест захисту з уроку 46 спрацював: новий `POST /api/telegram/webhook` без `AdminDep` зробив `test_every_other_endpoint_requires_admin` червоним. Webhook додано в `PUBLIC` свідомо, з поясненням: його захист — секретний заголовок, а JWT у Telegram немає.
+Обидва сервери на `127.0.0.1`. «Внутрішній» недосяжний, бо дозволено лише порт `feed` — як у справжній мережі, де до внутрішнього сервісу немає маршруту.
 
 Справжній запуск:
 
 ```text
 $ pytest
-335 passed, 2 deselected
+====================== 279 passed, 2 deselected in 14.73s ======================
 $ TEST_DATABASE_URL=postgresql+asyncpg://… TEST_REDIS_URL=redis://localhost:6380/15 pytest
-335 passed, 2 deselected
+279 passed, 2 deselected in 19.16s
 $ mypy --strict news_hub
-Success: no issues found in 26 source files
+Success: no issues found in 18 source files
 ```
+
+19 навмисних поломок захисту ловить хоча б один тест кожну. Серед них: прибрати `require` з `decode`, прийняти HS512, пропустити перевірку ролі, перевіряти IP лише до DNS, не перевіряти перенаправлення, прибрати `nx=True`, розбирати JSON до підпису.
+
+Одна поломка, яку тести **не** ловлять: замінити `hmac.compare_digest` на `!=` (див. «Зміни приклад» нижче). Функціонально обидва порівняння дають той самий результат, різниця — лише в часі. Такі речі перевіряє рецензія, а правило записано в `CLAUDE.md` проєкту для AI-асистента.
 
 ## Мінімальні версії залежностей { #min-versions }
 
 ```text title="requirements.txt (нове)"
-aiogram>=3.15           # урок 47: Telegram-бот (у стартовому коді — 3.15.0)
+PyJWT>=2.4             # урок 47: JWT адміна (2.4 — виправлено підміну алгоритму, CVE-2022-29217)
+bcrypt>=4.0            # урок 47: хеш пароля адміна — напряму, без passlib (passlib 1.7.4 не працює з bcrypt 5)
 ```
 
-Усі тести проходять на трьох наборах:
-
-- Python 3.10 з `aiogram 3.15.0` і мінімальними версіями решти залежностей з уроку 46 (`aiohttp 3.10.10`, `pydantic 2.9.0`, `fastapi 0.121.0`);
-- Python 3.13 з найновішими (`aiogram 3.31.0`);
-- PostgreSQL 16 + Redis 7.
-
-Міграція `0004` застосовується на SQLite і PostgreSQL, `alembic check` не бачить розбіжностей з моделями.
+Усі 279 тестів проходять на трьох наборах: Python 3.10 з `PyJWT 2.4.0`, `bcrypt 4.0.0` і мінімальними версіями решти залежностей з уроку 44; Python 3.13 з найновішими; PostgreSQL 16 + Redis 7. Міграція `0003` застосовується на SQLite і PostgreSQL, `alembic check` не бачить розбіжностей з моделями.
 
 ## Практика { #practice }
 
-### Розібраний приклад: `/search <слово>`
+### Розібраний приклад: «хто я?»
 
-Пошук у заголовках уже є в API (`GET /api/news/search`, урок 38). У боті — це ще один handler над тим самим `NewsRepository.search`:
+Адмін-панелі потрібно знати, чий токен і коли він закінчиться, — щоб попередити «сесія закінчується». Ендпоінт `GET /api/admin/me`:
 
-```python title="news_hub/bot/handlers.py (розв'язок)"
-async def cmd_search(message: Message, command: CommandObject, news: NewsRepository) -> None:
-    """/search <слово> — заголовки, що містять слово (той самий пошук, що GET /api/news/search)."""
-    query = (command.args or "").strip()
-    if not 2 <= len(query) <= 60:
-        await message.answer("Використання: /search &lt;слово&gt; — від 2 до 60 символів")
-        return
-    rows = await news.search(query, limit=10)
-    if not rows:
-        await message.answer(f"Нічого не знайдено за «{esc(query)}»")
-        return
-    await answer_lines(message, [f"🔎 <b>{esc(query)}</b>: {len(rows)}", ""] +
-                       [f"• {link(row.url, row.title)}" for row in rows])
+```python title="news_hub/api.py (розв'язок)"
+class AdminMe(BaseModel):
+    username: str
+    expires_at: datetime
+
+
+@app.get("/api/admin/me", response_model=AdminMe, tags=["admin"])
+async def admin_me(settings: AdminSettingsDep,
+                   credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(bearer_scheme)],
+                   username: Annotated[str, AdminDep]) -> AdminMe:
+    """Хто я і до коли діє токен — для кнопки «Вийти» і попередження «сесія закінчується»."""
+    assert credentials is not None                      # require_admin уже перевірив
+    payload = decode_token(settings, credentials.credentials)
+    return AdminMe(username=username, expires_at=datetime.fromtimestamp(payload["exp"], timezone.utc))
 ```
 
-У `build_router()` — рядок `router.message(Command("search"))(cmd_search)` перед `F.text`. Тест:
-
-```python title="tests/integration/test_bot.py (розв'язок)"
-async def test_search(telegram: BotHarness) -> None:
-    await add_news(telegram, "Уряд ухвалив бюджет на рік", "Погода на вихідні: <сонячно> & тепло")
-    [found] = await telegram.say("/search БЮДЖЕТ")
-    assert found.startswith("🔎 <b>БЮДЖЕТ</b>: 1") and "Погода" not in found
-    [found] = await telegram.say("/search сонячно")
-    assert "&lt;сонячно&gt; &amp; тепло" in found
-    assert await telegram.say("/search футбол") == ["Нічого не знайдено за «футбол»"]
-    assert (await telegram.say("/search я"))[0].startswith("Використання: /search")
+```python title="tests/integration/test_admin_api.py (розв'язок)"
+def test_admin_me(anon: TestClient) -> None:
+    token = create_access_token(_settings(), "admin")
+    me = anon.get("/api/admin/me", headers=_token_headers(token)).json()
+    assert me["username"] == "admin"
+    assert anon.get("/api/admin/me").status_code == 401
 ```
 
-Нового SQL немає: регістр і `%`/`_` у слові вже обробляє `search` з уроку 38. Бот лише інакше **показує** той самий результат.
+Тест захисту нічого не дописує: `test_every_other_endpoint_requires_admin` знаходить `require_admin` у залежностях нового маршруту, а `test_anonymous_gets_401` сам додає для нього випадок. Було 27 тестів у файлі — стало 29. Якби `AdminDep` забули, перший тест впав би з різницею множин і показав `('GET', '/api/admin/me')`.
 
 ### Зміни приклад
 
-1. У `build_router()` перенеси `router.message(F.text)(unknown)` на самий початок. Що відповість бот на `/help`, `/subscribe бюджет`, `/subscriptions`?
-2. В `InjectMiddleware` прибери `await session.commit()`. Надішли `/subscribe бюджет`, потім `/subscriptions`. Що побачить користувач?
+1. У фікстурі `local_policy` додай `max_redirects=0` і запусти `pytest tests/integration/test_sources_ssrf.py`. Який тест впав і з яким повідомленням? Чому тести перенаправлень на внутрішній сервіс досі зелені?
+2. У `verify_signature` заміни `hmac.compare_digest(...)` на `signature != sign(...)`. Скільки тестів впало?
 
 ??? success "Що покаже запуск"
 
-    1. На всі три: `['Не знаю такої команди. /help — що я вмію']`. `F.text` пропускає будь-який текст, зокрема команди, а aiogram бере **перший** handler, чий фільтр підійшов.
-    2. `/subscribe бюджет` → `['✅ Підписка на «бюджет»']`, але `/subscriptions` → `['Підписок немає. Додай: /subscribe &lt;слово&gt;']`. INSERT виконався в сесії, а без COMMIT вона закрилась із ROLLBACK. Бот «пообіцяв» те, чого немає в базі. Тест `test_subscriptions` це ловить.
+    1. Червоний один — `test_fetch_rss_source`: `{'detail': 'джерело недоступне: більше 0 перенаправлень'}`. Стрічка доступна лише через `/moved → /rss`. Решта 13 зелені. Перенаправлення на внутрішній сервіс, метадані й `file://` зупиняє `check_url` **ще до** того, як цикл дійде до ліміту: адресу з `Location` перевіряють першою.
+    2. Жодного: `279 passed`. Результат порівняння той самий, різниться лише **час**: `!=` зупиняється на першому неспівпадінні. Функціональний тест такого не бачить. Тому правило записане в `CLAUDE.md` і перевіряється на рецензії, а не тестом.
 
-### Спробуй самостійно: кнопка «Відписатися»
+### Спробуй самостійно: scraper через `FetchPolicy`
 
-Під сповіщенням — inline-кнопка «Відписатися від «бюджет»». Натискання приходить як `callback_query` з `callback_data`; бот видаляє підписку і відповідає `answer_callback_query`.
+`scraper.py` (урок 38) завантажує сторінки rbc.ua через `aiohttp.ClientSession()` без resolver-перевірки й з автоматичними перенаправленнями. `ScrapeRequest.pages` приймає лише `is_rbc_host`, але якщо rbc.ua перенаправить на внутрішню адресу, aiohttp піде туди.
+
+Зроби так, щоб `scrape_all_async` і `scrape_sequential` приймали `policy: FetchPolicy = DEFAULT_POLICY` і з'єднувались через `PolicyResolver`, а перенаправлення перевіряли так само, як `safe_fetch`.
 
 **Критерії перевірки:**
 
-- `callback_data` не довше за 64 байти (обмеження Telegram) і не містить нічого, крім слова;
-- натискання від **іншого** чату не видаляє чужу підписку (`callback_query.message.chat.id`);
-- двійник отримує `answerCallbackQuery` (додай метод у `tests/telegram_twin.py`);
-- тест у `tests/integration/test_bot.py`.
+- тести `tests/integration/test_scraper_server.py` проходять з явною локальною політикою;
+- новий тест: сторінка `302 → http://169.254.169.254/` дає `PageResult.error`, а не новини;
+- запит до внутрішнього сервера — 0 (як `HITS` у `test_sources_ssrf.py`).
 
 ### Знайди помилку { #find-bug }
 
-Handler зі стартового коду і його тест (тест зелений):
+Функція із захистом від SSRF і тест до неї (з `OWASP_TOP_10.md`, тест зелений):
 
 ```python
-@router.message(CommandStart())
-async def cmd_start(message: Message, history_repo: HistoryRepository) -> None:
-    user = message.from_user
-    await history_repo.clear(user.id)
-    await message.answer(
-        f"Привіт, <b>{user.first_name}</b>! 🤖\n\n"
-        f"Просто напиши своє запитання.",
-        parse_mode="HTML",
-    )
+ALLOWED_HOSTS_FOR_FETCH = ['i.imgur.com', 'avatars.githubusercontent.com']
+
+def is_safe_url(url):
+    parsed = urlparse(url)
+    return parsed.hostname in ALLOWED_HOSTS_FOR_FETCH
+
+def upload_avatar(request):
+    url = request.POST.get('avatar_url')
+    if not is_safe_url(url):
+        raise PermissionDenied
+    response = requests.get(url)
+    ...
 
 
-async def test_start_greets_user():
-    update = make_update("/start", first_name="Олена")
-    await dp.feed_update(bot, update)
-    assert "Привіт, <b>Олена</b>!" in sent_messages[-1]
+def test_internal_url_rejected():
+    assert not is_safe_url("http://169.254.169.254/latest/meta-data/")
+    assert not is_safe_url("http://localhost:6379/")
+    assert is_safe_url("https://i.imgur.com/cat.png")
 ```
 
-Кому бот не відповість ніколи? Справжній вивід цього коду проти двійника Telegram:
+Як отримати відповідь внутрішнього сервісу через `upload_avatar`? Справжній вивід атаки на локальних серверах:
 
 ```text
-/start від 'Олена': надіслано
-/start від '<Олена>': TelegramBadRequest: … can't parse entities: unexpected character at byte offset 11
-/start від 'Tom & Jerry': TelegramBadRequest: … can't parse entities: unsupported entity at byte offset 15
+is_safe_url: True
+фінальна адреса: http://localhost:39855/latest/meta-data/
+відповідь: INTERNAL: aws_secret_access_key=...
 ```
 
 ??? success "Відповідь"
 
-    Ім'я вставлено в HTML без екранування. Для Telegram «<» і «&» поза тегом — зламана розмітка, і він відхиляє все повідомлення. Бот мовчить, а користувач не розуміє чому. Тест перевіряв лише «звичайне» ім'я: даних, які ламають розмітку, у ньому не було.
+    `is_safe_url` перевіряє **першу** адресу, а `requests.get` за замовчуванням іде за перенаправленнями: `302` з дозволеного хоста веде куди завгодно. Вистачить одного «відкритого перенаправлення» на дозволеному сайті, тобто сторінки на кшталт `/redirect?to=…`, і захист обійдено. Тест перевіряв саму функцію на рядках, а не шлях запиту, тож був зелений.
 
-    Виправлення — `esc(name)` (`html.escape`) для всього, що прийшло ззовні. Тест на це — `test_start_escapes_user_name`: ім'я `<Олена & Ко>`, а двійник, як Telegram, не пропустить невалідну розмітку.
+    Виправлення в `safe_fetch`: `allow_redirects=False` і кожен `Location` — знову через `check_url` і resolver, який перевіряє IP **з'єднання**. Тест на це — `test_redirect_is_checked_again`: справжній aiohttp проти локального сервера, що перенаправляє, і лічильник запитів «внутрішнього» сервісу, який має лишитися нулем.
 
 ## Підсумок
 
 | Поняття | Що запам'ятати |
 |---|---|
-| Bot / Dispatcher / Router | клієнт API / маршрутизація update / набір handler; роутер — новий на кожен диспетчер |
-| Порядок handler | перший, чий фільтр підійшов; `F.text` — останній |
-| Middleware | outer — до маршрутизації (ліміт), inner — перед handler (залежності, сесія бази, COMMIT) |
-| HTML | усе ззовні — `esc` / `link`; ділити між рядками, ≤ 4096 |
-| Сповіщення | лише нові новини (`insert_new`); 403 → видалити підписки; 429 → `retry_after` |
-| Polling / webhook | розробка / сервер; одночасно — ні; webhook: https, секрет у заголовку, 200 одразу |
-| Тести | двійник Bot API: записує виклики, відтворює правила; справжній токен не потрібен |
+| JWT адміна | HS256 у коді, `require: exp, sub, role`; 401 — не автентифікований, 403 — не має прав |
+| Пароль | bcrypt-хеш в env; > 72 байт — «не той пароль»; одна відповідь на чуже ім'я і чужий пароль; ліміт спроб |
+| Налаштування | без значень за замовчуванням: не задано → 503, задано погано → не стартує |
+| Хто може писати | `dependencies=[AdminDep]` + тест, що обходить усі маршрути і порівнює з `PUBLIC` |
+| SSRF | перевіряти IP **з'єднання** (resolver), а не рядок URL; кожне перенаправлення; порти, розмір, тип; відповідь не віддавати |
+| Webhook | HMAC(час + сирі байти тіла), вікно 5 хв, `SET NX` проти повтору, `compare_digest`, секрет не в URL |
+| Що ловлять тести | атаки — так (підроблені токени, адреси, повтори); витік часу — ні: це рецензія |
 
 ### Самоперевірка
 
-1. Чому `F.text` реєструють останнім, а `CommandStart()` — першим?
-2. Що станеться з update, якщо webhook відповідатиме Telegram через 2 хвилини?
-3. Навіщо розсилці `insert_new`, якщо є `add_many`?
-4. Користувач заблокував бота. Що буде після наступного збору, а що — після ще одного?
-5. Чому бот у webhook-режимі не видаляє webhook при зупинці?
-6. Що перевіряє двійник Telegram, а чого він перевірити не може?
+1. Чим `401` відрізняється від `403` у `require_admin`? Наведи запит для кожного.
+2. Навіщо перевіряти пароль, коли ім'я вже неправильне?
+3. Чому `http://localhost/admin` пройшов `POST /api/sources`, але не пройшов `/fetch`? Чи не краще перевіряти DNS при додаванні?
+4. Навіщо в підписі webhook час, якщо є `SET NX`? І навпаки?
+5. Чому підпис рахують від сирих байтів, а не від `json.loads(body)`?
+6. Який захист уроку жоден тест не перевіряє і чому?
 
 ??? success "Відповіді"
 
-    1. aiogram бере перший handler, чий фільтр підійшов. `F.text` підходить до будь-якого тексту, зокрема до `/start`. Порядок решти команд не важливий, бо їхні фільтри не перетинаються.
-    2. Telegram вважатиме доставку невдалою і надсилатиме update повторно — бот відповість кілька разів. Тому 200 — одразу, а обробка — у фоні.
-    3. `add_many` повертає лише кількість. Для розсилки потрібні **які саме** новини нові, інакше повторний збір тих самих новин знову сповістив би всіх.
-    4. Перший збір: `sendMessage` → 403 → підписки чату видалено. Другий: чату немає серед підписок, запитів до нього немає.
-    5. Під час перезапуску новий процес уже зареєстрував webhook. Старий, видаляючи його при зупинці, залишив би бота без update.
-    6. Перевіряє формат відповіді бота: метод, чат, текст, HTML за правилами документації, ліміт 4096, реакцію на 403 / 429. Не перевіряє справжню поведінку Telegram поза цими правилами: доставку на пристрої, реальні ліміти, новіші зміни API. Для цього — справжній токен і тестовий бот.
+    1. `401` — ми не знаємо, хто це: токена немає, підпис не збігається, строк минув (`DELETE /api/news` без заголовка). `403` — знаємо, хто, але прав немає: справжній токен з `role: user`.
+    2. Інакше чуже ім'я відповідає миттєво, а своє — після bcrypt (~0,2 с). Різниця в часі підказує, що ім'я вгадано, і далі треба перебирати лише паролі.
+    3. Ім'я без DNS не перевірити, а DNS можна змінити будь-коли після додавання. Перевірка при додаванні дала б хибну впевненість, тому IP перевіряє resolver при **кожному** з'єднанні.
+    4. `SET NX` без часу мусив би пам'ятати підписи вічно. Час без `SET NX` дозволяє повторити запит багато разів за 5 хвилин. Разом: старе відкидає час, свіже повторення — Redis, а ключі живуть лише 10 хвилин.
+    5. Відправник підписує байти, які надсилає. `json.loads` + `json.dumps` дає інші байти (пробіли, порядок ключів), і підписи не збігалися б навіть для справжнього запиту. До того ж розбирати JSON до перевірки — означає обробляти дані невідомо від кого.
+    6. Порівняння секрету за сталий час (`compare_digest`): результат той самий, що в `==`, різниця лише в часі. Це правило в `CLAUDE.md` проєкту і пункт рецензії.
 
 ### Що далі
 
-- Ноутбук заняття: [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_47_telegram_bot/note_lesson_47_telegram_bot_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_47_telegram_bot/note_lesson_47_telegram_bot.ipynb){ .solutions-link }.
-- Уроки 48–50 — Docker, Compose, CI/CD: `news_hub`, PostgreSQL, Redis і бот у контейнерах; `BOT_TOKEN` і секрети — у змінних середовища, не в образі.
+- Ноутбук заняття: [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_47_security_advanced/note_lesson_47_security_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_4/lessons/lesson_47_security_advanced/note_lesson_47_security.ipynb){ .solutions-link }.
+- Урок 48 — Telegram-бот: webhook Telegram приходить на `news_hub` і перевіряється `verify_secret_token`; команди адміна в боті — лише для дозволених `user_id`.
+- Уроки 49–51 — Docker і CI: секрети (`JWT_SECRET`, `ADMIN_PASSWORD_HASH`, `WEBHOOK_SECRET`) — у змінних середовища контейнера і секретах CI, не в образі й не в git.
 
 ## Документація і джерела
 
-- Код: [`news_hub`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_4/lessons/lesson_47_telegram_bot/news_hub) — `bot/` з `ai_bot/app/` і `echo_bot/`, `notify.py` з `production_bot/backend/workers/notifications.py`, webhook — з `production_bot/backend/api/webhook.py`.
-- Telegram: [Bot API](https://core.telegram.org/bots/api), [HTML style](https://core.telegram.org/bots/api#html-style), [setWebhook](https://core.telegram.org/bots/api#setwebhook), [webhooks](https://core.telegram.org/bots/webhooks), [Bots FAQ: ліміти](https://core.telegram.org/bots/faq#my-bot-is-hitting-limits-how-do-i-avoid-this), [локальний Bot API server](https://github.com/tdlib/telegram-bot-api), [@BotFather](https://core.telegram.org/bots/features#botfather).
-- aiogram 3: [документація](https://docs.aiogram.dev/en/latest/), [Router](https://docs.aiogram.dev/en/latest/dispatcher/router.html), [Middlewares](https://docs.aiogram.dev/en/latest/dispatcher/middlewares.html), [Dependency injection](https://docs.aiogram.dev/en/latest/dispatcher/dependency_injection.html), [webhook](https://docs.aiogram.dev/en/latest/dispatcher/webhook.html).
-- Уроки курсу: [39 — Redis і rate limit](lesson_39.md), [43 — LLM API](lesson_43.md), [46 — Security advanced](lesson_46.md).
+- Код: [`news_hub`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_4/lessons/lesson_47_security_advanced/news_hub) — `security.py` з `production_bot/backend/core/security.py`, `api/deps.py`, `api/admin/auth.py`; `webhooks.py` з `api/webhook.py`; `safe_fetch.py` — розділ A10 `OWASP_TOP_10.md`.
+- OWASP: [Top 10](https://owasp.org/Top10/), [SSRF Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Server_Side_Request_Forgery_Prevention_Cheat_Sheet.html), [Password Storage Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html), [JSON Web Token for Java Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/JSON_Web_Token_for_Java_Cheat_Sheet.html) (атаки на JWT — не лише для Java).
+- Бібліотеки: [PyJWT](https://pyjwt.readthedocs.io/en/stable/usage.html), [bcrypt](https://github.com/pyca/bcrypt), [aiohttp — client reference](https://docs.aiohttp.org/en/stable/client_reference.html), Python — [`hmac`](https://docs.python.org/3/library/hmac.html), [`ipaddress`](https://docs.python.org/3/library/ipaddress.html), [`secrets`](https://docs.python.org/3/library/secrets.html).
+- FastAPI: [Security](https://fastapi.tiangolo.com/tutorial/security/), [OAuth2 з JWT](https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/).
+- Webhook: [GitHub — Validating webhook deliveries](https://docs.github.com/en/webhooks/using-webhooks/validating-webhook-deliveries), [Telegram Bot API — setWebhook (`secret_token`)](https://core.telegram.org/bots/api#setwebhook).
+- Уроки курсу: [40 — автентифікація та security basics](lesson_41.md), [39 — Redis і rate limit](lesson_40.md), [41 — тести, мок і фейк](lesson_42.md), [43 — LLM API](lesson_44.md).

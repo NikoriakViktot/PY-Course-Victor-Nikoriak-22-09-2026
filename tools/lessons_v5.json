@@ -3,62 +3,245 @@
   "course": "python-course",
   "stream": "autumn-2026",
   "bonus": {
-    "pandas_data_analysis": {"module": 3, "after": 28, "title": "Бонус. Pandas: аналіз даних, графіки і Dash", "type": "Урок (бонус)"},
-    "linux_devops": {"module": 5, "after": 47, "title": "Бонус. Linux для розробника", "type": "Урок (бонус)"},
-    "cv_maker": {"module": 6, "after": 52, "title": "Бонус. CV розробника: HTML → PDF", "type": "Урок (бонус)"}
+    "context_managers": {
+      "module": 2,
+      "after": 22,
+      "title": "Бонус. Контекстні менеджери: архітектура гарантованого життєвого циклу",
+      "type": "Урок (бонус)"
+    },
+    "module2_review": {
+      "module": 2,
+      "after": 29,
+      "title": "Бонус. Фінальний проєкт М2: Mini E-commerce Analytics Engine",
+      "type": "Урок (бонус)"
+    },
+    "pandas_data_analysis": {
+      "module": 3,
+      "after": 29,
+      "title": "Бонус. Pandas: аналіз даних, графіки і Dash",
+      "type": "Урок (бонус)"
+    },
+    "linux_devops": {
+      "module": 5,
+      "after": 48,
+      "title": "Бонус. Linux для розробника",
+      "type": "Урок (бонус)"
+    },
+    "cv_maker": {
+      "module": 6,
+      "after": 53,
+      "title": "Бонус. CV розробника: HTML → PDF",
+      "type": "Урок (бонус)"
+    }
   },
   "lessons": {
-    "1": {"title": "Вступний урок: знайомство, формат курсу, AI-політика", "type": "Урок"},
-    "2": {"title": "Перші кроки та мінімальна робоча програма (+ налаштування середовища)", "type": "Урок"},
-    "3": {"title": "Змінні та базові типи даних", "type": "Урок"},
-    "4": {"title": "Умови та цикли: як програма приймає рішення", "type": "Урок"},
-    "5": {"title": "Списки, кортежі та множини", "type": "Урок"},
-    "6": {"title": "Словники, for, comprehensions", "type": "Урок"},
-    "7": {"title": "Функції", "type": "Урок"},
-    "8": {"title": "П1. Big O + базові задачі", "type": "Практикум (клас)"},
-    "9": {"title": "Декоратори", "type": "Урок"},
-    "10": {"title": "Ітератори й генератори", "type": "Урок"},
-    "11": {"title": "П2. Пошук", "type": "Практикум (клас)"},
-    "12": {"title": "Модулі та стандартна бібліотека", "type": "Урок"},
-    "13": {"title": "Виключення", "type": "Урок"},
-    "14": {"title": "Файли I/O, менеджери контексту, JSON", "type": "Урок"},
-    "15": {"title": "Git + GitHub: перший репозиторій, PR, портфоліо", "type": "Урок"},
-    "16": {"title": "П3. Хеш-структури", "type": "Практикум (клас)"},
-    "17": {"title": "Узагальнення М1 + міні-проєкт CLI", "type": "Урок"},
-    "18": {"title": "Функції як об'єкти першого класу", "type": "Урок"},
-    "19": {"title": "Класи, простір імен", "type": "Урок"},
-    "20": {"title": "Наслідування, поліморфізм", "type": "Урок"},
-    "21": {"title": "Інкапсуляція, область видимості", "type": "Урок"},
-    "22": {"title": "П4. Рекурсія, divide & conquer, backtracking", "type": "Практикум (клас)"},
-    "23": {"title": "@property, декоратори класів, dunder", "type": "Урок"},
-    "24": {"title": "Ітератори advanced", "type": "Урок"},
-    "25": {"title": "Тестування з pytest (+ валідація AI-коду)", "type": "Урок"},
-    "26": {"title": "П5. Динамічне програмування + greedy (вступ)", "type": "Практикум (клас)"},
-    "27": {"title": "Потоки, multiprocessing, asyncio: вступ", "type": "Урок"},
-    "28": {"title": "П6. Stack/Queue/Heap/Trie + LRU Cache → ООП-пакет (артефакт М2)", "type": "Практикум (клас)"},
-    "29": {"title": "Основи SQL (PostgreSQL)", "type": "Урок"},
-    "30": {"title": "Redis overview", "type": "Урок"},
-    "31": {"title": "HTTP: requests, httpx, aiohttp", "type": "Урок"},
-    "32": {"title": "REST: принципи дизайну API", "type": "Урок"},
-    "33": {"title": "Django intro: MVT, ORM, admin", "type": "Урок"},
-    "34": {"title": "Django: forms, HTML practice", "type": "Урок"},
-    "35": {"title": "DRF overview + Django vs FastAPI", "type": "Урок"},
-    "36": {"title": "Typing + Pydantic", "type": "Урок"},
-    "37": {"title": "FastAPI basics + Postman + OpenAPI", "type": "Урок"},
-    "38": {"title": "FastAPI + SQLAlchemy/SQLModel: повний CRUD", "type": "Урок"},
-    "39": {"title": "Middlewares і кешування (Redis на практиці)", "type": "Урок"},
-    "40": {"title": "Автентифікація та security basics (JWT, hashing, OWASP)", "type": "Урок"},
-    "41": {"title": "Тестування API (pytest + httpx)", "type": "Урок"},
-    "42": {"title": "AI-інструменти розробника + ризики й валідація", "type": "Урок"},
-    "43": {"title": "Інтеграція LLM API (OpenAI/Anthropic)", "type": "Урок"},
-    "44": {"title": "Архітектура застосунків і патерни", "type": "Урок"},
-    "45": {"title": "WebSockets + практика: чат", "type": "Урок"},
-    "46": {"title": "Security advanced", "type": "Урок"},
-    "47": {"title": "Telegram Bot API", "type": "Урок"},
-    "48": {"title": "Docker", "type": "Урок"},
-    "49": {"title": "Docker Compose + деплой", "type": "Урок"},
-    "50": {"title": "CI/CD basics (GitHub Actions)", "type": "Урок"},
-    "51": {"title": "Робота над фінальним проєктом", "type": "Урок"},
-    "52": {"title": "Випускний: презентація фінального проєкту", "type": "Урок"}
+    "1": {
+      "title": "Вступний урок: знайомство, формат курсу, AI-політика",
+      "type": "Урок"
+    },
+    "2": {
+      "title": "Перші кроки та мінімальна робоча програма (+ налаштування середовища)",
+      "type": "Урок"
+    },
+    "3": {
+      "title": "Змінні та базові типи даних",
+      "type": "Урок"
+    },
+    "4": {
+      "title": "Умови та цикли: як програма приймає рішення",
+      "type": "Урок"
+    },
+    "5": {
+      "title": "Списки, кортежі та множини",
+      "type": "Урок"
+    },
+    "6": {
+      "title": "Словники, for, comprehensions",
+      "type": "Урок"
+    },
+    "8": {
+      "title": "Функції",
+      "type": "Урок"
+    },
+    "9": {
+      "title": "П1. Big O + базові задачі",
+      "type": "Практикум (клас)"
+    },
+    "10": {
+      "title": "Декоратори",
+      "type": "Урок"
+    },
+    "11": {
+      "title": "Ітератори й генератори",
+      "type": "Урок"
+    },
+    "12": {
+      "title": "П2. Пошук",
+      "type": "Практикум (клас)"
+    },
+    "13": {
+      "title": "Модулі та стандартна бібліотека",
+      "type": "Урок"
+    },
+    "14": {
+      "title": "Виключення",
+      "type": "Урок"
+    },
+    "15": {
+      "title": "Файли I/O, менеджери контексту, JSON",
+      "type": "Урок"
+    },
+    "16": {
+      "title": "Git + GitHub: перший репозиторій, PR, портфоліо",
+      "type": "Урок"
+    },
+    "17": {
+      "title": "П3. Хеш-структури",
+      "type": "Практикум (клас)"
+    },
+    "18": {
+      "title": "Узагальнення М1 + міні-проєкт CLI",
+      "type": "Урок"
+    },
+    "19": {
+      "title": "Функції як об'єкти першого класу",
+      "type": "Урок"
+    },
+    "20": {
+      "title": "Класи, простір імен",
+      "type": "Урок"
+    },
+    "21": {
+      "title": "Наслідування, поліморфізм",
+      "type": "Урок"
+    },
+    "22": {
+      "title": "Інкапсуляція, область видимості",
+      "type": "Урок"
+    },
+    "23": {
+      "title": "П4. Рекурсія, divide & conquer, backtracking",
+      "type": "Практикум (клас)"
+    },
+    "24": {
+      "title": "@property, декоратори класів, dunder",
+      "type": "Урок"
+    },
+    "25": {
+      "title": "Ітератори advanced",
+      "type": "Урок"
+    },
+    "26": {
+      "title": "Тестування з pytest (+ валідація AI-коду)",
+      "type": "Урок"
+    },
+    "27": {
+      "title": "П5. Динамічне програмування + greedy (вступ)",
+      "type": "Практикум (клас)"
+    },
+    "28": {
+      "title": "Потоки, multiprocessing, asyncio: вступ",
+      "type": "Урок"
+    },
+    "29": {
+      "title": "П6. Stack/Queue/Heap/Trie + LRU Cache → ООП-пакет (артефакт М2)",
+      "type": "Практикум (клас)"
+    },
+    "30": {
+      "title": "Основи SQL (PostgreSQL)",
+      "type": "Урок"
+    },
+    "31": {
+      "title": "Redis overview",
+      "type": "Урок"
+    },
+    "32": {
+      "title": "HTTP: requests, httpx, aiohttp",
+      "type": "Урок"
+    },
+    "33": {
+      "title": "REST: принципи дизайну API",
+      "type": "Урок"
+    },
+    "34": {
+      "title": "Django intro: MVT, ORM, admin",
+      "type": "Урок"
+    },
+    "35": {
+      "title": "Django: forms, HTML practice",
+      "type": "Урок"
+    },
+    "36": {
+      "title": "DRF overview + Django vs FastAPI",
+      "type": "Урок"
+    },
+    "37": {
+      "title": "Typing + Pydantic",
+      "type": "Урок"
+    },
+    "38": {
+      "title": "FastAPI basics + Postman + OpenAPI",
+      "type": "Урок"
+    },
+    "39": {
+      "title": "FastAPI + SQLAlchemy/SQLModel: повний CRUD",
+      "type": "Урок"
+    },
+    "40": {
+      "title": "Middlewares і кешування (Redis на практиці)",
+      "type": "Урок"
+    },
+    "41": {
+      "title": "Автентифікація та security basics (JWT, hashing, OWASP)",
+      "type": "Урок"
+    },
+    "42": {
+      "title": "Тестування API (pytest + httpx)",
+      "type": "Урок"
+    },
+    "43": {
+      "title": "AI-інструменти розробника + ризики й валідація",
+      "type": "Урок"
+    },
+    "44": {
+      "title": "Інтеграція LLM API (OpenAI/Anthropic)",
+      "type": "Урок"
+    },
+    "45": {
+      "title": "Архітектура застосунків і патерни",
+      "type": "Урок"
+    },
+    "46": {
+      "title": "WebSockets + практика: чат",
+      "type": "Урок"
+    },
+    "47": {
+      "title": "Security advanced",
+      "type": "Урок"
+    },
+    "48": {
+      "title": "Telegram Bot API",
+      "type": "Урок"
+    },
+    "49": {
+      "title": "Docker",
+      "type": "Урок"
+    },
+    "50": {
+      "title": "Docker Compose + деплой",
+      "type": "Урок"
+    },
+    "51": {
+      "title": "CI/CD basics (GitHub Actions)",
+      "type": "Урок"
+    },
+    "52": {
+      "title": "Робота над фінальним проєктом",
+      "type": "Урок"
+    },
+    "53": {
+      "title": "Випускний: презентація фінального проєкту",
+      "type": "Урок"
+    }
   }
 }
