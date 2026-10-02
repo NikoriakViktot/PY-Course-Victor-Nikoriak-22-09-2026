@@ -85,6 +85,7 @@ from typing import NamedTuple
 
 
 class Order(NamedTuple):
+    waiter: str
     total_bill: float
     tip: float
     day: str
@@ -93,11 +94,11 @@ class Order(NamedTuple):
 
 
 orders = [
-    Order(540.0, 50.0, "пт", "вечеря", 2),
-    Order(320.0, 30.0, "пт", "обід", 1),
-    Order(980.0, 120.0, "сб", "вечеря", 4),
-    Order(760.0, 70.0, "сб", "вечеря", 3),
-    Order(450.0, 0.0, "нд", "обід", 5),
+    Order("Тарас", 540.0, 50.0, "пт", "вечеря", 2),
+    Order("Марія", 320.0, 30.0, "пт", "обід", 1),
+    Order("Тарас", 980.0, 120.0, "сб", "вечеря", 4),
+    Order("Олексій", 760.0, 70.0, "сб", "вечеря", 3),
+    Order("Марія", 450.0, 0.0, "нд", "обід", 5),
 ]
 
 revenue = 0
@@ -644,6 +645,7 @@ from typing import NamedTuple
 
 
 class Order(NamedTuple):
+    waiter: str
     total_bill: float
     tip: float
     day: str
@@ -652,11 +654,11 @@ class Order(NamedTuple):
 
 
 orders = [
-    Order(540.0, 50.0, "пт", "вечеря", 2),
-    Order(320.0, 30.0, "пт", "обід", 1),
-    Order(980.0, 120.0, "сб", "вечеря", 4),
-    Order(760.0, 70.0, "сб", "вечеря", 3),
-    Order(450.0, 0.0, "нд", "обід", 5),
+    Order("Тарас", 540.0, 50.0, "пт", "вечеря", 2),
+    Order("Марія", 320.0, 30.0, "пт", "обід", 1),
+    Order("Тарас", 980.0, 120.0, "сб", "вечеря", 4),
+    Order("Олексій", 760.0, 70.0, "сб", "вечеря", 3),
+    Order("Марія", 450.0, 0.0, "нд", "обід", 5),
 ]
 
 orders_by_day = {}

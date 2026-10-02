@@ -19,9 +19,11 @@
 - прибирати дублікати і порівнювати набори значень через множини;
 - обирати контейнер під задачу: `list`, `tuple` чи `set`.
 
-**Задача розділу.** Кафе закриває день. Програма має зберегти позиції замовлень і всі чеки дня, а потім відповісти на запитання власника: скільки чеків, який виторг, який найбільший чек, у які дні працювали, які гості приходили двічі. Повну програму розберемо в розділі [«Практика»](#practice).
+**Задача розділу.** Кафе закриває день. Програма має зберегти позиції замовлень і всі чеки дня, а потім відповісти на запитання власника: скільки чеків, який виторг, який найбільший чек і хто його обслужив, у які дні працювали, хто з офіціантів виходив, які гості приходили двічі. Повну програму розберемо в розділі [«Практика»](#practice).
 
-**Ноутбук заняття:** [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_05_lists_tuples_sets/note_lesson_05_lists_tuples_sets_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_05_lists_tuples_sets/note_lesson_05_lists_tuples_sets.ipynb){ .solutions-link }
+**Ноутбук заняття:** [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_05_lists_tuples_sets/note_lesson_05_lists_tuples_sets_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_05_lists_tuples_sets/note_lesson_05_lists_tuples_sets.ipynb){ .solutions-link } — нотатка про три типи: усі методи з прикладами, типові помилки, шпаргалка, 244 реальних чеки і задачі з перевірками.
+
+**Розповідь заняття:** [`konspekt_lesson_05_cafe_story.ipynb`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_05_lists_tuples_sets/konspekt_lesson_05_cafe_story.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_05_lists_tuples_sets/konspekt_lesson_05_cafe_story.ipynb) — одна зміна в кафе, у якій по черзі з'являються список, кортеж і множина; за нею іде заняття. Схеми до неї — [`restoran_alg.md`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_05_lists_tuples_sets/restoran_alg.md).
 
 ## Пригадай
 
@@ -392,6 +394,7 @@ from typing import NamedTuple
 
 
 class Order(NamedTuple):
+    waiter: str
     total_bill: float
     tip: float
     day: str
@@ -399,33 +402,33 @@ class Order(NamedTuple):
     size: int
 
 
-order = Order(540.0, 50.0, "пт", "вечеря", 2)
+order = Order("Тарас", 540.0, 50.0, "пт", "вечеря", 2)
 
 print(order)
-print(order.total_bill, order.tip)
+print(order.waiter, order.total_bill, order.tip)
 ```
 
 ```text
-Order(total_bill=540.0, tip=50.0, day='пт', time='вечеря', size=2)
-540.0 50.0
+Order(waiter='Тарас', total_bill=540.0, tip=50.0, day='пт', time='вечеря', size=2)
+Тарас 540.0 50.0
 ```
 
 Як це читати:
 
 - `from typing import NamedTuple` підключає інструмент з модуля `typing` (як `import random` в уроці 4);
 - блок `class Order(NamedTuple):` — **шаблон запису**: назва `Order` і список полів. Після двокрапки в кожному рядку — назва поля і тип, який ми туди очікуємо;
-- `Order(540.0, 50.0, "пт", "вечеря", 2)` створює один чек: значення розкладаються по полях у тому порядку, в якому поля оголошено.
+- `Order("Тарас", 540.0, 50.0, "пт", "вечеря", 2)` створює один чек: значення розкладаються по полях у тому порядку, в якому поля оголошено.
 
-Слово `class` належить до теми класів, яку розберемо в модулі 2. Поки що достатньо сприймати цей блок як опис полів запису. Поля ті самі, що й у ноутбуці заняття: сума чека, чайові, день, прийом їжі, кількість гостей.
+Слово `class` належить до теми класів, яку розберемо в модулі 2. Поки що достатньо сприймати цей блок як опис полів запису. Поля ті самі, що й у розповіді заняття, квесті та ноутбуці: хто обслуговував, сума чека, чайові, день, прийом їжі, кількість гостей.
 
 `Order` досі кортеж: працюють індекси й розпакування, і змінити поле не можна.
 
 ```python
 print(isinstance(order, tuple))
-print(order[0])
+print(order[1])
 
-total_bill, tip, day, time, size = order
-print(day, size)
+waiter, total_bill, tip, day, time, size = order
+print(waiter, day, size)
 
 order.tip = 70.0
 ```
@@ -433,12 +436,12 @@ order.tip = 70.0
 ```text
 True
 540.0
-пт 2
+Тарас пт 2
 AttributeError: can't set attribute
 ```
 
 !!! note "Типи в шаблоні — це підказка"
-    Записи `total_bill: float` описують, що ми **очікуємо** в полі, але під час виконання Python їх не перевіряє. `Order("п'ятсот", 50.0, "пт", "вечеря", 2)` створиться без помилки, а проблема з'явиться пізніше, коли з полем спробують рахувати.
+    Записи `total_bill: float` описують, що ми **очікуємо** в полі, але під час виконання Python їх не перевіряє. `Order("Тарас", "п'ятсот", 50.0, "пт", "вечеря", 2)` створиться без помилки, а проблема з'явиться пізніше, коли з полем спробують рахувати.
 
 ### Список чеків дня
 
@@ -446,23 +449,23 @@ AttributeError: can't set attribute
 
 ```python
 orders = [
-    Order(540.0, 50.0, "пт", "вечеря", 2),
-    Order(320.0, 30.0, "пт", "обід", 1),
-    Order(980.0, 120.0, "сб", "вечеря", 4),
-    Order(760.0, 70.0, "сб", "вечеря", 3),
-    Order(450.0, 0.0, "нд", "обід", 5),
+    Order("Тарас", 540.0, 50.0, "пт", "вечеря", 2),
+    Order("Марія", 320.0, 30.0, "пт", "обід", 1),
+    Order("Тарас", 980.0, 120.0, "сб", "вечеря", 4),
+    Order("Олексій", 760.0, 70.0, "сб", "вечеря", 3),
+    Order("Марія", 450.0, 0.0, "нд", "обід", 5),
 ]
 
 print(len(orders))
-print(orders[2].total_bill)
+print(orders[2].total_bill, orders[2].waiter)
 ```
 
 ```text
 5
-980.0
+980.0 Тарас
 ```
 
-`orders[2]` — третій чек у списку (індекс 2), а `.total_bill` — поле цього чека, тобто його сума.
+`orders[2]` — третій чек у списку (індекс 2), а `.total_bill` і `.waiter` — поля цього чека: сума і хто його обслужив.
 
 ```mermaid
 flowchart TD
@@ -475,7 +478,7 @@ flowchart TD
     L["orders — list<br>5 чеків, можна додавати"] --> O2["orders[2] — Order<br>незмінний запис"]
     L --> ON["інші чеки<br>індекси 0, 1, 3, 4"]
     O2 --> F1["orders[2].total_bill<br>980.0"]
-    O2 --> F2["orders[2].size<br>4"]
+    O2 --> F2["orders[2].waiter<br>'Тарас'"]
 
     class L decision
     class O2,ON step
@@ -612,6 +615,26 @@ print(sorted(days))
 
 Для простого списку значень те саме робить один рядок: `len(set(["кава", "чай", "кава"]))` дає `2`.
 
+### Хто з офіціантів працював
+
+Той самий прохід, інше поле. Тарас і Марія мають по два чеки, але в множині кожне ім'я — один раз:
+
+```python
+waiters = set()
+i = 0
+while i < len(orders):
+    waiters.add(orders[i].waiter)
+    i += 1
+
+print(len(waiters))
+print(sorted(waiters))
+```
+
+```text
+3
+['Марія', 'Олексій', 'Тарас']
+```
+
 !!! warning "list(set(...)) губить порядок"
     `list(set(items))` прибирає дублікати, але порядок елементів у результаті може відрізнятися від початкового. Якщо порядок важливий, прибирай дублікати циклом: додавай елемент у новий список, лише якщо його там ще немає.
 
@@ -673,11 +696,12 @@ flowchart TD
 
 Програма бере чеки дня і друкує звіт для власника: кількість чеків, виторг, частку чайових, найбільший чек і дні роботи.
 
-```python linenums="1" hl_lines="20 21 22 23 26 33"
+```python linenums="1" hl_lines="21 22 23 24 25 28 36"
 from typing import NamedTuple
 
 
 class Order(NamedTuple):
+    waiter: str
     total_bill: float
     tip: float
     day: str
@@ -686,53 +710,57 @@ class Order(NamedTuple):
 
 
 orders = [
-    Order(540.0, 50.0, "пт", "вечеря", 2),
-    Order(320.0, 30.0, "пт", "обід", 1),
-    Order(980.0, 120.0, "сб", "вечеря", 4),
-    Order(760.0, 70.0, "сб", "вечеря", 3),
-    Order(450.0, 0.0, "нд", "обід", 5),
+    Order("Тарас", 540.0, 50.0, "пт", "вечеря", 2),
+    Order("Марія", 320.0, 30.0, "пт", "обід", 1),
+    Order("Тарас", 980.0, 120.0, "сб", "вечеря", 4),
+    Order("Олексій", 760.0, 70.0, "сб", "вечеря", 3),
+    Order("Марія", 450.0, 0.0, "нд", "обід", 5),
 ]
 
 revenue = 0
 tips = 0
-max_bill = orders[0].total_bill
+best = orders[0]
 days = set()
+waiters = set()
 
 i = 0
 while i < len(orders):
     order = orders[i]
     revenue += order.total_bill
     tips += order.tip
-    if order.total_bill > max_bill:
-        max_bill = order.total_bill
+    if order.total_bill > best.total_bill:
+        best = order
     days.add(order.day)
+    waiters.add(order.waiter)
     i += 1
 
 print("Чеків:", len(orders))
 print("Виторг:", revenue, "грн")
 print("Чайові:", round(tips / revenue * 100, 1), "% від виторгу")
-print("Найбільший чек:", max_bill, "грн")
+print("Найбільший чек:", best.total_bill, "грн —", best.waiter)
 print("Днів роботи:", len(days), sorted(days))
+print("Офіціантів:", len(waiters), sorted(waiters))
 ```
 
 ```text
 Чеків: 5
 Виторг: 3050.0 грн
 Чайові: 8.9 % від виторгу
-Найбільший чек: 980.0 грн
+Найбільший чек: 980.0 грн — Тарас
 Днів роботи: 3 ['нд', 'пт', 'сб']
+Офіціантів: 3 ['Марія', 'Олексій', 'Тарас']
 ```
 
 Що відбувається в ключових рядках:
 
-- **рядки 4–9** — шаблон запису `Order`;
-- **рядки 12–18** — список чеків дня: кожен елемент — один `Order`;
-- **рядки 20–23** — початковий стан: дві суми з нуля, стартовий максимум — перший чек, порожня множина днів;
-- **рядок 26** — `while` проходить індекси від 0 до `len(orders) - 1`;
-- **рядок 27** — `order = orders[i]` дає коротке ім'я поточному чеку, щоб не писати `orders[i]` щоразу;
-- **рядки 28–32** — одна ітерація оновлює все одразу: дві суми, максимум і множину днів;
-- **рядок 33** — зміна стану: без `i += 1` цикл став би нескінченним;
-- **рядок 37** — чайові разом `270` грн, `270 / 3050 * 100` ≈ `8.85`, а `round(…, 1)` округлює до одного знака після коми: `8.9`.
+- **рядки 4–10** — шаблон запису `Order`, перше поле — хто обслуговував;
+- **рядки 13–19** — список чеків дня: кожен елемент — один `Order`;
+- **рядки 21–25** — початковий стан: дві суми з нуля, стартовий чемпіон — перший чек цілком (не лише його сума, щоб потім назвати офіціанта), дві порожні множини;
+- **рядок 28** — `while` проходить індекси від 0 до `len(orders) - 1`;
+- **рядок 29** — `order = orders[i]` дає коротке ім'я поточному чеку, щоб не писати `orders[i]` щоразу;
+- **рядки 30–35** — одна ітерація оновлює все одразу: дві суми, чемпіона і дві множини;
+- **рядок 36** — зміна стану: без `i += 1` цикл став би нескінченним;
+- **рядок 40** — чайові разом `270` грн, `270 / 3050 * 100` ≈ `8.85`, а `round(…, 1)` округлює до одного знака після коми: `8.9`.
 
 Змінні `revenue` і `tips` накопичують значення: перед циклом вони нульові, у кожному повторі до них додається поле поточного чека. Цей прийом називають **накопичувачем**, і він знадобиться майже в кожній задачі на обробку даних.
 
@@ -846,11 +874,11 @@ Git: 3 учасники
 
 ### Що далі
 
-- Ноутбук заняття: [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_05_lists_tuples_sets/note_lesson_05_lists_tuples_sets_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_05_lists_tuples_sets/note_lesson_05_lists_tuples_sets.ipynb){ .solutions-link } — ті самі ідеї на реальному наборі з 244 чеків.
+- Ноутбук заняття: [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_05_lists_tuples_sets/note_lesson_05_lists_tuples_sets_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_05_lists_tuples_sets/note_lesson_05_lists_tuples_sets.ipynb){ .solutions-link } — нотатка про три типи з усіма методами, задачі й ті самі ідеї на реальному наборі з 244 чеків.
 - Квест для груп: [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_05_lists_tuples_sets/cafe_shift_quest_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_05_lists_tuples_sets/cafe_shift_quest.ipynb){ .solutions-link } — вечірня зміна в кафе, список, кортеж, `NamedTuple` і множини в одній грі.
-- Додатковий конспект з вправами: [`notes_lists_tuples_sets.ipynb`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_05_lists_tuples_sets/notes_lists_tuples_sets.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_05_lists_tuples_sets/notes_lists_tuples_sets.ipynb)
+- Розповідь заняття: [`konspekt_lesson_05_cafe_story.ipynb`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_05_lists_tuples_sets/konspekt_lesson_05_cafe_story.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_05_lists_tuples_sets/konspekt_lesson_05_cafe_story.ipynb) — зміна в кафе як одна історія про три типи; схеми до неї — [`restoran_alg.md`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_05_lists_tuples_sets/restoran_alg.md).
 - Довідник: [Списки](../../reference/python_core/lists.md), [Кортежі й `NamedTuple`](../../reference/python_core/tuples.md), [Множини](../../reference/python_core/sets.md).
-- Наступний урок: [Урок 6. Словники, for, comprehensions](lesson_06.md). Цикл `while` з індексом стане коротшим завдяки `for`, а словник дозволить рахувати, наприклад, виторг окремо для кожного дня.
+- Наступний урок: [Урок 6. Словники, for, comprehensions](lesson_06.md). Цикл `while` з індексом стане коротшим завдяки `for`, а словник відповість на питання, яке лишилося відкритим: чайові й виторг окремо для кожного офіціанта і дня.
 
 ## Документація
 

@@ -7,6 +7,8 @@
   на його місці — `# YOUR CODE HERE` з тим самим відступом, а всередині блоку (функція, цикл) ще й `pass`,
   щоб клітинка лишалась синтаксично правильною: студент бачить AssertionError вправи, а не SyntaxError;
 - клітинки з тегом `instructor` видаляються повністю;
+- клітинки з тегом `system` (Colab form-клітинка з `cellView: form`, напр. системна перевірка
+  для студента) лишаються як є — не стрипаються, але так само позначають ноутбук як майстер-ноутбук;
 - виводи й лічильники виконання очищаються (у виводах бувають відповіді);
 - бейдж Colab і `metadata.lms` одразу виставляються для шляху студентського файлу
   (та сама логіка, що в `tools/sync_notebook_metadata.py`).
@@ -36,6 +38,8 @@ PLACEHOLDER = "# YOUR CODE HERE"
 BEGIN, END = "# BEGIN SOLUTION", "# END SOLUTION"
 BLOCK = re.compile(r"^([ \t]*)# BEGIN SOLUTION[^\n]*\n(?:.*?\n)??[ \t]*# END SOLUTION[^\n]*(?:\n|\Z)", re.M | re.S)
 TAG_INSTRUCTOR = "instructor"
+TAG_SYSTEM = "system"          # Colab form-клітинка (cellView: form): лишається для студента, не стрипається,
+                                # але все одно рахується як ознака майстер-ноутбука (is_master)
 STUDENT_SUFFIX = "_student"
 
 
@@ -75,7 +79,8 @@ def compiles(source: str) -> bool:
 
 def is_master(nb: dict) -> bool:
     for cell in nb.get("cells", []):
-        if TAG_INSTRUCTOR in cell.get("metadata", {}).get("tags", []):
+        tags = cell.get("metadata", {}).get("tags", [])
+        if TAG_INSTRUCTOR in tags or TAG_SYSTEM in tags:
             return True
         if cell.get("cell_type") == "code" and BEGIN in cell_source(cell):
             return True
