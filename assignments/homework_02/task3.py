@@ -1,8 +1,12 @@
 # AI log: зробив перевірку чи правильно виконав завдання
 
-print('O:\t\t\t\tH:')
-print('#########\t\t#\t\t#')
-print('#\t\t#\t\t#\t\t#')
-print('#\t\t*\t\t#########')
-print('#\t\t#\t\t#\t\t#')
-print('#########\t\t#\t\t#')
+print('O:\n#########\n#\t\t#\n#\t\t#\n#\t\t#\n#########\n')
+print('H:\n#\t\t#\n#\t\t#\n#########\n#\t\t#\n#\t\t#')
+
+# Альтернативний варіант
+# print('O:\t\t\t\tH:')
+# print('#########\t\t#\t\t#')
+# print('#\t\t#\t\t#\t\t#')
+# print('#\t\t*\t\t#########')
+# print('#\t\t#\t\t#\t\t#')
+# print('#########\t\t#\t\t#')
