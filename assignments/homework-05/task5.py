@@ -69,6 +69,7 @@ while i < len(score):
             print("Перемога")
 
             is_winner = True
+            break
 
         j += 1
 
