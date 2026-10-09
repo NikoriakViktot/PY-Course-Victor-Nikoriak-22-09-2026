@@ -1705,8 +1705,7 @@
 <table>
 <thead>
 <tr>
-<th>#</th>
-<th>Категорія</th>
+<th>Вид</th>
 <th>Позначка</th>
 <th>Передача</th>
 <th>Тип усередині</th>
@@ -1714,42 +1713,30 @@
 </thead>
 <tbody>
 <tr>
-<td>1</td>
 <td>Positional-only (3.8+, PEP 570)</td>
 <td>ліворуч від <code>/</code></td>
 <td>лише за позицією</td>
 <td>значення</td>
 </tr>
 <tr>
-<td>2</td>
 <td>Positional-or-keyword</td>
-<td>після <code>/</code></td>
+<td>після <code>/</code>, до <code>*args</code> / <code>*</code></td>
 <td>за позицією або за іменем</td>
 <td>значення</td>
 </tr>
 <tr>
-<td>3</td>
-<td>Default</td>
-<td><code>param=value</code></td>
-<td>можна пропустити</td>
-<td>значення</td>
-</tr>
-<tr>
-<td>4</td>
 <td>Var-positional</td>
-<td><code>*args</code> або поодинока <code>*</code></td>
+<td><code>*args</code></td>
 <td>збирає зайві позиційні</td>
 <td><code>tuple</code></td>
 </tr>
 <tr>
-<td>5</td>
 <td>Keyword-only (PEP 3102)</td>
-<td>після <code>*args</code> / <code>*</code></td>
+<td>після <code>*args</code> або поодинокої <code>*</code></td>
 <td>лише <code>key=value</code></td>
 <td>значення</td>
 </tr>
 <tr>
-<td>6</td>
 <td>Var-keyword</td>
 <td><code>**kwargs</code>, завжди останній</td>
 <td>збирає зайві іменовані</td>
@@ -1757,6 +1744,7 @@
 </tr>
 </tbody>
 </table>
+<p>Значення за замовчуванням — не окремий вид: його можуть мати і positional-or-keyword (<code>default_pos=10</code>), і keyword-only (<code>kw_default=20</code>) параметри. Серед параметрів, які передаються за позицією, параметри зі значенням за замовчуванням стоять після обов'язкових. Для keyword-only такого обмеження немає.</p>
 <p>Порушення порядку — <code>SyntaxError</code> ще до запуску:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>def f(a=1, b): ...        SyntaxError: parameter without a default follows parameter with a default
 <a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>def f(**kw, *args): ...   SyntaxError: arguments cannot follow var-keyword argument
