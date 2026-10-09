@@ -5166,64 +5166,84 @@
 <div class="highlight"><pre><span></span><code><a id="__codelineno-99-1" name="__codelineno-99-1" href="#__codelineno-99-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">calculate_speed</span><span class="p">(</span><span class="n">distance</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="o">/</span><span class="p">):</span>  <span class="c1"># роздільник параметрів</span>
 <a id="__codelineno-99-2" name="__codelineno-99-2" href="#__codelineno-99-2"></a>    <span class="k">return</span> <span class="n">distance</span> <span class="o">/</span> <span class="n">time</span>              <span class="c1"># ділення чисел</span>
 </code></pre></div>
-<p>У рядку <code>def</code> символ <code>/</code> <strong>нічого не ділить</strong>. Він також не параметр: третього значення для нього передавати не треба, функція, як і раніше, отримує лише відстань і час. У виклику <code>/</code> не пишуть зовсім.</p>
-<p><strong>А якщо <code>/</code> стоїть посередині?</strong> Він обмежує тільки параметри <strong>ліворуч від себе</strong>:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-100-1" name="__codelineno-100-1" href="#__codelineno-100-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">calculate_speed</span><span class="p">(</span><span class="n">distance</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="n">time</span><span class="p">):</span>
+<p>У рядку <code>def</code> символ <code>/</code> <strong>нічого не ділить</strong>. Він також не параметр: третього значення для нього передавати не треба, функція, як і раніше, отримує лише відстань і час. <strong><code>/</code> ставлять лише в оголошенні <code>def</code>, у виклику його не пишуть.</strong></p>
+<p>Куди ж поділися імена <code>distance</code> і <code>time</code>? Вони нікуди не зникли, а лишилися <strong>всередині функції</strong>: саме тому можна написати <code>return distance / time</code>. Заборонено лише одне — використовувати ці імена <strong>у виклику</strong>, щоб передати аргументи (<code>distance=100</code>).</p>
+<p>Хочеш знову дозволити обидва способи — прибери <code>/</code> і <strong>повторно виконай оголошення функції</strong>. Поки новий <code>def</code> не виконано, Python пам'ятає стару версію з <code>/</code>, тож виклик за іменем і далі даватиме <code>TypeError</code>.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-100-1" name="__codelineno-100-1" href="#__codelineno-100-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">calculate_speed</span><span class="p">(</span><span class="n">distance</span><span class="p">,</span> <span class="n">time</span><span class="p">):</span>
 <a id="__codelineno-100-2" name="__codelineno-100-2" href="#__codelineno-100-2"></a>    <span class="k">return</span> <span class="n">distance</span> <span class="o">/</span> <span class="n">time</span>
 <a id="__codelineno-100-3" name="__codelineno-100-3" href="#__codelineno-100-3"></a>
 <a id="__codelineno-100-4" name="__codelineno-100-4" href="#__codelineno-100-4"></a>
 <a id="__codelineno-100-5" name="__codelineno-100-5" href="#__codelineno-100-5"></a><span class="nb">print</span><span class="p">(</span><span class="n">calculate_speed</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
-<a id="__codelineno-100-6" name="__codelineno-100-6" href="#__codelineno-100-6"></a><span class="nb">print</span><span class="p">(</span><span class="n">calculate_speed</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
-<a id="__codelineno-100-7" name="__codelineno-100-7" href="#__codelineno-100-7"></a><span class="n">calculate_speed</span><span class="p">(</span><span class="n">distance</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<a id="__codelineno-100-6" name="__codelineno-100-6" href="#__codelineno-100-6"></a><span class="nb">print</span><span class="p">(</span><span class="n">calculate_speed</span><span class="p">(</span><span class="n">distance</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+<a id="__codelineno-100-7" name="__codelineno-100-7" href="#__codelineno-100-7"></a><span class="nb">print</span><span class="p">(</span><span class="n">calculate_speed</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-101-1" name="__codelineno-101-1" href="#__codelineno-101-1"></a>50.0
 <a id="__codelineno-101-2" name="__codelineno-101-2" href="#__codelineno-101-2"></a>50.0
-<a id="__codelineno-101-3" name="__codelineno-101-3" href="#__codelineno-101-3"></a>TypeError: calculate_speed() got some positional-only arguments passed as keyword arguments: 'distance'
+<a id="__codelineno-101-3" name="__codelineno-101-3" href="#__codelineno-101-3"></a>50.0
 </code></pre></div>
+<p><strong>А якщо <code>/</code> стоїть посередині?</strong> Він обмежує тільки параметри <strong>ліворуч від себе</strong>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-102-1" name="__codelineno-102-1" href="#__codelineno-102-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">calculate_speed</span><span class="p">(</span><span class="n">distance</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="n">time</span><span class="p">):</span>
+<a id="__codelineno-102-2" name="__codelineno-102-2" href="#__codelineno-102-2"></a>    <span class="k">return</span> <span class="n">distance</span> <span class="o">/</span> <span class="n">time</span>
+<a id="__codelineno-102-3" name="__codelineno-102-3" href="#__codelineno-102-3"></a>
+<a id="__codelineno-102-4" name="__codelineno-102-4" href="#__codelineno-102-4"></a>
+<a id="__codelineno-102-5" name="__codelineno-102-5" href="#__codelineno-102-5"></a><span class="nb">print</span><span class="p">(</span><span class="n">calculate_speed</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+<a id="__codelineno-102-6" name="__codelineno-102-6" href="#__codelineno-102-6"></a><span class="nb">print</span><span class="p">(</span><span class="n">calculate_speed</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+<a id="__codelineno-102-7" name="__codelineno-102-7" href="#__codelineno-102-7"></a><span class="n">calculate_speed</span><span class="p">(</span><span class="n">distance</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-103-1" name="__codelineno-103-1" href="#__codelineno-103-1"></a>50.0
+<a id="__codelineno-103-2" name="__codelineno-103-2" href="#__codelineno-103-2"></a>50.0
+<a id="__codelineno-103-3" name="__codelineno-103-3" href="#__codelineno-103-3"></a>TypeError: calculate_speed() got some positional-only arguments passed as keyword arguments: 'distance'
+</code></pre></div>
+<p>Важлива деталь: «після <code>/</code>» <strong>не</strong> означає «тільки за іменем». Параметр <code>time</code> зберігає обидва способи.</p>
+<p>Порівняй три варіанти того самого оголошення:</p>
 <table>
 <thead>
 <tr>
-<th>Параметр</th>
-<th>Як можна передати</th>
+<th>Оголошення</th>
+<th>Що дозволено</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>distance</code></td>
-<td>тільки за порядком</td>
+<td><code>def calculate_speed(distance, time):</code></td>
+<td>обидва параметри — за порядком або за іменем</td>
 </tr>
 <tr>
-<td><code>time</code></td>
-<td>за порядком або за іменем</td>
+<td><code>def calculate_speed(distance, /, time):</code></td>
+<td><code>distance</code> — тільки за порядком, <code>time</code> — обома способами</td>
+</tr>
+<tr>
+<td><code>def calculate_speed(distance, time, /):</code></td>
+<td>обидва — тільки за порядком</td>
 </tr>
 </tbody>
 </table>
-<p>Важлива деталь: «після <code>/</code>» <strong>не</strong> означає «тільки за іменем». Параметр <code>time</code> зберігає обидва способи.</p>
+<p>Для звичайної функції, як-от обчислення швидкості, <code>/</code> не потрібен: перший варіант без нього цілком підходить.</p>
 <p><strong>Навіщо взагалі забороняти передачу за іменем?</strong> У наших функціях це зазвичай не потрібно: запис <code>distance=100, time=2</code> зрозумілий і корисний. Але іноді автор хоче, щоб користувачі не залежали від назв його параметрів. Нехай є функція:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-102-1" name="__codelineno-102-1" href="#__codelineno-102-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">double</span><span class="p">(</span><span class="n">number</span><span class="p">,</span> <span class="o">/</span><span class="p">):</span>
-<a id="__codelineno-102-2" name="__codelineno-102-2" href="#__codelineno-102-2"></a>    <span class="k">return</span> <span class="n">number</span> <span class="o">*</span> <span class="mi">2</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-104-1" name="__codelineno-104-1" href="#__codelineno-104-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">double</span><span class="p">(</span><span class="n">number</span><span class="p">,</span> <span class="o">/</span><span class="p">):</span>
+<a id="__codelineno-104-2" name="__codelineno-104-2" href="#__codelineno-104-2"></a>    <span class="k">return</span> <span class="n">number</span> <span class="o">*</span> <span class="mi">2</span>
 </code></pre></div>
 <p>Користувач викликає <code>double(5)</code>. Згодом автор перейменовує параметр:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-103-1" name="__codelineno-103-1" href="#__codelineno-103-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">double</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="o">/</span><span class="p">):</span>
-<a id="__codelineno-103-2" name="__codelineno-103-2" href="#__codelineno-103-2"></a>    <span class="k">return</span> <span class="n">value</span> <span class="o">*</span> <span class="mi">2</span>
-<a id="__codelineno-103-3" name="__codelineno-103-3" href="#__codelineno-103-3"></a>
-<a id="__codelineno-103-4" name="__codelineno-103-4" href="#__codelineno-103-4"></a>
-<a id="__codelineno-103-5" name="__codelineno-103-5" href="#__codelineno-103-5"></a><span class="nb">print</span><span class="p">(</span><span class="n">double</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-105-1" name="__codelineno-105-1" href="#__codelineno-105-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">double</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="o">/</span><span class="p">):</span>
+<a id="__codelineno-105-2" name="__codelineno-105-2" href="#__codelineno-105-2"></a>    <span class="k">return</span> <span class="n">value</span> <span class="o">*</span> <span class="mi">2</span>
+<a id="__codelineno-105-3" name="__codelineno-105-3" href="#__codelineno-105-3"></a>
+<a id="__codelineno-105-4" name="__codelineno-105-4" href="#__codelineno-105-4"></a>
+<a id="__codelineno-105-5" name="__codelineno-105-5" href="#__codelineno-105-5"></a><span class="nb">print</span><span class="p">(</span><span class="n">double</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-104-1" name="__codelineno-104-1" href="#__codelineno-104-1"></a>10
+<div class="highlight"><pre><span></span><code><a id="__codelineno-106-1" name="__codelineno-106-1" href="#__codelineno-106-1"></a>10
 </code></pre></div>
 <p>Виклик <code>double(5)</code> працює далі: назва змінилася, але користувач її не застосовував. Без <code>/</code> хтось міг би написати <code>double(number=5)</code>, і після перейменування цей виклик зламався б.</p>
 <p>Для початківця головне — <strong>вміти прочитати такий запис у документації</strong>. Наприклад, <code>help(len)</code> показує <code>len(obj, /)</code>. Це означає: об'єкт передаємо лише за порядком:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-105-1" name="__codelineno-105-1" href="#__codelineno-105-1"></a><span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">([</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">30</span><span class="p">]))</span>
-<a id="__codelineno-105-2" name="__codelineno-105-2" href="#__codelineno-105-2"></a><span class="nb">len</span><span class="p">(</span><span class="n">obj</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">30</span><span class="p">])</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-107-1" name="__codelineno-107-1" href="#__codelineno-107-1"></a><span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">([</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">30</span><span class="p">]))</span>
+<a id="__codelineno-107-2" name="__codelineno-107-2" href="#__codelineno-107-2"></a><span class="nb">len</span><span class="p">(</span><span class="n">obj</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">30</span><span class="p">])</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-106-1" name="__codelineno-106-1" href="#__codelineno-106-1"></a>3
-<a id="__codelineno-106-2" name="__codelineno-106-2" href="#__codelineno-106-2"></a>TypeError: len() takes no keyword arguments
+<div class="highlight"><pre><span></span><code><a id="__codelineno-108-1" name="__codelineno-108-1" href="#__codelineno-108-1"></a>3
+<a id="__codelineno-108-2" name="__codelineno-108-2" href="#__codelineno-108-2"></a>TypeError: len() takes no keyword arguments
 </code></pre></div>
 <details class="question">
 <summary>Перевір себе</summary>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-107-1" name="__codelineno-107-1" href="#__codelineno-107-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">multiply</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
-<a id="__codelineno-107-2" name="__codelineno-107-2" href="#__codelineno-107-2"></a>    <span class="k">return</span> <span class="n">a</span> <span class="o">*</span> <span class="n">b</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-109-1" name="__codelineno-109-1" href="#__codelineno-109-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">multiply</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+<a id="__codelineno-109-2" name="__codelineno-109-2" href="#__codelineno-109-2"></a>    <span class="k">return</span> <span class="n">a</span> <span class="o">*</span> <span class="n">b</span>
 </code></pre></div>
 <p>Які з викликів спрацюють: <code>multiply(3, 4)</code>, <code>multiply(3, b=4)</code>, <code>multiply(a=3, b=4)</code>?</p>
 </details>
@@ -5233,27 +5253,27 @@
 </details>
 <h3 id="_19">Тільки за іменем: <code>*</code><a class="headerlink" href="#_19" title="Permanent link">&para;</a></h3>
 <p>Тепер протилежне обмеження. У <code>make_coffee</code> кількість цукру — додаткове налаштування, і хочеться, щоб у виклику було видно, що саме означає число:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-108-1" name="__codelineno-108-1" href="#__codelineno-108-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">make_coffee</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">sugar</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
-<a id="__codelineno-108-2" name="__codelineno-108-2" href="#__codelineno-108-2"></a>    <span class="k">return</span> <span class="sa">f</span><span class="s2">"кава </span><span class="si">{</span><span class="n">size</span><span class="si">}</span><span class="s2">, цукор: </span><span class="si">{</span><span class="n">sugar</span><span class="si">}</span><span class="s2">"</span>
-<a id="__codelineno-108-3" name="__codelineno-108-3" href="#__codelineno-108-3"></a>
-<a id="__codelineno-108-4" name="__codelineno-108-4" href="#__codelineno-108-4"></a>
-<a id="__codelineno-108-5" name="__codelineno-108-5" href="#__codelineno-108-5"></a><span class="nb">print</span><span class="p">(</span><span class="n">make_coffee</span><span class="p">(</span><span class="s2">"L"</span><span class="p">,</span> <span class="n">sugar</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
-<a id="__codelineno-108-6" name="__codelineno-108-6" href="#__codelineno-108-6"></a><span class="n">make_coffee</span><span class="p">(</span><span class="s2">"L"</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-110-1" name="__codelineno-110-1" href="#__codelineno-110-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">make_coffee</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">sugar</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<a id="__codelineno-110-2" name="__codelineno-110-2" href="#__codelineno-110-2"></a>    <span class="k">return</span> <span class="sa">f</span><span class="s2">"кава </span><span class="si">{</span><span class="n">size</span><span class="si">}</span><span class="s2">, цукор: </span><span class="si">{</span><span class="n">sugar</span><span class="si">}</span><span class="s2">"</span>
+<a id="__codelineno-110-3" name="__codelineno-110-3" href="#__codelineno-110-3"></a>
+<a id="__codelineno-110-4" name="__codelineno-110-4" href="#__codelineno-110-4"></a>
+<a id="__codelineno-110-5" name="__codelineno-110-5" href="#__codelineno-110-5"></a><span class="nb">print</span><span class="p">(</span><span class="n">make_coffee</span><span class="p">(</span><span class="s2">"L"</span><span class="p">,</span> <span class="n">sugar</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+<a id="__codelineno-110-6" name="__codelineno-110-6" href="#__codelineno-110-6"></a><span class="n">make_coffee</span><span class="p">(</span><span class="s2">"L"</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-109-1" name="__codelineno-109-1" href="#__codelineno-109-1"></a>кава L, цукор: 2
-<a id="__codelineno-109-2" name="__codelineno-109-2" href="#__codelineno-109-2"></a>TypeError: make_coffee() takes 1 positional argument but 2 were given
+<div class="highlight"><pre><span></span><code><a id="__codelineno-111-1" name="__codelineno-111-1" href="#__codelineno-111-1"></a>кава L, цукор: 2
+<a id="__codelineno-111-2" name="__codelineno-111-2" href="#__codelineno-111-2"></a>TypeError: make_coffee() takes 1 positional argument but 2 were given
 </code></pre></div>
 <p><strong>Параметри після поодинокої <code>*</code> передаються тільки за іменем.</strong> Запис <code>make_coffee("L", sugar=2)</code> читається однозначно, а <code>make_coffee("L", 2)</code> змушує гадати, що таке <code>2</code>. Тому так часто оформлюють прапорці й налаштування.</p>
 <p>Поодинока <code>*</code> <strong>нічого не збирає</strong> — вона лише ставить межу. А <code>*args</code> збирає зайві значення без імені, і параметри після нього теж стають «тільки за іменем»:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-110-1" name="__codelineno-110-1" href="#__codelineno-110-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">report</span><span class="p">(</span><span class="o">*</span><span class="n">bills</span><span class="p">,</span> <span class="n">currency</span><span class="p">):</span>
-<a id="__codelineno-110-2" name="__codelineno-110-2" href="#__codelineno-110-2"></a>    <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">sum</span><span class="p">(</span><span class="n">bills</span><span class="p">)</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">currency</span><span class="si">}</span><span class="s2">"</span>
-<a id="__codelineno-110-3" name="__codelineno-110-3" href="#__codelineno-110-3"></a>
-<a id="__codelineno-110-4" name="__codelineno-110-4" href="#__codelineno-110-4"></a>
-<a id="__codelineno-110-5" name="__codelineno-110-5" href="#__codelineno-110-5"></a><span class="nb">print</span><span class="p">(</span><span class="n">report</span><span class="p">(</span><span class="mf">540.0</span><span class="p">,</span> <span class="mf">980.0</span><span class="p">,</span> <span class="n">currency</span><span class="o">=</span><span class="s2">"грн"</span><span class="p">))</span>
-<a id="__codelineno-110-6" name="__codelineno-110-6" href="#__codelineno-110-6"></a><span class="n">report</span><span class="p">(</span><span class="mf">540.0</span><span class="p">,</span> <span class="mf">980.0</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-112-1" name="__codelineno-112-1" href="#__codelineno-112-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">report</span><span class="p">(</span><span class="o">*</span><span class="n">bills</span><span class="p">,</span> <span class="n">currency</span><span class="p">):</span>
+<a id="__codelineno-112-2" name="__codelineno-112-2" href="#__codelineno-112-2"></a>    <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">sum</span><span class="p">(</span><span class="n">bills</span><span class="p">)</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">currency</span><span class="si">}</span><span class="s2">"</span>
+<a id="__codelineno-112-3" name="__codelineno-112-3" href="#__codelineno-112-3"></a>
+<a id="__codelineno-112-4" name="__codelineno-112-4" href="#__codelineno-112-4"></a>
+<a id="__codelineno-112-5" name="__codelineno-112-5" href="#__codelineno-112-5"></a><span class="nb">print</span><span class="p">(</span><span class="n">report</span><span class="p">(</span><span class="mf">540.0</span><span class="p">,</span> <span class="mf">980.0</span><span class="p">,</span> <span class="n">currency</span><span class="o">=</span><span class="s2">"грн"</span><span class="p">))</span>
+<a id="__codelineno-112-6" name="__codelineno-112-6" href="#__codelineno-112-6"></a><span class="n">report</span><span class="p">(</span><span class="mf">540.0</span><span class="p">,</span> <span class="mf">980.0</span><span class="p">)</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-111-1" name="__codelineno-111-1" href="#__codelineno-111-1"></a>1520.0 грн
-<a id="__codelineno-111-2" name="__codelineno-111-2" href="#__codelineno-111-2"></a>TypeError: report() missing 1 required keyword-only argument: 'currency'
+<div class="highlight"><pre><span></span><code><a id="__codelineno-113-1" name="__codelineno-113-1" href="#__codelineno-113-1"></a>1520.0 грн
+<a id="__codelineno-113-2" name="__codelineno-113-2" href="#__codelineno-113-2"></a>TypeError: report() missing 1 required keyword-only argument: 'currency'
 </code></pre></div>
 <p>Як видно з <code>make_coffee</code> і <code>report</code>, такий параметр може мати значення за замовчуванням (<code>sugar=0</code>), а може бути обов'язковим (<code>currency</code>).</p>
 <p>Тепер, коли обидві позначки знайомі, їх можна порівняти:</p>
@@ -5285,8 +5305,8 @@
 </details>
 <h3 id="_20">Повна картина: п'ять видів параметрів<a class="headerlink" href="#_20" title="Permanent link">&para;</a></h3>
 <p>Тепер кожен елемент знайомий, і можна зібрати все разом. У Python є п'ять видів параметрів, і в <code>def</code> вони йдуть саме в такому порядку:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-112-1" name="__codelineno-112-1" href="#__codelineno-112-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">example</span><span class="p">(</span><span class="n">pos_only</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="n">pos_or_kw</span><span class="p">,</span> <span class="n">default_pos</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">kw_only</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<a id="__codelineno-112-2" name="__codelineno-112-2" href="#__codelineno-112-2"></a>    <span class="k">pass</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-114-1" name="__codelineno-114-1" href="#__codelineno-114-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">example</span><span class="p">(</span><span class="n">pos_only</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="n">pos_or_kw</span><span class="p">,</span> <span class="n">default_pos</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">kw_only</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<a id="__codelineno-114-2" name="__codelineno-114-2" href="#__codelineno-114-2"></a>    <span class="k">pass</span>
 </code></pre></div>
 <table>
 <thead>
@@ -5325,158 +5345,158 @@
 </tbody>
 </table>
 <p><strong>Значення за замовчуванням — не окремий вид.</strong> Його може мати і параметр «за порядком або за іменем» (<code>default_pos=10</code>), і параметр «тільки за іменем» (<code>sugar=0</code> у <code>make_coffee</code>). Правило одне: серед параметрів, які можна передати за порядком, ті, що мають значення за замовчуванням, стоять після тих, що не мають. Жоден вид не обов'язковий, але порушення порядку Python помічає ще до запуску:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-113-1" name="__codelineno-113-1" href="#__codelineno-113-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">make_coffee</span><span class="p">(</span><span class="n">sugar</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="p">):</span>
-<a id="__codelineno-113-2" name="__codelineno-113-2" href="#__codelineno-113-2"></a>    <span class="k">pass</span>
-</code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-114-1" name="__codelineno-114-1" href="#__codelineno-114-1"></a>SyntaxError: parameter without a default follows parameter with a default
-</code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-115-1" name="__codelineno-115-1" href="#__codelineno-115-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">f</span><span class="p">(</span><span class="o">**</span><span class="n">options</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-115-1" name="__codelineno-115-1" href="#__codelineno-115-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">make_coffee</span><span class="p">(</span><span class="n">sugar</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="p">):</span>
 <a id="__codelineno-115-2" name="__codelineno-115-2" href="#__codelineno-115-2"></a>    <span class="k">pass</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-116-1" name="__codelineno-116-1" href="#__codelineno-116-1"></a>SyntaxError: arguments cannot follow var-keyword argument
+<div class="highlight"><pre><span></span><code><a id="__codelineno-116-1" name="__codelineno-116-1" href="#__codelineno-116-1"></a>SyntaxError: parameter without a default follows parameter with a default
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-117-1" name="__codelineno-117-1" href="#__codelineno-117-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">f</span><span class="p">(</span><span class="o">**</span><span class="n">options</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+<a id="__codelineno-117-2" name="__codelineno-117-2" href="#__codelineno-117-2"></a>    <span class="k">pass</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-118-1" name="__codelineno-118-1" href="#__codelineno-118-1"></a>SyntaxError: arguments cannot follow var-keyword argument
 </code></pre></div>
 <p>Подивимось, куди потрапляє кожен аргумент одного виклику:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-117-1" name="__codelineno-117-1" href="#__codelineno-117-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">example</span><span class="p">(</span><span class="n">pos_only</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="n">pos_or_kw</span><span class="p">,</span> <span class="n">default_pos</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">kw_only</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<a id="__codelineno-117-2" name="__codelineno-117-2" href="#__codelineno-117-2"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"  pos_only    ="</span><span class="p">,</span> <span class="n">pos_only</span><span class="p">)</span>
-<a id="__codelineno-117-3" name="__codelineno-117-3" href="#__codelineno-117-3"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"  pos_or_kw   ="</span><span class="p">,</span> <span class="n">pos_or_kw</span><span class="p">)</span>
-<a id="__codelineno-117-4" name="__codelineno-117-4" href="#__codelineno-117-4"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"  default_pos ="</span><span class="p">,</span> <span class="n">default_pos</span><span class="p">)</span>
-<a id="__codelineno-117-5" name="__codelineno-117-5" href="#__codelineno-117-5"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"  args        ="</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
-<a id="__codelineno-117-6" name="__codelineno-117-6" href="#__codelineno-117-6"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"  kw_only     ="</span><span class="p">,</span> <span class="n">kw_only</span><span class="p">)</span>
-<a id="__codelineno-117-7" name="__codelineno-117-7" href="#__codelineno-117-7"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"  kwargs      ="</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
-<a id="__codelineno-117-8" name="__codelineno-117-8" href="#__codelineno-117-8"></a>
-<a id="__codelineno-117-9" name="__codelineno-117-9" href="#__codelineno-117-9"></a>
-<a id="__codelineno-117-10" name="__codelineno-117-10" href="#__codelineno-117-10"></a><span class="n">example</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">kw_only</span><span class="o">=</span><span class="s2">"K"</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
-</code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-118-1" name="__codelineno-118-1" href="#__codelineno-118-1"></a>  pos_only    = 1
-<a id="__codelineno-118-2" name="__codelineno-118-2" href="#__codelineno-118-2"></a>  pos_or_kw   = 2
-<a id="__codelineno-118-3" name="__codelineno-118-3" href="#__codelineno-118-3"></a>  default_pos = 3
-<a id="__codelineno-118-4" name="__codelineno-118-4" href="#__codelineno-118-4"></a>  args        = (4, 5)
-<a id="__codelineno-118-5" name="__codelineno-118-5" href="#__codelineno-118-5"></a>  kw_only     = K
-<a id="__codelineno-118-6" name="__codelineno-118-6" href="#__codelineno-118-6"></a>  kwargs      = {'x': 100, 'y': 200}
-</code></pre></div>
-<p><code>1</code> і <code>2</code> зайняли перші два місця, <code>3</code> замінило значення за замовчуванням, <code>4</code> і <code>5</code> — зайві без імені, тому пішли в <code>args</code>. <code>kw_only</code> отримав значення за іменем, а <code>x</code> і <code>y</code> жоден параметр не забрав, тож вони опинилися в <code>kwargs</code>.</p>
-<p>Одна несподіванка: ім'я параметра «тільки за порядком» вільне для іменованих аргументів. Тому <code>pos_only=99</code> не конфліктує з <code>pos_only</code>, а потрапляє в <code>kwargs</code>:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-119-1" name="__codelineno-119-1" href="#__codelineno-119-1"></a><span class="n">example</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">kw_only</span><span class="o">=</span><span class="s2">"K"</span><span class="p">,</span> <span class="n">pos_only</span><span class="o">=</span><span class="mi">99</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-119-1" name="__codelineno-119-1" href="#__codelineno-119-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">example</span><span class="p">(</span><span class="n">pos_only</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="n">pos_or_kw</span><span class="p">,</span> <span class="n">default_pos</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">kw_only</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<a id="__codelineno-119-2" name="__codelineno-119-2" href="#__codelineno-119-2"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"  pos_only    ="</span><span class="p">,</span> <span class="n">pos_only</span><span class="p">)</span>
+<a id="__codelineno-119-3" name="__codelineno-119-3" href="#__codelineno-119-3"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"  pos_or_kw   ="</span><span class="p">,</span> <span class="n">pos_or_kw</span><span class="p">)</span>
+<a id="__codelineno-119-4" name="__codelineno-119-4" href="#__codelineno-119-4"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"  default_pos ="</span><span class="p">,</span> <span class="n">default_pos</span><span class="p">)</span>
+<a id="__codelineno-119-5" name="__codelineno-119-5" href="#__codelineno-119-5"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"  args        ="</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
+<a id="__codelineno-119-6" name="__codelineno-119-6" href="#__codelineno-119-6"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"  kw_only     ="</span><span class="p">,</span> <span class="n">kw_only</span><span class="p">)</span>
+<a id="__codelineno-119-7" name="__codelineno-119-7" href="#__codelineno-119-7"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"  kwargs      ="</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+<a id="__codelineno-119-8" name="__codelineno-119-8" href="#__codelineno-119-8"></a>
+<a id="__codelineno-119-9" name="__codelineno-119-9" href="#__codelineno-119-9"></a>
+<a id="__codelineno-119-10" name="__codelineno-119-10" href="#__codelineno-119-10"></a><span class="n">example</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">kw_only</span><span class="o">=</span><span class="s2">"K"</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-120-1" name="__codelineno-120-1" href="#__codelineno-120-1"></a>  pos_only    = 1
 <a id="__codelineno-120-2" name="__codelineno-120-2" href="#__codelineno-120-2"></a>  pos_or_kw   = 2
-<a id="__codelineno-120-3" name="__codelineno-120-3" href="#__codelineno-120-3"></a>  default_pos = 10
-<a id="__codelineno-120-4" name="__codelineno-120-4" href="#__codelineno-120-4"></a>  args        = ()
+<a id="__codelineno-120-3" name="__codelineno-120-3" href="#__codelineno-120-3"></a>  default_pos = 3
+<a id="__codelineno-120-4" name="__codelineno-120-4" href="#__codelineno-120-4"></a>  args        = (4, 5)
 <a id="__codelineno-120-5" name="__codelineno-120-5" href="#__codelineno-120-5"></a>  kw_only     = K
-<a id="__codelineno-120-6" name="__codelineno-120-6" href="#__codelineno-120-6"></a>  kwargs      = {'pos_only': 99}
+<a id="__codelineno-120-6" name="__codelineno-120-6" href="#__codelineno-120-6"></a>  kwargs      = {'x': 100, 'y': 200}
+</code></pre></div>
+<p><code>1</code> і <code>2</code> зайняли перші два місця, <code>3</code> замінило значення за замовчуванням, <code>4</code> і <code>5</code> — зайві без імені, тому пішли в <code>args</code>. <code>kw_only</code> отримав значення за іменем, а <code>x</code> і <code>y</code> жоден параметр не забрав, тож вони опинилися в <code>kwargs</code>.</p>
+<p>Одна несподіванка: ім'я параметра «тільки за порядком» вільне для іменованих аргументів. Тому <code>pos_only=99</code> не конфліктує з <code>pos_only</code>, а потрапляє в <code>kwargs</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-121-1" name="__codelineno-121-1" href="#__codelineno-121-1"></a><span class="n">example</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">kw_only</span><span class="o">=</span><span class="s2">"K"</span><span class="p">,</span> <span class="n">pos_only</span><span class="o">=</span><span class="mi">99</span><span class="p">)</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-122-1" name="__codelineno-122-1" href="#__codelineno-122-1"></a>  pos_only    = 1
+<a id="__codelineno-122-2" name="__codelineno-122-2" href="#__codelineno-122-2"></a>  pos_or_kw   = 2
+<a id="__codelineno-122-3" name="__codelineno-122-3" href="#__codelineno-122-3"></a>  default_pos = 10
+<a id="__codelineno-122-4" name="__codelineno-122-4" href="#__codelineno-122-4"></a>  args        = ()
+<a id="__codelineno-122-5" name="__codelineno-122-5" href="#__codelineno-122-5"></a>  kw_only     = K
+<a id="__codelineno-122-6" name="__codelineno-122-6" href="#__codelineno-122-6"></a>  kwargs      = {'pos_only': 99}
 </code></pre></div>
 <p>Правила самого <strong>виклику</strong> не змінились: спершу аргументи без імені, потім з іменем, і кожен параметр отримує значення один раз. Типові помилки:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-121-1" name="__codelineno-121-1" href="#__codelineno-121-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">foo</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
-<a id="__codelineno-121-2" name="__codelineno-121-2" href="#__codelineno-121-2"></a>    <span class="k">pass</span>
-<a id="__codelineno-121-3" name="__codelineno-121-3" href="#__codelineno-121-3"></a>
-<a id="__codelineno-121-4" name="__codelineno-121-4" href="#__codelineno-121-4"></a>
-<a id="__codelineno-121-5" name="__codelineno-121-5" href="#__codelineno-121-5"></a><span class="n">foo</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-123-1" name="__codelineno-123-1" href="#__codelineno-123-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">foo</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+<a id="__codelineno-123-2" name="__codelineno-123-2" href="#__codelineno-123-2"></a>    <span class="k">pass</span>
+<a id="__codelineno-123-3" name="__codelineno-123-3" href="#__codelineno-123-3"></a>
+<a id="__codelineno-123-4" name="__codelineno-123-4" href="#__codelineno-123-4"></a>
+<a id="__codelineno-123-5" name="__codelineno-123-5" href="#__codelineno-123-5"></a><span class="n">foo</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-122-1" name="__codelineno-122-1" href="#__codelineno-122-1"></a>TypeError: foo() got multiple values for argument 'a'
+<div class="highlight"><pre><span></span><code><a id="__codelineno-124-1" name="__codelineno-124-1" href="#__codelineno-124-1"></a>TypeError: foo() got multiple values for argument 'a'
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-123-1" name="__codelineno-123-1" href="#__codelineno-123-1"></a><span class="n">foo</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-125-1" name="__codelineno-125-1" href="#__codelineno-125-1"></a><span class="n">foo</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-124-1" name="__codelineno-124-1" href="#__codelineno-124-1"></a>TypeError: foo() got an unexpected keyword argument 'c'
+<div class="highlight"><pre><span></span><code><a id="__codelineno-126-1" name="__codelineno-126-1" href="#__codelineno-126-1"></a>TypeError: foo() got an unexpected keyword argument 'c'
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-125-1" name="__codelineno-125-1" href="#__codelineno-125-1"></a><span class="n">foo</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="s2">"a"</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span> <span class="o">*</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-127-1" name="__codelineno-127-1" href="#__codelineno-127-1"></a><span class="n">foo</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="s2">"a"</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span> <span class="o">*</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-126-1" name="__codelineno-126-1" href="#__codelineno-126-1"></a>SyntaxError: iterable argument unpacking follows keyword argument unpacking
+<div class="highlight"><pre><span></span><code><a id="__codelineno-128-1" name="__codelineno-128-1" href="#__codelineno-128-1"></a>SyntaxError: iterable argument unpacking follows keyword argument unpacking
 </code></pre></div>
 <p>Це те саме правило, що й для <code>foo(a=1, 2)</code> з <a href="#positional-keyword">початку уроку</a>: спершу аргументи без імені, потім з іменем. Тому й розпаковка <code>*</code> не може йти після <code>**</code>.</p>
 <h3 id="-">Функція-посередник<a class="headerlink" href="#-" title="Permanent link">&para;</a></h3>
 <p>Пакування в оголошенні й розпаковка у виклику разом дають функцію, яка приймає <strong>будь-які</strong> аргументи й передає їх іншій функції без змін. Наприклад, щоб записувати в журнал кожен виклик:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-127-1" name="__codelineno-127-1" href="#__codelineno-127-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">logged</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<a id="__codelineno-127-2" name="__codelineno-127-2" href="#__codelineno-127-2"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"  виклик"</span><span class="p">,</span> <span class="n">func</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="s2">"args ="</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="s2">"kwargs ="</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
-<a id="__codelineno-127-3" name="__codelineno-127-3" href="#__codelineno-127-3"></a>    <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-<a id="__codelineno-127-4" name="__codelineno-127-4" href="#__codelineno-127-4"></a>
-<a id="__codelineno-127-5" name="__codelineno-127-5" href="#__codelineno-127-5"></a>
-<a id="__codelineno-127-6" name="__codelineno-127-6" href="#__codelineno-127-6"></a><span class="nb">print</span><span class="p">(</span><span class="n">logged</span><span class="p">(</span><span class="n">price_with_service</span><span class="p">,</span> <span class="mf">500.0</span><span class="p">,</span> <span class="n">service</span><span class="o">=</span><span class="mi">5</span><span class="p">))</span>
-<a id="__codelineno-127-7" name="__codelineno-127-7" href="#__codelineno-127-7"></a><span class="nb">print</span><span class="p">(</span><span class="n">logged</span><span class="p">(</span><span class="nb">max</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
-<a id="__codelineno-127-8" name="__codelineno-127-8" href="#__codelineno-127-8"></a><span class="nb">print</span><span class="p">(</span><span class="n">logged</span><span class="p">(</span><span class="nb">sorted</span><span class="p">,</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-129-1" name="__codelineno-129-1" href="#__codelineno-129-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">logged</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<a id="__codelineno-129-2" name="__codelineno-129-2" href="#__codelineno-129-2"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"  виклик"</span><span class="p">,</span> <span class="n">func</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="s2">"args ="</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="s2">"kwargs ="</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+<a id="__codelineno-129-3" name="__codelineno-129-3" href="#__codelineno-129-3"></a>    <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<a id="__codelineno-129-4" name="__codelineno-129-4" href="#__codelineno-129-4"></a>
+<a id="__codelineno-129-5" name="__codelineno-129-5" href="#__codelineno-129-5"></a>
+<a id="__codelineno-129-6" name="__codelineno-129-6" href="#__codelineno-129-6"></a><span class="nb">print</span><span class="p">(</span><span class="n">logged</span><span class="p">(</span><span class="n">price_with_service</span><span class="p">,</span> <span class="mf">500.0</span><span class="p">,</span> <span class="n">service</span><span class="o">=</span><span class="mi">5</span><span class="p">))</span>
+<a id="__codelineno-129-7" name="__codelineno-129-7" href="#__codelineno-129-7"></a><span class="nb">print</span><span class="p">(</span><span class="n">logged</span><span class="p">(</span><span class="nb">max</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<a id="__codelineno-129-8" name="__codelineno-129-8" href="#__codelineno-129-8"></a><span class="nb">print</span><span class="p">(</span><span class="n">logged</span><span class="p">(</span><span class="nb">sorted</span><span class="p">,</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-128-1" name="__codelineno-128-1" href="#__codelineno-128-1"></a>  виклик price_with_service args = (500.0,) kwargs = {'service': 5}
-<a id="__codelineno-128-2" name="__codelineno-128-2" href="#__codelineno-128-2"></a>525.0
-<a id="__codelineno-128-3" name="__codelineno-128-3" href="#__codelineno-128-3"></a>  виклик max args = (3, 9, 4) kwargs = {}
-<a id="__codelineno-128-4" name="__codelineno-128-4" href="#__codelineno-128-4"></a>9
-<a id="__codelineno-128-5" name="__codelineno-128-5" href="#__codelineno-128-5"></a>  виклик sorted args = ([3, 1, 2],) kwargs = {'reverse': True}
-<a id="__codelineno-128-6" name="__codelineno-128-6" href="#__codelineno-128-6"></a>[3, 2, 1]
+<div class="highlight"><pre><span></span><code><a id="__codelineno-130-1" name="__codelineno-130-1" href="#__codelineno-130-1"></a>  виклик price_with_service args = (500.0,) kwargs = {'service': 5}
+<a id="__codelineno-130-2" name="__codelineno-130-2" href="#__codelineno-130-2"></a>525.0
+<a id="__codelineno-130-3" name="__codelineno-130-3" href="#__codelineno-130-3"></a>  виклик max args = (3, 9, 4) kwargs = {}
+<a id="__codelineno-130-4" name="__codelineno-130-4" href="#__codelineno-130-4"></a>9
+<a id="__codelineno-130-5" name="__codelineno-130-5" href="#__codelineno-130-5"></a>  виклик sorted args = ([3, 1, 2],) kwargs = {'reverse': True}
+<a id="__codelineno-130-6" name="__codelineno-130-6" href="#__codelineno-130-6"></a>[3, 2, 1]
 </code></pre></div>
 <p><code>logged</code> не знає, скільки аргументів у <code>max</code> чи <code>sorted</code>, і знати не мусить. На цьому прийомі побудовані декоратори з <a href="../lesson_10/">уроку 10</a>.</p>
 <h3 id="_21">Пастки з аргументами<a class="headerlink" href="#_21" title="Permanent link">&para;</a></h3>
 <p><strong>Список за замовчуванням.</strong> Пастку ми розібрали <a href="#default-values">на початку уроку</a>. Тепер видно, де саме «живе» той спільний список: Python зберігає значення за замовчуванням в атрибуті функції <code>__defaults__</code>.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-129-1" name="__codelineno-129-1" href="#__codelineno-129-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">add_item</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">items</span><span class="o">=</span><span class="p">[]):</span>
-<a id="__codelineno-129-2" name="__codelineno-129-2" href="#__codelineno-129-2"></a>    <span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
-<a id="__codelineno-129-3" name="__codelineno-129-3" href="#__codelineno-129-3"></a>    <span class="k">return</span> <span class="n">items</span>
-<a id="__codelineno-129-4" name="__codelineno-129-4" href="#__codelineno-129-4"></a>
-<a id="__codelineno-129-5" name="__codelineno-129-5" href="#__codelineno-129-5"></a>
-<a id="__codelineno-129-6" name="__codelineno-129-6" href="#__codelineno-129-6"></a><span class="nb">print</span><span class="p">(</span><span class="n">add_item</span><span class="o">.</span><span class="vm">__defaults__</span><span class="p">)</span>
-<a id="__codelineno-129-7" name="__codelineno-129-7" href="#__codelineno-129-7"></a><span class="n">add_item</span><span class="p">(</span><span class="s2">"кава"</span><span class="p">)</span>
-<a id="__codelineno-129-8" name="__codelineno-129-8" href="#__codelineno-129-8"></a><span class="n">add_item</span><span class="p">(</span><span class="s2">"чай"</span><span class="p">)</span>
-<a id="__codelineno-129-9" name="__codelineno-129-9" href="#__codelineno-129-9"></a><span class="nb">print</span><span class="p">(</span><span class="n">add_item</span><span class="o">.</span><span class="vm">__defaults__</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-131-1" name="__codelineno-131-1" href="#__codelineno-131-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">add_item</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">items</span><span class="o">=</span><span class="p">[]):</span>
+<a id="__codelineno-131-2" name="__codelineno-131-2" href="#__codelineno-131-2"></a>    <span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+<a id="__codelineno-131-3" name="__codelineno-131-3" href="#__codelineno-131-3"></a>    <span class="k">return</span> <span class="n">items</span>
+<a id="__codelineno-131-4" name="__codelineno-131-4" href="#__codelineno-131-4"></a>
+<a id="__codelineno-131-5" name="__codelineno-131-5" href="#__codelineno-131-5"></a>
+<a id="__codelineno-131-6" name="__codelineno-131-6" href="#__codelineno-131-6"></a><span class="nb">print</span><span class="p">(</span><span class="n">add_item</span><span class="o">.</span><span class="vm">__defaults__</span><span class="p">)</span>
+<a id="__codelineno-131-7" name="__codelineno-131-7" href="#__codelineno-131-7"></a><span class="n">add_item</span><span class="p">(</span><span class="s2">"кава"</span><span class="p">)</span>
+<a id="__codelineno-131-8" name="__codelineno-131-8" href="#__codelineno-131-8"></a><span class="n">add_item</span><span class="p">(</span><span class="s2">"чай"</span><span class="p">)</span>
+<a id="__codelineno-131-9" name="__codelineno-131-9" href="#__codelineno-131-9"></a><span class="nb">print</span><span class="p">(</span><span class="n">add_item</span><span class="o">.</span><span class="vm">__defaults__</span><span class="p">)</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-130-1" name="__codelineno-130-1" href="#__codelineno-130-1"></a>([],)
-<a id="__codelineno-130-2" name="__codelineno-130-2" href="#__codelineno-130-2"></a>(['кава', 'чай'],)
+<div class="highlight"><pre><span></span><code><a id="__codelineno-132-1" name="__codelineno-132-1" href="#__codelineno-132-1"></a>([],)
+<a id="__codelineno-132-2" name="__codelineno-132-2" href="#__codelineno-132-2"></a>(['кава', 'чай'],)
 </code></pre></div>
 <p><strong>Функція отримує той самий об'єкт, а не копію.</strong> Коли передаєш список у функцію, параметр стає ще одним іменем для того самого списку. Нове присвоєння всередині функції зовнішній список не змінює, а зміна «на місці» — змінює:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-131-1" name="__codelineno-131-1" href="#__codelineno-131-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">replace</span><span class="p">(</span><span class="n">bills</span><span class="p">):</span>
-<a id="__codelineno-131-2" name="__codelineno-131-2" href="#__codelineno-131-2"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"  replace: той самий список?"</span><span class="p">,</span> <span class="n">bills</span> <span class="ow">is</span> <span class="n">day</span><span class="p">)</span>
-<a id="__codelineno-131-3" name="__codelineno-131-3" href="#__codelineno-131-3"></a>    <span class="n">bills</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">]</span>                   <span class="c1"># ім'я bills тепер вказує на НОВИЙ список</span>
-<a id="__codelineno-131-4" name="__codelineno-131-4" href="#__codelineno-131-4"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"  replace: після присвоєння?"</span><span class="p">,</span> <span class="n">bills</span> <span class="ow">is</span> <span class="n">day</span><span class="p">)</span>
-<a id="__codelineno-131-5" name="__codelineno-131-5" href="#__codelineno-131-5"></a>
-<a id="__codelineno-131-6" name="__codelineno-131-6" href="#__codelineno-131-6"></a>
-<a id="__codelineno-131-7" name="__codelineno-131-7" href="#__codelineno-131-7"></a><span class="k">def</span><span class="w"> </span><span class="nf">append_tip</span><span class="p">(</span><span class="n">bills</span><span class="p">):</span>
-<a id="__codelineno-131-8" name="__codelineno-131-8" href="#__codelineno-131-8"></a>    <span class="n">bills</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">50.0</span><span class="p">)</span>              <span class="c1"># змінюємо спільний список</span>
-<a id="__codelineno-131-9" name="__codelineno-131-9" href="#__codelineno-131-9"></a>
-<a id="__codelineno-131-10" name="__codelineno-131-10" href="#__codelineno-131-10"></a>
-<a id="__codelineno-131-11" name="__codelineno-131-11" href="#__codelineno-131-11"></a><span class="n">day</span> <span class="o">=</span> <span class="p">[</span><span class="mf">540.0</span><span class="p">,</span> <span class="mf">980.0</span><span class="p">]</span>
-<a id="__codelineno-131-12" name="__codelineno-131-12" href="#__codelineno-131-12"></a><span class="n">replace</span><span class="p">(</span><span class="n">day</span><span class="p">)</span>
-<a id="__codelineno-131-13" name="__codelineno-131-13" href="#__codelineno-131-13"></a><span class="nb">print</span><span class="p">(</span><span class="s2">"після replace:"</span><span class="p">,</span> <span class="n">day</span><span class="p">)</span>
-<a id="__codelineno-131-14" name="__codelineno-131-14" href="#__codelineno-131-14"></a><span class="n">append_tip</span><span class="p">(</span><span class="n">day</span><span class="p">)</span>
-<a id="__codelineno-131-15" name="__codelineno-131-15" href="#__codelineno-131-15"></a><span class="nb">print</span><span class="p">(</span><span class="s2">"після append_tip:"</span><span class="p">,</span> <span class="n">day</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-133-1" name="__codelineno-133-1" href="#__codelineno-133-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">replace</span><span class="p">(</span><span class="n">bills</span><span class="p">):</span>
+<a id="__codelineno-133-2" name="__codelineno-133-2" href="#__codelineno-133-2"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"  replace: той самий список?"</span><span class="p">,</span> <span class="n">bills</span> <span class="ow">is</span> <span class="n">day</span><span class="p">)</span>
+<a id="__codelineno-133-3" name="__codelineno-133-3" href="#__codelineno-133-3"></a>    <span class="n">bills</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">]</span>                   <span class="c1"># ім'я bills тепер вказує на НОВИЙ список</span>
+<a id="__codelineno-133-4" name="__codelineno-133-4" href="#__codelineno-133-4"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"  replace: після присвоєння?"</span><span class="p">,</span> <span class="n">bills</span> <span class="ow">is</span> <span class="n">day</span><span class="p">)</span>
+<a id="__codelineno-133-5" name="__codelineno-133-5" href="#__codelineno-133-5"></a>
+<a id="__codelineno-133-6" name="__codelineno-133-6" href="#__codelineno-133-6"></a>
+<a id="__codelineno-133-7" name="__codelineno-133-7" href="#__codelineno-133-7"></a><span class="k">def</span><span class="w"> </span><span class="nf">append_tip</span><span class="p">(</span><span class="n">bills</span><span class="p">):</span>
+<a id="__codelineno-133-8" name="__codelineno-133-8" href="#__codelineno-133-8"></a>    <span class="n">bills</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">50.0</span><span class="p">)</span>              <span class="c1"># змінюємо спільний список</span>
+<a id="__codelineno-133-9" name="__codelineno-133-9" href="#__codelineno-133-9"></a>
+<a id="__codelineno-133-10" name="__codelineno-133-10" href="#__codelineno-133-10"></a>
+<a id="__codelineno-133-11" name="__codelineno-133-11" href="#__codelineno-133-11"></a><span class="n">day</span> <span class="o">=</span> <span class="p">[</span><span class="mf">540.0</span><span class="p">,</span> <span class="mf">980.0</span><span class="p">]</span>
+<a id="__codelineno-133-12" name="__codelineno-133-12" href="#__codelineno-133-12"></a><span class="n">replace</span><span class="p">(</span><span class="n">day</span><span class="p">)</span>
+<a id="__codelineno-133-13" name="__codelineno-133-13" href="#__codelineno-133-13"></a><span class="nb">print</span><span class="p">(</span><span class="s2">"після replace:"</span><span class="p">,</span> <span class="n">day</span><span class="p">)</span>
+<a id="__codelineno-133-14" name="__codelineno-133-14" href="#__codelineno-133-14"></a><span class="n">append_tip</span><span class="p">(</span><span class="n">day</span><span class="p">)</span>
+<a id="__codelineno-133-15" name="__codelineno-133-15" href="#__codelineno-133-15"></a><span class="nb">print</span><span class="p">(</span><span class="s2">"після append_tip:"</span><span class="p">,</span> <span class="n">day</span><span class="p">)</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-132-1" name="__codelineno-132-1" href="#__codelineno-132-1"></a>  replace: той самий список? True
-<a id="__codelineno-132-2" name="__codelineno-132-2" href="#__codelineno-132-2"></a>  replace: після присвоєння? False
-<a id="__codelineno-132-3" name="__codelineno-132-3" href="#__codelineno-132-3"></a>після replace: [540.0, 980.0]
-<a id="__codelineno-132-4" name="__codelineno-132-4" href="#__codelineno-132-4"></a>після append_tip: [540.0, 980.0, 50.0]
+<div class="highlight"><pre><span></span><code><a id="__codelineno-134-1" name="__codelineno-134-1" href="#__codelineno-134-1"></a>  replace: той самий список? True
+<a id="__codelineno-134-2" name="__codelineno-134-2" href="#__codelineno-134-2"></a>  replace: після присвоєння? False
+<a id="__codelineno-134-3" name="__codelineno-134-3" href="#__codelineno-134-3"></a>після replace: [540.0, 980.0]
+<a id="__codelineno-134-4" name="__codelineno-134-4" href="#__codelineno-134-4"></a>після append_tip: [540.0, 980.0, 50.0]
 </code></pre></div>
 <p>Щоб функція не зачепила оригінал, передай копію — <code>day.copy()</code>, <code>list(day)</code> або <code>day[:]</code>. А ще краще — пиши <a href="#pure-functions">чисті функції</a>, які повертають новий список. З числами, рядками й кортежами такої пастки немає: їх неможливо змінити «на місці», тому результат завжди треба брати з <code>return</code>:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-133-1" name="__codelineno-133-1" href="#__codelineno-133-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">add_one</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
-<a id="__codelineno-133-2" name="__codelineno-133-2" href="#__codelineno-133-2"></a>    <span class="n">n</span> <span class="o">+=</span> <span class="mi">1</span>
-<a id="__codelineno-133-3" name="__codelineno-133-3" href="#__codelineno-133-3"></a>    <span class="k">return</span> <span class="n">n</span>
-<a id="__codelineno-133-4" name="__codelineno-133-4" href="#__codelineno-133-4"></a>
-<a id="__codelineno-133-5" name="__codelineno-133-5" href="#__codelineno-133-5"></a>
-<a id="__codelineno-133-6" name="__codelineno-133-6" href="#__codelineno-133-6"></a><span class="n">guests</span> <span class="o">=</span> <span class="mi">5</span>
-<a id="__codelineno-133-7" name="__codelineno-133-7" href="#__codelineno-133-7"></a><span class="n">add_one</span><span class="p">(</span><span class="n">guests</span><span class="p">)</span>
-<a id="__codelineno-133-8" name="__codelineno-133-8" href="#__codelineno-133-8"></a><span class="nb">print</span><span class="p">(</span><span class="s2">"guests ="</span><span class="p">,</span> <span class="n">guests</span><span class="p">,</span> <span class="s2">"| add_one(guests) ="</span><span class="p">,</span> <span class="n">add_one</span><span class="p">(</span><span class="n">guests</span><span class="p">))</span>
-</code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-134-1" name="__codelineno-134-1" href="#__codelineno-134-1"></a>guests = 5 | add_one(guests) = 6
-</code></pre></div>
-<p><strong><code>**kwargs</code> ковтає описки.</strong> Неправильне ім'я аргументу не викличе помилки, а мовчки потрапить у словник:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-135-1" name="__codelineno-135-1" href="#__codelineno-135-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">run_report</span><span class="p">(</span><span class="n">bills</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">):</span>
-<a id="__codelineno-135-2" name="__codelineno-135-2" href="#__codelineno-135-2"></a>    <span class="n">debug</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"debug"</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
-<a id="__codelineno-135-3" name="__codelineno-135-3" href="#__codelineno-135-3"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"  options ="</span><span class="p">,</span> <span class="n">options</span><span class="p">,</span> <span class="s2">"| debug ="</span><span class="p">,</span> <span class="n">debug</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-135-1" name="__codelineno-135-1" href="#__codelineno-135-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">add_one</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+<a id="__codelineno-135-2" name="__codelineno-135-2" href="#__codelineno-135-2"></a>    <span class="n">n</span> <span class="o">+=</span> <span class="mi">1</span>
+<a id="__codelineno-135-3" name="__codelineno-135-3" href="#__codelineno-135-3"></a>    <span class="k">return</span> <span class="n">n</span>
 <a id="__codelineno-135-4" name="__codelineno-135-4" href="#__codelineno-135-4"></a>
 <a id="__codelineno-135-5" name="__codelineno-135-5" href="#__codelineno-135-5"></a>
-<a id="__codelineno-135-6" name="__codelineno-135-6" href="#__codelineno-135-6"></a><span class="n">run_report</span><span class="p">([</span><span class="mf">540.0</span><span class="p">],</span> <span class="n">debyg</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<a id="__codelineno-135-6" name="__codelineno-135-6" href="#__codelineno-135-6"></a><span class="n">guests</span> <span class="o">=</span> <span class="mi">5</span>
+<a id="__codelineno-135-7" name="__codelineno-135-7" href="#__codelineno-135-7"></a><span class="n">add_one</span><span class="p">(</span><span class="n">guests</span><span class="p">)</span>
+<a id="__codelineno-135-8" name="__codelineno-135-8" href="#__codelineno-135-8"></a><span class="nb">print</span><span class="p">(</span><span class="s2">"guests ="</span><span class="p">,</span> <span class="n">guests</span><span class="p">,</span> <span class="s2">"| add_one(guests) ="</span><span class="p">,</span> <span class="n">add_one</span><span class="p">(</span><span class="n">guests</span><span class="p">))</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-136-1" name="__codelineno-136-1" href="#__codelineno-136-1"></a>  options = {'debyg': True} | debug = False
+<div class="highlight"><pre><span></span><code><a id="__codelineno-136-1" name="__codelineno-136-1" href="#__codelineno-136-1"></a>guests = 5 | add_one(guests) = 6
+</code></pre></div>
+<p><strong><code>**kwargs</code> ковтає описки.</strong> Неправильне ім'я аргументу не викличе помилки, а мовчки потрапить у словник:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-137-1" name="__codelineno-137-1" href="#__codelineno-137-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">run_report</span><span class="p">(</span><span class="n">bills</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">):</span>
+<a id="__codelineno-137-2" name="__codelineno-137-2" href="#__codelineno-137-2"></a>    <span class="n">debug</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"debug"</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+<a id="__codelineno-137-3" name="__codelineno-137-3" href="#__codelineno-137-3"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"  options ="</span><span class="p">,</span> <span class="n">options</span><span class="p">,</span> <span class="s2">"| debug ="</span><span class="p">,</span> <span class="n">debug</span><span class="p">)</span>
+<a id="__codelineno-137-4" name="__codelineno-137-4" href="#__codelineno-137-4"></a>
+<a id="__codelineno-137-5" name="__codelineno-137-5" href="#__codelineno-137-5"></a>
+<a id="__codelineno-137-6" name="__codelineno-137-6" href="#__codelineno-137-6"></a><span class="n">run_report</span><span class="p">([</span><span class="mf">540.0</span><span class="p">],</span> <span class="n">debyg</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-138-1" name="__codelineno-138-1" href="#__codelineno-138-1"></a>  options = {'debyg': True} | debug = False
 </code></pre></div>
 <p>Коли імена параметрів відомі, оголоси їх явно — тільки за іменем. Тоді описку видно одразу, а сигнатуру бачать підказки редактора й <code>help()</code>:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-137-1" name="__codelineno-137-1" href="#__codelineno-137-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">run_report_strict</span><span class="p">(</span><span class="n">bills</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-<a id="__codelineno-137-2" name="__codelineno-137-2" href="#__codelineno-137-2"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"  debug ="</span><span class="p">,</span> <span class="n">debug</span><span class="p">)</span>
-<a id="__codelineno-137-3" name="__codelineno-137-3" href="#__codelineno-137-3"></a>
-<a id="__codelineno-137-4" name="__codelineno-137-4" href="#__codelineno-137-4"></a>
-<a id="__codelineno-137-5" name="__codelineno-137-5" href="#__codelineno-137-5"></a><span class="n">run_report_strict</span><span class="p">([</span><span class="mf">540.0</span><span class="p">],</span> <span class="n">debyg</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-139-1" name="__codelineno-139-1" href="#__codelineno-139-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">run_report_strict</span><span class="p">(</span><span class="n">bills</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<a id="__codelineno-139-2" name="__codelineno-139-2" href="#__codelineno-139-2"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">"  debug ="</span><span class="p">,</span> <span class="n">debug</span><span class="p">)</span>
+<a id="__codelineno-139-3" name="__codelineno-139-3" href="#__codelineno-139-3"></a>
+<a id="__codelineno-139-4" name="__codelineno-139-4" href="#__codelineno-139-4"></a>
+<a id="__codelineno-139-5" name="__codelineno-139-5" href="#__codelineno-139-5"></a><span class="n">run_report_strict</span><span class="p">([</span><span class="mf">540.0</span><span class="p">],</span> <span class="n">debyg</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-138-1" name="__codelineno-138-1" href="#__codelineno-138-1"></a>TypeError: run_report_strict() got an unexpected keyword argument 'debyg'
+<div class="highlight"><pre><span></span><code><a id="__codelineno-140-1" name="__codelineno-140-1" href="#__codelineno-140-1"></a>TypeError: run_report_strict() got an unexpected keyword argument 'debyg'
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-139-1" name="__codelineno-139-1" href="#__codelineno-139-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">inspect</span>
-<a id="__codelineno-139-2" name="__codelineno-139-2" href="#__codelineno-139-2"></a>
-<a id="__codelineno-139-3" name="__codelineno-139-3" href="#__codelineno-139-3"></a><span class="nb">print</span><span class="p">(</span><span class="s2">"run_report"</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">run_report</span><span class="p">)))</span>
-<a id="__codelineno-139-4" name="__codelineno-139-4" href="#__codelineno-139-4"></a><span class="nb">print</span><span class="p">(</span><span class="s2">"run_report_strict"</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">run_report_strict</span><span class="p">)))</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-141-1" name="__codelineno-141-1" href="#__codelineno-141-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">inspect</span>
+<a id="__codelineno-141-2" name="__codelineno-141-2" href="#__codelineno-141-2"></a>
+<a id="__codelineno-141-3" name="__codelineno-141-3" href="#__codelineno-141-3"></a><span class="nb">print</span><span class="p">(</span><span class="s2">"run_report"</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">run_report</span><span class="p">)))</span>
+<a id="__codelineno-141-4" name="__codelineno-141-4" href="#__codelineno-141-4"></a><span class="nb">print</span><span class="p">(</span><span class="s2">"run_report_strict"</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">run_report_strict</span><span class="p">)))</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-140-1" name="__codelineno-140-1" href="#__codelineno-140-1"></a>run_report(bills, **options)
-<a id="__codelineno-140-2" name="__codelineno-140-2" href="#__codelineno-140-2"></a>run_report_strict(bills, *, debug=False)
+<div class="highlight"><pre><span></span><code><a id="__codelineno-142-1" name="__codelineno-142-1" href="#__codelineno-142-1"></a>run_report(bills, **options)
+<a id="__codelineno-142-2" name="__codelineno-142-2" href="#__codelineno-142-2"></a>run_report_strict(bills, *, debug=False)
 </code></pre></div>
 <p><code>**kwargs</code> потрібен там, де функція справді не знає, що їй передадуть, як-от <code>logged</code> вище.</p>
 <details class="info">
@@ -5488,21 +5508,21 @@
 <li><strong><code>/</code> і <code>*</code> фіксують домовленість з користувачем.</strong> <code>/</code> дозволяє автору перейменовувати параметри, а <code>*</code> змушує писати налаштування явно: <code>recv(1024, block=False)</code> зрозуміліше, ніж <code>recv(1024, False)</code>.</li>
 </ul>
 <p>Усе це можна побачити на самому об'єкті функції:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-141-1" name="__codelineno-141-1" href="#__codelineno-141-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">sample</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">flag</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<a id="__codelineno-141-2" name="__codelineno-141-2" href="#__codelineno-141-2"></a>    <span class="k">pass</span>
-<a id="__codelineno-141-3" name="__codelineno-141-3" href="#__codelineno-141-3"></a>
-<a id="__codelineno-141-4" name="__codelineno-141-4" href="#__codelineno-141-4"></a>
-<a id="__codelineno-141-5" name="__codelineno-141-5" href="#__codelineno-141-5"></a><span class="nb">print</span><span class="p">(</span><span class="s2">"__defaults__   ="</span><span class="p">,</span> <span class="n">sample</span><span class="o">.</span><span class="vm">__defaults__</span><span class="p">)</span>
-<a id="__codelineno-141-6" name="__codelineno-141-6" href="#__codelineno-141-6"></a><span class="nb">print</span><span class="p">(</span><span class="s2">"__kwdefaults__ ="</span><span class="p">,</span> <span class="n">sample</span><span class="o">.</span><span class="vm">__kwdefaults__</span><span class="p">)</span>
-<a id="__codelineno-141-7" name="__codelineno-141-7" href="#__codelineno-141-7"></a><span class="nb">print</span><span class="p">(</span><span class="s2">"імена          ="</span><span class="p">,</span> <span class="n">sample</span><span class="o">.</span><span class="vm">__code__</span><span class="o">.</span><span class="n">co_varnames</span><span class="p">)</span>
-<a id="__codelineno-141-8" name="__codelineno-141-8" href="#__codelineno-141-8"></a><span class="nb">print</span><span class="p">(</span><span class="s2">"за порядком    ="</span><span class="p">,</span> <span class="n">sample</span><span class="o">.</span><span class="vm">__code__</span><span class="o">.</span><span class="n">co_argcount</span><span class="p">)</span>
-<a id="__codelineno-141-9" name="__codelineno-141-9" href="#__codelineno-141-9"></a><span class="nb">print</span><span class="p">(</span><span class="s2">"тільки іменем  ="</span><span class="p">,</span> <span class="n">sample</span><span class="o">.</span><span class="vm">__code__</span><span class="o">.</span><span class="n">co_kwonlyargcount</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-143-1" name="__codelineno-143-1" href="#__codelineno-143-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">sample</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">flag</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<a id="__codelineno-143-2" name="__codelineno-143-2" href="#__codelineno-143-2"></a>    <span class="k">pass</span>
+<a id="__codelineno-143-3" name="__codelineno-143-3" href="#__codelineno-143-3"></a>
+<a id="__codelineno-143-4" name="__codelineno-143-4" href="#__codelineno-143-4"></a>
+<a id="__codelineno-143-5" name="__codelineno-143-5" href="#__codelineno-143-5"></a><span class="nb">print</span><span class="p">(</span><span class="s2">"__defaults__   ="</span><span class="p">,</span> <span class="n">sample</span><span class="o">.</span><span class="vm">__defaults__</span><span class="p">)</span>
+<a id="__codelineno-143-6" name="__codelineno-143-6" href="#__codelineno-143-6"></a><span class="nb">print</span><span class="p">(</span><span class="s2">"__kwdefaults__ ="</span><span class="p">,</span> <span class="n">sample</span><span class="o">.</span><span class="vm">__kwdefaults__</span><span class="p">)</span>
+<a id="__codelineno-143-7" name="__codelineno-143-7" href="#__codelineno-143-7"></a><span class="nb">print</span><span class="p">(</span><span class="s2">"імена          ="</span><span class="p">,</span> <span class="n">sample</span><span class="o">.</span><span class="vm">__code__</span><span class="o">.</span><span class="n">co_varnames</span><span class="p">)</span>
+<a id="__codelineno-143-8" name="__codelineno-143-8" href="#__codelineno-143-8"></a><span class="nb">print</span><span class="p">(</span><span class="s2">"за порядком    ="</span><span class="p">,</span> <span class="n">sample</span><span class="o">.</span><span class="vm">__code__</span><span class="o">.</span><span class="n">co_argcount</span><span class="p">)</span>
+<a id="__codelineno-143-9" name="__codelineno-143-9" href="#__codelineno-143-9"></a><span class="nb">print</span><span class="p">(</span><span class="s2">"тільки іменем  ="</span><span class="p">,</span> <span class="n">sample</span><span class="o">.</span><span class="vm">__code__</span><span class="o">.</span><span class="n">co_kwonlyargcount</span><span class="p">)</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-142-1" name="__codelineno-142-1" href="#__codelineno-142-1"></a>__defaults__   = (10,)
-<a id="__codelineno-142-2" name="__codelineno-142-2" href="#__codelineno-142-2"></a>__kwdefaults__ = {'flag': True}
-<a id="__codelineno-142-3" name="__codelineno-142-3" href="#__codelineno-142-3"></a>імена          = ('a', 'b', 'flag', 'args', 'kwargs')
-<a id="__codelineno-142-4" name="__codelineno-142-4" href="#__codelineno-142-4"></a>за порядком    = 2
-<a id="__codelineno-142-5" name="__codelineno-142-5" href="#__codelineno-142-5"></a>тільки іменем  = 1
+<div class="highlight"><pre><span></span><code><a id="__codelineno-144-1" name="__codelineno-144-1" href="#__codelineno-144-1"></a>__defaults__   = (10,)
+<a id="__codelineno-144-2" name="__codelineno-144-2" href="#__codelineno-144-2"></a>__kwdefaults__ = {'flag': True}
+<a id="__codelineno-144-3" name="__codelineno-144-3" href="#__codelineno-144-3"></a>імена          = ('a', 'b', 'flag', 'args', 'kwargs')
+<a id="__codelineno-144-4" name="__codelineno-144-4" href="#__codelineno-144-4"></a>за порядком    = 2
+<a id="__codelineno-144-5" name="__codelineno-144-5" href="#__codelineno-144-5"></a>тільки іменем  = 1
 </code></pre></div>
 </details>
 <h2 id="_22">Підсумок<a class="headerlink" href="#_22" title="Permanent link">&para;</a></h2>
