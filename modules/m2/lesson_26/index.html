@@ -4319,11 +4319,11 @@
 <h2 id="architecture">Архітектура: тестованість — властивість дизайну<a class="headerlink" href="#architecture" title="Permanent link">&para;</a></h2>
 <h3 id="_7">Піраміда тестів<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h3>
 <pre class="mermaid"><code>flowchart TD
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px,color:#1a1a1a;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#1a1a1a;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1a1a1a;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px,color:#1a1a1a;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px,color:#1a1a1a;
 
     E2E["E2E: браузер, увесь сервіс&lt;br&gt;мало й повільні"]
     INT["інтеграційні&lt;br&gt;конвеєр, API, база"]
@@ -4342,11 +4342,11 @@
 <h3 id="_8">Залежності — параметром<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h3>
 <p>Функцію, яка сама ходить у мережу, у базу й у годинник, тестувати важко: кожен тест тягне за собою весь світ. Функцію, яка отримує залежності <strong>параметрами</strong>, — легко: у тесті передаємо fake чи mock.</p>
 <pre class="mermaid"><code>flowchart LR
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px,color:#1a1a1a;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#1a1a1a;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1a1a1a;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px,color:#1a1a1a;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px,color:#1a1a1a;
 
     N["notify_client&lt;br&gt;логіка сервісу"] --&gt; G{"gateway&lt;br&gt;має метод send"}
     G -- "у продакшені" --&gt; REAL["SmsGateway&lt;br&gt;мережа, гроші"]

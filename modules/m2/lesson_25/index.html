@@ -3877,11 +3877,11 @@
 <li><strong>ітератор</strong> (курсор) — пам'ятає позицію, одноразовий.</li>
 </ul>
 <pre class="mermaid"><code>flowchart LR
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px,color:#1a1a1a;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#1a1a1a;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1a1a1a;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px,color:#1a1a1a;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px,color:#1a1a1a;
 
     LOG["ShiftLog&lt;br&gt;дані"] -- "iter()" --&gt; C1["курсор 1&lt;br&gt;position = 0"]
     LOG -- "iter()" --&gt; C2["курсор 2&lt;br&gt;position = 0"]
@@ -4215,11 +4215,11 @@
 <h2 id="architecture">Архітектура: ETL-конвеєр подій<a class="headerlink" href="#architecture" title="Permanent link">&para;</a></h2>
 <p>Задачу диспетчерської зручно побудувати як <strong>ETL</strong> (extract — transform — load): витягти дані, перетворити, завантажити результат. Кожна стадія — функція «ітерабельне → ітерабельне», і стадії з'єднуються як труби:</p>
 <pre class="mermaid"><code>flowchart TD
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px,color:#1a1a1a;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#1a1a1a;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1a1a1a;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px,color:#1a1a1a;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px,color:#1a1a1a;
 
     SRC["журнал&lt;br&gt;рядки"] --&gt; P["parse&lt;br&gt;рядок → подія"]
     P --&gt; S["in_shift&lt;br&gt;dropwhile"]
@@ -4233,11 +4233,11 @@
 <h3 id="_4">Хто штовхає, а хто тягне<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
 <p>У конвеєрі з генераторів дані <strong>тягне</strong> споживач: <code>report</code> просить наступну тривалість, <code>durations</code> — наступну подію, і так до джерела. Сопрограми з <code>.send()</code> працюють навпаки — дані <strong>штовхає</strong> джерело:</p>
 <pre class="mermaid"><code>flowchart LR
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px,color:#1a1a1a;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#1a1a1a;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1a1a1a;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px,color:#1a1a1a;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px,color:#1a1a1a;
 
     subgraph PUSH["push: сопрограми"]
         direction TB

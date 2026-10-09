@@ -3912,11 +3912,11 @@
 <p>У другому виклику <code>print("try: розібрано")</code> не виконався: виняток перервав <code>try</code> на рядку <code>parse_line(line)</code>. <code>else</code> пропущено, бо виняток був. <code>finally</code> спрацював обидва рази.</p>
 <p>Обидва виклики поруч:</p>
 <pre class="mermaid"><code>flowchart TD
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px,color:#1a1a1a;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#1a1a1a;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1a1a1a;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px,color:#1a1a1a;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px,color:#1a1a1a;
 
     subgraph OK["check_line(KASA_LINES[0]) — правильний рядок"]
         direction LR
@@ -3937,11 +3937,11 @@
 <h2 id="except">Кілька except і ієрархія винятків<a class="headerlink" href="#except" title="Permanent link">&para;</a></h2>
 <p>Винятки утворюють <strong>дерево</strong>: загальні типи вгорі, конкретні внизу. <code>except</code> ловить свій тип <strong>і всіх його нащадків</strong>:</p>
 <pre class="mermaid"><code>flowchart TD
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px,color:#1a1a1a;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#1a1a1a;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1a1a1a;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px,color:#1a1a1a;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px,color:#1a1a1a;
 
     E["Exception&lt;br&gt;майже всі винятки"] --&gt; V["ValueError"]
     E --&gt; T["TypeError"]
@@ -4036,11 +4036,11 @@
 </code></pre></div>
 <p>Виняток народився у <code>float()</code> всередині <code>parse_line</code>. Там його ніхто не ловив, і він <strong>спливає</strong> до того, хто викликав: у <code>load_orders</code>. Там теж не ловили — далі на верхній рівень програми. Не зловив ніхто — програма зупинилася і надрукувала весь шлях.</p>
 <pre class="mermaid"><code>flowchart TD
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px,color:#1a1a1a;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#1a1a1a;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1a1a1a;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px,color:#1a1a1a;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px,color:#1a1a1a;
 
     F["float('540,00')&lt;br&gt;ValueError"] --&gt; P{"parse_line&lt;br&gt;має except?"}
     P -- ні --&gt; L{"load_orders&lt;br&gt;має except?"}

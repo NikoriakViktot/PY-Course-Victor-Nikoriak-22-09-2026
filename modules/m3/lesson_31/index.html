@@ -3860,11 +3860,11 @@
 <h2 id="redis-postgresql">Redis і PostgreSQL: навіщо двоє<a class="headerlink" href="#redis-postgresql" title="Permanent link">&para;</a></h2>
 <p><strong>Redis</strong> (REmote DIctionary Server) — сервер, який тримає <strong>великий словник</strong> в оперативній пам'яті: ключ — рядок, значення — рядок, список, хеш, множина… Клієнти підключаються до нього мережею, як до PostgreSQL, і надсилають короткі команди.</p>
 <pre class="mermaid"><code>flowchart LR
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px,color:#1a1a1a;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#1a1a1a;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1a1a1a;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px,color:#1a1a1a;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px,color:#1a1a1a;
 
     APP["сервіс диспетчерської&lt;br&gt;Python"] -- "лічильники, кеш,&lt;br&gt;черги, рейтинг" --&gt; R[("Redis&lt;br&gt;пам'ять, порт 6379")]
     APP -- "замовлення, кур'єри,&lt;br&gt;гроші" --&gt; PG[("PostgreSQL&lt;br&gt;диск, порт 5432")]
@@ -3967,11 +3967,11 @@
 </code></pre></div>
 <p><code>INCR</code> створює ключ зі значенням 0, якщо його не було, і додає 1. Головне: <code>INCR</code> — <strong>одна атомарна команда</strong>. Redis виконує команди по одній, тож «прочитати-додати-записати» не може перерватися іншим клієнтом — стан гонитви з уроку 28 тут неможливий.</p>
 <pre class="mermaid"><code>flowchart TD
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px,color:#1a1a1a;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#1a1a1a;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1a1a1a;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px,color:#1a1a1a;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px,color:#1a1a1a;
 
     subgraph B["GET + SET з двох кас: гонитва"]
         direction LR
@@ -4232,11 +4232,11 @@
 </code></pre></div>
 <p><code>BLPOP</code> — «блокуючий» <code>LPOP</code>: якщо черга порожня, воркер <strong>чекає</strong>, доки задача з'явиться (або мине <code>timeout</code>). Producer і consumer можуть бути різними програмами на різних комп'ютерах — Redis між ними як поштова скринька. Так працює Celery (урок 49+): Redis — брокер, воркери — окремі процеси.</p>
 <pre class="mermaid"><code>flowchart LR
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px,color:#1a1a1a;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#1a1a1a;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1a1a1a;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px,color:#1a1a1a;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px,color:#1a1a1a;
 
     A["сервіс замовлень&lt;br&gt;producer"] -- "RPUSH" --&gt; Q[("queue:sms&lt;br&gt;список у Redis")]
     Q -- "BLPOP" --&gt; W1["воркер 1&lt;br&gt;consumer"]
@@ -4265,11 +4265,11 @@
 <p>Pub/Sub підходить для «живих» сповіщень: екран диспетчера, чат (урок 46). Повідомлення ніде не зберігаються — для задач, які не можна загубити, беруть чергу.</p>
 <h2 id="architecture">Архітектура: що класти в Redis<a class="headerlink" href="#architecture" title="Permanent link">&para;</a></h2>
 <pre class="mermaid"><code>flowchart TD
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px,color:#1a1a1a;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#1a1a1a;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1a1a1a;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px,color:#1a1a1a;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px,color:#1a1a1a;
 
     Q["нові дані"] --&gt; L{"втрата — катастрофа?&lt;br&gt;гроші, замовлення"}
     L -- так --&gt; PG["PostgreSQL&lt;br&gt;джерело правди"]

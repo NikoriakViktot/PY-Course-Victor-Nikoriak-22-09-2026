@@ -3918,11 +3918,11 @@
 <p><strong>База даних</strong> — організоване сховище, яке саме стежить за правилами даних. <strong>Система керування базами даних</strong> (СКБД) — програма, що цим сховищем керує. <strong>PostgreSQL</strong> — одна з найпоширеніших вільних реляційних СКБД.</p>
 <p>PostgreSQL працює як <strong>сервер</strong>: окрема програма, що постійно запущена, тримає дані на диску й приймає запити від <strong>клієнтів</strong> — консолі <code>psql</code>, програм на Python, графічних інструментів.</p>
 <pre class="mermaid"><code>flowchart LR
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px,color:#1a1a1a;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#1a1a1a;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1a1a1a;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px,color:#1a1a1a;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px,color:#1a1a1a;
 
     P["psql&lt;br&gt;консоль"] -- "SQL-запит" --&gt; S["сервер PostgreSQL&lt;br&gt;порт 5432"]
     A["Python&lt;br&gt;psycopg"] -- "SQL-запит" --&gt; S
@@ -4260,11 +4260,11 @@
 <h3 id="select_1">У якому порядку виконується SELECT<a class="headerlink" href="#select_1" title="Permanent link">&para;</a></h3>
 <p>Ми <strong>пишемо</strong> <code>SELECT</code> першим, але база <strong>виконує</strong> його частини в іншому порядку:</p>
 <pre class="mermaid"><code>flowchart LR
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px,color:#1a1a1a;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#1a1a1a;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1a1a1a;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px,color:#1a1a1a;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px,color:#1a1a1a;
 
     F["1. FROM / JOIN&lt;br&gt;усі рядки таблиць"] --&gt; W["2. WHERE&lt;br&gt;відкинути рядки"]
     W --&gt; G["3. GROUP BY&lt;br&gt;зібрати в групи"]
@@ -4318,11 +4318,11 @@
 </code></pre></div>
 <p>Покроково, що робить база з <code>GROUP BY courier_id</code>:</p>
 <pre class="mermaid"><code>flowchart TD
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px,color:#1a1a1a;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#1a1a1a;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1a1a1a;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px,color:#1a1a1a;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px,color:#1a1a1a;
 
     subgraph W["WHERE status = 'delivered' — 7 рядків"]
         direction LR
@@ -4385,11 +4385,11 @@
 </code></pre></div>
 <p><code>orders AS o</code> — короткий псевдонім таблиці. <code>JOIN</code> (повністю — <code>INNER JOIN</code>) лишає лише пари, для яких умова <code>ON</code> істинна. Покроково для перших замовлень:</p>
 <pre class="mermaid"><code>flowchart TD
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px,color:#1a1a1a;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#1a1a1a;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1a1a1a;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px,color:#1a1a1a;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px,color:#1a1a1a;
 
     subgraph J1["замовлення 1 · courier_id = 1"]
         direction LR
@@ -4673,11 +4673,11 @@
 </code></pre></div>
 <p><code>numeric</code> приходить у Python як <code>Decimal</code> — точне десяткове число: гроші не отримують похибки <code>float</code>.</p>
 <pre class="mermaid"><code>flowchart LR
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px,color:#1a1a1a;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#1a1a1a;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1a1a1a;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px,color:#1a1a1a;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px,color:#1a1a1a;
 
     UI["інтерфейс&lt;br&gt;CLI, веб (модуль 4)"] --&gt; SVC["сервіс&lt;br&gt;Dispatcher: правила"]
     SVC --&gt; REPO["репозиторій&lt;br&gt;OrderRepository: SQL"]

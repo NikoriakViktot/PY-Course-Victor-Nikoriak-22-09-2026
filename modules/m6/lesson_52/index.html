@@ -4057,11 +4057,11 @@
 <h2 id="slice">Зріз курсу<a class="headerlink" href="#slice" title="Permanent link">&para;</a></h2>
 <p>Шість модулів — не шість окремих тем. Кожен наступний стоїть на попередньому, і в двох великих проєктах курсу видно майже все.</p>
 <pre class="mermaid"><code>flowchart TD
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px,color:#1a1a1a;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#1a1a1a;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1a1a1a;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px,color:#1a1a1a;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px,color:#1a1a1a;
 
     subgraph M1["М1. Python Core · 1–17"]
         direction LR
@@ -4445,11 +4445,11 @@
 </code></pre></div>
 <p>Індекс на <code>title</code> (прогін 2) існує, займає 59 MB — і <strong>не використовується</strong>: запит питає про <code>lower(title)</code>, а це інший вираз. Індекс допомагає, лише коли вираз у запиті збігається з виразом в індексі. Прогін 3 — у 2600 разів швидше. Ціна: ще 59 MB і 16 секунд на побудову.</p>
 <pre class="mermaid"><code>flowchart TD
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px,color:#1a1a1a;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#1a1a1a;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1a1a1a;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px,color:#1a1a1a;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px,color:#1a1a1a;
 
     Q["WHERE lower(title) LIKE '%кременчук%'"]
     Q --&gt; I1{"є індекс на&lt;br&gt;той самий вираз?"}
@@ -4497,11 +4497,11 @@
 </code></pre></div>
 <p><strong>Keyset-пагінація</strong> (курсор) замість «пропусти N» каже «дай наступні після id = X». Клієнт отримує <code>next_after</code> — <code>id</code> останньої новини сторінки — і передає його в наступному запиті.</p>
 <pre class="mermaid"><code>flowchart TD
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px,color:#1a1a1a;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#1a1a1a;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1a1a1a;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px,color:#1a1a1a;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px,color:#1a1a1a;
 
     subgraph P1["запит 1: after_id = 0"]
         direction LR
@@ -4671,11 +4671,11 @@
 <p>Цикл імпортів — модулі, що через ланцюжок імпортів залежать самі від себе. <code>cycles()</code> шукає <strong>сильно зв'язані компоненти</strong> алгоритмом Тар'яна: один обхід у глибину, і кожен модуль отримує <code>index</code> (коли обхід уперше до нього дійшов) і <code>low</code> (найменший <code>index</code>, до якого з нього можна повернутися по ребрах у модулі, що ще на стеку). Модуль з <code>low == index</code> — корінь компоненти: зі стеку знімається все до нього включно. Понад один модуль — цикл.</p>
 <p>Приклад з <code>test_architecture_audit.py</code>: <code>orders → users → payments → orders</code>, а <code>utils → orders</code>.</p>
 <pre class="mermaid"><code>flowchart TD
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px,color:#1a1a1a;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#1a1a1a;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1a1a1a;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px,color:#1a1a1a;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px,color:#1a1a1a;
 
     subgraph S1["крок 1: заходимо в orders"]
         direction LR
@@ -4717,11 +4717,11 @@
 </code></pre></div>
 <p><code>utils</code> залежить від циклу, але сам у ньому не бере участі: з <code>orders</code> до <code>utils</code> дороги немає.</p>
 <pre class="mermaid"><code>graph LR
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px,color:#1a1a1a;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#1a1a1a;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1a1a1a;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px,color:#1a1a1a;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px,color:#1a1a1a;
 
     subgraph IN["точки входу"]
         API["api.py&lt;br&gt;770 рядків, fan-out 18"]
@@ -4772,11 +4772,11 @@
 <a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a>цикли імпортів: немає
 </code></pre></div>
 <pre class="mermaid"><code>graph LR
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px,color:#1a1a1a;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#1a1a1a;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1a1a1a;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px,color:#1a1a1a;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px,color:#1a1a1a;
 
     URLS["urls.py, routing.py"] --&gt; VIEWS["views.py&lt;br&gt;722 рядки"]
     URLS --&gt; DRF["api.py"]
@@ -4925,11 +4925,11 @@
 <p>З N репліками ліміт у пам'яті процесу — це 5·N спроб. На одній репліці різниці не видно, тому такі помилки знаходять лише тестом з кількома процесами. Правило для фінального проєкту: <strong>усе, що має бути спільним, — у базі чи Redis; у пам'яті процесу — лише те, що можна втратити й порахувати заново.</strong></p>
 <h3 id="_13">Система цілком<a class="headerlink" href="#_13" title="Permanent link">&para;</a></h3>
 <pre class="mermaid"><code>graph LR
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px,color:#1a1a1a;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#1a1a1a;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1a1a1a;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px,color:#1a1a1a;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px,color:#1a1a1a;
 
     U["браузер, Postman,&lt;br&gt;Telegram"] --&gt; NG["nginx&lt;br&gt;:80"]
     NG --&gt; API["api ×N&lt;br&gt;(uvicorn)"]
@@ -5006,11 +5006,11 @@
 </table>
 <h3 id="_15">Як обрати тему<a class="headerlink" href="#_15" title="Permanent link">&para;</a></h3>
 <pre class="mermaid"><code>flowchart TD
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px,color:#1a1a1a;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#1a1a1a;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1a1a1a;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px,color:#1a1a1a;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px,color:#1a1a1a;
 
     Q0["є власна задача,&lt;br&gt;дані чи користувачі?"]
     Q0 --&gt;|так| Q1{"головне —&lt;br&gt;сторінки й форми?"}

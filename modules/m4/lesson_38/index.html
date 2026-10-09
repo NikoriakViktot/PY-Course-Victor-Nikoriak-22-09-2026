@@ -4392,11 +4392,11 @@
 <p>Небезпечне поєднання — <code>async def</code> + блокуючий виклик (<code>time.sleep</code>, <code>requests.get</code>, синхронний драйвер бази): функція займає цикл подій, і <strong>весь сервер</strong> чекає. Саме тому скрапер агрегатора — на <code>aiohttp</code> з <code>await</code>, а не на <code>requests</code>.</p>
 <p>Покроково — три одночасні запити до ендпоінта, що «чекає 2 секунди», у двох варіантах:</p>
 <pre class="mermaid"><code>flowchart TD
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px,color:#1a1a1a;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#1a1a1a;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1a1a1a;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px,color:#1a1a1a;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px,color:#1a1a1a;
 
     subgraph B0 ["sync-broken, t = 0 с: time.sleep(2) у async def"]
         direction LR
@@ -4498,11 +4498,11 @@
 <p>Для CPU-задач (<code>/cpu-broken</code> → <code>/cpu-fixed</code> через <code>ProcessPoolExecutor</code>) і пулу з'єднань з базою — розділи 3–6 <a href="../fastapi/fastapi_documentation/#s3">довідника</a>.</p>
 <h2 id="architecture">Архітектура: було → стало<a class="headerlink" href="#architecture" title="Permanent link">&para;</a></h2>
 <pre class="mermaid"><code>flowchart TD
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px,color:#1a1a1a;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#1a1a1a;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1a1a1a;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px,color:#1a1a1a;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px,color:#1a1a1a;
 
     subgraph OLD ["до рефакторингу: news_dashboard,&lt;br&gt;16 ендпоінтів в одному main.py"]
         direction LR

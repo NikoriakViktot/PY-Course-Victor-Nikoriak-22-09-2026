@@ -4478,11 +4478,11 @@
 </code></pre></div>
 <p><code>elif</code> означає «інакше, якщо», <code>else</code> — «в усіх інших випадках». Python перевіряє умови <strong>зверху вниз</strong> і виконує <strong>першу гілку, умова якої істинна</strong>. Після цього решта гілок пропускається, їхні умови навіть не обчислюються. Якщо жодна умова не спрацювала, виконується <code>else</code>.</p>
 <pre class="mermaid"><code>flowchart TD
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px,color:#1a1a1a;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#1a1a1a;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1a1a1a;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px,color:#1a1a1a;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px,color:#1a1a1a;
 
     S["order_total"] --&gt; C1{"order_total &gt;= 500?"}
     C1 -- так --&gt; A1["Доставка: безкоштовно"]
@@ -4589,11 +4589,11 @@
 <p>Внутрішня умова перевіряється лише тоді, коли зовнішня (<code>is_delivery</code>) істинна. Кожен <code>else</code> належить тому <code>if</code>, під яким він стоїть з тим самим відступом.</p>
 <p>Шлях виконання для <code>order_total = 150</code>, <code>is_delivery = True</code>. Помаранчеві вузли — перевірки, які справді виконались, зелений — гілка, що спрацювала, червоні — гілки, до яких виконання не дійшло:</p>
 <pre class="mermaid"><code>flowchart TD
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px,color:#1a1a1a;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#1a1a1a;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1a1a1a;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px,color:#1a1a1a;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px,color:#1a1a1a;
 
     S["order_total = 150&lt;br&gt;is_delivery = True"] --&gt; O{"is_delivery?&lt;br&gt;True"}
     O -- так --&gt; I{"order_total &gt;= 200?&lt;br&gt;150 &gt;= 200 → False"}
@@ -4632,11 +4632,11 @@
 <li>виконується <strong>перша</strong> гілка, що підійшла, решта пропускається — як у ланцюжку <code>elif</code>.</li>
 </ul>
 <pre class="mermaid"><code>flowchart LR
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px,color:#1a1a1a;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#1a1a1a;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1a1a1a;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px,color:#1a1a1a;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px,color:#1a1a1a;
 
     V["mode = #quot;таксі#quot;"] --&gt; C1{"#quot;зал#quot; | #quot;в залі#quot;?"}
     C1 -- ні --&gt; C2{"#quot;доставка#quot;?"}
@@ -4669,11 +4669,11 @@
 <p>Другий рядок часто дивує: <code>"False"</code>, <code>"0"</code> і навіть рядок з одного пробілу — <strong>непорожні</strong> рядки, тому вони істинні. Python не читає зміст рядка.</p>
 <p>Як Python вирішує, чи виконати блок <code>if value:</code>:</p>
 <pre class="mermaid"><code>flowchart TD
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px,color:#1a1a1a;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#1a1a1a;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1a1a1a;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px,color:#1a1a1a;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px,color:#1a1a1a;
 
     V["if value:"] --&gt; N{"False або None?"}
     N -- так --&gt; F["falsy&lt;br&gt;блок пропускається"]
@@ -4806,11 +4806,11 @@
 <p><code>guests &gt; 0</code> хибна, тому ділення <code>order_total / guests</code> не виконується взагалі. Якщо поміняти частини місцями (<code>order_total / guests &gt; 200 and guests &gt; 0</code>), ділення відбудеться першим і програма впаде: <code>ZeroDivisionError: division by zero</code>.</p>
 <p>Обидва порядки поруч, при <code>guests = 0</code>:</p>
 <pre class="mermaid"><code>flowchart TD
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px,color:#1a1a1a;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#1a1a1a;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1a1a1a;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px,color:#1a1a1a;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px,color:#1a1a1a;
 
     subgraph OK["guests &gt; 0 and order_total / guests &gt; 200"]
         direction LR
@@ -4969,11 +4969,11 @@
 </table>
 <p>Кожен цикл <code>while</code> складається з чотирьох частин: <strong>початковий стан → перевірка → дія → зміна стану</strong>.</p>
 <pre class="mermaid"><code>flowchart TD
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px,color:#1a1a1a;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#1a1a1a;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1a1a1a;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px,color:#1a1a1a;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px,color:#1a1a1a;
 
     I["початковий стан&lt;br&gt;portions = 3, cooked = 0"] --&gt; C{"cooked &lt; portions?"}
     C -- так --&gt; U["зміна стану&lt;br&gt;cooked += 1"]
@@ -4988,11 +4988,11 @@
 <p>Стрілка від дії повертається до перевірки: після кожного повтору Python знову обчислює <code>cooked &lt; portions</code>. Вийти з циклу можна лише гілкою «ні», тому зміна стану (<code>cooked += 1</code>) — обов'язкова частина.</p>
 <p>Та сама програма покроково: кожен блок — один прохід, у вузлах — стан змінних:</p>
 <pre class="mermaid"><code>flowchart TD
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px,color:#1a1a1a;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#1a1a1a;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1a1a1a;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px,color:#1a1a1a;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px,color:#1a1a1a;
 
     subgraph P1["прохід 1"]
         direction LR
@@ -5088,11 +5088,11 @@
 </code></pre></div>
 <p>Покроково:</p>
 <pre class="mermaid"><code>flowchart TD
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px,color:#1a1a1a;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#1a1a1a;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1a1a1a;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px,color:#1a1a1a;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px,color:#1a1a1a;
 
     subgraph R1["повтор 1"]
         direction LR
@@ -5131,11 +5131,11 @@
 <h3 id="continue">continue — до наступної перевірки<a class="headerlink" href="#continue" title="Permanent link">&para;</a></h3>
 <p><code>continue</code> завершує <strong>поточний</strong> повтор: решта блоку пропускається, і <code>while</code> знову перевіряє умову. Коли офіціант вводить позицію, якої немає в меню, її не треба додавати до суми — лише попередити:</p>
 <pre class="mermaid"><code>flowchart TD
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px,color:#1a1a1a;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#1a1a1a;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1a1a1a;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px,color:#1a1a1a;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px,color:#1a1a1a;
 
     W{"while True"} --&gt; IN["command = input(...)&lt;br&gt;.strip().lower()"]
     IN --&gt; Q1{"command == 'готово'?"}

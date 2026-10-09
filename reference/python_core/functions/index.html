@@ -1030,6 +1030,56 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="2. Робота з аргументами та параметрами">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#def" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Повний порядок параметрів у def
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Правила виклику
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Розпаковка * і **
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Пастки
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1056,7 +1106,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#_3" class="md-nav__link">
+  <a href="#_6" class="md-nav__link">
     <span class="md-ellipsis">
       
         Функції як об'єкти першого класу
@@ -1364,6 +1414,56 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="2. Робота з аргументами та параметрами">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#def" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Повний порядок параметрів у def
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Правила виклику
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Розпаковка * і **
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Пастки
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1390,7 +1490,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#_3" class="md-nav__link">
+  <a href="#_6" class="md-nav__link">
     <span class="md-ellipsis">
       
         Функції як об'єкти першого класу
@@ -1598,6 +1698,124 @@
 <a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>args: (30, 40)
 <a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>kwargs: {'x': 100, 'y': 200}
 </code></pre></div>
+<h3 id="def">Повний порядок параметрів у <code>def</code><a class="headerlink" href="#def" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">example</span><span class="p">(</span><span class="n">pos_only</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="n">pos_or_kw</span><span class="p">,</span> <span class="n">default_pos</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">kw_only</span><span class="p">,</span> <span class="n">kw_default</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>    <span class="k">pass</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Категорія</th>
+<th>Позначка</th>
+<th>Передача</th>
+<th>Тип усередині</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Positional-only (3.8+, PEP 570)</td>
+<td>ліворуч від <code>/</code></td>
+<td>лише за позицією</td>
+<td>значення</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Positional-or-keyword</td>
+<td>після <code>/</code></td>
+<td>за позицією або за іменем</td>
+<td>значення</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Default</td>
+<td><code>param=value</code></td>
+<td>можна пропустити</td>
+<td>значення</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Var-positional</td>
+<td><code>*args</code> або поодинока <code>*</code></td>
+<td>збирає зайві позиційні</td>
+<td><code>tuple</code></td>
+</tr>
+<tr>
+<td>5</td>
+<td>Keyword-only (PEP 3102)</td>
+<td>після <code>*args</code> / <code>*</code></td>
+<td>лише <code>key=value</code></td>
+<td>значення</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Var-keyword</td>
+<td><code>**kwargs</code>, завжди останній</td>
+<td>збирає зайві іменовані</td>
+<td><code>dict</code></td>
+</tr>
+</tbody>
+</table>
+<p>Порушення порядку — <code>SyntaxError</code> ще до запуску:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>def f(a=1, b): ...        SyntaxError: parameter without a default follows parameter with a default
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>def f(**kw, *args): ...   SyntaxError: arguments cannot follow var-keyword argument
+</code></pre></div>
+<h3 id="_3">Правила виклику<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Спершу позиційні, потім іменовані: <code>f(a=1, 2)</code> → <code>SyntaxError: positional argument follows keyword argument</code>.</li>
+<li>Одне значення — один раз: <code>f(1, a=2)</code> → <code>TypeError: f() got multiple values for argument 'a'</code>.</li>
+<li>Іменовані аргументи можна передавати в будь-якому порядку.</li>
+</ul>
+<h3 id="_4">Розпаковка <code>*</code> і <code>**</code><a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Де</th>
+<th>Запис</th>
+<th>Результат</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>виклик</td>
+<td><code>f(*[1, 2, 3])</code></td>
+<td><code>f(1, 2, 3)</code>; працює з list, tuple, set (порядок не гарантований), str, range, генератором; dict віддає ключі</td>
+</tr>
+<tr>
+<td>виклик</td>
+<td><code>f(**{"x": 1})</code></td>
+<td><code>f(x=1)</code>; ключі мають збігатися з іменами параметрів</td>
+</tr>
+<tr>
+<td>присвоєння</td>
+<td><code>first, *rest = [1, 2, 3]</code></td>
+<td><code>first = 1</code>, <code>rest = [2, 3]</code> (завжди list)</td>
+</tr>
+<tr>
+<td>літерал</td>
+<td><code>[*a, *b]</code>, <code>(*a, *b)</code>, <code>{*a, *b}</code></td>
+<td>нова колекція з елементів <code>a</code> і <code>b</code></td>
+</tr>
+<tr>
+<td>літерал</td>
+<td><code>{**d1, **d2}</code></td>
+<td>злиття словників, при однакових ключах перемагає правий</td>
+</tr>
+<tr>
+<td>прокидання</td>
+<td><code>def w(*args, **kwargs): return f(*args, **kwargs)</code></td>
+<td>посередник з будь-якою сигнатурою (основа декораторів)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_5">Пастки<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Мутабельне значення за замовчуванням</strong> обчислюється один раз при виконанні <code>def</code> і зберігається в <code>func.__defaults__</code> (для keyword-only — у <code>__kwdefaults__</code>). Виправлення: <code>None</code> + новий об'єкт у тілі.</li>
+<li><strong>Call-by-sharing:</strong> параметр — ще одне ім'я для того самого об'єкта. Присвоєння <code>x = ...</code> всередині ззовні не видно, а мутацію <code>x.append(...)</code> видно.</li>
+<li><strong><code>**kwargs</code> ковтає описки:</strong> <code>debyg=True</code> мовчки потрапляє в словник. Якщо імена відомі, оголошуй їх явно як keyword-only: <code>def f(data, *, debug=False)</code>.</li>
+</ul>
+<p>Детальні приклади з логуванням: <a href="../../../modules/m1/lesson_08/">урок 8</a> та конспект <code>module_1/lessons/lesson_08_functions/notes_functions.ipynb</code>, Частина 6.</p>
 <h2 id="3-scopes">3. Область видимості (Scopes)<a class="headerlink" href="#3-scopes" title="Permanent link">&para;</a></h2>
 <p>Змінні, створені всередині функції, є локальними і не існують за її межами. Якщо функція намагається знайти змінну, Python шукає її за правилом <strong>LEGB</strong>:</p>
 <ol>
@@ -1610,7 +1828,7 @@
 <p>👉 Це лише вступ, потрібний для розуміння наступних розділів. Повний розбір LEGB (з покроковими прикладами кожного рівня, пастками на кшталт <code>UnboundLocalError</code> і тим, що саме повертають <code>locals()</code>/<code>globals()</code>) — на окремій сторінці: <a href="../namespaces_legb/">Простори імен: <code>locals()</code>, <code>globals()</code>, LEGB</a>.</p>
 <h2 id="4-fp-python">4. Функціональне програмування (FP) в Python<a class="headerlink" href="#4-fp-python" title="Permanent link">&para;</a></h2>
 <p>Хоча Python не є суто функціональною мовою програмування, він містить потужний арсенал інструментів для написання коду у функціональному стилі. Основа ФП — обчислення без зміни глобального стану (використання "чистих функцій", які не мають побічних ефектів).</p>
-<h3 id="_3">Функції як об'єкти першого класу<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h3>
+<h3 id="_6">Функції як об'єкти першого класу<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h3>
 <p>У Python абсолютно все є об'єктами, і функції — не виняток. Функцію можна присвоїти змінній, передати як аргумент іншій функції (функції вищого порядку) або повернути як результат.</p>
 <h3 id="lambda">Анонімні функції (<code>lambda</code>)<a class="headerlink" href="#lambda" title="Permanent link">&para;</a></h3>
 <p>Для створення коротких, одноразових функцій використовується оператор <code>lambda</code>. Вони містять лише один вираз, результат якого автоматично повертається.</p>
@@ -1624,54 +1842,54 @@
 <p class="admonition-title">List comprehensions замість map/filter</p>
 <p>У сучасному Python замість <code>map</code> та <code>filter</code> часто віддають перевагу генераторам списків (list comprehensions), оскільки вони читаються легше.</p>
 </div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">reduce</span>
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
-<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="c1"># Лямбда-функція</span>
-<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="n">add_lambda</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span>
-<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="nb">print</span><span class="p">(</span><span class="s2">"Лямбда 5+3 ="</span><span class="p">,</span> <span class="n">add_lambda</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
-<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>
-<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="n">nums</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span>
-<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>
-<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="c1"># Map: підносимо до квадрату</span>
-<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="n">squares</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">nums</span><span class="p">))</span>
-<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="nb">print</span><span class="p">(</span><span class="s2">"Map (квадрати):"</span><span class="p">,</span> <span class="n">squares</span><span class="p">)</span>
-<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>
-<a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a><span class="c1"># Filter: залишаємо лише парні</span>
-<a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a><span class="n">evens</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="n">nums</span><span class="p">))</span>
-<a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a><span class="nb">print</span><span class="p">(</span><span class="s2">"Filter (парні):"</span><span class="p">,</span> <span class="n">evens</span><span class="p">)</span>
-<a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a>
-<a id="__codelineno-4-17" name="__codelineno-4-17" href="#__codelineno-4-17"></a><span class="c1"># Reduce: сума всіх чисел</span>
-<a id="__codelineno-4-18" name="__codelineno-4-18" href="#__codelineno-4-18"></a><span class="n">total</span> <span class="o">=</span> <span class="n">reduce</span><span class="p">(</span><span class="k">lambda</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="p">,</span> <span class="n">nums</span><span class="p">)</span>
-<a id="__codelineno-4-19" name="__codelineno-4-19" href="#__codelineno-4-19"></a><span class="nb">print</span><span class="p">(</span><span class="s2">"Reduce (сума):"</span><span class="p">,</span> <span class="n">total</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">reduce</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="c1"># Лямбда-функція</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="n">add_lambda</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="nb">print</span><span class="p">(</span><span class="s2">"Лямбда 5+3 ="</span><span class="p">,</span> <span class="n">add_lambda</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="n">nums</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span>
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="c1"># Map: підносимо до квадрату</span>
+<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="n">squares</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">nums</span><span class="p">))</span>
+<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a><span class="nb">print</span><span class="p">(</span><span class="s2">"Map (квадрати):"</span><span class="p">,</span> <span class="n">squares</span><span class="p">)</span>
+<a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a>
+<a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a><span class="c1"># Filter: залишаємо лише парні</span>
+<a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a><span class="n">evens</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="n">nums</span><span class="p">))</span>
+<a id="__codelineno-6-15" name="__codelineno-6-15" href="#__codelineno-6-15"></a><span class="nb">print</span><span class="p">(</span><span class="s2">"Filter (парні):"</span><span class="p">,</span> <span class="n">evens</span><span class="p">)</span>
+<a id="__codelineno-6-16" name="__codelineno-6-16" href="#__codelineno-6-16"></a>
+<a id="__codelineno-6-17" name="__codelineno-6-17" href="#__codelineno-6-17"></a><span class="c1"># Reduce: сума всіх чисел</span>
+<a id="__codelineno-6-18" name="__codelineno-6-18" href="#__codelineno-6-18"></a><span class="n">total</span> <span class="o">=</span> <span class="n">reduce</span><span class="p">(</span><span class="k">lambda</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="p">,</span> <span class="n">nums</span><span class="p">)</span>
+<a id="__codelineno-6-19" name="__codelineno-6-19" href="#__codelineno-6-19"></a><span class="nb">print</span><span class="p">(</span><span class="s2">"Reduce (сума):"</span><span class="p">,</span> <span class="n">total</span><span class="p">)</span>
 </code></pre></div>
 <p>Результат:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>Лямбда 5+3 = 8
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>Map (квадрати): [1, 4, 9, 16, 25]
-<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>Filter (парні): [2, 4]
-<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>Reduce (сума): 15
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>Лямбда 5+3 = 8
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>Map (квадрати): [1, 4, 9, 16, 25]
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>Filter (парні): [2, 4]
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>Reduce (сума): 15
 </code></pre></div>
 <h3 id="operator-functools">Корисні модулі для ФП: <code>operator</code> та <code>functools</code><a class="headerlink" href="#operator-functools" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>Модуль <code>operator</code></strong> — містить функції, що відповідають стандартним математичним операторам. Замість <code>lambda x, y: x + y</code> можна імпортувати <code>operator.add</code>.</li>
 <li><strong><code>functools.partial</code></strong> — дозволяє "зафіксувати" частину аргументів функції, створивши нову функцію з меншою кількістю параметрів (часткове застосування).</li>
 </ul>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">partial</span>
-<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="kn">import</span><span class="w"> </span><span class="nn">operator</span>
-<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>
-<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="k">def</span><span class="w"> </span><span class="nf">power</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="n">exp</span><span class="p">):</span>
-<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>    <span class="k">return</span> <span class="n">base</span> <span class="o">**</span> <span class="n">exp</span>
-<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>
-<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="c1"># Створюємо нову функцію, де exp завжди дорівнює 2</span>
-<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="n">square</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">power</span><span class="p">,</span> <span class="n">exp</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="nb">print</span><span class="p">(</span><span class="s2">"Partial (5^2):"</span><span class="p">,</span> <span class="n">square</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
-<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>
-<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a><span class="c1"># Використання operator замість lambda в reduce</span>
-<a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a><span class="n">total_op</span> <span class="o">=</span> <span class="n">reduce</span><span class="p">(</span><span class="n">operator</span><span class="o">.</span><span class="n">add</span><span class="p">,</span> <span class="n">nums</span><span class="p">)</span>
-<a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a><span class="nb">print</span><span class="p">(</span><span class="s2">"Reduce з operator.add:"</span><span class="p">,</span> <span class="n">total_op</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">partial</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="kn">import</span><span class="w"> </span><span class="nn">operator</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="k">def</span><span class="w"> </span><span class="nf">power</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="n">exp</span><span class="p">):</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>    <span class="k">return</span> <span class="n">base</span> <span class="o">**</span> <span class="n">exp</span>
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="c1"># Створюємо нову функцію, де exp завжди дорівнює 2</span>
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="n">square</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">power</span><span class="p">,</span> <span class="n">exp</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a><span class="nb">print</span><span class="p">(</span><span class="s2">"Partial (5^2):"</span><span class="p">,</span> <span class="n">square</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
+<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a>
+<a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a><span class="c1"># Використання operator замість lambda в reduce</span>
+<a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a><span class="n">total_op</span> <span class="o">=</span> <span class="n">reduce</span><span class="p">(</span><span class="n">operator</span><span class="o">.</span><span class="n">add</span><span class="p">,</span> <span class="n">nums</span><span class="p">)</span>
+<a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a><span class="nb">print</span><span class="p">(</span><span class="s2">"Reduce з operator.add:"</span><span class="p">,</span> <span class="n">total_op</span><span class="p">)</span>
 </code></pre></div>
 <p>Результат:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>Partial (5^2): 25
-<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>Reduce з operator.add: 15
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>Partial (5^2): 25
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>Reduce з operator.add: 15
 </code></pre></div>
 <h2 id="5">5. Просунуті техніки на базі функцій<a class="headerlink" href="#5" title="Permanent link">&para;</a></h2>
 <ul>
@@ -1679,32 +1897,32 @@
 <li><strong>Декоратори:</strong> спеціальні функції-обгортки, які приймають іншу функцію як аргумент, модифікують її поведінку і повертають нову функцію. Застосовуються за допомогою символу <code>@</code> перед оголошенням <code>def</code>. Ідеально для логування або кешування.</li>
 <li><strong>Рекурсія:</strong> функція може викликати саму себе. Корисно для обробки деревоподібних структур даних або математичних алгоритмів (наприклад, факторіал), проте завжди потрібно передбачати умову виходу, щоб уникнути нескінченного циклу.</li>
 </ul>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="c1"># --- Приклад 1: Декоратор ---</span>
-<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="k">def</span><span class="w"> </span><span class="nf">uppercase_decorator</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
-<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>        <span class="n">original_result</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>        <span class="k">return</span> <span class="n">original_result</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>  <span class="c1"># Змінюємо поведінку (робимо великими літерами)</span>
-<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>    <span class="k">return</span> <span class="n">wrapper</span>
-<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>
-<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="nd">@uppercase_decorator</span>
-<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a><span class="k">def</span><span class="w"> </span><span class="nf">say_hi</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
-<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a>    <span class="k">return</span> <span class="sa">f</span><span class="s2">"Привіт, </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span>
-<a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a>
-<a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a><span class="nb">print</span><span class="p">(</span><span class="s2">"Декоратор:"</span><span class="p">,</span> <span class="n">say_hi</span><span class="p">(</span><span class="s2">"Олексій"</span><span class="p">))</span>
-<a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a>
-<a id="__codelineno-8-14" name="__codelineno-8-14" href="#__codelineno-8-14"></a>
-<a id="__codelineno-8-15" name="__codelineno-8-15" href="#__codelineno-8-15"></a><span class="c1"># --- Приклад 2: Рекурсія ---</span>
-<a id="__codelineno-8-16" name="__codelineno-8-16" href="#__codelineno-8-16"></a><span class="k">def</span><span class="w"> </span><span class="nf">factorial</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
-<a id="__codelineno-8-17" name="__codelineno-8-17" href="#__codelineno-8-17"></a>    <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># Умова виходу (Base case)</span>
-<a id="__codelineno-8-18" name="__codelineno-8-18" href="#__codelineno-8-18"></a>        <span class="k">return</span> <span class="mi">1</span>
-<a id="__codelineno-8-19" name="__codelineno-8-19" href="#__codelineno-8-19"></a>    <span class="k">return</span> <span class="n">n</span> <span class="o">*</span> <span class="n">factorial</span><span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>  <span class="c1"># Рекурсивний виклик</span>
-<a id="__codelineno-8-20" name="__codelineno-8-20" href="#__codelineno-8-20"></a>
-<a id="__codelineno-8-21" name="__codelineno-8-21" href="#__codelineno-8-21"></a><span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Рекурсія (5!):"</span><span class="p">,</span> <span class="n">factorial</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="c1"># --- Приклад 1: Декоратор ---</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="k">def</span><span class="w"> </span><span class="nf">uppercase_decorator</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>        <span class="n">original_result</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>        <span class="k">return</span> <span class="n">original_result</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>  <span class="c1"># Змінюємо поведінку (робимо великими літерами)</span>
+<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>    <span class="k">return</span> <span class="n">wrapper</span>
+<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a>
+<a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a><span class="nd">@uppercase_decorator</span>
+<a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a><span class="k">def</span><span class="w"> </span><span class="nf">say_hi</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+<a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a>    <span class="k">return</span> <span class="sa">f</span><span class="s2">"Привіт, </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span>
+<a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a>
+<a id="__codelineno-10-12" name="__codelineno-10-12" href="#__codelineno-10-12"></a><span class="nb">print</span><span class="p">(</span><span class="s2">"Декоратор:"</span><span class="p">,</span> <span class="n">say_hi</span><span class="p">(</span><span class="s2">"Олексій"</span><span class="p">))</span>
+<a id="__codelineno-10-13" name="__codelineno-10-13" href="#__codelineno-10-13"></a>
+<a id="__codelineno-10-14" name="__codelineno-10-14" href="#__codelineno-10-14"></a>
+<a id="__codelineno-10-15" name="__codelineno-10-15" href="#__codelineno-10-15"></a><span class="c1"># --- Приклад 2: Рекурсія ---</span>
+<a id="__codelineno-10-16" name="__codelineno-10-16" href="#__codelineno-10-16"></a><span class="k">def</span><span class="w"> </span><span class="nf">factorial</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+<a id="__codelineno-10-17" name="__codelineno-10-17" href="#__codelineno-10-17"></a>    <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># Умова виходу (Base case)</span>
+<a id="__codelineno-10-18" name="__codelineno-10-18" href="#__codelineno-10-18"></a>        <span class="k">return</span> <span class="mi">1</span>
+<a id="__codelineno-10-19" name="__codelineno-10-19" href="#__codelineno-10-19"></a>    <span class="k">return</span> <span class="n">n</span> <span class="o">*</span> <span class="n">factorial</span><span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>  <span class="c1"># Рекурсивний виклик</span>
+<a id="__codelineno-10-20" name="__codelineno-10-20" href="#__codelineno-10-20"></a>
+<a id="__codelineno-10-21" name="__codelineno-10-21" href="#__codelineno-10-21"></a><span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Рекурсія (5!):"</span><span class="p">,</span> <span class="n">factorial</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
 </code></pre></div>
 <p>Результат:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>Декоратор: ПРИВІТ, ОЛЕКСІЙ
-<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>
-<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>Рекурсія (5!): 120
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>Декоратор: ПРИВІТ, ОЛЕКСІЙ
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>Рекурсія (5!): 120
 </code></pre></div>
 <hr />
 <p>👉 Практичне застосування функцій на курсі — рефакторинг звіту кафе у <a href="../../modules/m1/lesson_07.md">Уроці 7</a>; декоратори як окрема тема — <a href="../../../modules/m1/lesson_09/">Урок 9</a>.</p>

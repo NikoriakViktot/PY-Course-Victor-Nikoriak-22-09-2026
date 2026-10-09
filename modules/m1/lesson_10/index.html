@@ -3896,11 +3896,11 @@
 </code></pre></div>
 <p>Сама <code>delete_post</code> тепер займається лише видаленням. Перевірка живе в <code>require_admin</code>, а <code>wrapper</code> — замикання, яке пам'ятає, яку саме функцію <code>func</code> воно захищає.</p>
 <pre class="mermaid"><code>flowchart TD
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px,color:#1a1a1a;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#1a1a1a;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1a1a1a;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px,color:#1a1a1a;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px,color:#1a1a1a;
 
     C["виклик delete_post(7)&lt;br&gt;насправді викликає wrapper(7)"] --&gt; Q{"current_user&lt;br&gt;має роль admin?"}
     Q -- ні --&gt; N["Доступ заборонено&lt;br&gt;func не викликається"]
@@ -3940,7 +3940,7 @@
 </code></pre></div>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>TypeError: require_admin.&lt;locals&gt;.wrapper() takes 1 positional argument but 2 were given
 </code></pre></div>
-<p>Декоратор не повинен знати, скільки аргументів у функції, яку він обгортає. Для цього є два спеціальні параметри:</p>
+<p>Декоратор не повинен знати, скільки аргументів у функції, яку він обгортає. Для цього є два спеціальні параметри, знайомі з <a href="../lesson_08/">уроку 8</a>:</p>
 <ul>
 <li><code>*args</code> збирає всі позиційні аргументи в <strong>кортеж</strong>;</li>
 <li><code>**kwargs</code> збирає всі іменовані аргументи в <strong>словник</strong>.</li>
@@ -4090,11 +4090,11 @@
 </tbody>
 </table>
 <pre class="mermaid"><code>flowchart TD
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px,color:#1a1a1a;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#1a1a1a;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1a1a1a;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px,color:#1a1a1a;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px,color:#1a1a1a;
 
     A["require_role(#quot;user#quot;, #quot;admin#quot;)&lt;br&gt;запам'ятовує ролі"] --&gt; B["повертає decorator"]
     B --&gt; C["@ застосовує decorator до create_post&lt;br&gt;один раз, при def"]

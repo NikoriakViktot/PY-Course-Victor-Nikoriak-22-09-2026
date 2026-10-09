@@ -3901,11 +3901,11 @@
 <h3 id="legb">Де функція шукає змінні: LEGB<a class="headerlink" href="#legb" title="Permanent link">&para;</a></h3>
 <p>Коли <code>apply</code> бачить <code>percent</code>, Python шукає ім'я в чотирьох місцях по черзі — правило <strong>LEGB</strong>:</p>
 <pre class="mermaid"><code>flowchart TD
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px,color:#1a1a1a;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#1a1a1a;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1a1a1a;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px,color:#1a1a1a;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px,color:#1a1a1a;
 
     L["L — Local&lt;br&gt;змінні самої apply: bill"] --&gt; E["E — Enclosing&lt;br&gt;змінні make_discount: percent"]
     E --&gt; G["G — Global&lt;br&gt;імена модуля: PROMO"]
@@ -4021,11 +4021,11 @@
 </code></pre></div>
 <p>Той самий чек, ті самі кроки — різний результат. У другому варіанті знижку отримала й доставка. <strong>Порядок кроків — це бізнес-правило</strong>, і тепер воно записане в одному місці: у списку <code>checkout</code>, а не розмазане по коду.</p>
 <pre class="mermaid"><code>flowchart TD
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px,color:#1a1a1a;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#1a1a1a;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1a1a1a;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px,color:#1a1a1a;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px,color:#1a1a1a;
 
     A["540.0&lt;br&gt;чек кафе"] --&gt; B["SUMMER10&lt;br&gt;486.0"]
     B --&gt; C["add_fee&lt;br&gt;566.0"]

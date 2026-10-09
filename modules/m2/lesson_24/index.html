@@ -4080,11 +4080,11 @@
 </code></pre></div>
 <p><code>__repr__</code> — для розробника (однозначно, як створити об'єкт), <code>__str__</code> — для людини; <code>print</code> бере <code>__str__</code>. А <code>NotImplemented</code> — не помилка, а сигнал «я не вмію з цим типом». Python тоді дає шанс іншому операнду і лише потім кидає <code>TypeError</code>:</p>
 <pre class="mermaid"><code>flowchart TD
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px,color:#1a1a1a;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#1a1a1a;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1a1a1a;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px,color:#1a1a1a;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px,color:#1a1a1a;
 
     A["a + b"] --&gt; L["a.__add__(b)"]
     L --&gt; Q1{"повернув&lt;br&gt;NotImplemented?"}
@@ -4338,11 +4338,11 @@
 </code></pre></div>
 <p>Дескриптори бувають двох видів: <strong>data</strong> (є <code>__set__</code>: <code>property</code>, <code>Positive</code>) і <strong>non-data</strong> (лише <code>__get__</code>: звичайні методи, <code>cached_property</code>). Від виду залежить, хто виграє, коли в класі є дескриптор, а в екземплярі — однойменний атрибут:</p>
 <pre class="mermaid"><code>flowchart TD
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px,color:#1a1a1a;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#1a1a1a;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1a1a1a;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px,color:#1a1a1a;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px,color:#1a1a1a;
 
     A["obj.attr"] --&gt; D1{"у класі data-дескриптор?&lt;br&gt;property, Positive"}
     D1 -- так --&gt; G1["__get__ дескриптора"]
@@ -4487,11 +4487,11 @@
 <p>Помилка, якої варто уникати: <code>@dataclass</code> без <code>frozen</code> для сутності з хешем за змінюваними полями — це та сама «загублена монета», лише з замовленням.</p>
 <h3 id="_8">Який інструмент обрати<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h3>
 <pre class="mermaid"><code>flowchart TD
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px,color:#1a1a1a;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#1a1a1a;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1a1a1a;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px,color:#1a1a1a;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px,color:#1a1a1a;
 
     S["що потрібно класу?"] --&gt; Q1{"працювати з синтаксисом Python?&lt;br&gt;len, in, +, sorted"}
     Q1 -- так --&gt; DUN["dunder-методи"]

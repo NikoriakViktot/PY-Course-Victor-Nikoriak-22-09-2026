@@ -3654,11 +3654,11 @@
 <h2 id="_2">Проєкт: шість задач, які залежать одна від одної<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
 <p>Команда збирає той самий конвеєр, що в уроках 13–15, але кожну ланку пише інша людина:</p>
 <pre class="mermaid"><code>flowchart TD
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px,color:#1a1a1a;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#1a1a1a;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1a1a1a;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px,color:#1a1a1a;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px,color:#1a1a1a;
 
     M["models.py&lt;br&gt;RawOrder, DAYS"] --&gt; T2["2. parsing.py&lt;br&gt;parse_line"]
     T2 --&gt; T3["3. loading.py&lt;br&gt;read_lines, load_orders"]
@@ -3731,11 +3731,11 @@
 <p>Задача 4 викликає функції задачі 1, задача 5 — задачі 4. Як тоді Тарасові писати задачу 4, якщо Оксана ще не дописала задачу 1? Про це — розділ «Контракт». Спершу — як Git тримає код команди.</p>
 <h2 id="_3">Три місця, де живуть файли<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
 <pre class="mermaid"><code>flowchart TD
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px,color:#1a1a1a;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#1a1a1a;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1a1a1a;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px,color:#1a1a1a;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px,color:#1a1a1a;
 
     W["робоча тека&lt;br&gt;файли, які ти редагуєш"] -- "git add" --&gt; S["staging area&lt;br&gt;що піде в наступний коміт"]
     S -- "git commit" --&gt; R["репозиторій .git&lt;br&gt;історія комітів"]
@@ -3849,11 +3849,11 @@
 <p><code>M</code> у першій колонці — файл змінено й додано в staging. Якби <code>M</code> стояло в другій колонці, файл було б змінено, але ще не додано.</p>
 <p>У той самий час Тарас від <code>main</code> створює свою гілку <code>task-4-stats</code>, пише <code>stats.py</code>, дописує себе в <code>TEAM.md</code> і комітить. Тепер історія розгалужена:</p>
 <pre class="mermaid"><code>flowchart TD
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px,color:#1a1a1a;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#1a1a1a;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1a1a1a;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px,color:#1a1a1a;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px,color:#1a1a1a;
 
     C0["f423465&lt;br&gt;Шаблон проєкту"] --&gt; C1["0dcd132&lt;br&gt;Задача 1"]
     C0 --&gt; C4["36d1cdd&lt;br&gt;Задача 4"]
@@ -3908,11 +3908,11 @@
 <h2 id="pull-request">Pull Request і злиття<a class="headerlink" href="#pull-request" title="Permanent link">&para;</a></h2>
 <p>У командному репозиторії ніхто не комітить у <code>main</code> напряму. Кожна задача проходить однаковий шлях:</p>
 <pre class="mermaid"><code>flowchart TD
-    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px;
-    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px;
-    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px;
+    classDef step     fill:#eceff1,stroke:#546e7a,stroke-width:1px,color:#1a1a1a;
+    classDef decision fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#1a1a1a;
+    classDef success  fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1a1a1a;
+    classDef error    fill:#ffebee,stroke:#c62828,stroke-width:3px,color:#1a1a1a;
+    classDef warning  fill:#fff8e1,stroke:#e65100,stroke-width:2px,color:#1a1a1a;
 
     A["git switch main&lt;br&gt;git pull"] --&gt; B["git switch -c task-N-..."]
     B --&gt; C["код + python check.py N"]
