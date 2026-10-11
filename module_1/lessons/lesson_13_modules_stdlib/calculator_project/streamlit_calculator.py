@@ -1,3 +1,57 @@
+
+"""
+Python Math Lab — Streamlit Calculator
+======================================
+
+Навчальний застосунок для роботи з математичними функціями.
+
+Можливості:
+    1. Калькулятор у стилі iPhone з підтримкою клавіатури.
+    2. Побудова графіків математичних функцій.
+    3. Символьне обчислення похідних за допомогою SymPy.
+    4. Символьне обчислення невизначених інтегралів.
+
+Необхідні бібліотеки:
+    streamlit
+    numpy
+    matplotlib
+    sympy
+
+ВСТАНОВЛЕННЯ
+------------
+Відкрити термінал у корені проєкту:
+
+    python -m pip install streamlit numpy matplotlib sympy
+
+ЗАПУСК
+------
+Виконати з кореня репозиторію:
+
+    python -m streamlit run module_1/lessons/lesson_13_modules_stdlib/calculator_project/streamlit_calculator.py
+
+ВІДКРИТИ У БРАУЗЕРІ
+-------------------
+    http://localhost:8501
+
+ЗУПИНИТИ ПРОГРАМУ
+-----------------
+    Ctrl + C у терміналі.
+
+ДОКУМЕНТАЦІЯ
+------------
+Переглянути опис модуля в Python:
+
+    python -m pydoc module_1.lessons.lesson_13_modules_stdlib.calculator_project.streamlit_calculator
+
+Увага: імпорт Streamlit-модуля через pydoc може виконувати
+його код без активного Streamlit-контексту.
+Тому для повної документації краще використовувати README.md
+та MkDocs.
+
+
+"""
+
+
 import streamlit as st
 import streamlit.components.v1 as components
 import numpy as np

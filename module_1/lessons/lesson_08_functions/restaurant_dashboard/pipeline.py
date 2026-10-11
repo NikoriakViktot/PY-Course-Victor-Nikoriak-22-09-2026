@@ -54,6 +54,8 @@ class Order(NamedTuple):
     size:       int
 
 
+
+
 class RichOrder(NamedTuple):
     """Збагачений чек — Order + обчислені поля. Його повертає enrich_order()."""
     total_bill:      float

@@ -8,8 +8,8 @@ from sync_notebook_metadata import ROOT, sync_doc
 GH = "https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/"
 CO = "https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/"
 BADGE = "[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)]"
-MASTER = "module_6/lessons/lesson_51_final_project/note_lesson_51_final_project.ipynb"   # має _student-копію
-PLAIN = "module_1/docs/namespaces_legb.ipynb"                                            # вправ з розв'язками немає
+MASTER = "module_6/lessons/lesson_52_final_project/note_lesson_52_final_project.ipynb"   # має _student-копію
+PLAIN = "module_1/bonus/namespaces_legb.ipynb"                                            # вправ з розв'язками немає
 
 
 @pytest.fixture
@@ -32,7 +32,7 @@ def test_buttons_are_accepted_and_get_no_extra_badge(page) -> None:
     assert errors == [] and synced == original
 
 
-OTHER_STUDENT = "module_6/lessons/lesson_52_graduation_pitch/note_lesson_52_pitch_student.ipynb"
+OTHER_STUDENT = "module_6/lessons/lesson_53_graduation_pitch/note_lesson_53_pitch_student.ipynb"
 
 
 @pytest.mark.parametrize("text", [

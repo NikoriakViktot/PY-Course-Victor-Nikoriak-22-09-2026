@@ -3,7 +3,7 @@ import pytest
 
 from generate_student import compile_errors, is_master, make_student, strip_solutions, student_source
 
-REL = "module_6/lessons/lesson_51_final_project/note_lesson_51_final_project_student.ipynb"
+REL = "module_6/lessons/lesson_52_final_project/note_lesson_52_final_project_student.ipynb"
 
 
 def code(source: str, **metadata: object) -> dict:
@@ -56,7 +56,7 @@ def test_make_student_strips_untagged_cells_drops_instructor_and_outputs() -> No
     assert not any("SECRET" in s or "return 1" in s or "BEGIN SOLUTION" in s for s in sources)
     assert sources[0].startswith('<a href="https://colab.research.google.com/github/') and REL in sources[0]
     assert all(c["outputs"] == [] and c["execution_count"] is None for c in student["cells"] if c["cell_type"] == "code")
-    assert student["metadata"]["lms"]["notebook_path"] == REL and student["metadata"]["lms"]["lesson_number"] == 51
+    assert student["metadata"]["lms"]["notebook_path"] == REL and student["metadata"]["lms"]["lesson_number"] == 52
     assert compile_errors(student) == []
     assert "SECRET" in "".join(nb["cells"][1]["source"])          # майстер не змінився
 
