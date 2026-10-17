@@ -1136,6 +1136,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#pause-bridge" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Відкладене питання: пауза, щоб не чекати
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#_13" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3465,6 +3476,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#pause-bridge" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Відкладене питання: пауза, щоб не чекати
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#_13" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -4200,6 +4222,77 @@
 <li>Коли дані треба пройти кілька разів, відсортувати, знати їхню кількість або звертатися за індексом.</li>
 </ol>
 </details>
+<h3 id="pause-bridge">Відкладене питання: пауза, щоб не чекати<a class="headerlink" href="#pause-bridge" title="Permanent link">&para;</a></h3>
+<p>Головне вміння цього уроку — <strong>поставити функцію на паузу</strong>. Генератор зупиняється на <code>yield</code>, пам'ятає всі свої змінні й місце в коді і продовжує з того самого рядка, коли його попросять через <code>next()</code>.</p>
+<p>Тепер інша задача брокерської компанії. Програма питає ціну акції в трьох біржах. Кожна відповідає мережею приблизно за секунду. Якщо питати по черзі, програма три секунди <strong>нічого не робить</strong>: надіслала запит і стоїть, поки не прийде відповідь.</p>
+<details class="example">
+<summary>Для охочих: два генератори по черзі</summary>
+<p>Пауза вже дає змогу чергувати задачі. Кожен генератор — запит до біржі, а кожен <code>yield</code> — момент «чекаю відповідь»: тут він віддає керування, і поки він чекає, працює інший:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-36-1" name="__codelineno-36-1" href="#__codelineno-36-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">ask_price</span><span class="p">(</span><span class="n">exchange</span><span class="p">,</span> <span class="n">waits</span><span class="p">):</span>
+<a id="__codelineno-36-2" name="__codelineno-36-2" href="#__codelineno-36-2"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">exchange</span><span class="si">}</span><span class="s2">: запит надіслано"</span><span class="p">)</span>
+<a id="__codelineno-36-3" name="__codelineno-36-3" href="#__codelineno-36-3"></a>    <span class="k">for</span> <span class="n">second</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">waits</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+<a id="__codelineno-36-4" name="__codelineno-36-4" href="#__codelineno-36-4"></a>        <span class="k">yield</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">exchange</span><span class="si">}</span><span class="s2">: чекаю відповідь, </span><span class="si">{</span><span class="n">second</span><span class="si">}</span><span class="s2"> с"</span>
+<a id="__codelineno-36-5" name="__codelineno-36-5" href="#__codelineno-36-5"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">exchange</span><span class="si">}</span><span class="s2">: ціна отримана"</span><span class="p">)</span>
+<a id="__codelineno-36-6" name="__codelineno-36-6" href="#__codelineno-36-6"></a>
+<a id="__codelineno-36-7" name="__codelineno-36-7" href="#__codelineno-36-7"></a>
+<a id="__codelineno-36-8" name="__codelineno-36-8" href="#__codelineno-36-8"></a><span class="n">tasks</span> <span class="o">=</span> <span class="p">[</span><span class="n">ask_price</span><span class="p">(</span><span class="s2">"Біржа А"</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">ask_price</span><span class="p">(</span><span class="s2">"Біржа Б"</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]</span>
+<a id="__codelineno-36-9" name="__codelineno-36-9" href="#__codelineno-36-9"></a>
+<a id="__codelineno-36-10" name="__codelineno-36-10" href="#__codelineno-36-10"></a><span class="k">while</span> <span class="n">tasks</span><span class="p">:</span>
+<a id="__codelineno-36-11" name="__codelineno-36-11" href="#__codelineno-36-11"></a>    <span class="n">task</span> <span class="o">=</span> <span class="n">tasks</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>              <span class="c1"># беремо першу задачу з черги</span>
+<a id="__codelineno-36-12" name="__codelineno-36-12" href="#__codelineno-36-12"></a>    <span class="n">status</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">task</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>        <span class="c1"># даємо їй попрацювати до наступної паузи</span>
+<a id="__codelineno-36-13" name="__codelineno-36-13" href="#__codelineno-36-13"></a>    <span class="k">if</span> <span class="n">status</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-36-14" name="__codelineno-36-14" href="#__codelineno-36-14"></a>        <span class="nb">print</span><span class="p">(</span><span class="n">status</span><span class="p">)</span>
+<a id="__codelineno-36-15" name="__codelineno-36-15" href="#__codelineno-36-15"></a>        <span class="n">tasks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">task</span><span class="p">)</span>           <span class="c1"># ще не закінчила — в кінець черги</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-37-1" name="__codelineno-37-1" href="#__codelineno-37-1"></a>Біржа А: запит надіслано
+<a id="__codelineno-37-2" name="__codelineno-37-2" href="#__codelineno-37-2"></a>Біржа А: чекаю відповідь, 1 с
+<a id="__codelineno-37-3" name="__codelineno-37-3" href="#__codelineno-37-3"></a>Біржа Б: запит надіслано
+<a id="__codelineno-37-4" name="__codelineno-37-4" href="#__codelineno-37-4"></a>Біржа Б: чекаю відповідь, 1 с
+<a id="__codelineno-37-5" name="__codelineno-37-5" href="#__codelineno-37-5"></a>Біржа А: чекаю відповідь, 2 с
+<a id="__codelineno-37-6" name="__codelineno-37-6" href="#__codelineno-37-6"></a>Біржа Б: ціна отримана
+<a id="__codelineno-37-7" name="__codelineno-37-7" href="#__codelineno-37-7"></a>Біржа А: ціна отримана
+</code></pre></div>
+<p>Біржа Б отримала ціну раніше, хоча її запит надіслали другим: поки А чекала, працювала Б. Справжнього очікування тут немає, це лише модель. Цикл <code>while</code>, який по черзі будить задачі, — це іграшкова версія <strong>циклу подій</strong> (event loop).</p>
+</details>
+<p>Ту саму паузу Python уміє ставити не лише для того, щоб віддати значення, а й для того, щоб <strong>не марнувати час на очікування</strong>:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th><code>yield</code></th>
+<th>спільний принцип</th>
+<th><code>await</code> + цикл подій</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Що робить</td>
+<td>ставить генератор на паузу й віддає значення</td>
+<td><strong>зберегти стан → пауза → продовжити</strong></td>
+<td>ставить корутину на паузу, поки вона чекає, і дає працювати іншим задачам</td>
+</tr>
+<tr>
+<td>Хто продовжує</td>
+<td>той, хто викликає <code>next()</code></td>
+<td></td>
+<td>цикл подій, коли відповідь готова</td>
+</tr>
+<tr>
+<td>Де в курсі</td>
+<td>цей урок</td>
+<td></td>
+<td><a href="../../m2/lesson_28/">урок 28</a></td>
+</tr>
+</tbody>
+</table>
+<details class="info">
+<summary>Звідки це взялося</summary>
+<p>Ранні асинхронні функції в Python буквально були генераторами. З Python 3.5 для них є окремий синтаксис <code>async def</code> і <code>await</code> (<a href="https://peps.python.org/pep-0492/">PEP 492</a>), а з Python 3.11 старий спосіб через генератори з <code>asyncio</code> прибрали. Тож <code>await</code> — не той самий <code>yield</code>, а та сама ідея паузи з окремим, зрозумілішим записом.</p>
+</details>
+<p>Запам'ятай питання, до якого ми повернемося в <a href="../../m2/lesson_28/">уроці 28</a>:</p>
+<blockquote>
+<p><strong>Якщо Python уже вміє ставити функцію на паузу, чому б не використати це, щоб не марнувати час на очікування відповіді сервера?</strong></p>
+</blockquote>
 <h3 id="_13">Що далі<a class="headerlink" href="#_13" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Ноутбук заняття: <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_11_iterators_generators/lesson_11_transactions_streaming.ipynb"><code>lesson_11_transactions_streaming.ipynb</code></a> <a href="https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_11_iterators_generators/lesson_11_transactions_streaming.ipynb"><img alt="Open In Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></a> — клас-ітератор і генератор угод, запис і потокове читання NDJSON / CSV, конвеєр з VWAP по всіх компаніях.</li>
