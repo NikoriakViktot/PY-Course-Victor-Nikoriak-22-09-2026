@@ -28,6 +28,9 @@ def is_even(n):
     return n % 2 == 0
 
 
+def main():
+    print("add(4, 5)  =", add(4, 5))
+
 # ────────────────────────────────────────────────────────────
 # Цей блок виконується ТІЛЬКИ якщо запустити файл напряму:
 #   python my_math.py
@@ -37,6 +40,7 @@ def is_even(n):
 if __name__ == "__main__":
 
     print("=== Тестування my_math ===")
+
     print("add(2, 3)       =", add(2, 3))
     print("multiply(4, 5)  =", multiply(4, 5))
     print("square(7)       =", square(7))

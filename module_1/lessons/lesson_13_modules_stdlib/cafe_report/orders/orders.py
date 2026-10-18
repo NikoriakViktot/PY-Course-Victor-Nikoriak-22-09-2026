@@ -1,9 +1,9 @@
-"""Чеки кафе: сирі записи з каси і перетворення на Order з уроку 7."""
+"""Чеки кафе: сирі записи з каси і перетворення на Order з уроку 8."""
 import random
 from datetime import datetime, timedelta
 from typing import NamedTuple
 
-from rules import day_from_timestamp, meal_type_from_hour
+from rules.rules import day_from_timestamp, meal_type_from_hour
 
 
 class RawOrder(NamedTuple):
@@ -15,7 +15,7 @@ class RawOrder(NamedTuple):
 
 
 class Order(NamedTuple):
-    """Чек, як його рахує звіт з уроку 7."""
+    """Чек, як його рахує звіт з уроку 8."""
     total_bill: float
     tip: float
     day: str

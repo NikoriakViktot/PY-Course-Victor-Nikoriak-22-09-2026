@@ -1,0 +1,58 @@
+<!doctype html>
+<!--
+  Перевірка стемера lunr.uk.js: відкрий файл у браузері — зелений рядок означає, що все пройшло.
+  Headless: chrome --headless=new --dump-dom tools/mkdocs_hooks/test_lunr_uk.html  → шукай "PASSED" / "FAILED".
+-->
+<html lang="uk">
+<meta charset="utf-8">
+<title>lunr.uk tests</title>
+<pre id="out">running</pre>
+<script>
+  // Мінімальна заглушка lunr: стемеру потрібні лише ці три функції.
+  var lunr = {
+    trimmerSupport: { generateTrimmer: function () { return function (t) { return t } } },
+    Pipeline: { registerFunction: function () {} },
+    generateStopWordFilter: function () { return function (t) { return t } },
+    Index: { prototype: { query: function () {} } }
+  }
+</script>
+<script src="lunr.uk.js"></script>
+<script>
+  // Кожна група — словоформи, які мають дати ОДНУ основу.
+  var SAME_STEM = [
+    ["файл", "файли", "файлів", "файлами", "файлу", "файлом", "файлі"],
+    ["виняток", "винятки", "винятків", "винятку", "винятком", "винятками"],
+    ["функція", "функції", "функцій", "функцію", "функціями", "функціях"],
+    ["режим", "режими", "режимів", "режиму", "режимом", "режимах"],
+    ["словник", "словники", "словників", "словника", "словником", "словниками"],
+    ["рядок", "рядки", "рядків", "рядка", "рядком"],
+    ["урок", "уроки", "уроків", "уроку", "уроком"],
+    ["значення", "значенням", "значень", "значеннями"],
+    ["можливість", "можливості", "можливостей", "можливістю"],
+    ["текстовий", "текстового", "текстова", "текстові", "текстовим", "текстовому", "текстових", "текстову", "текстовою"],
+    ["читати", "читаю", "читає", "читаємо", "читаєте", "читають", "читав", "читала", "читали"],
+    ["навчатися", "навчаюсь", "навчається"],
+    ["пам'ять", "памʼять", "пам’ять"],
+    ["гравець", "гравця", "гравці", "гравцем"]
+  ]
+  // Не кирилиця — без змін.
+  var UNCHANGED = ["filenotfounderror", "json.load", "try", "except", "open()", "utf-8", "2024", "r+"]
+
+  var failures = []
+  SAME_STEM.forEach(function (group) {
+    var stems = group.map(lunr.uk.stem)
+    if (new Set(stems).size !== 1) {
+      failures.push(group.map(function (w, i) { return w + "→" + stems[i] }).join(", "))
+    }
+  })
+  UNCHANGED.forEach(function (w) {
+    if (lunr.uk.stem(w) !== w) failures.push(w + "→" + lunr.uk.stem(w) + " (має лишитися без змін)")
+  })
+
+  var out = document.getElementById("out")
+  out.textContent = failures.length
+    ? "FAILED " + failures.length + "\n" + failures.join("\n")
+    : "PASSED " + SAME_STEM.length + " груп словоформ, " + UNCHANGED.length + " латинських токенів"
+  out.style.color = failures.length ? "crimson" : "green"
+</script>
+</html>

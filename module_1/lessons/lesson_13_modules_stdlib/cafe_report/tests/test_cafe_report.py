@@ -1,14 +1,14 @@
-"""Перевірки cafe_report: python test_cafe_report.py (або pytest)."""
+"""Перевірки cafe_report. Запуск з теки cafe_report/: python -m tests.test_cafe_report (або pytest)."""
 import contextlib
 import importlib
 import io
 from datetime import datetime
 
 import main
-import report
-from orders import Order, RawOrder, generate_raw_orders, in_month, to_order
-from report import best_day, count_by_day, revenue_by_day
-from rules import MONTHS, day_from_timestamp, meal_type_from_hour
+from orders.orders import Order, RawOrder, generate_raw_orders, in_month, to_order
+from reports import report
+from reports.report import best_day, count_by_day, revenue_by_day
+from rules.rules import MONTHS, day_from_timestamp, meal_type_from_hour
 
 
 def test_meal_type_borders():

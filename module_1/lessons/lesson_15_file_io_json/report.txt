@@ -1,0 +1,1 @@
+{'cafe': 'Смачно', 'orders': 4, 'revenue': 3040.0, 'open': True, 'note': None}

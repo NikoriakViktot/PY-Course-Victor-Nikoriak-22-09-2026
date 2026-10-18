@@ -50,9 +50,16 @@ extra_css:
 extra_javascript:
   - javascripts/sidebars.js
 
+hooks:
+  - tools/mkdocs_hooks/uk_search.py   # український стемер для пошуку
+
 plugins:
   - search:
-      lang: uk
+      # "uk" тут не можна: lunr.js не має української, mkdocs підміняє її на "ru".
+      # Хук tools/mkdocs_hooks/uk_search.py додає "uk" до індексу після збірки.
+      lang: en
+      # без явного списку Material вимикає стемер (за замовчуванням лише stopWordFilter)
+      pipeline: [stemmer, stopWordFilter, trimmer]
 
 validation:
   nav:

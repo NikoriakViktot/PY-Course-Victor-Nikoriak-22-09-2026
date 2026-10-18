@@ -2,9 +2,9 @@
 import calendar
 import sys
 
-from orders import generate_raw_orders, in_month, to_order
-from report import print_report
-from rules import MONTHS
+from orders.orders import generate_raw_orders, in_month, to_order
+from reports.report import print_report
+from rules.rules import MONTHS
 
 
 def main(args):

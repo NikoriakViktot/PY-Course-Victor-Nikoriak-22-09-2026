@@ -1,6 +1,7 @@
-"""Звіт кафе: функції з уроку 7, тепер в окремому модулі."""
+"""Звіт кафе: функції з уроку 8, тепер в окремому модулі."""
 from collections import Counter
 
+from orders import Order
 from rules import DAYS
 
 
@@ -38,12 +39,10 @@ def print_report(orders):
     print("За прийомом їжі:", dict(Counter(order.time for order in orders).most_common()))
 
 
-if __name__ == "__main__":
-    from orders import Order
 
-    demo = [
-        Order(540.0, 50.0, "пт", "вечеря", 2),
-        Order(320.0, 30.0, "пт", "обід", 1),
-        Order(980.0, 120.0, "сб", "вечеря", 4),
-    ]
-    print_report(demo)
+orders = [
+    Order(540.0, 50.0, "пт", "вечеря", 2),
+    Order(320.0, 30.0, "пт", "обід", 1),
+    Order(980.0, 120.0, "сб", "вечеря", 4),
+]
+print_report(orders)
