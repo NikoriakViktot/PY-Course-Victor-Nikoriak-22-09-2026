@@ -1,9 +1,6 @@
 # AI log: Claude, що ви запитували, що ви змінили.
 
 import sys
-print(sys.path[0]) # тека файлу, який ви запустили
-print(len(sys.path))
+print(sys.path[0])
 
-import sys
-for path in sys.path:
-    print(path)
+# /.../PY-Course-Victor-Nikoriak-22-09-2026/assignments/Complete homework 09 - тека файлу, який я запустила
