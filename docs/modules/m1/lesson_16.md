@@ -536,7 +536,7 @@ git merge --no-ff task-4-stats
 
 Команда з 4–6 людей. У маленькій команді хтось бере дві задачі.
 
-1. **Лідер** створює новий публічний репозиторій на GitHub ([інструкція](../../00_getting_started/github/create_repository.md), сценарій B), копіює туди **вміст** теки [`team_project/`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_1/lessons/lesson_16_git_github_system/team_project) **без** теки `solution/` і робить перший коміт.
+1. **Лідер** відкриває шаблон [NikoriakViktot/cafe-kasa-template](https://github.com/NikoriakViktot/cafe-kasa-template) → **Use this template** → **Create a new repository** → назва, наприклад `cafe-kasa-team-1`, **Public**. Репозиторій команди з'являється з першим комітом: шаблон, тести, заглушки. Копіювати файли вручну не треба. Дорожня карта команди, як запускати перевірки і розбір кожної задачі — у `TEAM.md` репозиторію.
 2. Лідер додає команду: **Settings → Collaborators → Add people** ([документація GitHub](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/repository-access-and-collaboration/inviting-collaborators-to-a-personal-repository)). Кожен приймає запрошення й клонує репозиторій.
 3. Команда розподіляє задачі 1–6. Кожен:
     - `git switch main` і `git pull`, потім `git switch -c task-N-назва`;

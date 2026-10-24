@@ -586,6 +586,31 @@ group_anagrams(["літо", "клоун", "тіло", "таксі", "уклон"
 - порівнювати кожне слово з кожним не можна — це `O(n²)`;
 - слова зберігаються в групі у тому вигляді, в якому прийшли (без `lower()`).
 
+### Хеш зсередини, пам'ять і бази даних
+
+Розділи 8–10 ноутбука заняття йдуть глибше:
+
+- **хеш зсередини** — `hash()` для чисел, рядків і кортежів; чому hash рядка змінюється після перезапуску Python; чому `{1: 'a', 1.0: 'b'}` містить один ключ; як `set` розширюється, коли заповнюється на 2/3;
+- **скільки це важить** — `sys.getsizeof`: `set` зі 100 000 чисел займає приблизно в 5 разів більше, ніж `list`; число — об'єкт на 28 байт, кирилиця — 2 байти на символ. Вправа 6 — `deep_size`, де множина `id()` не дає порахувати об'єкт двічі;
+- **затравка: реляційна база даних** — ті самі поїздки в DuckDB: `PRIMARY KEY` як ключ словника, `GROUP BY` як `Counter`, `JOIN` як словник-індекс. `EXPLAIN` показує `HASH_GROUP_BY` і `HASH_JOIN` — бази даних побудовані на тих самих хеш-таблицях.
+
+### Лабораторія: таксі
+
+Для показу на занятті є інтерактивний застосунок [`taxi_lab`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_1/lessons/lesson_17_practicum_hashing/taxi_lab) на Streamlit, чотири вкладки:
+
+- **хеш-таблиця зсередини** — наповнюєш таблицю справжніми зонами Нью-Йорка й бачиш комірки, колізії, розширення; кошики-списки або відкрита адресація, як у `dict`; погані хеш-функції перетворюють пошук на `O(n)`;
+- **list · tuple · set · dict** — властивості, що можна хешувати, гонка `x in …` до мільйона елементів і ціна побудови множини;
+- **пам'ять** — `getsizeof`, `tracemalloc`, глибокий розмір, «сходинки» росту контейнерів;
+- **NYC Taxi + DuckDB** — 3 мільйони справжніх поїздок жовтого таксі Нью-Йорка: ті самі питання в Python (`Counter`, `dict`) і в SQL, `EXPLAIN`, повтори ключів, що ламають `JOIN`, вага одного рядка і карта посадок.
+
+```bash
+pip install streamlit plotly duckdb pandas geopandas
+cd module_1/lessons/lesson_17_practicum_hashing/taxi_lab
+streamlit run app.py
+```
+
+Дані NYC (~45 МБ) застосунок завантажить з офіційного сайту NYC TLC за кнопкою; без інтернету вкладка працює на згенерованих поїздках.
+
 ## Підсумок
 
 | Поняття | Що запам'ятати |
@@ -620,7 +645,8 @@ group_anagrams(["літо", "клоун", "тіло", "таксі", "уклон"
 
 ### Що далі
 
-- Ноутбук заняття: [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_17_practicum_hashing/note_lesson_17_hashing_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_17_practicum_hashing/note_lesson_17_hashing.ipynb){ .solutions-link } — та сама зміна диспетчера: прогнози, лічильники кроків, вправи з перевірками.
+- Ноутбук заняття: [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_17_practicum_hashing/note_lesson_17_hashing_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_17_practicum_hashing/note_lesson_17_hashing.ipynb){ .solutions-link } — та сама зміна диспетчера: прогнози, лічильники кроків, вправи з перевірками, хеш зсередини, пам'ять і DuckDB.
+- Лабораторія для заняття: [`taxi_lab`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_1/lessons/lesson_17_practicum_hashing/taxi_lab) — хеш-таблиця зсередини, пам'ять і 3 мільйони поїздок NYC у DuckDB.
 - Наступне заняття: [Урок 18. Огляд модуля 1](lesson_18.md) — усе разом: типи, колекції, функції, винятки, файли, Git і три практикуми.
 - У модулі 2 повернемося до hashable з іншого боку: як зробити ключем словника **власний** клас (`__hash__` і `__eq__`).
 
@@ -629,6 +655,8 @@ group_anagrams(["літо", "клоун", "тіло", "таксі", "уклон"
 - Типи [`dict`](https://docs.python.org/3/library/stdtypes.html#mapping-types-dict) і [`set`](https://docs.python.org/3/library/stdtypes.html#set-types-set-frozenset); вбудована функція [`hash()`](https://docs.python.org/3/library/functions.html#hash)
 - Глосарій: [hashable](https://docs.python.org/3/glossary.html#term-hashable); [`collections.Counter`](https://docs.python.org/3/library/collections.html#collections.Counter)
 - [Складність операцій `list`, `dict`, `set`](https://wiki.python.org/moin/TimeComplexity)
+- Пам'ять: [`sys.getsizeof`](https://docs.python.org/3/library/sys.html#sys.getsizeof), [`tracemalloc`](https://docs.python.org/3/library/tracemalloc.html)
+- [DuckDB](https://duckdb.org/docs/): [Python API](https://duckdb.org/docs/api/python/overview), [`EXPLAIN`](https://duckdb.org/docs/guides/meta/explain); дані [NYC TLC Trip Record Data](https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page)
 - Для охочих:
     - Harvard CS50x, [тиждень 5 «Data Structures»](https://cs50.harvard.edu/x/weeks/5/) — хеш-таблиці, хеш-функції й колізії;
     - MIT 6.006, [лекція 4 «Hashing»](https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/resources/lecture-4-hashing/) — для тих, хто хоче глибше.

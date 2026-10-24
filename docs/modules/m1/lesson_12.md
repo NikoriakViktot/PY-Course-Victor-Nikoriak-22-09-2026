@@ -521,6 +521,25 @@ first_at_or_after([], 5)        → 0
 - функція робить не більше `len(items).bit_length() + 1` порівнянь (додай лічильник);
 - цикл `while` з двома межами, без перебору всіх елементів.
 
+### Готові інструменти: Python і бібліотеки
+
+Свої пошуки ми писали, щоб зрозуміти ідею. У робочому коді те саме беруть готовим: `x in list`, `bisect`, `itertools.accumulate` зі стандартної бібліотеки або `numpy.searchsorted`, `pandas` і `sortedcontainers.SortedList`. Вони написані на C і швидші за наш цикл у рази, але **Big O не скасовують**: на мільйоні записів `x in list` (C, `O(n)`) програє нашому бінарному пошуку на Python (`O(log n)`) у сотні разів. Розділ 6 ноутбука заняття порівнює ці інструменти замірами `timeit`.
+
+**Правило:** алгоритм визначає, як росте робота, бібліотека — наскільки швидкий кожен крок. Спершу Big O, потім бібліотека.
+
+### Лабораторія: таксі
+
+Для показу на занятті є інтерактивний застосунок [`taxi_lab`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_1/lessons/lesson_12_practicum_search/taxi_lab) на Streamlit:
+
+- **місії диспетчера** — чотири задачі уроку: спершу визначаєш, що відомо про дані, потім прогнозуєш, як зростуть кроки при подвоєнні даних (+1 / ×2 / ×4), і перевіряєш дослідом. Для кожної задачі — готові інструменти Python і бібліотек з часом підготовки та запиту;
+- **гонка пошуків** — шість способів знайти момент у журналі від 1 000 до 1 000 000 записів, багато запитів одразу з `numpy`, пастка невідсортованих даних і питання «чи варто спершу відсортувати».
+
+```bash
+pip install streamlit plotly numpy pandas sortedcontainers
+cd module_1/lessons/lesson_12_practicum_search/taxi_lab
+streamlit run app.py
+```
+
 ## Підсумок
 
 | Що потрібно | Як |
@@ -552,7 +571,8 @@ first_at_or_after([], 5)        → 0
 
 ### Що далі
 
-- Ноутбук заняття: [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_12_practicum_search/note_lesson_12_search_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_12_practicum_search/note_lesson_12_search.ipynb){ .solutions-link } — зміна диспетчера таксі: чотири задачі, чотири стратегії, лічильники кроків і перевірки.
+- Ноутбук заняття: [Відкрити вправи в Colab](https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_12_practicum_search/note_lesson_12_search_student.ipynb){ .md-button .md-button--primary } [Переглянути розв’язки](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_12_practicum_search/note_lesson_12_search.ipynb){ .solutions-link } — зміна диспетчера таксі: чотири задачі, чотири стратегії, лічильники кроків, готові інструменти Python і бібліотек.
+- Лабораторія для заняття: [`taxi_lab`](https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_1/lessons/lesson_12_practicum_search/taxi_lab) — місії диспетчера й гонка пошуків на Streamlit.
 - Наступне заняття: [Урок 13. Модулі та стандартна бібліотека](lesson_13.md). Модуль `bisect` — лише один з багатьох готових інструментів.
 - Лінію «алгоритм залежить від представлення даних» продовжить [Практикум 3. Хеш-структури](lesson_17.md): пошук за `O(1)` через `dict` і `set`.
 
@@ -561,6 +581,8 @@ first_at_or_after([], 5)        → 0
 - Модуль [`bisect`](https://docs.python.org/3/library/bisect.html): [`bisect_left`](https://docs.python.org/3/library/bisect.html#bisect.bisect_left), [пошук у відсортованих списках](https://docs.python.org/3/library/bisect.html#searching-sorted-lists)
 - Методи рядків: [`str.startswith`](https://docs.python.org/3/library/stdtypes.html#str.startswith); сортування: [Sorting Techniques](https://docs.python.org/3/howto/sorting.html)
 - [Складність операцій `list`, `dict`, `set`](https://wiki.python.org/moin/TimeComplexity)
+- Заміри часу: модуль [`timeit`](https://docs.python.org/3/library/timeit.html); префіксні суми: [`itertools.accumulate`](https://docs.python.org/3/library/itertools.html#itertools.accumulate)
+- Бібліотеки: [`numpy.searchsorted`](https://numpy.org/doc/stable/reference/generated/numpy.searchsorted.html), [`pandas` `rolling`](https://pandas.pydata.org/docs/reference/api/pandas.Series.rolling.html), [`sortedcontainers`](https://grantjenks.com/docs/sortedcontainers/)
 - Для охочих:
     - Harvard CS50, [тиждень 3 «Algorithms»](https://cs50.harvard.edu/x/weeks/3/) — лінійний і бінарний пошук на прикладі телефонної книги;
     - MIT 6.0001, [лекція 12 «Searching and Sorting»](https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/resources/lecture-12-searching-and-sorting/).

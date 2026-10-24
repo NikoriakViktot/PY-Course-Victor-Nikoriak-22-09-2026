@@ -9,6 +9,17 @@
 
 ```bash
 pip install streamlit plotly
+```
+```bash
+cd module_1/lessons/lesson_09_practicum_big_o/taxi_lab
+```
+
+```bash
+streamlit run app.py
+```
+* однією командою 
+```bash
+pip install streamlit plotly
 cd module_1/lessons/lesson_09_practicum_big_o/taxi_lab
 streamlit run app.py
 ```

@@ -1,0 +1,570 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Алгоритми наживо</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: sticky tab bar; each lesson = explanation → flow schema → live visualization + data-structure strip → Python code with the active line lit. */
+:root{
+  --bg:#f4f6f9; --panel:#ffffff; --fg:#17202a; --muted:#5d6b7a; --line:#d8dfe8;
+  --ink:#1f3a5f;            /* headings, default bars */
+  --cur:#e8a300;            /* current / comparing */
+  --swap:#e4572e;           /* swap / write */
+  --ok:#1b9e77;             /* sorted / found / visited */
+  --pivot:#7b4fbf;          /* pivot / special pointer */
+  --codebg:#1b2430; --codefg:#e6edf3; --codehl:#3a4a2a;
+  --flowbg:#eef2f7;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0f141b; --panel:#171e28; --fg:#e4e9f0; --muted:#97a3b2; --line:#2b3542;
+  --ink:#8fb4e8; --cur:#f2b632; --swap:#f07a56; --ok:#3cc29a; --pivot:#b48ff0;
+  --codebg:#0b1017; --codefg:#dce3ea; --codehl:#2d4a26; --flowbg:#1e2733; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --bg:#0f141b; --panel:#171e28; --fg:#e4e9f0; --muted:#97a3b2; --line:#2b3542;
+  --ink:#8fb4e8; --cur:#f2b632; --swap:#f07a56; --ok:#3cc29a; --pivot:#b48ff0;
+  --codebg:#0b1017; --codefg:#dce3ea; --codehl:#2d4a26; --flowbg:#1e2733; color-scheme:dark }
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:16px;line-height:1.5;margin:0}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--panel)}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 48px}
+header.top{padding-block:28px 12px}
+header.top h1{font-size:clamp(28px,4vw,40px);margin:0 0 6px;color:var(--ink);text-wrap:balance;letter-spacing:-.01em}
+header.top p{margin:0;color:var(--muted);max-width:68ch}
+nav.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--panel);border-block:1px solid var(--line)}
+nav.tabs .wrap{display:flex;gap:4px;overflow-x:auto;padding-block:8px;scrollbar-width:thin}
+nav.tabs button{flex:0 0 auto;border:1px solid transparent;background:transparent;color:var(--muted);font:inherit;font-weight:500;padding:8px 14px;border-radius:8px;cursor:pointer}
+nav.tabs button:hover{color:var(--fg);background:var(--flowbg)}
+nav.tabs button[aria-selected="true"]{background:var(--ink);color:var(--panel)}
+nav.tabs button:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--cur);outline-offset:2px}
+
+section.lesson{display:none;padding-block:28px 0}
+section.lesson.active{display:block}
+.lesson h2{font-size:28px;margin:0 0 8px;color:var(--ink);text-wrap:balance}
+.lead{color:var(--muted);max-width:72ch;margin:0 0 18px}
+.lead b{color:var(--fg)}
+.grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:860px){.grid{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px;min-width:0}
+.card h3{font-size:14px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0 0 12px;font-weight:600}
+.stack{display:flex;flex-direction:column;gap:20px;min-width:0}
+
+/* controls */
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:14px}
+.controls label{display:flex;align-items:center;gap:6px;font-size:14px;color:var(--muted)}
+.btn{font:inherit;font-weight:600;font-size:14px;border:1px solid var(--line);background:var(--panel);color:var(--fg);padding:8px 14px;border-radius:8px;cursor:pointer}
+.btn:hover{border-color:var(--ink)}
+.btn.primary{background:var(--ink);color:var(--panel);border-color:var(--ink);min-width:110px}
+.btn:disabled{opacity:.45;cursor:default}
+select,input[type=number],input[type=text]{font:inherit;font-size:14px;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--fg)}
+input[type=range]{accent-color:var(--ink)}
+.stats{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:14px;color:var(--muted);font-variant-numeric:tabular-nums;margin-top:10px}
+.stats b{color:var(--fg);font-family:var(--mono);font-weight:600}
+.msg{min-height:24px;font-size:15px;margin-top:8px;font-variant-numeric:tabular-nums}
+.msg code,.lead code{font-family:var(--mono);font-size:.92em;background:var(--flowbg);padding:1px 5px;border-radius:4px}
+
+/* flow schema */
+.flow{display:flex;flex-wrap:wrap;gap:6px 0;align-items:center;margin-bottom:14px}
+.flow .node{background:var(--flowbg);border:1px solid var(--line);border-radius:8px;padding:6px 12px;font-size:14px;color:var(--muted);transition:background .15s,color .15s}
+.flow .node.on{background:var(--cur);color:#1b1b1b;border-color:var(--cur);font-weight:600}
+.flow .node.end.on{background:var(--ok);color:#fff;border-color:var(--ok)}
+.flow .arrow{width:22px;text-align:center;color:var(--muted);font-size:14px}
+
+/* bars */
+.bars{display:flex;align-items:flex-end;gap:3px;height:220px;padding-top:6px}
+.bar{flex:1;min-width:0;background:var(--ink);border-radius:3px 3px 0 0;position:relative;transition:height .12s}
+.bar.cmp{background:var(--cur)}.bar.swap{background:var(--swap)}.bar.ok{background:var(--ok)}.bar.pivot{background:var(--pivot)}.bar.dim{opacity:.35}
+.bar span{position:absolute;bottom:100%;left:0;right:0;text-align:center;font-size:11px;font-family:var(--mono);color:var(--muted)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--muted);margin-top:10px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-2px;margin-right:6px}
+
+/* cells (search) */
+.cells{display:flex;gap:4px;flex-wrap:wrap}
+.cell{width:48px;height:48px;display:flex;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:8px;font-family:var(--mono);font-weight:500;position:relative;background:var(--panel)}
+.cell.cmp{background:var(--cur);color:#1b1b1b;border-color:var(--cur)}
+.cell.ok{background:var(--ok);color:#fff;border-color:var(--ok)}
+.cell.dim{opacity:.3}
+.cell.seen{background:var(--flowbg)}
+.cell .tag{position:absolute;top:100%;left:0;right:0;text-align:center;font-size:11px;color:var(--pivot);font-family:var(--mono);margin-top:2px}
+.cell .idx{position:absolute;bottom:100%;left:0;right:0;text-align:center;font-size:10px;color:var(--muted)}
+.row{margin:22px 0 26px}
+.row h4{margin:0 0 20px;font-size:15px;font-weight:600}
+.row h4 small{color:var(--muted);font-weight:400;margin-left:8px}
+
+/* data structure strip */
+.ds{display:flex;align-items:center;gap:6px;flex-wrap:wrap;min-height:40px;font-family:var(--mono);font-size:14px}
+.ds .lab{color:var(--muted);font-family:var(--sans);font-size:13px;margin-right:4px}
+.chip{border:1px solid var(--line);background:var(--flowbg);border-radius:6px;padding:4px 10px}
+.chip.hot{background:var(--cur);border-color:var(--cur);color:#1b1b1b}
+.chip.ok{background:var(--ok);border-color:var(--ok);color:#fff}
+.chip.swap{background:var(--swap);border-color:var(--swap);color:#fff}
+.chip.empty{color:var(--muted);border-style:dashed}
+
+/* code */
+pre.code{background:var(--codebg);color:var(--codefg);font-family:var(--mono);font-size:13.5px;line-height:1.55;border-radius:10px;padding:14px 0;margin:0;overflow-x:auto}
+pre.code .ln{display:block;padding:0 16px 0 44px;position:relative;white-space:pre}
+pre.code .ln::before{content:attr(data-n);position:absolute;left:14px;color:#6c7a89;font-size:12px;top:2px}
+pre.code .ln.hl{background:var(--codehl)}
+pre.code .k{color:#c792ea}pre.code .f{color:#82aaff}pre.code .n{color:#f78c6c}pre.code .c{color:#7f8c9b;font-style:italic}pre.code .s{color:#c3e88d}
+
+/* graph */
+svg.graph{width:100%;height:auto;display:block}
+svg.graph .e{stroke:var(--line);stroke-width:3}
+svg.graph .e.on{stroke:var(--ok)}
+svg.graph circle{fill:var(--panel);stroke:var(--ink);stroke-width:3}
+svg.graph .v.ok circle{fill:var(--ok);stroke:var(--ok)}
+svg.graph .v.cur circle{fill:var(--cur);stroke:var(--cur)}
+svg.graph .v.front circle{stroke:var(--cur);stroke-dasharray:5 4}
+svg.graph text{font-family:var(--mono);font-weight:600;font-size:18px;fill:var(--fg);text-anchor:middle;dominant-baseline:central}
+svg.graph .v.ok text,svg.graph .v.cur text{fill:#fff}
+svg.graph .v.cur text{fill:#1b1b1b}
+svg.graph .ord{font-size:12px;fill:var(--muted);font-weight:400}
+
+/* tiles */
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
+.tile{background:var(--flowbg);border-radius:10px;padding:12px 14px}
+.tile .v{font-family:var(--mono);font-size:26px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--ink)}
+.tile .l{font-size:13px;color:var(--muted)}
+.memo{display:flex;flex-wrap:wrap;gap:4px}
+.memo .m{width:52px;border:1px solid var(--line);border-radius:6px;text-align:center;font-family:var(--mono);font-size:12px;padding:3px 0;background:var(--panel)}
+.memo .m small{display:block;color:var(--muted);font-size:10px}
+.memo .m.ok{background:var(--ok);color:#fff;border-color:var(--ok)}.memo .m.ok small{color:#e8fff6}
+.memo .m.hot{background:var(--cur);border-color:var(--cur);color:#1b1b1b}.memo .m.hot small{color:#333}
+
+table.t{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}
+table.t th,table.t td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left}
+table.t th{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}
+table.t td.num{font-family:var(--mono);text-align:right}
+table.t tr.warn td{color:var(--swap)}
+.tablewrap{overflow-x:auto}
+.coins{display:flex;flex-wrap:wrap;gap:8px;min-height:44px;align-items:center}
+.coin{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-weight:600;background:var(--cur);color:#1b1b1b;border:2px solid var(--panel);box-shadow:0 0 0 1px var(--line)}
+.coin.cand{background:var(--flowbg);color:var(--fg)}
+.coin.cand.on{background:var(--ink);color:var(--panel)}
+.coin.cand.off{opacity:.35}
+.note{border-left:3px solid var(--cur);padding:8px 12px;background:var(--flowbg);border-radius:0 8px 8px 0;font-size:14px;margin-top:12px}
+.note.bad{border-color:var(--swap)}
+svg.ga{width:100%;height:auto;display:block}
+svg.ga .axis{stroke:var(--line);stroke-width:1}
+svg.ga .curve{fill:none;stroke:var(--ink);stroke-width:2;opacity:.7}
+svg.ga .p{fill:var(--muted);opacity:.8}
+svg.ga .p.keep{fill:var(--ok);opacity:1}
+svg.ga .p.drop{fill:var(--swap);opacity:.5}
+svg.ga .p.new{fill:var(--cur);opacity:1}
+svg.ga text{font-family:var(--mono);font-size:12px;fill:var(--muted)}
+footer{color:var(--muted);font-size:14px;margin-top:40px;padding-top:16px;border-top:1px solid var(--line)}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+
+<header class="top"><div class="wrap">
+  <h1>Алгоритми наживо</h1>
+  <p>Інтерактивний урок до теми «Вступ до алгоритмів». Кожен алгоритм показано трьома синхронними шарами: схема потоку кроків, рух даних у структурі та рядок коду Python, що виконується саме зараз. Натискайте «Крок», щоб іти вручну, або «Старт» для автоматичного виконання.</p>
+</div></header>
+
+<nav class="tabs" aria-label="Розділи уроку"><div class="wrap" id="tabbar"></div></nav>
+
+<main class="wrap">
+
+<!-- ============ SEARCH ============ -->
+<section class="lesson" id="poshuk" data-title="1 · Пошук">
+  <h2>Алгоритми пошуку: лінійний проти бінарного</h2>
+  <p class="lead">Задача одна: знайти число у відсортованому списку. <b>Лінійний пошук</b> перевіряє елементи по одному. <b>Бінарний пошук</b> дивиться на середину і відкидає половину даних за крок. Результат однаковий, кількість кроків різна. Обидва алгоритми запускаються одночасно, кожен на своєму рядку.</p>
+  <div class="grid">
+    <div class="stack">
+      <div class="card">
+        <div class="controls" id="s-controls"></div>
+        <div class="controls">
+          <label>Ціль <select id="s-target"></select></label>
+          <button class="btn" id="s-new">Новий масив</button>
+        </div>
+        <div class="row">
+          <h4>Лінійний пошук <small>O(n)</small></h4>
+          <div class="flow" id="s-flow-lin"></div>
+          <div class="cells" id="s-lin"></div>
+          <div class="msg" id="s-msg-lin"></div>
+        </div>
+        <div class="row">
+          <h4>Бінарний пошук <small>O(log n)</small></h4>
+          <div class="flow" id="s-flow-bin"></div>
+          <div class="cells" id="s-bin"></div>
+          <div class="msg" id="s-msg-bin"></div>
+        </div>
+        <div class="stats"><span>Порівнянь лінійно: <b id="s-c-lin">0</b></span><span>Порівнянь бінарно: <b id="s-c-bin">0</b></span></div>
+      </div>
+      <div class="card">
+        <h3>Де використовується</h3>
+        <p style="margin:0">Лінійний: невідсортовані списки, читання CSV, невеликі дані, <code>grep</code>. Бінарний: бази даних та індекси, модуль <code>bisect</code>, будь-які відсортовані колекції. Для 1 000 000 елементів бінарний пошук робить не більше 20 кроків.</p>
+      </div>
+    </div>
+    <div class="stack">
+      <div class="card"><h3>linear_search</h3><pre class="code" id="s-code-lin"></pre></div>
+      <div class="card"><h3>binary_search</h3><pre class="code" id="s-code-bin"></pre></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SORTING ============ -->
+<section class="lesson" id="sortuvannya" data-title="2 · Сортування">
+  <h2>Алгоритми сортування</h2>
+  <p class="lead">Висота стовпчика дорівнює значенню. <span style="color:var(--cur);font-weight:600">Жовтий</span> — елементи, які зараз порівнюються; <span style="color:var(--swap);font-weight:600">червоний</span> — елементи, що міняються місцями або записуються; <span style="color:var(--ok);font-weight:600">зелений</span> — вже на своєму місці; <span style="color:var(--pivot);font-weight:600">фіолетовий</span> — опорний елемент (pivot). Порівняйте лічильники операцій для різних алгоритмів на тих самих даних.</p>
+  <div class="grid">
+    <div class="stack">
+      <div class="card">
+        <div class="controls" id="o-controls"></div>
+        <div class="controls">
+          <label>Алгоритм <select id="o-algo">
+            <option value="bubble">Bubble Sort</option>
+            <option value="selection">Selection Sort</option>
+            <option value="insertion">Insertion Sort</option>
+            <option value="quick">QuickSort</option>
+            <option value="merge">Merge Sort</option>
+          </select></label>
+          <label>Дані <select id="o-data">
+            <option value="random">випадкові</option>
+            <option value="nearly">майже відсортовані</option>
+            <option value="reversed">у зворотному порядку</option>
+            <option value="few">мало унікальних</option>
+          </select></label>
+          <label>n <input type="range" id="o-n" min="6" max="40" value="16"> <b id="o-n-v" style="font-family:var(--mono)">16</b></label>
+          <button class="btn" id="o-new">Перемішати</button>
+        </div>
+        <div class="flow" id="o-flow"></div>
+        <div class="bars" id="o-bars"></div>
+        <div class="msg" id="o-msg"></div>
+        <div class="stats"><span>Порівнянь: <b id="o-cmp">0</b></span><span>Записів у масив: <b id="o-swp">0</b></span><span>Кроків: <b id="o-steps">0</b></span></div>
+      </div>
+      <div class="card">
+        <h3>Складність і застосування</h3>
+        <div class="tablewrap"><table class="t">
+          <tr><th>Алгоритм</th><th>Середній час</th><th>Найгірший</th><th>Пам'ять</th><th>Коли використовувати</th></tr>
+          <tr><td>Bubble Sort</td><td class="num">O(n²)</td><td class="num">O(n²)</td><td class="num">O(1)</td><td>лише для розуміння ідеї</td></tr>
+          <tr><td>Selection Sort</td><td class="num">O(n²)</td><td class="num">O(n²)</td><td class="num">O(1)</td><td>коли запис (swap) дорогий: рівно n−1 обмінів</td></tr>
+          <tr><td>Insertion Sort</td><td class="num">O(n²)</td><td class="num">O(n²)</td><td class="num">O(1)</td><td>маленькі або майже відсортовані дані: O(n) у кращому випадку</td></tr>
+          <tr><td>QuickSort</td><td class="num">O(n log n)</td><td class="num">O(n²)</td><td class="num">O(log n)</td><td>загальні задачі, найшвидший на практиці</td></tr>
+          <tr><td>Merge Sort</td><td class="num">O(n log n)</td><td class="num">O(n log n)</td><td class="num">O(n)</td><td>великі дані, зовнішнє сортування, стабільність</td></tr>
+        </table></div>
+        <p class="note">У Python <code>sorted()</code> і <code>list.sort()</code> використовують Timsort: гібрид Merge Sort та Insertion Sort, стабільний, O(n) на вже впорядкованих ділянках.</p>
+      </div>
+    </div>
+    <div class="stack">
+      <div class="card"><h3 id="o-code-title">Код</h3><pre class="code" id="o-code"></pre></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ GRAPHS ============ -->
+<section class="lesson" id="hrafy" data-title="3 · Графи">
+  <h2>Обхід графа: BFS і DFS</h2>
+  <p class="lead">Той самий граф, той самий стартовий вузол A. <b>BFS</b> (пошук у ширину) тримає сусідів у <b>черзі</b> FIFO і розходиться хвилею по рівнях, тому першим знаходить найкоротший шлях. <b>DFS</b> (пошук у глибину) тримає їх у <b>стеку</b> LIFO і занурюється по одній гілці до кінця. Стежте за вмістом черги і стека під кожним графом: саме структура даних визначає порядок обходу.</p>
+  <div class="grid">
+    <div class="stack">
+      <div class="card">
+        <div class="controls" id="g-controls"></div>
+        <div class="grid" style="gap:16px">
+          <div style="min-width:0">
+            <h4 style="margin:0 0 8px;font-size:15px">BFS <small style="color:var(--muted);font-weight:400">черга · deque.popleft()</small></h4>
+            <div class="flow" id="g-flow-bfs"></div>
+            <svg class="graph" id="g-svg-bfs" viewBox="0 0 320 260" aria-label="Граф для BFS"></svg>
+            <div class="ds" id="g-ds-bfs"></div>
+            <div class="ds" id="g-ord-bfs" style="margin-top:6px"></div>
+          </div>
+          <div style="min-width:0">
+            <h4 style="margin:0 0 8px;font-size:15px">DFS <small style="color:var(--muted);font-weight:400">стек · list.pop()</small></h4>
+            <div class="flow" id="g-flow-dfs"></div>
+            <svg class="graph" id="g-svg-dfs" viewBox="0 0 320 260" aria-label="Граф для DFS"></svg>
+            <div class="ds" id="g-ds-dfs"></div>
+            <div class="ds" id="g-ord-dfs" style="margin-top:6px"></div>
+          </div>
+        </div>
+        <div class="msg" id="g-msg"></div>
+      </div>
+      <div class="card">
+        <h3>Де використовується</h3>
+        <p style="margin:0">BFS: найкоротший шлях без ваг (карти, соціальні мережі «друзі друзів»), обхід по рівнях. DFS: аналіз залежностей, топологічне сортування, пошук циклів, лабіринти. Складність обох: O(V + E). Для зважених графів замість черги береться пріоритетна черга — це алгоритм Дейкстри.</p>
+      </div>
+    </div>
+    <div class="stack">
+      <div class="card"><h3>bfs</h3><pre class="code" id="g-code-bfs"></pre></div>
+      <div class="card"><h3>dfs (ітеративно, зі стеком)</h3><pre class="code" id="g-code-dfs"></pre></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ GREEDY ============ -->
+<section class="lesson" id="zhadibnyi" data-title="4 · Жадібний">
+  <h2>Жадібний алгоритм: видача решти</h2>
+  <p class="lead">Жадібний алгоритм на кожному кроці бере <b>найкращий локальний варіант</b> і ніколи не повертається назад. Для решти це означає: щоразу брати найбільшу монету, яка ще вміщується в залишок. Для американських монет це дає оптимум. Але спробуйте набір <code>[1, 3, 4]</code> і суму 6: жадібний видасть три монети, хоча вистачило б двох.</p>
+  <div class="grid">
+    <div class="stack">
+      <div class="card">
+        <div class="controls" id="r-controls"></div>
+        <div class="controls">
+          <label>Монети <input type="text" id="r-coins" value="25, 10, 5, 1" size="14"></label>
+          <label>Сума <input type="number" id="r-amount" value="63" min="1" max="500" style="width:80px"></label>
+          <button class="btn" id="r-preset1">США, 63</button>
+          <button class="btn" id="r-preset2">Контрприклад [1,3,4], 6</button>
+        </div>
+        <div class="flow" id="r-flow"></div>
+        <div class="ds" style="margin-bottom:14px"><span class="lab">Монети за спаданням:</span><span id="r-cands" class="coins"></span></div>
+        <div class="tiles" style="margin-bottom:14px">
+          <div class="tile"><div class="v" id="r-left">63</div><div class="l">залишок суми</div></div>
+          <div class="tile"><div class="v" id="r-count">0</div><div class="l">монет видано</div></div>
+        </div>
+        <div class="ds"><span class="lab">Рішення:</span><span id="r-result" class="coins"></span></div>
+        <div class="msg" id="r-msg"></div>
+        <div id="r-verdict"></div>
+      </div>
+    </div>
+    <div class="stack">
+      <div class="card"><h3>greedy_change</h3><pre class="code" id="r-code"></pre></div>
+      <div class="card"><h3>Де використовується</h3><p style="margin:0">Кешування, планування задач, побудова маршрутів, кодування Хаффмана, алгоритм Дейкстри. Жадібна стратегія коректна лише тоді, коли локальний оптимум гарантовано веде до глобального; інакше потрібне динамічне програмування.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ DP ============ -->
+<section class="lesson" id="dp" data-title="5 · Динамічне програмування">
+  <h2>Динамічне програмування: Фібоначчі з мемоізацією</h2>
+  <p class="lead">Наївна рекурсія <code>fib(n) = fib(n-1) + fib(n-2)</code> перераховує ті самі підзадачі тисячі разів. <b>Мемоізація</b> зберігає результат кожної підзадачі в словнику і при повторному виклику бере готову відповідь. Стежте за стеком викликів і за таблицею memo: кожна клітинка обчислюється рівно один раз.</p>
+  <div class="grid">
+    <div class="stack">
+      <div class="card">
+        <div class="controls" id="d-controls"></div>
+        <div class="controls"><label>n <input type="range" id="d-n" min="3" max="30" value="12"> <b id="d-n-v" style="font-family:var(--mono)">12</b></label></div>
+        <div class="flow" id="d-flow"></div>
+        <div class="ds" style="margin-bottom:12px"><span class="lab">Стек викликів:</span><span id="d-stack" class="ds"></span></div>
+        <div class="memo" id="d-memo"></div>
+        <div class="msg" id="d-msg"></div>
+        <div class="tiles" style="margin-top:14px">
+          <div class="tile"><div class="v" id="d-calls">0</div><div class="l">викликів з memo</div></div>
+          <div class="tile"><div class="v" id="d-hits">0</div><div class="l">влучань у memo</div></div>
+          <div class="tile"><div class="v" id="d-naive">0</div><div class="l">викликів без memo (для цього n)</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="stack">
+      <div class="card"><h3>fib з мемоізацією</h3><pre class="code" id="d-code"></pre></div>
+      <div class="card"><h3>Де використовується</h3><p style="margin:0">Оптимізація ресурсів, вирівнювання послідовностей у біоінформатиці, фінансові моделі, найкоротші шляхи (Беллман–Форд, Флойд–Воршелл), ML. У Python готовий декоратор: <code>functools.lru_cache</code>.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ GENETIC ============ -->
+<section class="lesson" id="henetyka" data-title="6 · Евристики">
+  <h2>Евристичні алгоритми: генетичний алгоритм</h2>
+  <p class="lead">Коли точне рішення знайти надто дорого, шукають <b>достатньо хороше</b>. Генетичний алгоритм тримає популяцію кандидатів, оцінює їхню якість (fitness), залишає найкращих, схрещує їх і трохи мутує. Тут популяція з 10 чисел шукає максимум функції <code>fitness(x) = −(x − target)²</code>. Пересуньте target під час роботи: популяція адаптується.</p>
+  <div class="grid">
+    <div class="stack">
+      <div class="card">
+        <div class="controls" id="e-controls"></div>
+        <div class="controls">
+          <label>target <input type="range" id="e-target" min="0" max="10" step="0.1" value="5"> <b id="e-target-v" style="font-family:var(--mono)">5.0</b></label>
+          <label>мутація σ <input type="range" id="e-sigma" min="0" max="2" step="0.1" value="0.6"> <b id="e-sigma-v" style="font-family:var(--mono)">0.6</b></label>
+        </div>
+        <div class="flow" id="e-flow"></div>
+        <svg class="ga" id="e-svg" viewBox="0 0 640 240" aria-label="Популяція на числовій прямій і крива fitness"></svg>
+        <div class="legend"><span><i style="background:var(--muted)"></i>кандидат</span><span><i style="background:var(--ok)"></i>відібраний (топ-5)</span><span><i style="background:var(--swap)"></i>відкинутий</span><span><i style="background:var(--cur)"></i>нащадок після мутації</span></div>
+        <div class="msg" id="e-msg"></div>
+        <div class="tiles" style="margin-top:14px">
+          <div class="tile"><div class="v" id="e-gen">0</div><div class="l">покоління</div></div>
+          <div class="tile"><div class="v" id="e-best">—</div><div class="l">найкращий x</div></div>
+          <div class="tile"><div class="v" id="e-fit">—</div><div class="l">найкращий fitness</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="stack">
+      <div class="card"><h3>Генетичний алгоритм</h3><pre class="code" id="e-code"></pre></div>
+      <div class="card"><h3>Де використовується</h3><p style="margin:0">Підбір гіперпараметрів моделей, задача комівояжера, розклади, проєктування конструкцій. Відповідь не гарантовано оптимальна, але її можна отримати за прийнятний час там, де повний перебір неможливий.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ BIG-O ============ -->
+<section class="lesson" id="bigo" data-title="7 · Складність">
+  <h2>Чому це важливо: кількість кроків залежно від n</h2>
+  <p class="lead">Одна задача, різні алгоритми, одна й та сама машина (умовно 10⁸ простих операцій за секунду). Пересувайте n і дивіться, як розходяться класи складності.</p>
+  <div class="card">
+    <div class="controls"><label>n = <b id="b-n-v" style="font-family:var(--mono);font-size:18px">1 000</b> <input type="range" id="b-n" min="1" max="7" step="0.01" value="3" style="width:260px;max-width:100%"></label></div>
+    <div class="tablewrap"><table class="t" id="b-table">
+      <tr><th>Складність</th><th>Приклад</th><th style="text-align:right">Операцій</th><th style="text-align:right">Час при 10⁸ оп/с</th></tr>
+    </table></div>
+    <p class="note">Для n = 10⁶ алгоритм O(n²) потребує 10¹² операцій, тобто кілька годин, а O(n log n) — близько 20 мільйонів операцій, тобто частки секунди. Різниця між ними — це лише вибір алгоритму.</p>
+  </div>
+  <div class="card" style="margin-top:20px">
+    <h3>Ключова думка</h3>
+    <p style="margin:0;font-size:18px">Один результат → багато шляхів. Різниця між ними — у швидкості та ресурсах. Алгоритми — це не про код, а про ефективний спосіб мислення: правильно обрана структура даних (черга, стек, словник) часто і є алгоритмом.</p>
+  </div>
+</section>
+
+</main>
+<footer class="wrap">Вступ до алгоритмів · Python Advanced · інтерактивні демонстрації для аудиторії</footer>
+
+<script>
+(function(){
+'use strict';
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+const fmt=n=>Math.round(n).toLocaleString('uk-UA');
+const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+
+/* ---------- Runner: generic stepper over a generator ---------- */
+class Runner{
+  constructor(make,render){this.make=make;this.render=render;this.timer=null;this.delay=450;this.playBtn=null;this.stepBtn=null;this.reset();}
+  reset(){this.pause();this.gen=this.make();this.done=false;this.steps=0;const r=this.gen.next();this.state=r.value;this.done=!!r.done;this.render(this.state,this);this.ui();}
+  step(){if(this.done)return;const r=this.gen.next();if(r.done){this.done=true;this.pause();}else{this.state=r.value;this.steps++;this.render(this.state,this);}this.ui();}
+  play(){if(this.timer||this.done)return;const tick=()=>{this.step();if(!this.done)this.timer=setTimeout(tick,this.delay);else this.timer=null;};this.timer=setTimeout(tick,0);this.ui();}
+  pause(){if(this.timer){clearTimeout(this.timer);this.timer=null;}this.ui();}
+  toggle(){this.timer?this.pause():this.play();}
+  ui(){if(this.playBtn){this.playBtn.textContent=this.timer?'⏸ Пауза':(this.done?'✓ Готово':'▶ Старт');this.playBtn.disabled=this.done;}if(this.stepBtn)this.stepBtn.disabled=this.done;}
+}
+function controls(host,runner,idp){
+  host.innerHTML=`<button class="btn primary" id="${idp}-play">▶ Старт</button><button class="btn" id="${idp}-step">Крок →</button><button class="btn" id="${idp}-reset">Скинути</button><label>Швидкість <input type="range" id="${idp}-speed" min="1" max="10" value="5"></label>`;
+  runner.playBtn=$('#'+idp+'-play');runner.stepBtn=$('#'+idp+'-step');
+  runner.playBtn.onclick=()=>runner.toggle();runner.stepBtn.onclick=()=>{runner.pause();runner.step();};
+  $('#'+idp+'-reset').onclick=()=>runner.reset();
+  const sp=$('#'+idp+'-speed');const set=()=>runner.delay=1150-sp.value*110;sp.oninput=set;set();runner.ui();
+}
+/* ---------- flow schema ---------- */
+function flow(host,nodes){host.innerHTML=nodes.map((n,i)=>`${i?'<span class="arrow">→</span>':''}<span class="node${i===nodes.length-1?' end':''}" data-i="${i}">${esc(n)}</span>`).join('');}
+function flowOn(host,i){host.querySelectorAll('.node').forEach(n=>n.classList.toggle('on',+n.dataset.i===i));}
+/* ---------- code ---------- */
+function code(host,lines){host.innerHTML=lines.map((l,i)=>`<span class="ln" data-n="${i+1}">${hi(l)||' '}</span>`).join('');}
+function hi(l){return esc(l).replace(/(#.*)$/,'<span class="c">$1</span>').replace(/\b(def|return|for|in|while|if|elif|else|not|and|or|import|from|lambda|True|False|None|range|len|yield)\b/g,'<span class="k">$1</span>').replace(/\b(\d+(\.\d+)?)\b/g,'<span class="n">$1</span>').replace(/(&#39;[^&]*&#39;|'[^']*')/g,'<span class="s">$1</span>');}
+function codeOn(host,i){host.querySelectorAll('.ln').forEach((n,k)=>n.classList.toggle('hl',k===i));}
+
+/* ---------- tabs ---------- */
+const sections=[...document.querySelectorAll('section.lesson')];const tabbar=$('#tabbar');
+sections.forEach(s=>{const b=document.createElement('button');b.textContent=s.dataset.title;b.setAttribute('role','tab');b.onclick=()=>show(s.id,true);tabbar.appendChild(b);});
+function show(id,push){if(!document.getElementById(id))id=sections[0].id;sections.forEach(s=>s.classList.toggle('active',s.id===id));[...tabbar.children].forEach((b,i)=>b.setAttribute('aria-selected',sections[i].id===id));if(push){try{history.replaceState(null,'','#'+id);}catch(e){}}window.scrollTo({top:0});}
+show((location.hash||'#poshuk').slice(1),false);
+
+/* ===================== 1. SEARCH ===================== */
+(function(){
+  const LIN=['def linear_search(arr, target):','    for i, value in enumerate(arr):','        if value == target:','            return i','    return -1'];
+  const BIN=['def binary_search(arr, target):','    low, high = 0, len(arr) - 1','    while low <= high:','        mid = (low + high) // 2','        if arr[mid] == target:','            return mid','        elif arr[mid] < target:','            low = mid + 1','        else:','            high = mid - 1','    return -1'];
+  code($('#s-code-lin'),LIN);code($('#s-code-bin'),BIN);
+  const FL=['Взяти наступний елемент','Дорівнює цілі?','Знайдено','Не знайдено'],FB=['mid = (low+high)//2','Порівняти arr[mid] з ціллю','Відкинути половину','Знайдено','Не знайдено'];
+  flow($('#s-flow-lin'),FL);flow($('#s-flow-bin'),FB);
+  let arr=[],target=0;
+  function newArr(){const set=new Set();while(set.size<15)set.add(rnd(1,99));arr=[...set].sort((a,b)=>a-b);const sel=$('#s-target');sel.innerHTML='';const opts=arr.map(v=>[v,String(v)]);let miss=50;while(arr.includes(miss))miss++;opts.push([miss,miss+' (немає в масиві)']);opts.forEach(([v,t])=>{const o=document.createElement('option');o.value=v;o.textContent=t;sel.appendChild(o);});sel.value=arr[rnd(0,14)];target=+sel.value;}
+  function* lin(){let c=0;for(let i=0;i<arr.length;i++){c++;yield{i,c,line:2,f:1,msg:`arr[${i}] = ${arr[i]} == ${target}? ${arr[i]===target?'так':'ні'}`};if(arr[i]===target){yield{i,c,found:true,line:3,f:2,msg:`Знайдено на індексі ${i} за ${c} порівнянь`};return;}}yield{i:-1,c,miss:true,line:4,f:3,msg:`Не знайдено. Перевірено всі ${c} елементів`};}
+  function* bin(){let lo=0,hi=arr.length-1,c=0;yield{lo,hi,mid:-1,c,line:1,f:-1,msg:`low=${lo}, high=${hi}`};while(lo<=hi){const mid=(lo+hi)>>1;yield{lo,hi,mid,c,line:3,f:0,msg:`mid = (${lo}+${hi})//2 = ${mid}`};c++;if(arr[mid]===target){yield{lo,hi,mid,c,found:true,line:5,f:3,msg:`arr[${mid}] = ${arr[mid]} == ${target}. Знайдено за ${c} порівнянь`};return;}else if(arr[mid]<target){yield{lo,hi,mid,c,line:6,f:1,msg:`arr[${mid}] = ${arr[mid]} < ${target} → ціль праворуч`};lo=mid+1;yield{lo,hi,mid:-1,c,line:7,f:2,msg:`low = ${lo}. Відкинуто ліву половину`};}else{yield{lo,hi,mid,c,line:8,f:1,msg:`arr[${mid}] = ${arr[mid]} > ${target} → ціль ліворуч`};hi=mid-1;yield{lo,hi,mid:-1,c,line:9,f:2,msg:`high = ${hi}. Відкинуто праву половину`};}}yield{lo,hi,mid:-1,c,miss:true,line:10,f:4,msg:`low > high: не знайдено за ${c} порівнянь`};}
+  function* both(){const a=lin(),b=bin();let ra=a.next(),rb=b.next(),la=ra.value,lb=rb.value;yield{la,lb};while(!ra.done||!rb.done){if(!ra.done){ra=a.next();if(!ra.done)la=ra.value;}if(!rb.done){rb=b.next();if(!rb.done)lb=rb.value;}yield{la,lb};}}
+  function cells(host,fn){host.innerHTML=arr.map((v,i)=>`<div class="cell ${fn(i)}"><span class="idx">${i}</span>${v}${tag(i)}</div>`).join('');}
+  let tags={};const tag=i=>tags[i]?`<span class="tag">${tags[i]}</span>`:'';
+  function render(st){const {la,lb}=st;
+    tags={};cells($('#s-lin'),i=>la.found&&i===la.i?'ok':(i===la.i?'cmp':(i<la.i||la.miss?'seen':'')));$('#s-msg-lin').textContent=la.msg;codeOn($('#s-code-lin'),la.line);flowOn($('#s-flow-lin'),la.f);$('#s-c-lin').textContent=la.c;
+    tags={};if(lb.lo<=lb.hi&&!lb.found){tags[lb.lo]=(tags[lb.lo]||'')+'low';tags[lb.hi]=(tags[lb.hi]||'')+(lb.lo===lb.hi?'=high':'high');}if(lb.mid>=0)tags[lb.mid]=(tags[lb.mid]?tags[lb.mid]+' ':'')+'mid';
+    cells($('#s-bin'),i=>lb.found&&i===lb.mid?'ok':(i===lb.mid?'cmp':((i<lb.lo||i>lb.hi)?'dim':'')));$('#s-msg-bin').textContent=lb.msg;codeOn($('#s-code-bin'),lb.line);flowOn($('#s-flow-bin'),lb.f);$('#s-c-bin').textContent=lb.c;}
+  newArr();const R=new Runner(both,render);controls($('#s-controls'),R,'s');
+  $('#s-target').onchange=e=>{target=+e.target.value;R.reset();};$('#s-new').onclick=()=>{newArr();R.reset();};
+})();
+
+/* ===================== 2. SORTING ===================== */
+(function(){
+  const CODES={
+    bubble:['def bubble_sort(arr):','    n = len(arr)','    for i in range(n):','        for j in range(n - i - 1):','            if arr[j] > arr[j + 1]:','                arr[j], arr[j + 1] = arr[j + 1], arr[j]','    return arr'],
+    selection:['def selection_sort(arr):','    n = len(arr)','    for i in range(n):','        min_idx = i','        for j in range(i + 1, n):','            if arr[j] < arr[min_idx]:','                min_idx = j','        arr[i], arr[min_idx] = arr[min_idx], arr[i]','    return arr'],
+    insertion:['def insertion_sort(arr):','    for i in range(1, len(arr)):','        current = arr[i]','        j = i - 1','        while j >= 0 and arr[j] > current:','            arr[j + 1] = arr[j]   # зсув вправо','            j -= 1','        arr[j + 1] = current','    return arr'],
+    quick:['def quick_sort(arr, low, high):','    if low < high:','        pivot = arr[high]','        i = low - 1','        for j in range(low, high):','            if arr[j] <= pivot:','                i += 1','                arr[i], arr[j] = arr[j], arr[i]','        arr[i + 1], arr[high] = arr[high], arr[i + 1]','        quick_sort(arr, low, i)','        quick_sort(arr, i + 2, high)'],
+    merge:['def merge_sort(arr, lo, hi):','    if hi - lo < 1:','        return','    mid = (lo + hi) // 2','    merge_sort(arr, lo, mid)','    merge_sort(arr, mid + 1, hi)','    left, right = arr[lo:mid+1], arr[mid+1:hi+1]','    i = j = 0; k = lo','    while i < len(left) and j < len(right):','        if left[i] <= right[j]:','            arr[k] = left[i]; i += 1','        else:','            arr[k] = right[j]; j += 1','        k += 1','    # дописати залишок left або right']
+  };
+  const FLOWS={
+    bubble:['Порівняти сусідів','Більший?','Поміняти місцями','Кінець проходу','Відсортовано'],
+    selection:['Шукати мінімум','Менший за min?','Запамʼятати min','Поміняти з першим','Відсортовано'],
+    insertion:['Взяти наступний','Порівняти з попереднім','Зсунути вправо','Вставити на місце','Відсортовано'],
+    quick:['Обрати pivot','Порівняти з pivot','Поміняти','Поставити pivot','Рекурсія','Відсортовано'],
+    merge:['Розділити навпіл','Порівняти голови','Записати менший','Дописати залишок','Відсортовано']
+  };
+  const NAMES={bubble:'bubble_sort',selection:'selection_sort',insertion:'insertion_sort',quick:'quick_sort',merge:'merge_sort'};
+  let a=[],stats={cmp:0,swp:0};
+  function gen(){const n=+$('#o-n').value,kind=$('#o-data').value;let b=[];if(kind==='random')b=Array.from({length:n},()=>rnd(5,100));else if(kind==='nearly'){b=Array.from({length:n},(_,i)=>Math.round(5+95*i/(n-1)));for(let k=0;k<Math.max(1,n/6);k++){const i=rnd(0,n-2);[b[i],b[i+1]]=[b[i+1],b[i]];}}else if(kind==='reversed')b=Array.from({length:n},(_,i)=>Math.round(100-95*i/(n-1)));else b=Array.from({length:n},()=>[15,40,65,90][rnd(0,3)]);a=b;}
+  const snap=(arr,marks,line,f,msg)=>({a:arr.slice(),marks,line,f,msg});
+  function* bubble(){const x=a.slice(),n=x.length,ok={};for(let i=0;i<n;i++){let sw=false;for(let j=0;j<n-i-1;j++){stats.cmp++;yield snap(x,{...ok,[j]:'cmp',[j+1]:'cmp'},4,0,`arr[${j}]=${x[j]} > arr[${j+1}]=${x[j+1]}? ${x[j]>x[j+1]?'так → міняємо':'ні'}`);if(x[j]>x[j+1]){[x[j],x[j+1]]=[x[j+1],x[j]];stats.swp+=2;sw=true;yield snap(x,{...ok,[j]:'swap',[j+1]:'swap'},5,2,`Обмін: ${x[j]} ↔ ${x[j+1]}`);}}ok[n-i-1]='ok';yield snap(x,ok,2,3,`Прохід ${i+1}: ${x[n-i-1]} «сплив» на своє місце`);if(!sw){for(let k=0;k<n;k++)ok[k]='ok';break;}}yield snap(x,Object.fromEntries(x.map((_,i)=>[i,'ok'])),6,4,'Готово');}
+  function* selection(){const x=a.slice(),n=x.length,ok={};for(let i=0;i<n;i++){let m=i;yield snap(x,{...ok,[i]:'cmp',[m]:'pivot'},3,0,`min_idx = ${i} (значення ${x[i]})`);for(let j=i+1;j<n;j++){stats.cmp++;yield snap(x,{...ok,[m]:'pivot',[j]:'cmp'},5,1,`arr[${j}]=${x[j]} < arr[min]=${x[m]}? ${x[j]<x[m]?'так':'ні'}`);if(x[j]<x[m]){m=j;yield snap(x,{...ok,[m]:'pivot'},6,2,`Новий мінімум: ${x[m]} на індексі ${m}`);}}if(m!==i){[x[i],x[m]]=[x[m],x[i]];stats.swp+=2;}yield snap(x,{...ok,[i]:'swap',[m]:'swap'},7,3,m!==i?`Обмін: ${x[m]} ↔ ${x[i]}`:`Мінімум уже на місці`);ok[i]='ok';}yield snap(x,Object.fromEntries(x.map((_,i)=>[i,'ok'])),8,4,'Готово');}
+  function* insertion(){const x=a.slice(),n=x.length;const okUpTo=k=>Object.fromEntries(Array.from({length:k},(_,i)=>[i,'ok']));for(let i=1;i<n;i++){const cur=x[i];let j=i-1;yield snap(x,{...okUpTo(i),[i]:'pivot'},2,0,`current = ${cur}`);while(j>=0){stats.cmp++;yield snap(x,{...okUpTo(i),[j]:'cmp',[i]:'pivot'},4,1,`arr[${j}]=${x[j]} > ${cur}? ${x[j]>cur?'так → зсув':'ні → стоп'}`);if(x[j]>cur){x[j+1]=x[j];stats.swp++;yield snap(x,{...okUpTo(i),[j+1]:'swap',[j]:'dim'},5,2,`arr[${j+1}] = ${x[j]}`);j--;}else break;}x[j+1]=cur;stats.swp++;yield snap(x,{...okUpTo(i+1),[j+1]:'swap'},7,3,`Вставка ${cur} на індекс ${j+1}`);}yield snap(x,okUpTo(n),8,4,'Готово');}
+  function* quick(){const x=a.slice(),ok={};function* qs(lo,hi,depth){if(lo>hi)return;if(lo===hi){ok[lo]='ok';yield snap(x,{...ok},1,4,`Підмасив з одного елемента [${x[lo]}] відсортований`);return;}const p=x[hi];yield snap(x,{...ok,[hi]:'pivot'},2,0,`pivot = arr[${hi}] = ${p} (підмасив ${lo}..${hi})`);let i=lo-1;for(let j=lo;j<hi;j++){stats.cmp++;yield snap(x,{...ok,[hi]:'pivot',[j]:'cmp',...(i>=lo?{[i]:'swap'}:{})},5,1,`arr[${j}]=${x[j]} <= ${p}? ${x[j]<=p?'так → у ліву частину':'ні'}`);if(x[j]<=p){i++;if(i!==j){[x[i],x[j]]=[x[j],x[i]];stats.swp+=2;yield snap(x,{...ok,[hi]:'pivot',[i]:'swap',[j]:'swap'},7,2,`Обмін ${x[i]} ↔ ${x[j]}: менші йдуть ліворуч`);}}}[x[i+1],x[hi]]=[x[hi],x[i+1]];stats.swp+=2;ok[i+1]='ok';yield snap(x,{...ok,[i+1]:'ok'},8,3,`pivot ${p} став на остаточне місце ${i+1}`);yield snap(x,{...ok},9,4,`Рекурсія: ліва частина ${lo}..${i}`);yield* qs(lo,i,depth+1);yield snap(x,{...ok},10,4,`Рекурсія: права частина ${i+2}..${hi}`);yield* qs(i+2,hi,depth+1);}yield* qs(0,x.length-1,0);yield snap(x,Object.fromEntries(x.map((_,i)=>[i,'ok'])),0,5,'Готово');}
+  function* merge(){const x=a.slice();function* ms(lo,hi){if(hi-lo<1)return;const mid=(lo+hi)>>1;const range={};for(let k=lo;k<=hi;k++)range[k]='cmp';yield snap(x,range,3,0,`Розділити ${lo}..${hi} на ${lo}..${mid} і ${mid+1}..${hi}`);yield* ms(lo,mid);yield* ms(mid+1,hi);const L=x.slice(lo,mid+1),Rr=x.slice(mid+1,hi+1);let i=0,j=0,k=lo;while(i<L.length&&j<Rr.length){stats.cmp++;yield snap(x,{[lo+i]:'cmp',[mid+1+j]:'cmp'},9,1,`left=${L[i]} <= right=${Rr[j]}? ${L[i]<=Rr[j]?'так':'ні'}`);let fromLeft;if(L[i]<=Rr[j]){x[k]=L[i++];fromLeft=true;}else{x[k]=Rr[j++];fromLeft=false;}stats.swp++;yield snap(x,{[k]:'swap'},fromLeft?10:12,2,`arr[${k}] = ${x[k]} (з ${fromLeft?'left':'right'})`);k++;}while(i<L.length){x[k]=L[i++];stats.swp++;yield snap(x,{[k]:'swap'},14,3,`arr[${k}] = ${x[k]} (залишок left)`);k++;}while(j<Rr.length){x[k]=Rr[j++];stats.swp++;yield snap(x,{[k]:'swap'},14,3,`arr[${k}] = ${x[k]} (залишок right)`);k++;}const done={};for(let q=lo;q<=hi;q++)done[q]='ok';yield snap(x,done,8,3,`Злито ${lo}..${hi}: [${x.slice(lo,hi+1).join(', ')}]`);}yield* ms(0,x.length-1);yield snap(x,Object.fromEntries(x.map((_,i)=>[i,'ok'])),0,4,'Готово');}
+  const GENS={bubble,selection,insertion,quick,merge};
+  function make(){stats={cmp:0,swp:0};const k=$('#o-algo').value;code($('#o-code'),CODES[k]);$('#o-code-title').textContent=NAMES[k];flow($('#o-flow'),FLOWS[k]);const g=GENS[k]();const first={a:a.slice(),marks:{},line:-1,f:-1,msg:'Натисніть «Крок» або «Старт»'};return (function*(){yield first;yield* g;})();}
+  function render(st,R){const show=a.length<=24;$('#o-bars').innerHTML=st.a.map((v,i)=>`<div class="bar ${st.marks[i]||''}" style="height:${v}%">${show?`<span>${v}</span>`:''}</div>`).join('');$('#o-msg').textContent=st.msg;codeOn($('#o-code'),st.line);flowOn($('#o-flow'),st.f);$('#o-cmp').textContent=stats.cmp;$('#o-swp').textContent=stats.swp;$('#o-steps').textContent=R.steps;}
+  gen();const R=new Runner(make,render);controls($('#o-controls'),R,'o');
+  $('#o-algo').onchange=()=>R.reset();$('#o-data').onchange=()=>{gen();R.reset();};$('#o-n').oninput=e=>{$('#o-n-v').textContent=e.target.value;gen();R.reset();};$('#o-new').onclick=()=>{gen();R.reset();};
+})();
+
+/* ===================== 3. GRAPHS ===================== */
+(function(){
+  const N={A:[160,30],B:[70,95],C:[250,95],D:[30,170],E:[115,170],F:[205,170],G:[290,170],H:[160,235]};
+  const ADJ={A:['B','C'],B:['A','D','E'],C:['A','F','G'],D:['B','H'],E:['B','H'],F:['C','H'],G:['C'],H:['D','E','F']};
+  const EDGES=[];Object.keys(ADJ).forEach(u=>ADJ[u].forEach(v=>{if(u<v)EDGES.push([u,v]);}));
+  const CB=['from collections import deque','','def bfs(graph, start):','    visited = {start}','    order = []','    queue = deque([start])','    while queue:','        node = queue.popleft()   # з початку','        order.append(node)','        for nb in graph[node]:','            if nb not in visited:','                visited.add(nb)','                queue.append(nb)  # у кінець','    return order'];
+  const CD=['def dfs(graph, start):','    visited = set()','    order = []','    stack = [start]','    while stack:','        node = stack.pop()        # з вершини','        if node in visited:','            continue','        visited.add(node)','        order.append(node)','        for nb in reversed(graph[node]):','            if nb not in visited:','                stack.append(nb)  # на вершину','    return order'];
+  code($('#g-code-bfs'),CB);code($('#g-code-dfs'),CD);
+  flow($('#g-flow-bfs'),['Дістати з початку черги','Відвідати вузол','Додати сусідів у кінець','Черга порожня']);
+  flow($('#g-flow-dfs'),['Зняти з вершини стека','Відвідати вузол','Покласти сусідів на вершину','Стек порожній']);
+  function* bfs(){const vis=new Set(['A']),q=['A'],order=[];const tree=[];yield{q,order,cur:null,line:5,f:-1,tree,msg:'queue = [A]'};while(q.length){const u=q.shift();yield{q,order,cur:u,line:7,f:0,tree,msg:`popleft() → ${u}`};order.push(u);yield{q,order,cur:u,line:8,f:1,tree,msg:`Відвідано ${u}`};for(const v of ADJ[u]){if(!vis.has(v)){vis.add(v);q.push(v);tree.push([u,v]);yield{q,order,cur:u,line:12,f:2,tree,added:v,msg:`${v} ще не відвідано → queue.append(${v})`};}}}yield{q,order,cur:null,line:13,f:3,tree,msg:`Порядок BFS: ${order.join(' ')}`};}
+  function* dfs(){const vis=new Set(),st=['A'],order=[];const tree=[];let parent={};yield{q:st,order,cur:null,line:3,f:-1,tree,msg:'stack = [A]'};while(st.length){const u=st.pop();yield{q:st,order,cur:u,line:5,f:0,tree,msg:`pop() → ${u}`};if(vis.has(u)){yield{q:st,order,cur:u,line:7,f:0,tree,msg:`${u} уже відвідано → пропускаємо`};continue;}vis.add(u);order.push(u);if(parent[u])tree.push([parent[u],u]);yield{q:st,order,cur:u,line:9,f:1,tree,msg:`Відвідано ${u}`};for(const v of [...ADJ[u]].reverse()){if(!vis.has(v)){st.push(v);parent[v]=u;yield{q:st,order,cur:u,line:12,f:2,tree,added:v,msg:`stack.append(${v}) — ${v} тепер на вершині`};}}}yield{q:st,order,cur:null,line:13,f:3,tree,msg:`Порядок DFS: ${order.join(' ')}`};}
+  function* both(){const a=bfs(),b=dfs();let ra=a.next(),rb=b.next(),la=ra.value,lb=rb.value;yield{la,lb};while(!ra.done||!rb.done){if(!ra.done){ra=a.next();if(!ra.done)la=ra.value;}if(!rb.done){rb=b.next();if(!rb.done)lb=rb.value;}yield{la,lb};}}
+  function svg(host,st){const on=new Set(st.tree.map(e=>e.join()));const frontier=new Set(st.q);host.innerHTML=EDGES.map(([u,v])=>`<line class="e ${on.has([u,v].join())||on.has([v,u].join())?'on':''}" x1="${N[u][0]}" y1="${N[u][1]}" x2="${N[v][0]}" y2="${N[v][1]}"/>`).join('')+Object.keys(N).map(k=>{const cls=st.cur===k?'cur':(st.order.includes(k)?'ok':(frontier.has(k)?'front':''));const o=st.order.indexOf(k);return `<g class="v ${cls}"><circle cx="${N[k][0]}" cy="${N[k][1]}" r="18"/><text x="${N[k][0]}" y="${N[k][1]}">${k}</text>${o>=0?`<text class="ord" x="${N[k][0]+24}" y="${N[k][1]-14}">${o+1}</text>`:''}</g>`;}).join('');}
+  function ds(host,label,items,hotIdx,added){host.innerHTML=`<span class="lab">${label}</span>`+(items.length?items.map((x,i)=>`<span class="chip ${i===hotIdx?'hot':''} ${x===added?'swap':''}">${x}</span>`).join(''):'<span class="chip empty">порожньо</span>');}
+  function render(st){const {la,lb}=st;svg($('#g-svg-bfs'),la);svg($('#g-svg-dfs'),lb);ds($('#g-ds-bfs'),'Черга (вихід ліворуч):',la.q,0,la.added);ds($('#g-ds-dfs'),'Стек (вершина праворуч):',lb.q,lb.q.length-1,lb.added);ds($('#g-ord-bfs'),'Відвідано:',la.order,-1);ds($('#g-ord-dfs'),'Відвідано:',lb.order,-1);$('#g-ord-bfs').querySelectorAll('.chip').forEach(c=>c.classList.add('ok'));$('#g-ord-dfs').querySelectorAll('.chip').forEach(c=>c.classList.add('ok'));codeOn($('#g-code-bfs'),la.line);codeOn($('#g-code-dfs'),lb.line);flowOn($('#g-flow-bfs'),la.f);flowOn($('#g-flow-dfs'),lb.f);$('#g-msg').textContent=`BFS: ${la.msg}   ·   DFS: ${lb.msg}`;}
+  const R=new Runner(both,render);controls($('#g-controls'),R,'g');
+})();
+
+/* ===================== 4. GREEDY ===================== */
+(function(){
+  code($('#r-code'),['def greedy_change(amount, coins):','    coins = sorted(coins, reverse=True)','    result = []','    for coin in coins:','        while amount >= coin:','            amount -= coin','            result.append(coin)','    return result']);
+  flow($('#r-flow'),['Взяти найбільшу монету','Монета ≤ залишок?','Відняти і додати до рішення','Наступна монета','Готово']);
+  function parse(){const coins=[...new Set($('#r-coins').value.split(/[\s,;]+/).map(Number).filter(v=>v>0&&Number.isInteger(v)))].sort((a,b)=>b-a);const amount=Math.max(1,Math.min(500,+$('#r-amount').value||1));return {coins,amount};}
+  function optimal(amount,coins){const dp=new Array(amount+1).fill(Infinity),from=new Array(amount+1).fill(-1);dp[0]=0;for(let s=1;s<=amount;s++)for(const c of coins)if(c<=s&&dp[s-c]+1<dp[s]){dp[s]=dp[s-c]+1;from[s]=c;}if(dp[amount]===Infinity)return null;const res=[];let s=amount;while(s>0){res.push(from[s]);s-=from[s];}return res;}
+  let P=parse();
+  function* g(){P=parse();let left=P.amount;const res=[];yield{left,res,ci:-1,line:1,f:-1,msg:`Монети за спаданням: [${P.coins.join(', ')}], сума ${left}`};for(let ci=0;ci<P.coins.length;ci++){const c=P.coins[ci];yield{left,res,ci,line:3,f:0,msg:`coin = ${c}`};while(true){yield{left,res,ci,line:4,f:1,msg:`${left} >= ${c}? ${left>=c?'так':'ні'}`};if(left<c)break;left-=c;res.push(c);yield{left,res,ci,line:6,f:2,msg:`amount = ${left}, result = [${res.join(', ')}]`};}if(ci<P.coins.length-1)yield{left,res,ci,line:3,f:3,msg:`Монета ${c} більше не вміщується → наступна`};}yield{left,res,ci:-1,line:7,f:4,done:true,msg:left===0?`Готово: ${res.length} монет`:`Залишок ${left} не вдалося видати цими монетами`};}
+  function render(st){$('#r-cands').innerHTML=P.coins.map((c,i)=>`<span class="coin cand ${i===st.ci?'on':(i<st.ci?'off':'')}">${c}</span>`).join('');$('#r-left').textContent=st.left;$('#r-count').textContent=st.res.length;$('#r-result').innerHTML=st.res.length?st.res.map(c=>`<span class="coin">${c}</span>`).join(''):'<span class="chip empty">порожньо</span>';$('#r-msg').textContent=st.msg;codeOn($('#r-code'),st.line);flowOn($('#r-flow'),st.f);
+    const v=$('#r-verdict');if(!st.done){v.innerHTML='';return;}const opt=optimal(P.amount,P.coins);if(!opt){v.innerHTML=`<p class="note bad">Жодна комбінація цих монет не дає ${P.amount}.</p>`;return;}if(st.left>0)v.innerHTML=`<p class="note bad">Жадібний алгоритм зупинився із залишком ${st.left}, хоча рішення існує: [${opt.join(', ')}] (${opt.length} монет). Локальний оптимум завів у тупик.</p>`;else if(opt.length<st.res.length)v.innerHTML=`<p class="note bad">Жадібний: ${st.res.length} монет [${st.res.join(', ')}]. Оптимально (динамічне програмування): ${opt.length} монети [${opt.join(', ')}]. Жадібна стратегія тут не оптимальна.</p>`;else v.innerHTML=`<p class="note">Жадібне рішення збігається з оптимальним: ${opt.length} монет. Для цього набору монет жадібна стратегія коректна.</p>`;}
+  const R=new Runner(g,render);controls($('#r-controls'),R,'r');
+  $('#r-coins').onchange=$('#r-amount').onchange=()=>R.reset();
+  $('#r-preset1').onclick=()=>{$('#r-coins').value='25, 10, 5, 1';$('#r-amount').value=63;R.reset();};
+  $('#r-preset2').onclick=()=>{$('#r-coins').value='1, 3, 4';$('#r-amount').value=6;R.reset();};
+})();
+
+/* ===================== 5. DP ===================== */
+(function(){
+  code($('#d-code'),['def fib(n, memo={}):','    if n in memo:','        return memo[n]        # влучання','    if n <= 2:','        return 1               # базовий випадок','    memo[n] = fib(n - 1, memo) + fib(n - 2, memo)','    return memo[n]']);
+  flow($('#d-flow'),['Виклик fib(n)','Є в memo?','Взяти з memo','Базовий випадок','fib(n−1) + fib(n−2)','Зберегти в memo']);
+  const naiveCalls=n=>{let a=1,b=1;for(let i=3;i<=n;i++){[a,b]=[b,a+b];}return n<=2?1:2*b-1;};
+  let n=12;
+  function* g(){n=+$('#d-n').value;const memo={},stack=[];let calls=0,hits=0;const S=(line,f,msg,hot)=>({memo:{...memo},stack:[...stack],calls,hits,line,f,msg,hot});yield S(-1,-1,`fib(${n}) з мемоізацією`);function* fib(k){calls++;stack.push(k);yield S(1,0,`Виклик fib(${k})`,k);if(memo[k]!==undefined){hits++;yield S(2,2,`fib(${k}) уже в memo = ${memo[k]} → повертаємо без обчислень`,k);stack.pop();return memo[k];}if(k<=2){yield S(4,3,`fib(${k}) = 1 (базовий випадок)`,k);stack.pop();return 1;}yield S(5,4,`fib(${k}) = fib(${k-1}) + fib(${k-2})`,k);const a=yield* fib(k-1);const b=yield* fib(k-2);memo[k]=a+b;yield S(5,5,`memo[${k}] = ${a} + ${b} = ${memo[k]}`,k);stack.pop();return memo[k];}const r=yield* fib(n);yield S(6,5,`fib(${n}) = ${r}. Викликів: ${calls}, влучань у memo: ${hits}. Без memo було б ${fmt(naiveCalls(n))} викликів.`);}
+  function render(st){$('#d-stack').innerHTML=st.stack.length?st.stack.map((k,i)=>`<span class="chip ${i===st.stack.length-1?'hot':''}">fib(${k})</span>`).join(''):'<span class="chip empty">порожній</span>';let m='';for(let k=1;k<=n;k++){const v=st.memo[k];m+=`<span class="m ${k===st.hot?'hot':(v!==undefined?'ok':'')}"><small>memo[${k}]</small>${v!==undefined?v:(k<=2?'1 (база)':'—')}</span>`;}$('#d-memo').innerHTML=m;$('#d-msg').textContent=st.msg;codeOn($('#d-code'),st.line);flowOn($('#d-flow'),st.f);$('#d-calls').textContent=st.calls;$('#d-hits').textContent=st.hits;$('#d-naive').textContent=fmt(naiveCalls(n));}
+  const R=new Runner(g,render);controls($('#d-controls'),R,'d');
+  $('#d-n').oninput=e=>{$('#d-n-v').textContent=e.target.value;R.reset();};
+})();
+
+/* ===================== 6. GENETIC ===================== */
+(function(){
+  code($('#e-code'),['import random','','def fitness(x, target):','    return -(x - target) ** 2','','population = [random.uniform(0, 10) for _ in range(10)]','for generation in range(50):','    population.sort(key=lambda x: fitness(x, target), reverse=True)','    parents = population[:5]            # відбір','    children = []','    for _ in range(5):','        a, b = random.sample(parents, 2)','        child = (a + b) / 2             # схрещування','        child += random.gauss(0, sigma)  # мутація','        children.append(child)','    population = parents + children']);
+  flow($('#e-flow'),['Оцінити fitness','Відібрати топ-5','Схрещування','Мутація','Нове покоління']);
+  const T=()=>+$('#e-target').value,SIG=()=>+$('#e-sigma').value,fit=(x,t)=>-((x-t)**2),clamp=x=>Math.max(0,Math.min(10,x));
+  const gauss=()=>{let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);};
+  function* g(){let pop=Array.from({length:10},()=>Math.random()*10),gen=0;const S=(pts,f,line,msg)=>({pts,gen,f,line,msg,t:T()});yield S(pop.map(x=>({x,c:''})),-1,5,'Початкова популяція: 10 випадкових чисел від 0 до 10');while(true){const t=T();yield S(pop.map(x=>({x,c:''})),0,7,`Покоління ${gen}: рахуємо fitness(x) = −(x − ${t.toFixed(1)})² для кожного`);const sorted=pop.slice().sort((a,b)=>fit(b,t)-fit(a,t));const parents=sorted.slice(0,5);yield S(sorted.map((x,i)=>({x,c:i<5?'keep':'drop'})),1,8,`Відбір: залишаємо 5 найкращих, найкращий x = ${parents[0].toFixed(2)}`);const children=[];for(let i=0;i<5;i++){const a=parents[Math.floor(Math.random()*5)];let b=parents[Math.floor(Math.random()*5)];children.push((a+b)/2);}yield S([...parents.map(x=>({x,c:'keep'})),...children.map(x=>({x,c:'new'}))],2,12,`Схрещування: 5 нащадків як середнє двох випадкових батьків`);const mutated=children.map(c=>clamp(c+gauss()*SIG()));yield S([...parents.map(x=>({x,c:'keep'})),...mutated.map(x=>({x,c:'new'}))],3,13,`Мутація: до кожного нащадка додано шум N(0, ${SIG().toFixed(1)})`);pop=[...parents,...mutated];gen++;yield S(pop.map(x=>({x,c:''})),4,15,`Нове покоління ${gen}: 5 батьків + 5 нащадків`);}}
+  const W=640,H=240,PX=x=>40+x*56,PY=f=>30+(-f/25)*150;
+  function render(st){const t=st.t;let curve='';for(let x=0;x<=10;x+=0.1)curve+=(x?'L':'M')+PX(x).toFixed(1)+','+Math.min(230,PY(fit(x,t))).toFixed(1)+' ';const ticks=Array.from({length:11},(_,i)=>`<line class="axis" x1="${PX(i)}" y1="200" x2="${PX(i)}" y2="206"/><text x="${PX(i)}" y="222" text-anchor="middle">${i}</text>`).join('');
+    const pts=st.pts.map(p=>`<circle class="p ${p.c}" cx="${PX(p.x).toFixed(1)}" cy="${Math.min(200,PY(fit(p.x,t))).toFixed(1)}" r="7"/>`).join('');
+    $('#e-svg').innerHTML=`<line class="axis" x1="${PX(0)}" y1="200" x2="${PX(10)}" y2="200"/><path class="curve" d="${curve}"/><line class="axis" x1="${PX(t)}" y1="20" x2="${PX(t)}" y2="200" stroke-dasharray="4 4"/><text x="${PX(t)}" y="14" text-anchor="middle">target = ${t.toFixed(1)}</text>${ticks}${pts}<text x="${PX(10)+6}" y="200">x</text><text x="4" y="30">fitness ↑</text>`;
+    const best=st.pts.reduce((b,p)=>fit(p.x,t)>fit(b.x,t)?p:b,st.pts[0]);$('#e-gen').textContent=st.gen;$('#e-best').textContent=best.x.toFixed(3);$('#e-fit').textContent=fit(best.x,t).toFixed(3);$('#e-msg').textContent=st.msg;codeOn($('#e-code'),st.line);flowOn($('#e-flow'),st.f);}
+  const R=new Runner(g,render);controls($('#e-controls'),R,'e');
+  $('#e-target').oninput=e=>{$('#e-target-v').textContent=(+e.target.value).toFixed(1);if(R.state)render({...R.state,t:T()});};
+  $('#e-sigma').oninput=e=>$('#e-sigma-v').textContent=(+e.target.value).toFixed(1);
+})();
+
+/* ===================== 7. BIG-O ===================== */
+(function(){
+  const rows=[['O(1)','доступ до dict / list[i]',n=>1],['O(log n)','бінарний пошук',n=>Math.log2(n)],['O(n)','лінійний пошук',n=>n],['O(n log n)','QuickSort, Merge Sort, Timsort',n=>n*Math.log2(n)],['O(n²)','Bubble / Selection / Insertion Sort',n=>n*n]];
+  const time=ops=>{const s=ops/1e8;if(s<1e-6)return (s*1e9).toFixed(0)+' нс';if(s<1e-3)return (s*1e6).toFixed(1)+' мкс';if(s<1)return (s*1e3).toFixed(1)+' мс';if(s<60)return s.toFixed(1)+' с';if(s<3600)return (s/60).toFixed(1)+' хв';if(s<86400)return (s/3600).toFixed(1)+' год';if(s<86400*365)return (s/86400).toFixed(1)+' днів';return (s/86400/365).toFixed(1)+' років';};
+  function render(){const n=Math.round(10**$('#b-n').value);$('#b-n-v').textContent=fmt(n);const tb=$('#b-table');tb.querySelectorAll('tr:not(:first-child)').forEach(r=>r.remove());rows.forEach(([c,ex,f])=>{const ops=f(n);const tr=document.createElement('tr');if(ops/1e8>60)tr.className='warn';tr.innerHTML=`<td style="font-family:var(--mono);font-weight:600">${c}</td><td>${ex}</td><td class="num">${fmt(ops)}</td><td class="num">${time(ops)}</td>`;tb.appendChild(tr);});}
+  $('#b-n').oninput=render;render();
+})();
+})();
+</script>
+
+</body></html>
