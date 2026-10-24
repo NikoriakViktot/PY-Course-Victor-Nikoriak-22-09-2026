@@ -1146,13 +1146,35 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#python" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Готові інструменти: Python і бібліотеки
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Лабораторія: таксі
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#_12" class="md-nav__link">
+  <a href="#_13" class="md-nav__link">
     <span class="md-ellipsis">
       
         Підсумок
@@ -1164,7 +1186,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#_13" class="md-nav__link">
+  <a href="#_14" class="md-nav__link">
     <span class="md-ellipsis">
       
         Самоперевірка
@@ -1175,7 +1197,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_14" class="md-nav__link">
+  <a href="#_15" class="md-nav__link">
     <span class="md-ellipsis">
       
         Що далі
@@ -1191,7 +1213,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_15" class="md-nav__link">
+  <a href="#_16" class="md-nav__link">
     <span class="md-ellipsis">
       
         Документація і джерела
@@ -3458,13 +3480,35 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#python" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Готові інструменти: Python і бібліотеки
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Лабораторія: таксі
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#_12" class="md-nav__link">
+  <a href="#_13" class="md-nav__link">
     <span class="md-ellipsis">
       
         Підсумок
@@ -3476,7 +3520,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#_13" class="md-nav__link">
+  <a href="#_14" class="md-nav__link">
     <span class="md-ellipsis">
       
         Самоперевірка
@@ -3487,7 +3531,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_14" class="md-nav__link">
+  <a href="#_15" class="md-nav__link">
     <span class="md-ellipsis">
       
         Що далі
@@ -3503,7 +3547,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_15" class="md-nav__link">
+  <a href="#_16" class="md-nav__link">
     <span class="md-ellipsis">
       
         Документація і джерела
@@ -4159,7 +4203,20 @@
 <li>функція робить не більше <code>len(items).bit_length() + 1</code> порівнянь (додай лічильник);</li>
 <li>цикл <code>while</code> з двома межами, без перебору всіх елементів.</li>
 </ul>
-<h2 id="_12">Підсумок<a class="headerlink" href="#_12" title="Permanent link">&para;</a></h2>
+<h3 id="python">Готові інструменти: Python і бібліотеки<a class="headerlink" href="#python" title="Permanent link">&para;</a></h3>
+<p>Свої пошуки ми писали, щоб зрозуміти ідею. У робочому коді те саме беруть готовим: <code>x in list</code>, <code>bisect</code>, <code>itertools.accumulate</code> зі стандартної бібліотеки або <code>numpy.searchsorted</code>, <code>pandas</code> і <code>sortedcontainers.SortedList</code>. Вони написані на C і швидші за наш цикл у рази, але <strong>Big O не скасовують</strong>: на мільйоні записів <code>x in list</code> (C, <code>O(n)</code>) програє нашому бінарному пошуку на Python (<code>O(log n)</code>) у сотні разів. Розділ 6 ноутбука заняття порівнює ці інструменти замірами <code>timeit</code>.</p>
+<p><strong>Правило:</strong> алгоритм визначає, як росте робота, бібліотека — наскільки швидкий кожен крок. Спершу Big O, потім бібліотека.</p>
+<h3 id="_12">Лабораторія: таксі<a class="headerlink" href="#_12" title="Permanent link">&para;</a></h3>
+<p>Для показу на занятті є інтерактивний застосунок <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_1/lessons/lesson_12_practicum_search/taxi_lab"><code>taxi_lab</code></a> на Streamlit:</p>
+<ul>
+<li><strong>місії диспетчера</strong> — чотири задачі уроку: спершу визначаєш, що відомо про дані, потім прогнозуєш, як зростуть кроки при подвоєнні даних (+1 / ×2 / ×4), і перевіряєш дослідом. Для кожної задачі — готові інструменти Python і бібліотек з часом підготовки та запиту;</li>
+<li><strong>гонка пошуків</strong> — шість способів знайти момент у журналі від 1 000 до 1 000 000 записів, багато запитів одразу з <code>numpy</code>, пастка невідсортованих даних і питання «чи варто спершу відсортувати».</li>
+</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a>pip<span class="w"> </span>install<span class="w"> </span>streamlit<span class="w"> </span>plotly<span class="w"> </span>numpy<span class="w"> </span>pandas<span class="w"> </span>sortedcontainers
+<a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a><span class="nb">cd</span><span class="w"> </span>module_1/lessons/lesson_12_practicum_search/taxi_lab
+<a id="__codelineno-26-3" name="__codelineno-26-3" href="#__codelineno-26-3"></a>streamlit<span class="w"> </span>run<span class="w"> </span>app.py
+</code></pre></div>
+<h2 id="_13">Підсумок<a class="headerlink" href="#_13" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
@@ -4194,7 +4251,7 @@
 </tr>
 </tbody>
 </table>
-<h3 id="_13">Самоперевірка<a class="headerlink" href="#_13" title="Permanent link">&para;</a></h3>
+<h3 id="_14">Самоперевірка<a class="headerlink" href="#_14" title="Permanent link">&para;</a></h3>
 <ol>
 <li>Чому бінарний пошук не можна застосувати до невідсортованого списку?</li>
 <li>Скільки кроків приблизно зробить бінарний пошук на 1 000 000 записів? А на 2 000 000?</li>
@@ -4214,17 +4271,20 @@
 <li>Лінійний пошук: порядку немає, скористатися нічим. Якщо таких пошуків буде багато, варто один раз відсортувати або (у Практикумі 3) побудувати словник.</li>
 </ol>
 </details>
-<h3 id="_14">Що далі<a class="headerlink" href="#_14" title="Permanent link">&para;</a></h3>
+<h3 id="_15">Що далі<a class="headerlink" href="#_15" title="Permanent link">&para;</a></h3>
 <ul>
-<li>Ноутбук заняття: <a class="md-button md-button--primary" href="https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_12_practicum_search/note_lesson_12_search_student.ipynb">Відкрити вправи в Colab</a> <a class="solutions-link" href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_12_practicum_search/note_lesson_12_search.ipynb">Переглянути розв’язки</a> — зміна диспетчера таксі: чотири задачі, чотири стратегії, лічильники кроків і перевірки.</li>
+<li>Ноутбук заняття: <a class="md-button md-button--primary" href="https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_12_practicum_search/note_lesson_12_search_student.ipynb">Відкрити вправи в Colab</a> <a class="solutions-link" href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_12_practicum_search/note_lesson_12_search.ipynb">Переглянути розв’язки</a> — зміна диспетчера таксі: чотири задачі, чотири стратегії, лічильники кроків, готові інструменти Python і бібліотек.</li>
+<li>Лабораторія для заняття: <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_1/lessons/lesson_12_practicum_search/taxi_lab"><code>taxi_lab</code></a> — місії диспетчера й гонка пошуків на Streamlit.</li>
 <li>Наступне заняття: <a href="../lesson_13/">Урок 13. Модулі та стандартна бібліотека</a>. Модуль <code>bisect</code> — лише один з багатьох готових інструментів.</li>
 <li>Лінію «алгоритм залежить від представлення даних» продовжить <a href="../lesson_17/">Практикум 3. Хеш-структури</a>: пошук за <code>O(1)</code> через <code>dict</code> і <code>set</code>.</li>
 </ul>
-<h2 id="_15">Документація і джерела<a class="headerlink" href="#_15" title="Permanent link">&para;</a></h2>
+<h2 id="_16">Документація і джерела<a class="headerlink" href="#_16" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Модуль <a href="https://docs.python.org/3/library/bisect.html"><code>bisect</code></a>: <a href="https://docs.python.org/3/library/bisect.html#bisect.bisect_left"><code>bisect_left</code></a>, <a href="https://docs.python.org/3/library/bisect.html#searching-sorted-lists">пошук у відсортованих списках</a></li>
 <li>Методи рядків: <a href="https://docs.python.org/3/library/stdtypes.html#str.startswith"><code>str.startswith</code></a>; сортування: <a href="https://docs.python.org/3/howto/sorting.html">Sorting Techniques</a></li>
 <li><a href="https://wiki.python.org/moin/TimeComplexity">Складність операцій <code>list</code>, <code>dict</code>, <code>set</code></a></li>
+<li>Заміри часу: модуль <a href="https://docs.python.org/3/library/timeit.html"><code>timeit</code></a>; префіксні суми: <a href="https://docs.python.org/3/library/itertools.html#itertools.accumulate"><code>itertools.accumulate</code></a></li>
+<li>Бібліотеки: <a href="https://numpy.org/doc/stable/reference/generated/numpy.searchsorted.html"><code>numpy.searchsorted</code></a>, <a href="https://pandas.pydata.org/docs/reference/api/pandas.Series.rolling.html"><code>pandas</code> <code>rolling</code></a>, <a href="https://grantjenks.com/docs/sortedcontainers/"><code>sortedcontainers</code></a></li>
 <li>Для охочих:<ul>
 <li>Harvard CS50, <a href="https://cs50.harvard.edu/x/weeks/3/">тиждень 3 «Algorithms»</a> — лінійний і бінарний пошук на прикладі телефонної книги;</li>
 <li>MIT 6.0001, <a href="https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/resources/lecture-12-searching-and-sorting/">лекція 12 «Searching and Sorting»</a>.</li>

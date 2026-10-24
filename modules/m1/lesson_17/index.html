@@ -1319,13 +1319,35 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#_16" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Хеш зсередини, пам'ять і бази даних
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_17" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Лабораторія: таксі
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#_16" class="md-nav__link">
+  <a href="#_18" class="md-nav__link">
     <span class="md-ellipsis">
       
         Підсумок
@@ -1337,7 +1359,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#_17" class="md-nav__link">
+  <a href="#_19" class="md-nav__link">
     <span class="md-ellipsis">
       
         Самоперевірка
@@ -1348,7 +1370,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_18" class="md-nav__link">
+  <a href="#_20" class="md-nav__link">
     <span class="md-ellipsis">
       
         Що далі
@@ -1364,7 +1386,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_19" class="md-nav__link">
+  <a href="#_21" class="md-nav__link">
     <span class="md-ellipsis">
       
         Документація і джерела
@@ -3524,13 +3546,35 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#_16" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Хеш зсередини, пам'ять і бази даних
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_17" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Лабораторія: таксі
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#_16" class="md-nav__link">
+  <a href="#_18" class="md-nav__link">
     <span class="md-ellipsis">
       
         Підсумок
@@ -3542,7 +3586,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#_17" class="md-nav__link">
+  <a href="#_19" class="md-nav__link">
     <span class="md-ellipsis">
       
         Самоперевірка
@@ -3553,7 +3597,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_18" class="md-nav__link">
+  <a href="#_20" class="md-nav__link">
     <span class="md-ellipsis">
       
         Що далі
@@ -3569,7 +3613,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_19" class="md-nav__link">
+  <a href="#_21" class="md-nav__link">
     <span class="md-ellipsis">
       
         Документація і джерела
@@ -4183,7 +4227,27 @@
 <li>порівнювати кожне слово з кожним не можна — це <code>O(n²)</code>;</li>
 <li>слова зберігаються в групі у тому вигляді, в якому прийшли (без <code>lower()</code>).</li>
 </ul>
-<h2 id="_16">Підсумок<a class="headerlink" href="#_16" title="Permanent link">&para;</a></h2>
+<h3 id="_16">Хеш зсередини, пам'ять і бази даних<a class="headerlink" href="#_16" title="Permanent link">&para;</a></h3>
+<p>Розділи 8–10 ноутбука заняття йдуть глибше:</p>
+<ul>
+<li><strong>хеш зсередини</strong> — <code>hash()</code> для чисел, рядків і кортежів; чому hash рядка змінюється після перезапуску Python; чому <code>{1: 'a', 1.0: 'b'}</code> містить один ключ; як <code>set</code> розширюється, коли заповнюється на 2/3;</li>
+<li><strong>скільки це важить</strong> — <code>sys.getsizeof</code>: <code>set</code> зі 100 000 чисел займає приблизно в 5 разів більше, ніж <code>list</code>; число — об'єкт на 28 байт, кирилиця — 2 байти на символ. Вправа 6 — <code>deep_size</code>, де множина <code>id()</code> не дає порахувати об'єкт двічі;</li>
+<li><strong>затравка: реляційна база даних</strong> — ті самі поїздки в DuckDB: <code>PRIMARY KEY</code> як ключ словника, <code>GROUP BY</code> як <code>Counter</code>, <code>JOIN</code> як словник-індекс. <code>EXPLAIN</code> показує <code>HASH_GROUP_BY</code> і <code>HASH_JOIN</code> — бази даних побудовані на тих самих хеш-таблицях.</li>
+</ul>
+<h3 id="_17">Лабораторія: таксі<a class="headerlink" href="#_17" title="Permanent link">&para;</a></h3>
+<p>Для показу на занятті є інтерактивний застосунок <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_1/lessons/lesson_17_practicum_hashing/taxi_lab"><code>taxi_lab</code></a> на Streamlit, чотири вкладки:</p>
+<ul>
+<li><strong>хеш-таблиця зсередини</strong> — наповнюєш таблицю справжніми зонами Нью-Йорка й бачиш комірки, колізії, розширення; кошики-списки або відкрита адресація, як у <code>dict</code>; погані хеш-функції перетворюють пошук на <code>O(n)</code>;</li>
+<li><strong>list · tuple · set · dict</strong> — властивості, що можна хешувати, гонка <code>x in …</code> до мільйона елементів і ціна побудови множини;</li>
+<li><strong>пам'ять</strong> — <code>getsizeof</code>, <code>tracemalloc</code>, глибокий розмір, «сходинки» росту контейнерів;</li>
+<li><strong>NYC Taxi + DuckDB</strong> — 3 мільйони справжніх поїздок жовтого таксі Нью-Йорка: ті самі питання в Python (<code>Counter</code>, <code>dict</code>) і в SQL, <code>EXPLAIN</code>, повтори ключів, що ламають <code>JOIN</code>, вага одного рядка і карта посадок.</li>
+</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-42-1" name="__codelineno-42-1" href="#__codelineno-42-1"></a>pip<span class="w"> </span>install<span class="w"> </span>streamlit<span class="w"> </span>plotly<span class="w"> </span>duckdb<span class="w"> </span>pandas<span class="w"> </span>geopandas
+<a id="__codelineno-42-2" name="__codelineno-42-2" href="#__codelineno-42-2"></a><span class="nb">cd</span><span class="w"> </span>module_1/lessons/lesson_17_practicum_hashing/taxi_lab
+<a id="__codelineno-42-3" name="__codelineno-42-3" href="#__codelineno-42-3"></a>streamlit<span class="w"> </span>run<span class="w"> </span>app.py
+</code></pre></div>
+<p>Дані NYC (~45 МБ) застосунок завантажить з офіційного сайту NYC TLC за кнопкою; без інтернету вкладка працює на згенерованих поїздках.</p>
+<h2 id="_18">Підсумок<a class="headerlink" href="#_18" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
@@ -4222,7 +4286,7 @@
 </tr>
 </tbody>
 </table>
-<h3 id="_17">Самоперевірка<a class="headerlink" href="#_17" title="Permanent link">&para;</a></h3>
+<h3 id="_19">Самоперевірка<a class="headerlink" href="#_19" title="Permanent link">&para;</a></h3>
 <ol>
 <li>Чому <code>pair_with_sum</code> з П2 мовчки дає неправильну відповідь на невідсортованих даних, а не падає?</li>
 <li>Що зберігає <code>seen</code> у <code>pair_with_sum_hash</code> і чому саме словник, а не список?</li>
@@ -4244,17 +4308,20 @@
 <li><code>O(n²)</code>: <code>count</code> сам проходить весь список, і так для кожного імені. <code>Counter</code> рахує все за один прохід.</li>
 </ol>
 </details>
-<h3 id="_18">Що далі<a class="headerlink" href="#_18" title="Permanent link">&para;</a></h3>
+<h3 id="_20">Що далі<a class="headerlink" href="#_20" title="Permanent link">&para;</a></h3>
 <ul>
-<li>Ноутбук заняття: <a class="md-button md-button--primary" href="https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_17_practicum_hashing/note_lesson_17_hashing_student.ipynb">Відкрити вправи в Colab</a> <a class="solutions-link" href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_17_practicum_hashing/note_lesson_17_hashing.ipynb">Переглянути розв’язки</a> — та сама зміна диспетчера: прогнози, лічильники кроків, вправи з перевірками.</li>
+<li>Ноутбук заняття: <a class="md-button md-button--primary" href="https://colab.research.google.com/github/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_17_practicum_hashing/note_lesson_17_hashing_student.ipynb">Відкрити вправи в Colab</a> <a class="solutions-link" href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/blob/main/module_1/lessons/lesson_17_practicum_hashing/note_lesson_17_hashing.ipynb">Переглянути розв’язки</a> — та сама зміна диспетчера: прогнози, лічильники кроків, вправи з перевірками, хеш зсередини, пам'ять і DuckDB.</li>
+<li>Лабораторія для заняття: <a href="https://github.com/NikoriakViktot/PY-Course-Victor-Nikoriak-22-09-2026/tree/main/module_1/lessons/lesson_17_practicum_hashing/taxi_lab"><code>taxi_lab</code></a> — хеш-таблиця зсередини, пам'ять і 3 мільйони поїздок NYC у DuckDB.</li>
 <li>Наступне заняття: <a href="../lesson_18/">Урок 18. Огляд модуля 1</a> — усе разом: типи, колекції, функції, винятки, файли, Git і три практикуми.</li>
 <li>У модулі 2 повернемося до hashable з іншого боку: як зробити ключем словника <strong>власний</strong> клас (<code>__hash__</code> і <code>__eq__</code>).</li>
 </ul>
-<h2 id="_19">Документація і джерела<a class="headerlink" href="#_19" title="Permanent link">&para;</a></h2>
+<h2 id="_21">Документація і джерела<a class="headerlink" href="#_21" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Типи <a href="https://docs.python.org/3/library/stdtypes.html#mapping-types-dict"><code>dict</code></a> і <a href="https://docs.python.org/3/library/stdtypes.html#set-types-set-frozenset"><code>set</code></a>; вбудована функція <a href="https://docs.python.org/3/library/functions.html#hash"><code>hash()</code></a></li>
 <li>Глосарій: <a href="https://docs.python.org/3/glossary.html#term-hashable">hashable</a>; <a href="https://docs.python.org/3/library/collections.html#collections.Counter"><code>collections.Counter</code></a></li>
 <li><a href="https://wiki.python.org/moin/TimeComplexity">Складність операцій <code>list</code>, <code>dict</code>, <code>set</code></a></li>
+<li>Пам'ять: <a href="https://docs.python.org/3/library/sys.html#sys.getsizeof"><code>sys.getsizeof</code></a>, <a href="https://docs.python.org/3/library/tracemalloc.html"><code>tracemalloc</code></a></li>
+<li><a href="https://duckdb.org/docs/">DuckDB</a>: <a href="https://duckdb.org/docs/api/python/overview">Python API</a>, <a href="https://duckdb.org/docs/guides/meta/explain"><code>EXPLAIN</code></a>; дані <a href="https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page">NYC TLC Trip Record Data</a></li>
 <li>Для охочих:<ul>
 <li>Harvard CS50x, <a href="https://cs50.harvard.edu/x/weeks/5/">тиждень 5 «Data Structures»</a> — хеш-таблиці, хеш-функції й колізії;</li>
 <li>MIT 6.006, <a href="https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/resources/lecture-4-hashing/">лекція 4 «Hashing»</a> — для тих, хто хоче глибше.</li>
