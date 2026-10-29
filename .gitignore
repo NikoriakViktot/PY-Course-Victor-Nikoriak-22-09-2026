@@ -241,3 +241,4 @@ module_3/bonus/pandas_data_analysis/data/wfpvam_foodprices.csv
 # локальна SQLite-база news_hub (урок 38+)
 module_4/lessons/*/news_hub/*.db
 module_1/lessons/lesson_16_git_github_system/team_project/solution
+module_1/lessons/lesson_18_module1_review/capstone/solution
