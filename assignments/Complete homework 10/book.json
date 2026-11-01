@@ -1,0 +1,37 @@
+[
+  {
+    "first": "Ann",
+    "last": "Kovalenko",
+    "phone": "+380501112233",
+    "city": "Lviv",
+    "state": "Lvivska"
+  },
+  {
+    "first": "Ann",
+    "last": "Shevchenko",
+    "phone": "+380671234567",
+    "city": "Kyiv",
+    "state": "Kyivska"
+  },
+  {
+    "first": "Taras",
+    "last": "Kovalenko",
+    "phone": "+380931112233",
+    "city": "Odesa",
+    "state": "Odeska"
+  },
+  {
+    "first": "Olena",
+    "last": "Petrenko",
+    "phone": "+380991234567",
+    "city": "Rivne",
+    "state": "Rivnenska"
+  },
+  {
+    "first": "ШIryna",
+    "last": "Bondar",
+    "phone": "+380935555766",
+    "city": "Нікополь",
+    "state": "Dnipropetrovska"
+  }
+]
