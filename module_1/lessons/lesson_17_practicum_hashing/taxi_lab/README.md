@@ -8,7 +8,13 @@
 
 ```bash
 pip install streamlit plotly duckdb pandas geopandas
+```
+
+```bash
 cd module_1/lessons/lesson_17_practicum_hashing/taxi_lab
+```
+
+```bash
 streamlit run app.py
 ```
 

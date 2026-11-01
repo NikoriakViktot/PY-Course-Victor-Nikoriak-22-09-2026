@@ -94,9 +94,21 @@ module_1/lessons/lesson_NN_<тема>/    ← NN = номер уроку за п
 
 ```bash
 git checkout main
+```
+```bash
+git pull upstream main
+```
+
+```bash
+git push origin main
+```
+
+```bash
+git checkout main
 git pull upstream main
 git push origin main
 ```
+
 
 Так ви отримаєте нові матеріали курсу.
 
@@ -106,12 +118,28 @@ git push origin main
 
 ```bash
 git checkout -b homework-01
+```
+
+```bash
+# після виконання завдання
+git add .
+```
+```bash
+git commit -m "Homework 01"
+```
+```bash
+git push origin homework-01
+```
+
+```bash
+git checkout -b homework-01
 
 # після виконання завдання
 git add .
 git commit -m "Homework 01"
 git push origin homework-01
 ```
+
 
 Після цього на GitHub створіть **Pull Request**:
 
